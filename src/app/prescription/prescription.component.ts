@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnChanges, OnInit, SimpleChanges } from '@angular/core';
 import { PageTitleService } from '../core/page-title/page-title.service';
 import { VisitService } from '../services/visit.service';
 import * as moment from 'moment';
@@ -11,7 +11,7 @@ import { ApiResponseModel, CustomEncounterModel, CustomVisitModel, ProviderAttri
   templateUrl: './prescription.component.html',
   styleUrls: ['./prescription.component.scss']
 })
-export class PrescriptionComponent implements OnInit {
+export class PrescriptionComponent implements OnInit, OnChanges {
 
   active: number = 1;
   completedVisits: CustomVisitModel[] = [];
@@ -24,6 +24,7 @@ export class PrescriptionComponent implements OnInit {
   prescriptionSentCount: number = 0;
   completedVisitsCount: number = 0;
   doctorCompletedVisitsCount: number = 0;
+  user = getCacheData(true, doctorDetails.USER);
 
   constructor(private pageTitleService: PageTitleService, private visitService: VisitService) { }
 
@@ -36,10 +37,15 @@ export class PrescriptionComponent implements OnInit {
       }
     }
     this.getPrescriptionSentVisits();
-    this.getCompletedVisits();
-    this.geDoctorsCompletedVisits(provider.uuid);
+    //this.getCompletedVisits();
+    //this.geDoctorsCompletedVisits(provider.uuid);
+    this.getVisitCounts(this.user.uuid, this.specialization);
   }
 
+
+    ngOnChanges(changes: SimpleChanges): void {
+     console.log("change", changes)
+    }
   /**
   * Get completed visits for a given page number
   * @param {number} page - Page number
@@ -107,11 +113,12 @@ export class PrescriptionComponent implements OnInit {
     });
   }
 
-  geDoctorsCompletedVisits(uuid: any, page: number = 1) {
+  getDoctorsCompletedVisits(page: number = 1) {
     if(page == 1) this.doctorCompletedVisits = [];
-    this.visitService.getEndedVisits(this.specialization, page).subscribe((ps: ApiResponseModel) => {
+    this.visitService.getDoctorsCompletedVisits(this.user.uuid, page).subscribe((ps: ApiResponseModel) => {
       if (ps.success) {
-         let record = [];
+        this.doctorCompletedVisitsCount = ps.totalCount;
+         let records = [];
         for (let i = 0; i < ps.data.length; i++) {
           let visit = ps.data[i];
           let vcenc = this.checkIfEncounterExists(visit.encounters, visitTypes.VISIT_COMPLETE);
@@ -119,15 +126,21 @@ export class PrescriptionComponent implements OnInit {
           visit.visit_created = this.getEncounterCreated(visit, visitTypes.ADULTINITIAL);
           visit.prescription_sent = (vcenc) ? this.checkIfDateOldThanOneDay(vcenc.encounter_datetime) : null;
           visit.person.age = this.calculateAge(visit.person.birthdate);
-          if(vcenc?.encounter_provider?.provider.uuid === uuid) {
-            record.push(visit);
-          }
+          records.push(visit);
         }
-        this.doctorCompletedVisitsCount = record.length;
-        this.doctorCompletedVisits = this.doctorCompletedVisits.concat(record);
+        this.doctorCompletedVisits = this.doctorCompletedVisits.concat(records);
         this.loaded3 = true;
       }
     });
+  }
+
+   /**
+  * Get completed visits for a given page number
+  * @param {number} page - Page number
+  * @return {void}
+  */
+   geDoctorsCompletedVisitsData(page: number) {
+    this.getDoctorsCompletedVisits(page);
   }
 
   /**
@@ -250,6 +263,16 @@ export class PrescriptionComponent implements OnInit {
       }
     });
     return specialization;
+  }
+
+  getVisitCounts(userId, speciality) {
+    this.visitService.getVisitCounts(userId, speciality).subscribe(({ data }: any) => {
+      if (data) {      
+        this.completedVisitsCount = data.completedVisit + data.endedVisits;
+        this.prescriptionSentCount = data.completedVisit;
+        this.doctorCompletedVisitsCount = data.followUpVisits;
+      }
+    });
   }
 
 }

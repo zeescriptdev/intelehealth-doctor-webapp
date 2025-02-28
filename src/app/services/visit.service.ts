@@ -111,7 +111,19 @@ export class VisitService {
     const url = `${this.baseURL}/visit/${visitId}/attribute`;
     return this.http.get(url);
   }
-  
+
+  getVisitCounts(userId, speciality): Observable<any> {
+    return this.http.get(
+      `${this.baseURLMindmap}/openmrs/getVisitCounts/${userId}?speciality=${speciality}`
+    );
+  }
+
+  getDoctorsCompletedVisits(userId, page): Observable<any> {
+    return this.http.get(
+      `${this.baseURLMindmap}/openmrs/getDoctorsVisit/${userId}?page=${page}`
+    );
+  }
+
   /**
   * Post visit attribute
   * @param {string} visitId - Visit uuid

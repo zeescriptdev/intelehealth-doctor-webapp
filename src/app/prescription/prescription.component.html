@@ -19,7 +19,7 @@
           </ng-template>
         </li>
         <li [ngbNavItem]="2">
-          <a ngbNavLink data-test-id="navCompleted">
+          <a ngbNavLink data-test-id="navCompleted" (click)="getCompletedVisits()">
             <div class="chip-item chip-item-green">
               <img class="chip-img" src="assets/svgs/completed-2.svg" alt="" />
               <div class="chip-info">
@@ -35,7 +35,7 @@
           </ng-template>
         </li>
         <li [ngbNavItem]="3">
-          <a ngbNavLink data-test-id="navCompleted">
+          <a ngbNavLink data-test-id="navCompleted" (click)="getDoctorsCompletedVisits()">
             <div class="chip-item chip-item-green1">
               <img class="chip-img" src="assets/svgs/your-completed-visit.svg" alt="" />
               <div class="chip-info info1">
@@ -46,7 +46,7 @@
           </a>
           <ng-template ngbNavContent>
             <ng-container *ngIf="loaded3">
-              <app-doctor-completed [doctorCompletedVisits]="doctorCompletedVisits" [doctorCompletedVisitsCount]="doctorCompletedVisitsCount" (fetchPageEvent)="geDoctorsCompletedVisits($event)"></app-doctor-completed>
+              <app-doctor-completed [doctorCompletedVisits]="doctorCompletedVisits" [doctorCompletedVisitsCount]="doctorCompletedVisitsCount" (fetchPageEvent)="geDoctorsCompletedVisitsData($event)"></app-doctor-completed>
             </ng-container>
           </ng-template>
         </li>
