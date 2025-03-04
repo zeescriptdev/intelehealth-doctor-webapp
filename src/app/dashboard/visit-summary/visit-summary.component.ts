@@ -162,6 +162,7 @@ export class VisitSummaryComponent implements OnInit, OnDestroy, AfterViewInit {
   diagnosticList;
   sanitizedValue: SafeHtml;
 
+  changesMade: boolean = false;
   isCallInProgress: boolean = false;
   callTimerInterval: Subscription;
   callDuration: number = 0;
@@ -376,6 +377,10 @@ export class VisitSummaryComponent implements OnInit, OnDestroy, AfterViewInit {
   * @return {void}
   */
   formControlValueChanges(): void {
+    this.discussionSummaryForm.valueChanges.subscribe(()=>{
+      console.log("value changed on the discussionSummary form")
+      this.changesMade = true;
+    })
     this.referSpecialityForm.get('refer').valueChanges.subscribe((val: boolean) => {
       if (val) {
         this.referSpecialityForm.get(doctorDetails.SPECIALIZATION).setValue(null);
@@ -2387,6 +2392,7 @@ export class VisitSummaryComponent implements OnInit, OnDestroy, AfterViewInit {
     this.saveAllObs().subscribe({
       next: (responses) => {
         console.log('All observations saved successfully', responses);
+        this.changesMade = false
       },
       error: (error) => {
         console.error('Error saving observations', error);

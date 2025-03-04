@@ -2264,6 +2264,7 @@
         type="button"
         class="blue-btn mr-2 mb-2"
         (click)="saveAsDraft()"
+        [disabled]="!changesMade"
         *ngIf="!isMCCUser && visitNotePresent && !visitEnded && isVisitNoteProvider && !visitCompleted"
       >
        {{'Save as Draft'|translate}}
