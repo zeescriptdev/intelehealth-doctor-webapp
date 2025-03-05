@@ -258,6 +258,16 @@ export class VisitService {
     return this.http.get(`${this.baseURLMindmap}/openmrs/getEndedVisits?speciality=${speciality}&page=${page}`);
   }
 
+    /**
+  * Get FollowUpLog Visits
+  * @param {number} page - Page number
+  * @return {Observable<any>}
+  */
+    getFollowUpLogVisits(page: number = 1): Observable<any> {
+      return this.http.get(`${this.baseURLMindmap}/openmrs/getFollowUpLogVisits?page=${page}`);
+    }
+
+    
    /**
   * Get Locations
   * @return {Observable<any>}

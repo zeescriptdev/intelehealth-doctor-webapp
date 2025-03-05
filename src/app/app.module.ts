@@ -121,15 +121,16 @@ registerLocaleData(localeEn);
     NgxUiLoaderHttpModule.forRoot({
       showForeground: true,
       exclude: [
-        'https://ekal.intelehealth.org:3004/api/messages/',
-        'https://ekal.intelehealth.org:3004/api/support/',
-        'https://ekal.intelehealth.org:3004/api/auth/validateProviderAttribute',
-        'https://ekal.intelehealth.org:3000/api/getToken',
-        'https://ekal.intelehealth.org/gen',
-        'https://ekal.intelehealth.org/vl2',
-        'https://ekal.intelehealth.org/bs',
-        'https://ekal.intelehealth.org/vlrv',
-        'https://ekal.intelehealth.org/lcrep'
+        'https://afi.ekalarogya.org:3004/api/messages/',
+        'https://afi.ekalarogya.org:3004/api/support/',
+        'https://afi.ekalarogya.org:3004/api/auth/validateProviderAttribute',
+        'https://afi.ekalarogya.org:3000/api/getToken',
+        'https://afi.ekalarogya.org:3004/api/appointment/',
+        'https://afi.ekalarogya.org/gen',
+        'https://afi.ekalarogya.org/vl2',
+        'https://afi.ekalarogya.org/bs',
+        'https://afi.ekalarogya.org/vlrv',
+        'https://afi.ekalarogya.org/lcrep'
       ]
     }),
     NgxPermissionsModule.forRoot({
@@ -171,12 +172,12 @@ registerLocaleData(localeEn);
       useClass: ErrorInterceptor,
       multi: true,
     },
-    {
-      provide: APP_INITIALIZER,
-      useFactory: initializer,
-      deps: [PwaService],
-      multi: true
-    }
+    // {
+    //   provide: APP_INITIALIZER,
+    //   useFactory: initializer,
+    //   deps: [PwaService],
+    //   multi: true
+    // }
   ],
   schemas: [CUSTOM_ELEMENTS_SCHEMA, NO_ERRORS_SCHEMA],
   bootstrap: [AppComponent],

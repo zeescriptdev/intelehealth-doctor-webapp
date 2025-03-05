@@ -268,7 +268,7 @@ export class PrescriptionComponent implements OnInit, OnChanges {
   getVisitCounts(userId, speciality) {
     this.visitService.getVisitCounts(userId, speciality).subscribe(({ data }: any) => {
       if (data) {      
-        this.completedVisitsCount = data.completedVisit + data.endedVisits;
+        this.completedVisitsCount = data.endedVisits;
         this.prescriptionSentCount = data.completedVisit;
         this.doctorCompletedVisitsCount = data.followUpVisits;
       }

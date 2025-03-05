@@ -21,9 +21,9 @@ export class FollowupTrackerComponent {
   doctorFollowUpVisits: CustomVisitModel[] = [];
   filteredFollowUpVisits: CustomVisitModel[] = [];
   doctorFollowpCount: number = 0;
-  @ViewChild('completedPaginator') paginator: MatPaginator;
+  filteredFollowUpVisitsCount: number = 0;
   offset: number = environment.recordsPerPage;
-  recordsFetched: number = environment.recordsPerPage;
+  followUprecordsFetched: number = 0;
   pageEvent: PageEvent;
   pageIndex: number = 0;
   pageSize: number = 5;
@@ -31,6 +31,7 @@ export class FollowupTrackerComponent {
   specialization: string = '';
   @Output() fetchPageEvent = new EventEmitter<number>();
   @ViewChild('tempPaginator') tempPaginator: MatPaginator;
+  @ViewChild('completedPaginator') paginator: MatPaginator;
 
   @ViewChild(MatMenuTrigger) trigger: MatMenuTrigger;
   showDate: boolean = true;
@@ -40,15 +41,15 @@ export class FollowupTrackerComponent {
   today = new Date().toISOString().slice(0, 10);
   fromDate: string;
   toDate: string;
-
+  provider = getCacheData(true, doctorDetails.PROVIDER);
   constructor(private pageTitleService: PageTitleService, private visitService: VisitService) { }
 
   ngOnInit(): void {
     this.pageTitleService.setTitle({ title: "Follow-up Log", imgUrl: "assets/svgs/follow-up-tracker.svg" });
-    let provider = getCacheData(true, doctorDetails.PROVIDER);
-    if (provider) {
-      if (provider.attributes.length) {
-        provider.attributes.forEach((a: ProviderAttributeModel) => {
+
+    if (this.provider) {
+      if (this.provider.attributes.length) {
+        this.provider.attributes.forEach((a: ProviderAttributeModel) => {
           if (a.attributeType.uuid == 'ed1715f5-93e2-404e-b3c9-2a2d9600f062' && !a.voided) {
             this.specialization = a.value;
           }
@@ -59,10 +60,16 @@ export class FollowupTrackerComponent {
   }
 
   getFollowupVisits(page: number = 1) {
-    let provider = getCacheData(true, doctorDetails.PROVIDER);
-    if (page == 1) this.doctorFollowUpVisits = [], this.filteredFollowUpVisits = [];
-    this.visitService.getEndedVisits(this.specialization, page).subscribe((ps: ApiResponseModel) => {
+    if (page == 1) {
+      this.doctorFollowUpVisits = [];
+      this.filteredFollowUpVisits = []
+      this.followUprecordsFetched = 0;
+    }
+    //this.doctorFollowUpVisits = [], this.filteredFollowUpVisits = [];
+    this.visitService.getFollowUpLogVisits(page).subscribe((ps: ApiResponseModel) => {
       if (ps.success) {
+        this.followUprecordsFetched += this.offset;
+        this.doctorFollowpCount = ps.totalCount;
         for (let i = 0; i < ps.data.length; i++) {
           let visit = ps.data[i];
           let followUp_date = this.visitService.getFollowupDate(visit, visitTypes.VISIT_NOTE);
@@ -71,7 +78,7 @@ export class FollowupTrackerComponent {
               visit.cheif_complaint = this.visitService.getCheifComplaint1(visit);
               let enco = visit?.encounters.filter(e => e.type.name == visitTypes.PATIENT_EXIT_SURVEY || e.type.name == visitTypes.VISIT_COMPLETE)[0];
               visit.encounter_provider = JSON.parse(enco.obs[0].value_text).name;
-              visit.encounter_provider_uuid = JSON.parse(enco.obs[0].value_text).uuid;
+              visit.encounter_provider_uuid = enco?.encounter_provider?.provider.uuid;
               visit.person.age = this.visitService.calculateAge(visit.person.birthdate);
               visit.followup_date = followUp_date;
               const visits = res.results;
@@ -79,32 +86,37 @@ export class FollowupTrackerComponent {
                 v.attributes.filter(a => a.attributeType.display === 'Visit Speciality')[0].value === 'General Physician'
               );
               if (recentVisit.length > 0) {
-                 let fvisits = recentVisit.filter(v => ((this.visitService.getCheifComplaint1(v)).includes("Follow up visit") ||
-                   (this.visitService.getCheifComplaint1(v)).includes("Follow Up") ||
-                    (this.visitService.getCheifComplaint1(v)).includes("Follow-Up")));
-                  if(fvisits.length > 0) {
-                    let nearestVisit = fvisits[0];
-                   let minDiff = Math.abs(new Date(visit.date_stopped).getTime() - new Date(nearestVisit.startDatetime).getTime());
-               
-                   for (const v of fvisits) {
-                     const diff = Math.abs(new Date(visit.date_stopped).getTime() - new Date(v.startDatetime).getTime());
-                     if (diff < minDiff) {
-                       minDiff = diff;
-                       nearestVisit = v;
-                     }
-                   }
-                   visit.patient_verdict =  new Date(visit.date_stopped).getTime() < new Date(nearestVisit.startDatetime).getTime() ?
-                    this.visitService.getPatientVerdict(nearestVisit) : null;
+                let fvisits = recentVisit.filter(v => ((this.visitService.getCheifComplaint1(v)).includes("Follow up visit") ||
+                  (this.visitService.getCheifComplaint1(v)).includes("Follow Up") ||
+                  (this.visitService.getCheifComplaint1(v)).includes("Follow-Up")));
+                if (fvisits.length > 0) {
+                  let nearestVisit = fvisits[0];
+                  let minDiff = Math.abs(new Date(visit.date_stopped).getTime() - new Date(nearestVisit.startDatetime).getTime());
+
+                  for (const v of fvisits) {
+                    const diff = Math.abs(new Date(visit.date_stopped).getTime() - new Date(v.startDatetime).getTime());
+                    if (diff < minDiff) {
+                      minDiff = diff;
+                      nearestVisit = v;
+                    }
                   }
+                  visit.patient_verdict = new Date(visit.date_stopped).getTime() < new Date(nearestVisit.startDatetime).getTime() ?
+                    this.visitService.getPatientVerdict(nearestVisit) : null;
+                }
               } else {
                 visit.patient_verdict = null;
               }
               this.doctorFollowUpVisits.push(visit);
-              this.filteredFollowUpVisits = this.doctorFollowUpVisits.filter((visit) => {
-                return visit.encounter_provider_uuid == provider.uuid;
-              });
+              if (!this.showAllVisits) {
+                this.filteredFollowUpVisits = this.doctorFollowUpVisits.filter((visit) => {
+                  return visit.encounter_provider_uuid == this.provider.uuid;
+                });
+                this.filteredFollowUpVisitsCount = this.filteredFollowUpVisits.length;
+              } else {
+                this.filteredFollowUpVisits = this.doctorFollowUpVisits;
+                this.filteredFollowUpVisitsCount = this.doctorFollowpCount;
+              }
               this.filteredFollowUpVisits.sort((a, b) => new Date(b.followup_date) < new Date(a.followup_date) ? -1 : 1);
-              this.doctorFollowpCount = this.filteredFollowUpVisits.length;
               this.dataSource.data = [...this.filteredFollowUpVisits];
               this.dataSource.paginator = this.tempPaginator;
             });
@@ -125,8 +137,8 @@ export class FollowupTrackerComponent {
     if (this.dataSource.filter) {
       this.paginator.firstPage();
     }
-    if (((event.pageIndex + 1) * this.pageSize) > this.recordsFetched) {
-      this.fetchPageEvent.emit((this.recordsFetched + this.offset) / this.offset)
+    if (((event.pageIndex + 1) * this.pageSize) > this.followUprecordsFetched) {
+      this.getFollowupVisits((this.followUprecordsFetched + this.offset) / this.offset);
     } else {
       if (event.previousPageIndex < event.pageIndex) {
         this.tempPaginator.nextPage();
@@ -160,34 +172,39 @@ export class FollowupTrackerComponent {
   applyDateFilter(showAllVisits: boolean) {
     let filteredVisits: CustomVisitModel[] = [];
     let visits = this.filteredFollowUpVisits;
-    this.doctorFollowpCount = 0;
+    this.filteredFollowUpVisitsCount = 0;
     if (this.fromDate && this.toDate) {
       filteredVisits = visits.filter((visit) => {
         return (new Date(visit.followup_date).toISOString().slice(0, 10) >= this.fromDate &&
           new Date(visit.followup_date).toISOString().slice(0, 10) <= this.toDate);
       });
+      this.filteredFollowUpVisitsCount = filteredVisits.length;
     } else if (this.fromDate) {
       filteredVisits = visits.filter((visit) => {
         return new Date(visit.followup_date).toISOString().slice(0, 10) == this.fromDate;
       });
+      this.filteredFollowUpVisitsCount = filteredVisits.length;
     } else if (showAllVisits) {
       filteredVisits = this.doctorFollowUpVisits;
+      this.filteredFollowUpVisitsCount = this.doctorFollowpCount;
     }
     filteredVisits.sort((a, b) => new Date(b.followup_date) < new Date(a.followup_date) ? -1 : 1);
     this.dataSource.data = [...filteredVisits];
     this.tempPaginator.length = filteredVisits.length;
     this.tempPaginator.firstPage();
     this.paginator.firstPage();
-    this.doctorFollowpCount = filteredVisits.length;
     this.trigger.closeMenu();
   }
 
   resetFilter() {
+    this.filteredFollowUpVisits = this.doctorFollowUpVisits.filter((visit) => {
+      return visit.encounter_provider_uuid == this.provider.uuid;
+    });
     this.dataSource.data = [...this.filteredFollowUpVisits];
     this.tempPaginator.length = this.filteredFollowUpVisits.length;
     this.tempPaginator.firstPage();
     this.paginator.firstPage();
-    this.doctorFollowpCount = this.filteredFollowUpVisits.length;
+    this.filteredFollowUpVisitsCount = this.filteredFollowUpVisits.length;
     this.selectAll = false;
     this.trigger.closeMenu();
     this.fromDate = null;

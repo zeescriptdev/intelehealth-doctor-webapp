@@ -8,7 +8,7 @@
               <mat-panel-title>
                 <div class="intel-accordion-title">
                   <img src="assets/svgs/follow-up-tracker.svg" alt="" width="44px">
-                  <h6 class="mb-0 ml-2">{{'Follow-up Log'|translate}} ({{doctorFollowpCount}})</h6>
+                  <h6 class="mb-0 ml-2">{{'Follow-up Log'|translate}} ({{filteredFollowUpVisitsCount}})</h6>
                   <mat-icon class="info_icon" aria-hidden="false" aria-label="help icon" 
                   matTooltip="{{'Visits that follow-up provided by you'|translate}}" matTooltipPosition="right"
                    data-test-id="matIcoHelpCompleted">help_outline</mat-icon>
@@ -83,7 +83,7 @@
   
               <mat-paginator #tempPaginator hidePageSize [pageSizeOptions]="[5, 10, 20]" hidden aria-label="Select page of periodic elements"></mat-paginator>
               <mat-paginator #completedPaginator hidePageSize [pageSizeOptions]="[5, 10, 20]"
-              [length]="doctorFollowpCount" [pageIndex]="pageIndex" [pageSize]="pageSize" (page)="pageEvent = getData($event)" aria-label="Select page of periodic elements" data-test-id="matPaginatorCompleted">
+              [length]="filteredFollowUpVisitsCount" [pageIndex]="pageIndex" [pageSize]="pageSize" (page)="pageEvent = getData($event)" aria-label="Select page of periodic elements" data-test-id="matPaginatorCompleted">
               </mat-paginator>
             </div>
   
