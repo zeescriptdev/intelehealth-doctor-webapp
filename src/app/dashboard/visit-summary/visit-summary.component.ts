@@ -408,6 +408,11 @@ export class VisitSummaryComponent implements OnInit, OnDestroy, AfterViewInit {
     medicines.forEach(med => {
       this.drugNameList.push({ 'id': med.id, 'name': this.translateService.instant(med.name) });
     });
+    
+    // Reset changed fields and disable save as draft on page refresh
+    this.updatedObsData = {...this.obsData};
+    this.changesMade = false;
+    
     this.getVisit(id);
     // this.formControlValueChanges();
     this.dSearchSubject.pipe(debounceTime(500), distinctUntilChanged()).subscribe(searchTextValue => {
