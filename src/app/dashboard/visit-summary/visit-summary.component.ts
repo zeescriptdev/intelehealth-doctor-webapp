@@ -160,6 +160,7 @@ export class VisitSummaryComponent implements OnInit, OnDestroy, AfterViewInit {
   diagnosticList;
   sanitizedValue: SafeHtml;
 
+  editFormValues: boolean = false;
   changesMade: boolean = false;
   isCallInProgress: boolean = false;
   callTimerInterval: Subscription;
@@ -467,6 +468,7 @@ export class VisitSummaryComponent implements OnInit, OnDestroy, AfterViewInit {
     this.discussionSummaryForm.valueChanges.subscribe(()=>{
       console.log("value changed on the discussionSummary form")
       this.changesMade = true;
+      this.editFormValues = true;
     })
     this.referSpecialityForm.get('refer').valueChanges.subscribe((val: boolean) => {
       if (val) {
@@ -504,6 +506,9 @@ export class VisitSummaryComponent implements OnInit, OnDestroy, AfterViewInit {
   getVisit(uuid: string): void {
     this.visitService.fetchVisitDetails(uuid).subscribe((visit: VisitModel) => {
       if (visit) {
+        setTimeout(()=>{
+          this.editFormValues = true;
+        },1000)
         this.visit = visit;
         if (this.visitSummaryService.checkIfEncounterExists(visit.encounters, visitTypes.FLAGGED)) {
           this.visit['visitUploadTime'] = this.visitSummaryService.checkIfEncounterExists(visit.encounters, visitTypes.FLAGGED) ? this.visitSummaryService.checkIfEncounterExists(visit.encounters, visitTypes.FLAGGED)['encounterDatetime'] : null;
@@ -2504,6 +2509,7 @@ export class VisitSummaryComponent implements OnInit, OnDestroy, AfterViewInit {
         // Reset tracking after successful save
         this.updatedObsData = {...this.obsData};
         this.changesMade = false;
+         this.editFormValues = false;
         this.toastr.success(this.translateService.instant('Changes saved successfully'), this.translateService.instant('Success'));
       },
       error: (error) => {
@@ -2520,6 +2526,7 @@ export class VisitSummaryComponent implements OnInit, OnDestroy, AfterViewInit {
     // Initialize updatedObsData with initial values from obsData
     this.updatedObsData = {...this.obsData};
     this.changesMade = false;
+    this.editFormValues = false;
 
     // Track patient interaction form
     if (this.patientInteractionCommentForm) {
@@ -2656,6 +2663,10 @@ export class VisitSummaryComponent implements OnInit, OnDestroy, AfterViewInit {
     const changedFields = Object.keys(updatedObsData).filter(key => 
       updatedObsData[key] !== this.obsData[key]
     );
+
+    if(!this.editFormValues){
+      return false;
+    }
     
     // If any fields have changed, enable the Save as Draft button
     this.changesMade = changedFields.length > 0;
