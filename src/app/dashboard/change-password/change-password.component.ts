@@ -25,6 +25,7 @@ export class ChangePasswordComponent implements OnInit {
   userUuid: string;
   baseUrl: string = environment.baseURL;
   level = 1;
+  passwordLength;
 
   constructor(
     private coreService: CoreService,
@@ -88,9 +89,10 @@ export class ChangePasswordComponent implements OnInit {
   generatePassword() {
     let passwd = '';
     const chars = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789*@$&';
+    this.passwordLength = this.passwordLength ? this.passwordLength + 1 : 8;
     do {
       passwd = '';
-      for (let i = 0; i < 8; i++) {
+      for (let i = 0; i < this.passwordLength; i++) {
         const c = Math.floor(Math.random() * chars.length + 1);
         passwd += chars.charAt(c);
       }
