@@ -222,25 +222,25 @@ export class VisitSummaryComponent implements OnInit, OnDestroy, AfterViewInit {
 
   // Add this property to the component class
   obsData = {
-    notes: false,
-    familyHistoryNote: false,
-    pastMedicalHistoryNote: false,
-    followUp: false,
-    followUpInstruction: false,
-    diagnosis: false,
-    addMedicine: false,
-    additionalInstruction: false,
-    addAdvice: false,
-    test: false,
-    addReferral: false,
-    discussionSummary: false,
-    patientCallStatus: false,
-    diagnosisSecondary: false,
-    referralSecondary: false,
-    patientInteractionComment: false,
-    hwInteraction: false,
-    patientInteraction: false,
-    medicine: false
+    notes: [],
+    familyHistoryNote: [],
+    pastMedicalHistoryNote: [], 
+    followUp: null,
+    followUpInstruction: [],
+    diagnosis: [],
+    addMedicine: [],
+    additionalInstruction: null,
+    addAdvice: [],
+    test: null,
+    addReferral: [],
+    discussionSummary: null,
+    patientCallStatus: null,
+    diagnosisSecondary: null,
+    referralSecondary: null,
+    patientInteractionComment: null,
+    hwInteraction: null,
+    patientInteraction: null,
+    medicine: []
   };
 
   private _hwInteraction: string;
@@ -2525,164 +2525,259 @@ export class VisitSummaryComponent implements OnInit, OnDestroy, AfterViewInit {
    */
   private trackFormChanges() {
     // Initialize updatedObsData with initial values from obsData
-    this.updatedObsData = {...this.obsData};
+    this.updatedObsData = JSON.parse(JSON.stringify(this.obsData));
     this.changesMade = false;
-    //this.editFormValues = false;
-    if(this.discussionSummaryForm){
-     this.discussionSummaryForm.valueChanges.subscribe(()=>{
-      this.updatedObsData.discussionSummary = true;
-       this.checkChanges(this.updatedObsData);
-      // console.log("value changed on the discussionSummary form")
-      // this.changesMade = true;
-      // this.editFormValues = true;
-    })
-  }
 
-    // Track patient interaction form
+    // Track discussion summary form
+    if (this.discussionSummaryForm) {
+      // Store initial value
+      this.obsData.discussionSummary = this.discussionSummaryForm.value.value;
+      
+      this.discussionSummaryForm.valueChanges.subscribe(() => {
+        const newValue = this.discussionSummaryForm.value.value;
+        if (newValue !== this.obsData.discussionSummary) {
+          this.updatedObsData.discussionSummary = newValue;
+          this.checkChanges(this.updatedObsData);
+        }
+      });
+    }
+
+    // Track patient interaction comment form
     if (this.patientInteractionCommentForm) {
+      this.obsData.patientInteractionComment = this.patientInteractionCommentForm.value.value;
+      
       this.patientInteractionCommentForm.valueChanges.subscribe(() => {
-        this.updatedObsData.patientInteractionComment = true;
-        this.checkChanges(this.updatedObsData);
+        const newValue = this.patientInteractionCommentForm.value.value;
+        if (newValue !== this.obsData.patientInteractionComment) {
+          this.updatedObsData.patientInteractionComment = newValue;
+          this.checkChanges(this.updatedObsData);
+        }
       });
     }
 
     // Track follow-up form
     if (this.followUpForm) {
+      this.obsData.followUp = this.followUpForm.value;
+      
       this.followUpForm.valueChanges.subscribe(() => {
-        this.updatedObsData.followUp = true;
-        this.checkChanges(this.updatedObsData);
+        const newValue = this.followUpForm.value;
+        if (JSON.stringify(newValue) !== JSON.stringify(this.obsData.followUp)) {
+          this.updatedObsData.followUp = newValue;
+          this.checkChanges(this.updatedObsData);
+        }
       });
     }
 
     // Track notes forms
     if (this.notesRef) {
+      this.obsData.notes = [...this.notesRef.notes];
+      
       this.notesRef.addNoteForm.valueChanges.subscribe(() => {
-        this.updatedObsData.notes = true;
-        this.checkChanges(this.updatedObsData);
+        const newValue = [...this.notesRef.notes];
+        if (JSON.stringify(newValue) !== JSON.stringify(this.obsData.notes)) {
+          this.updatedObsData.notes = newValue;
+          this.checkChanges(this.updatedObsData);
+        }
       });
     }
 
     if (this.familyHistoryNoteRef) {
+      this.obsData.familyHistoryNote = [...this.familyHistoryNoteRef.notes];
+      
       this.familyHistoryNoteRef.addNoteForm.valueChanges.subscribe(() => {
-        this.updatedObsData.familyHistoryNote = true;
-        this.checkChanges(this.updatedObsData);
+        const newValue = [...this.familyHistoryNoteRef.notes];
+        if (JSON.stringify(newValue) !== JSON.stringify(this.obsData.familyHistoryNote)) {
+          this.updatedObsData.familyHistoryNote = newValue;
+          this.checkChanges(this.updatedObsData);
+        }
       });
     }
 
     if (this.pastMedicalHistoryNoteRef) {
+      this.obsData.pastMedicalHistoryNote = [...this.pastMedicalHistoryNoteRef.notes];
+      
       this.pastMedicalHistoryNoteRef.addNoteForm.valueChanges.subscribe(() => {
-        this.updatedObsData.pastMedicalHistoryNote = true;
-        this.checkChanges(this.updatedObsData);
+        const newValue = [...this.pastMedicalHistoryNoteRef.notes];
+        if (JSON.stringify(newValue) !== JSON.stringify(this.obsData.pastMedicalHistoryNote)) {
+          this.updatedObsData.pastMedicalHistoryNote = newValue;
+          this.checkChanges(this.updatedObsData);
+        }
       });
     }
 
     // Track diagnosis form
     if (this.diagnosisForm) {
+      this.obsData.diagnosis = [...this.existingDiagnosis];
+      
       this.diagnosisForm.valueChanges.subscribe(() => {
-        this.updatedObsData.diagnosis = true;
-        this.checkChanges(this.updatedObsData);
+        const newValue = [...this.existingDiagnosis];
+        if (JSON.stringify(newValue) !== JSON.stringify(this.obsData.diagnosis)) {
+          this.updatedObsData.diagnosis = newValue;
+          this.checkChanges(this.updatedObsData);
+        }
       });
     }
 
     // Track medicine form
     if (this.addMedicineForm) {
+      this.obsData.medicine = [...this.medicines];
+      
       this.addMedicineForm.valueChanges.subscribe(() => {
-        this.updatedObsData.addMedicine = true;
-        this.checkChanges(this.updatedObsData);
+        const newValue = [...this.medicines];
+        if (JSON.stringify(newValue) !== JSON.stringify(this.obsData.medicine)) {
+          this.updatedObsData.medicine = newValue;
+          this.checkChanges(this.updatedObsData);
+        }
       });
     }
 
     // Track additional instruction form
     if (this.additionalInstructionForm) {
+      this.obsData.additionalInstruction = this.additionalInstructionForm.value.value;
+      
       this.additionalInstructionForm.valueChanges.subscribe(() => {
-        this.updatedObsData.additionalInstruction = true;
-        this.checkChanges(this.updatedObsData);
+        const newValue = this.additionalInstructionForm.value.value;
+        if (newValue !== this.obsData.additionalInstruction) {
+          this.updatedObsData.additionalInstruction = newValue;
+          this.checkChanges(this.updatedObsData);
+        }
       });
     }
 
     // Track advice form
     if (this.addAdviceForm) {
+      this.obsData.addAdvice = [...this.advices];
+      
       this.addAdviceForm.valueChanges.subscribe(() => {
-        this.updatedObsData.addAdvice = true;
-        this.checkChanges(this.updatedObsData);
+        const newValue = [...this.advices];
+        if (JSON.stringify(newValue) !== JSON.stringify(this.obsData.addAdvice)) {
+          this.updatedObsData.addAdvice = newValue;
+          this.checkChanges(this.updatedObsData);
+        }
       });
     }
 
     // Track test form
     if (this.testForm) {
+      this.obsData.test = this.testForm.value.test;
+      
       this.testForm.valueChanges.subscribe(() => {
-        this.updatedObsData.test = true;
-        this.checkChanges(this.updatedObsData);
+        const newValue = this.testForm.value.test;
+        if (newValue !== this.obsData.test) {
+          this.updatedObsData.test = newValue;
+          this.checkChanges(this.updatedObsData);
+        }
       });
     }
 
     // Track referral form
     if (this.addReferralForm) {
+      this.obsData.addReferral = [...this.referrals];
+      
       this.addReferralForm.valueChanges.subscribe(() => {
-        this.updatedObsData.addReferral = true;
-        this.checkChanges(this.updatedObsData);
+        const newValue = [...this.referrals];
+        if (JSON.stringify(newValue) !== JSON.stringify(this.obsData.addReferral)) {
+          this.updatedObsData.addReferral = newValue;
+          this.checkChanges(this.updatedObsData);
+        }
       });
     }
 
     // Track discussion summary form
     if (this.discussionSummaryForm) {
+      this.obsData.discussionSummary = this.discussionSummaryForm.value.value;
+      
       this.discussionSummaryForm.valueChanges.subscribe(() => {
-        this.updatedObsData.discussionSummary = true;
-        this.checkChanges(this.updatedObsData);
+        const newValue = this.discussionSummaryForm.value.value;
+        if (newValue !== this.obsData.discussionSummary) {
+          this.updatedObsData.discussionSummary = newValue;
+          this.checkChanges(this.updatedObsData);
+        }
       });
     }
 
     // Track diagnosis secondary form
     if (this.diagnosisSecondaryForm) {
+      this.obsData.diagnosisSecondary = this.diagnosisSecondaryForm.value;
+      
       this.diagnosisSecondaryForm.valueChanges.subscribe(() => {
-        this.updatedObsData.diagnosisSecondary = true;
-        this.checkChanges(this.updatedObsData);
+        const newValue = this.diagnosisSecondaryForm.value;
+        if (JSON.stringify(newValue) !== JSON.stringify(this.obsData.diagnosisSecondary)) {
+          this.updatedObsData.diagnosisSecondary = newValue;
+          this.checkChanges(this.updatedObsData);
+        }
       });
     }
 
     // Track referral secondary form
     if (this.referralSecondaryForm) {
+      this.obsData.referralSecondary = this.referralSecondaryForm.value;
+      
       this.referralSecondaryForm.valueChanges.subscribe(() => {
-        this.updatedObsData.referralSecondary = true;
-        this.checkChanges(this.updatedObsData);
+        const newValue = this.referralSecondaryForm.value;
+        if (JSON.stringify(newValue) !== JSON.stringify(this.obsData.referralSecondary)) {
+          this.updatedObsData.referralSecondary = newValue;
+          this.checkChanges(this.updatedObsData);
+        }
       });
     }
 
     // Track patient call status form
     if (this.patientCallStatusForm) {
+      this.obsData.patientCallStatus = {
+        callStatus: this.patientCallStatusForm.value.callStatus,
+        reason: this.patientCallStatusForm.value.reason
+      };
+      
       this.patientCallStatusForm.valueChanges.subscribe(() => {
-        this.updatedObsData.patientCallStatus = true;
-        this.checkChanges(this.updatedObsData);
+        const newValue = {
+          callStatus: this.patientCallStatusForm.value.callStatus,
+          reason: this.patientCallStatusForm.value.reason
+        };
+        if (JSON.stringify(newValue) !== JSON.stringify(this.obsData.patientCallStatus)) {
+          this.updatedObsData.patientCallStatus = newValue;
+          this.checkChanges(this.updatedObsData);
+        }
       });
     }
 
-    // Track follow-up instruction component changes if available
+    // Track follow-up instruction component changes
     if (this.followUpInstructionComponentRef) {
+      this.obsData.followUpInstruction = this.followUpInstructionComponentRef.addInstructionForm?.value?.instructions || [];
+      
       this.followUpInstructionComponentRef.addInstructionForm?.get('instructions')?.valueChanges.subscribe(() => {
-        this.updatedObsData.followUpInstruction = true;
-        this.checkChanges(this.updatedObsData);
+        const newValue = this.followUpInstructionComponentRef.addInstructionForm?.value?.instructions || [];
+        if (JSON.stringify(newValue) !== JSON.stringify(this.obsData.followUpInstruction)) {
+          this.updatedObsData.followUpInstruction = newValue;
+          this.checkChanges(this.updatedObsData);
+        }
       });
     }
-  
-}
+  }
 
   /**
    * Check for changes and update changesMade flag
    */
   private checkChanges(updatedObsData: any) {
-     if(!this.editFormValues){
+    if (!this.editFormValues) {
       return true;
     }
-    // Get all fields that have been changed
-    const changedFields = Object.keys(updatedObsData).filter(key => 
-      updatedObsData[key] !== this.obsData[key]
-    );
 
-   
-    
-    // If any fields have changed, enable the Save as Draft button
+    // Compare actual values instead of just checking boolean flags
+    const changedFields = Object.keys(updatedObsData).filter(key => {
+      // For arrays, compare stringified versions
+      if (Array.isArray(updatedObsData[key])) {
+        return JSON.stringify(updatedObsData[key]) !== JSON.stringify(this.obsData[key]);
+      }
+      // For objects, compare stringified versions
+      if (typeof updatedObsData[key] === 'object' && updatedObsData[key] !== null) {
+        return JSON.stringify(updatedObsData[key]) !== JSON.stringify(this.obsData[key]);
+      }
+      // For primitive values, compare directly
+      return updatedObsData[key] !== this.obsData[key];
+    });
+
     this.changesMade = changedFields.length > 0;
-    
     console.log('Changed fields:', changedFields);
     console.log('Save as Draft enabled:', this.changesMade);
   }
