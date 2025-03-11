@@ -508,7 +508,7 @@ export class VisitSummaryComponent implements OnInit, OnDestroy, AfterViewInit {
       if (visit) {
         setTimeout(()=>{
           this.editFormValues = true;
-        },1000)
+        },2000)
         this.visit = visit;
         if (this.visitSummaryService.checkIfEncounterExists(visit.encounters, visitTypes.FLAGGED)) {
           this.visit['visitUploadTime'] = this.visitSummaryService.checkIfEncounterExists(visit.encounters, visitTypes.FLAGGED) ? this.visitSummaryService.checkIfEncounterExists(visit.encounters, visitTypes.FLAGGED)['encounterDatetime'] : null;
@@ -2191,6 +2191,7 @@ export class VisitSummaryComponent implements OnInit, OnDestroy, AfterViewInit {
       if(!isLoad) {
         this.patientCallStatusForm.patchValue({ reason: null });
         console.log(this.patientCallStatusForm.value)
+        this.editFormValues = true;
         setTimeout(() => this.reasonSelectComponent?.open(), 0);
       }
     }
@@ -2507,9 +2508,13 @@ export class VisitSummaryComponent implements OnInit, OnDestroy, AfterViewInit {
       next: (responses) => {
         console.log('All observations saved successfully', responses);
         // Reset tracking after successful save
-        this.updatedObsData = {...this.obsData};
+        this.obsData = {...this.updatedObsData};  // Update base state to current state
+        this.updatedObsData = {...this.obsData};  // Reset tracking state
         this.changesMade = false;
-         this.editFormValues = false;
+        
+        // Don't disable editFormValues - remove this line
+        // this.editFormValues = false;
+        
         this.toastr.success(this.translateService.instant('Changes saved successfully'), this.translateService.instant('Success'));
       },
       error: (error) => {
@@ -2526,7 +2531,7 @@ export class VisitSummaryComponent implements OnInit, OnDestroy, AfterViewInit {
     // Initialize updatedObsData with initial values from obsData
     this.updatedObsData = {...this.obsData};
     this.changesMade = false;
-    this.editFormValues = false;
+    //this.editFormValues = false;
 
     // Track patient interaction form
     if (this.patientInteractionCommentForm) {
@@ -2659,14 +2664,15 @@ export class VisitSummaryComponent implements OnInit, OnDestroy, AfterViewInit {
    * Check for changes and update changesMade flag
    */
   private checkChanges(updatedObsData: any) {
+     if(!this.editFormValues){
+      return true;
+    }
     // Get all fields that have been changed
     const changedFields = Object.keys(updatedObsData).filter(key => 
       updatedObsData[key] !== this.obsData[key]
     );
 
-    if(!this.editFormValues){
-      return false;
-    }
+   
     
     // If any fields have changed, enable the Save as Draft button
     this.changesMade = changedFields.length > 0;
