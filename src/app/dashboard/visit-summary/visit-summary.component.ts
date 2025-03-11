@@ -465,11 +465,7 @@ export class VisitSummaryComponent implements OnInit, OnDestroy, AfterViewInit {
   * @return {void}
   */
   formControlValueChanges(): void {
-    this.discussionSummaryForm.valueChanges.subscribe(()=>{
-      console.log("value changed on the discussionSummary form")
-      this.changesMade = true;
-      this.editFormValues = true;
-    })
+   
     this.referSpecialityForm.get('refer').valueChanges.subscribe((val: boolean) => {
       if (val) {
         this.referSpecialityForm.get(doctorDetails.SPECIALIZATION).setValue(null);
@@ -2532,6 +2528,15 @@ export class VisitSummaryComponent implements OnInit, OnDestroy, AfterViewInit {
     this.updatedObsData = {...this.obsData};
     this.changesMade = false;
     //this.editFormValues = false;
+    if(this.discussionSummaryForm){
+     this.discussionSummaryForm.valueChanges.subscribe(()=>{
+      this.updatedObsData.discussionSummary = true;
+       this.checkChanges(this.updatedObsData);
+      // console.log("value changed on the discussionSummary form")
+      // this.changesMade = true;
+      // this.editFormValues = true;
+    })
+  }
 
     // Track patient interaction form
     if (this.patientInteractionCommentForm) {
@@ -2658,7 +2663,8 @@ export class VisitSummaryComponent implements OnInit, OnDestroy, AfterViewInit {
         this.checkChanges(this.updatedObsData);
       });
     }
-  }
+  
+}
 
   /**
    * Check for changes and update changesMade flag
