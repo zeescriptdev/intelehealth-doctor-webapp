@@ -401,7 +401,6 @@ export class VisitSummaryComponent implements OnInit, OnDestroy, AfterViewInit {
   }
 
   ngOnInit(): void {
-    console.log("obsData",this.obsData)
     this.translateService.use(getCacheData(false, languages.SELECTED_LANGUAGE));
     this.pageTitleService.setTitle({ title: '', imgUrl: '' });
     const id = this.route.snapshot.paramMap.get('id');
@@ -998,7 +997,6 @@ export class VisitSummaryComponent implements OnInit, OnDestroy, AfterViewInit {
       this.visit['uploadTime'] = this.visitSummaryService.checkIfEncounterExists(encounters, visitTypes.ADULTINITIAL) ? this.visitSummaryService.checkIfEncounterExists(encounters, visitTypes.ADULTINITIAL)['encounterDatetime'] : null;
       this.visitStatus = visitTypes.AWAITING_VISIT;
     }
-    console.log("visitStatus",this.visitStatus);
   }
 
   /**
@@ -1675,8 +1673,6 @@ export class VisitSummaryComponent implements OnInit, OnDestroy, AfterViewInit {
   * @returns {Observable<any>}
   */
   saveTest(): Observable<any> {
-    console.log("this.obsData.test",this.obsData.test)
-    console.log("this.updatedObsData.test",this.updatedObsData.test)
     if(this.testForm.value.uuid){
       if(this.testForm.valid && this.obsData.test !== this.testForm.value.test)
         return this.encounterService.updateObs(this.testForm.value.uuid,{
@@ -1868,7 +1864,6 @@ export class VisitSummaryComponent implements OnInit, OnDestroy, AfterViewInit {
     }
     this.saveAllObs().subscribe({
       next: (responses) => {
-        console.log('All observations saved successfully', responses);
         //Open Share Prescription Confirmation Modal
         this.coreService.openSharePrescriptionConfirmModal().subscribe((res: boolean) => {
           if (res) {
@@ -2188,7 +2183,6 @@ export class VisitSummaryComponent implements OnInit, OnDestroy, AfterViewInit {
       this.reasonsList = this.reasons[this.patientCallStatusForm.value.callStatus] || [];
       if(!isLoad) {
         this.patientCallStatusForm.patchValue({ reason: null });
-        console.log(this.patientCallStatusForm.value)
         this.editFormValues = true;
         setTimeout(() => this.reasonSelectComponent?.open(), 0);
       }
@@ -2273,7 +2267,6 @@ export class VisitSummaryComponent implements OnInit, OnDestroy, AfterViewInit {
       if (attr.attributeType.uuid === visitAttributeTypes.callStatus && attr.value) {
         this.patientCallStatusForm.patchValue({...obsParse(attr.value,attr.uuid)})
         this.onCallStatusChange(true)
-        console.log(this.patientCallStatusForm.value)
       }
     });
   }
@@ -2356,7 +2349,6 @@ export class VisitSummaryComponent implements OnInit, OnDestroy, AfterViewInit {
   }
 
   saveAllObs(changedFields: string[] = []): Observable<any>{
-    console.log("this.updatedObsData",this.updatedObsData)
     const postObsRequests = [];
 
     // Only push if the field is in changedFields array
@@ -2485,8 +2477,6 @@ export class VisitSummaryComponent implements OnInit, OnDestroy, AfterViewInit {
         );
       }
     }
-
-    console.log("postObsRequests before forkJoin",postObsRequests);
     // Use forkJoin to wait for all requests to complete
     return forkJoin(postObsRequests)
   }
@@ -2499,13 +2489,9 @@ export class VisitSummaryComponent implements OnInit, OnDestroy, AfterViewInit {
     const changedFields = Object.keys(this.updatedObsData).filter(key => 
       this.updatedObsData[key] !== this.obsData[key]
     );
-
-    console.log("changedFields", changedFields);
     
     this.saveAllObs(changedFields).subscribe({
-      next: (responses) => {
-        console.log('All observations saved successfully on saveAsDraft', responses);
-        
+      next: (responses) => {        
         // Unsubscribe from all existing subscriptions
         this.unsubscribeFromFormTracking();
         
@@ -2834,8 +2820,6 @@ export class VisitSummaryComponent implements OnInit, OnDestroy, AfterViewInit {
     });
 
     this.changesMade = changedFields.length > 0;
-    console.log('Changed fields:', changedFields);
-    console.log('Save as Draft enabled:', this.changesMade);
     return false;
   }
 
