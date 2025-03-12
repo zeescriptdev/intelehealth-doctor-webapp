@@ -483,8 +483,8 @@ export class VisitService {
     * @param {PatientModel} patient - patient details
     * @return {string} - Whatsapp link
     */
-    getSevikasLink(patient:PatientModel) {
-      return this.getWhatsappLink(this.getSevikasPhoneNo('phoneNumber'), `Hello I'm calling for patient
+    getSevikasLink(patient:PatientModel, hwPhoneNo?) {
+      return this.getWhatsappLink(hwPhoneNo? hwPhoneNo :this.getSevikasPhoneNo('phoneNumber'), `Hello I'm calling for patient
        ${patient.person.display} OpenMRS ID ${patient.identifiers[0].identifier}`);
     }
   }

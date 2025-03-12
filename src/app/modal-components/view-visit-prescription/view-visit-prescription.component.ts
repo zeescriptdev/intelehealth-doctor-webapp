@@ -406,7 +406,7 @@ export class ViewVisitPrescriptionComponent implements OnInit, OnDestroy {
   * @return {any} - Value for a given attribute type
   */
   getSevikasPhoneNo(attrType: string) {
-    return this.visitService.getSevikasPhoneNo(attrType);
+    return this.hwPhoneNo;
    }
  
    /**
@@ -414,7 +414,7 @@ export class ViewVisitPrescriptionComponent implements OnInit, OnDestroy {
    * @return {string} - Whatsapp link
    */
    getSevikasLink() {
-     return this.visitService.getSevikasLink(this.patient);
+     return this.visitService.getSevikasLink(this.patient, this.hwPhoneNo);
    }
 
   /**

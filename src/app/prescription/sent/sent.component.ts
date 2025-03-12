@@ -3,6 +3,7 @@ import { MatPaginator, PageEvent } from '@angular/material/paginator';
 import { MatTableDataSource } from '@angular/material/table';
 import { TranslateService } from '@ngx-translate/core';
 import { CustomVisitModel } from 'src/app/model/model';
+import { CoreService } from 'src/app/services/core/core.service';
 import { getCacheData } from 'src/app/utils/utility-functions';
 import { languages } from 'src/config/constant';
 import { environment } from 'src/environments/environment';
@@ -29,7 +30,7 @@ export class SentComponent implements OnInit, AfterViewInit, OnChanges {
   @ViewChild('tempPaginator') tempPaginator: MatPaginator;
   @ViewChild('sentSearchInput', { static: true }) searchElement: ElementRef;
 
-  constructor(private translateService: TranslateService) { }
+  constructor(private translateService: TranslateService, private coreService: CoreService) { }
 
   ngOnInit(): void {
     this.translateService.use(getCacheData(false, languages.SELECTED_LANGUAGE));
@@ -98,4 +99,7 @@ export class SentComponent implements OnInit, AfterViewInit, OnChanges {
     this.searchElement.nativeElement.value = '';
   }
 
+  openVisitPrescriptionModal(visitUuid) {
+    this.coreService.openVisitPrescriptionModal({ uuid: visitUuid });
+  }
 }
