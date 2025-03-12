@@ -355,8 +355,10 @@
                                 <li *ngFor="let ckri of ckr.data">
                                   <div class="list-item">
                                     <label>{{ckri.key}}</label>
-                                    <div class="list-item-content" [class.text-muted]="!ckri.value">
-                                      {{(ckri.value)?ckri.value:'None'}}
+                                    <div
+                                      class="list-item-content"
+                                      [class.text-muted]="!ckri.value"
+                                      [innerHTML]="ckri.value ? ckri.value : ('None' | translate)">
                                     </div>
                                   </div>
                                 </li>

@@ -150,3 +150,45 @@ export function isFeaturePresent(featureName: string, notInclude = false): boole
   if(notInclude) return !featureList.includes(featureName);
   return featureList.includes(featureName);
 }
+
+export function getCallDuration(given_seconds: number){
+  let dateObj = new Date(given_seconds * 1000);
+  let hours = dateObj.getUTCHours();
+  let minutes = dateObj.getUTCMinutes();
+  let seconds = dateObj.getSeconds();
+  return hours.toString().padStart(2, '0') + ':' + 
+      minutes.toString().padStart(2, '0') + ':' + 
+      seconds.toString().padStart(2, '0');
+}
+
+export function autoGrowTextZone(e:any) {
+  e.target.style.height = "0px";
+  e.target.style.height = (e.target.scrollHeight+5)+"px";
+}
+
+export function autoGrowAllTextAreaZone(e: HTMLTextAreaElement[]) {
+  e.forEach(element => {
+    element.style.height = (element.scrollHeight+5)+"px";
+  });
+}
+
+export function obsStringify(obs: any): string {
+  try {
+    delete obs['uuid'];
+    Object.keys(obs).forEach((k) => obs[k] == null && delete obs[k]);
+    return JSON.stringify(obs)
+  } catch (error) {
+    return ""
+  }
+}
+
+export function obsParse(obs: string, uuid: string = ""): object {
+  try {
+    if(uuid)
+      return { uuid: uuid, ...JSON.parse(obs) }
+    else
+      return { ...JSON.parse(obs) }
+  } catch (error) {
+    return { uuid: uuid }
+  }
+}

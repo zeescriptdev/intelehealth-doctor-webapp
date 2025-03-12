@@ -260,6 +260,7 @@ export interface CustomVisitModel {
     uuid?: string
     person_attribute?: any[]
   }
+  prescription_started?:any
 }
 
 export interface CustomEncounterModel {
@@ -345,6 +346,8 @@ export interface PatientModel {
     gender?: string,
     attributes?: PersonAttributeModel[],
     preferredAddress?: {
+      address6: string,
+      address3: string,
       address2: string,
       address1: string,
       cityVillage?: string,
@@ -529,7 +532,8 @@ export interface DiagnosisModel {
   diagnosisType?: string,
   diagnosisStatus?: string,
   uuid?: string,
-  diagnosisTNMStaging?: string
+  diagnosisCode?: string,
+  isSnomed? : boolean
 }
 
 export interface DocImagesModel {
@@ -595,6 +599,7 @@ export interface PatientRegistrationFieldsModel {
   is_mandatory: boolean,
   is_editable: boolean,
   is_locked: boolean
+  validations?: any
 }
 
 export interface SpecializationModel {
@@ -642,6 +647,14 @@ export interface VitalModel {
   lang: object;
 }
 
+export interface DiagnosticModel {
+  name: string,
+  key: string,
+  uuid: string,
+  is_mandatory: boolean,
+  lang: object;
+}
+
 export interface FeatureModel extends BaseModel {}
 export interface WebrtcModel extends BaseModel {}
 export interface WebrtcDataModel {
@@ -672,10 +685,16 @@ export interface PatientVisitSummaryConfigModel {
   severity_of_case_section: boolean
   completed_visit_section: boolean
   follow_up_visit_section: boolean
-  hw_interaction: boolean
   awaiting_visits_patient_type_demarcation: boolean
   awaiting_visit_section: boolean
   diagnosis_at_secondary_level: boolean
+  dp_recommendation_group: boolean
+  dp_call_status: boolean
+  dp_dignosis_secondary: boolean
+  dp_medication_secondary: boolean
+  dp_investigations_secondary: boolean
+  dp_referral_secondary: boolean
+  dp_discussion_summary: boolean  
 }
 
 export interface PagerdutyList {
@@ -723,4 +742,27 @@ export interface PatientVisitSection {
   sub_sections?: any;
   updatedAt?: string;
   createdAt?: string
+}
+
+export interface DiagnosticUnit {
+  name: string;
+  unit: string;
+  min: number;
+  max?: number;
+  percentageMin?: number;
+  percentageMax?: number;
+  percentageUnit?: string;
+  gender?: string;
+}
+
+export interface DiagnosticName {
+  name: string;
+  testName: string;
+}
+
+export interface PatientVisitDropdownFieldsModel{
+  id?:number,
+  name?:string,
+  is_enabled: boolean,
+  updatedAt: string
 }

@@ -15,6 +15,7 @@ import { getCacheData } from '../utils/utility-functions';
 import { doctorDetails, languages, visitTypes } from 'src/config/constant';
 import { ApiResponseModel, AppointmentDetailResponseModel, AppointmentModel, CustomEncounterModel, EncounterModel, FollowUpModel, HwModel, ProviderAttributeModel, ProviderModel, RescheduleAppointmentModalResponseModel, ScheduleModel, ScheduleSlotModel, UserModel } from '../model/model';
 import { MindmapService } from '../services/mindmap.service';
+import { AppConfigService } from '../services/app-config.service';
 
 @Component({
   selector: 'app-calendar',
@@ -36,6 +37,7 @@ export class CalendarComponent implements OnInit {
   daysOff: ScheduleModel[] = [];
   monthNames: string[] = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
   refresh = new Subject<void>();
+  patientRegFields = [];
 
   constructor(
     private pageTitleService: PageTitleService,
@@ -45,7 +47,8 @@ export class CalendarComponent implements OnInit {
     private router: Router,
     private toastr: ToastrService,
     private mindmapService: MindmapService,
-    private translateService:TranslateService
+    private translateService:TranslateService,
+    private appConfigService: AppConfigService
   ) { }
 
   ngOnInit(): void {
@@ -58,6 +61,7 @@ export class CalendarComponent implements OnInit {
     this.getFollowUpVisit();
     this.getAppointments(moment().startOf('year').format('DD/MM/YYYY'), moment().endOf('year').format('DD/MM/YYYY'));
     this.getSchedule();
+    this.patientRegFields = this.appConfigService.patientRegFields;
   }
 
   /**
@@ -152,10 +156,12 @@ export class CalendarComponent implements OnInit {
           let followUpVisits = res;
           followUpVisits.forEach((folloUp: FollowUpModel) => {
             this.visitService.fetchVisitDetails(folloUp.visit_id).subscribe((visit)=> {
-              let followUpDate = (folloUp.followup_text.includes('Time:')) ? moment(folloUp.followup_text.split(', Time: ')[0]).format('YYYY-MM-DD') : moment(folloUp.followup_text.split(', Remark: ')[0]).format('YYYY-MM-DD');
-              let followUpTime = (folloUp.followup_text.includes('Time:')) ? folloUp.followup_text.split(', Time: ')[1].split(', Remark: ')[0] : null;
-              let start = (followUpTime)?  moment(followUpDate + ' ' + followUpTime, 'YYYY-MM-DD hh:mm a').toDate() : setHours(setMinutes(new Date(followUpDate), 0), 9);
-              let end = (followUpTime)?  moment(followUpDate + ' ' + followUpTime, 'YYYY-MM-DD hh:mm a').add(30, 'minutes').toDate() : setHours(setMinutes(new Date(followUpDate), 30), 9);
+              const result = folloUp.followup_text.split(',').filter(Boolean);
+              const time = result.find((v: string) => v.includes('Time:'))?.split('Time:')?.[1]?.trim();
+              let followUpDate = moment(result[0]).format('YYYY-MM-DD');
+              let followUpTime = time ? time : null;
+              let start = (followUpTime) ? moment(followUpDate + ' ' + followUpTime, 'YYYY-MM-DD hh:mm a').toDate() : setHours(setMinutes(new Date(followUpDate), 0), 9);
+              let end = (followUpTime) ? moment(followUpDate + ' ' + followUpTime, 'YYYY-MM-DD hh:mm a').add(30, 'minutes').toDate() : setHours(setMinutes(new Date(followUpDate), 30), 9);
               if (moment(start).isValid() && moment(end).isValid()) {
                 let hw = this.getHW(visit.encounters);
                 this.events.push({
@@ -526,4 +532,7 @@ export class CalendarComponent implements OnInit {
     return getCacheData(false, languages.SELECTED_LANGUAGE);
   }
 
+  checkPatientRegField(fieldName: any): boolean{
+    return this.patientRegFields.indexOf(fieldName) !== -1;
+  }
 }

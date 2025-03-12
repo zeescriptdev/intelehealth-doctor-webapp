@@ -35,6 +35,7 @@ export const visitTypes = {
     FAMILY_HISTORY:'FAMILY HISTORY',
     FOLLOW_UP:'Follow-up',
     NEW:'New',
+    PATIENT_INTERACTION_COMMENT:'Patient Interaction Comment',
 }
 
 export const doctorDetails = {
@@ -238,9 +239,18 @@ export const conceptIds = {
   conceptDiagnosisClass : '8d4918b0-c2cc-11de-8d13-0010c6dffd0f',
   conceptPastMedicalHistoryNotes: 'dc27d56c-f970-4eaa-88d0-46d55c2ab24c',
   conceptFamilyHistoryNotes: '675bafa3-2d9b-4cd1-9d38-55a2f47a69a5',
-  conceptFollowUpInstruction: 'e444b5e9-e3b9-4cb1-92ee-29bba00b33d0'
+  conceptFollowUpInstruction: 'e444b5e9-e3b9-4cb1-92ee-29bba00b33d0',
+  conceptDiscussionSummary: 'b673cd54-a01d-4d8a-9c07-8fb19bf4982c'
 }
 
 export const WEBRTC = {
   CHAT_TEXT_LIMIT: 1000
+}
+
+export const visitAttributeTypes = {
+  patientCallDuration : '35e64f4a-d0a5-40bc-8010-8c61d52cc4b1',
+  HWInteraction : 'c3e885bf-6c97-4d27-9171-a7e0c25450e9',
+  PatientInteraction: '6cc0bdfe-ccde-46b4-b5ff-e3ae238272cc',
+  callStatus: 'f8e121db-0999-455f-a105-514cf2ec3e43',
+  patientInteractionComment: 'ed7444db-0e1e-4a88-88c6-9d9775a9bf3e'
 }

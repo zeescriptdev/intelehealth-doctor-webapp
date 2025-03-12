@@ -12,7 +12,8 @@
     "test": "ng test --include src/app/admin/admin-actions/webrtc",
     "lint": "ng lint",
     "e2e": "ng e2e",
-    "prepare": "husky install"
+    "prepare": "husky install",
+    "build-library": "ng build ih-library --watch"
   },
   "lint-staged": {
     "src/**/*.{ts,css}": "tslint --fix -c ./tslint.json"
@@ -44,10 +45,12 @@
     "core-js": "^2.5.4",
     "date-fns": "^2.29.3",
     "html2pdf.js": "^0.10.1",
+    "ih-library": "github:Intelehealth/intelehealth-doctor-webapp-config-table-grid#main",
     "intl-tel-input": "^17.0.19",
     "jquery": "^3.5.1",
+    "lib-presciption": "github:Intelehealth/intelehealth-doctor-webapp-download-prescription#build_0.1",
     "libphonenumber-js": "^1.10.18",
-    "livekit-client": "v2.0.10",
+    "livekit-client": "^2.8.0",
     "moment": "^2.29.4",
     "ng-otp-input": "^1.8.5",
     "ng2-pdf-viewer": "^9.1.3",
