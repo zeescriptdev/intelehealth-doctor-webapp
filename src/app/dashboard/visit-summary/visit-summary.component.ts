@@ -2489,7 +2489,7 @@ export class VisitSummaryComponent implements OnInit, OnDestroy, AfterViewInit {
     const changedFields = Object.keys(this.updatedObsData).filter(key => 
       this.updatedObsData[key] !== this.obsData[key]
     );
-    
+
     this.saveAllObs(changedFields).subscribe({
       next: (responses) => {        
         // Unsubscribe from all existing subscriptions
@@ -2655,13 +2655,13 @@ export class VisitSummaryComponent implements OnInit, OnDestroy, AfterViewInit {
 
     // Track medicine form
     if (this.addMedicineForm) {
-      this.obsData.medicine = [...this.medicines];
+      this.obsData.addMedicine = [...this.medicines];
       
       this.formSubscriptions.push(
         this.addMedicineForm.valueChanges.subscribe(() => {
           const newValue = [...this.medicines];
-          if (JSON.stringify(newValue) !== JSON.stringify(this.obsData.medicine)) {
-            this.updatedObsData.medicine = newValue;
+          if (JSON.stringify(newValue) !== JSON.stringify(this.obsData.addMedicine)) {
+            this.updatedObsData.addMedicine = newValue;
             this.checkChanges(this.updatedObsData);
           }
         })
