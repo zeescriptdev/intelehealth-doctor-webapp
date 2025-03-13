@@ -405,8 +405,8 @@ export class ViewVisitPrescriptionComponent implements OnInit, OnDestroy {
   * @param {string} attrType - Sevikas attribute type
   * @return {any} - Value for a given attribute type
   */
-  getSevikasPhoneNo(attrType: string) {
-    return this.hwPhoneNo;
+  getSevikasPhoneNo(attrType?: string) {
+    return this.hwPhoneNo ? this.hwPhoneNo : 'NA';
    }
  
    /**
@@ -414,7 +414,7 @@ export class ViewVisitPrescriptionComponent implements OnInit, OnDestroy {
    * @return {string} - Whatsapp link
    */
    getSevikasLink() {
-     return this.visitService.getSevikasLink(this.patient, this.hwPhoneNo);
+     return this.visitService.getSevikasLink(this.patient, this.getSevikasPhoneNo());
    }
 
   /**
@@ -1061,7 +1061,7 @@ export class ViewVisitPrescriptionComponent implements OnInit, OnDestroy {
             records.push([m?.value]);
           });
         } else {
-          records.push([{ text: 'No medicines added', colSpan: 5, alignment: 'center' }]);
+          records.push([{ text: 'No medicines added', colSpan: 5, alignment: 'left' }]);
         }
         break;
       case 'additionalInstruction':

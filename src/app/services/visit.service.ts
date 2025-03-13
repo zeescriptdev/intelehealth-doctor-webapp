@@ -32,6 +32,17 @@ export class VisitService {
     return this.http.get(url);
   }
 
+    /**
+  * Get visit
+  * @param {string} uuid - Visit uuid
+  * @return {Observable<any>}
+  */
+  getVisitEncounters(uuid): Observable<any> {
+    // tslint:disable-next-line:max-line-length
+     const url = `${this.baseURL}/visit/${uuid}?v=custom:(uuid,encounters:(display,encounterDatetime),stopDatetime)`;
+    return this.http.get(url);
+  }
+
   /**
   * Get visits for a patient
   * @param {string} id - Patient uuid

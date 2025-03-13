@@ -104,7 +104,12 @@ export class LoginComponent implements OnInit {
     const role = this.rolesService.getRole('ORGANIZATIONAL: SYSTEM ADMINISTRATOR');
     const isNurse = this.rolesService.getRole('ORGANIZATIONAL: NURSE');
     if (role) {
-      this.router.navigate(['/admin']);
+      let role1 = this.rolesService.getRole("PROJECT MANAGER");
+      if(role1) {
+        this.router.navigate(['/admin/reports']);
+      } else {
+        this.router.navigate(['/admin']);
+      }
     } else {
       if (isNurse) {
         this.router.navigate(['/dashboard/hw-profile']);

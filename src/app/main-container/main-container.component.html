@@ -11,37 +11,37 @@
         <img src="assets/images/Ekal-logo.png" class="m-img" alt="" width="100%" *ngIf="collapsed">
       </div>
       <ul class="admin-nav">
-        <li class="nav-item" *ngxPermissionsExcept="['ORGANIZATIONAL: SYSTEM ADMINISTRATOR', 'ORGANIZATIONAL: NURSE']" (click)="toggleSidebar()" data-test-id="listItemDashboard">
+        <li class="nav-item" *ngxPermissionsOnly="['ORGANIZATIONAL: DOCTOR']" (click)="toggleSidebar()" data-test-id="listItemDashboard">
           <a class="nav-item-link" routerLink="/dashboard" routerLinkActive="active" data-test-id="linkDashboard">
             <img src="assets/svgs/menu-home.svg" alt="">
             <span>{{'Dashboard' | translate}}</span>
           </a>
         </li>
-        <li class="nav-item" *ngxPermissionsExcept="['ORGANIZATIONAL: SYSTEM ADMINISTRATOR', 'ORGANIZATIONAL: NURSE']" (click)="toggleSidebar()" data-test-id="listItemMessages">
+        <li class="nav-item" *ngxPermissionsOnly="['ORGANIZATIONAL: DOCTOR']" (click)="toggleSidebar()" data-test-id="listItemMessages">
           <a class="nav-item-link" routerLink="/messages" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }" data-test-id="linkMessages">
             <img src="assets/svgs/menu-message.svg" alt="">
             <span>{{'Messages' | translate}}</span>
           </a>
         </li>
-        <li class="nav-item" *ngxPermissionsExcept="['ORGANIZATIONAL: SYSTEM ADMINISTRATOR', 'ORGANIZATIONAL: NURSE']" (click)="toggleSidebar()" data-test-id="listItemAppointments">
+        <li class="nav-item" *ngxPermissionsOnly="['ORGANIZATIONAL: DOCTOR']" (click)="toggleSidebar()" data-test-id="listItemAppointments">
           <a class="nav-item-link" routerLink="/appointments" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }" data-test-id="linkAppointments">
             <img src="assets/svgs/menu-video.svg" alt="">
             <span>{{'Appointment' | translate}}</span>
           </a>
         </li>
-        <li class="nav-item" *ngxPermissionsExcept="['ORGANIZATIONAL: SYSTEM ADMINISTRATOR', 'ORGANIZATIONAL: NURSE']" (click)="toggleSidebar()" data-test-id="listItemCalendar">
+        <li class="nav-item" *ngxPermissionsOnly="['ORGANIZATIONAL: DOCTOR']" (click)="toggleSidebar()" data-test-id="listItemCalendar">
           <a class="nav-item-link" routerLink="/calendar" routerLinkActive="active" data-test-id="linkCalendar">
             <img src="assets/svgs/menu-calendar.svg" alt="">
             <span>{{'Calendar' | translate}}</span>
           </a>
         </li>
-        <li class="nav-item" *ngxPermissionsExcept="['ORGANIZATIONAL: SYSTEM ADMINISTRATOR', 'ORGANIZATIONAL: NURSE']" (click)="toggleSidebar()" data-test-id="listItemPrescription">
+        <li class="nav-item" *ngxPermissionsOnly="['ORGANIZATIONAL: DOCTOR']" (click)="toggleSidebar()" data-test-id="listItemPrescription">
           <a class="nav-item-link" routerLink="/prescription" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }" data-test-id="linkPrescription">
             <img src="assets/svgs/menu-treatment.svg" alt="">
             <span>{{'Prescription' | translate}}</span>
           </a>
         </li>
-        <li class="nav-item" *ngxPermissionsExcept="['ORGANIZATIONAL: SYSTEM ADMINISTRATOR', 'ORGANIZATIONAL: NURSE']" (click)="toggleSidebar()" data-test-id="listItemHelp">
+        <li class="nav-item" *ngxPermissionsOnly="['ORGANIZATIONAL: DOCTOR']" (click)="toggleSidebar()" data-test-id="listItemHelp">
           <a class="nav-item-link" routerLink="/follow-up-tracker" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }" data-test-id="linkHelp">
             <img src="assets/svgs/follow-up-tracker-icon.svg" alt="">
             <span>{{'Follow-up Log' | translate}}</span>
@@ -53,49 +53,49 @@
             <span>{{'My Profile'| translate}}</span>
           </a>
         </li>
-        <li class="nav-item" *ngxPermissionsExcept="['ORGANIZATIONAL: SYSTEM ADMINISTRATOR']" (click)="toggleSidebar()" data-test-id="listItemHelp">
+        <li class="nav-item" *ngxPermissionsOnly="['ORGANIZATIONAL: DOCTOR']" (click)="toggleSidebar()" data-test-id="listItemHelp">
           <a class="nav-item-link" routerLink="/help" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }" data-test-id="linkHelp">
             <img src="assets/svgs/menu-info.svg" alt="">
             <span>{{'Tech Support Chat' | translate}}</span>
           </a>
         </li>
-        <li class="nav-item" *ngxPermissionsOnly="['ORGANIZATIONAL: SYSTEM ADMINISTRATOR']" (click)="toggleSidebar()" data-test-id="listItemAyu">
+        <li class="nav-item" *ngxPermissionsOnly="['SYSTEM DEVELOPER', 'DATA MANAGER']" (click)="toggleSidebar()" data-test-id="listItemAyu">
           <a class="nav-item-link" routerLink="/admin" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }" data-test-id="linkAyu">
             <img src="assets/svgs/warning.svg" alt="">
             <span>{{'Ayu'| translate}}</span>
           </a>
         </li>
-        <li class="nav-item" *ngxPermissionsOnly="['ORGANIZATIONAL: SYSTEM ADMINISTRATOR']" (click)="toggleSidebar()" data-test-id="listItemSupport">
+        <li class="nav-item" *ngxPermissionsOnly="['SYSTEM DEVELOPER', 'DATA MANAGER']" (click)="toggleSidebar()" data-test-id="listItemSupport">
           <a class="nav-item-link" routerLink="/admin/support" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }" data-test-id="linkSupport">
             <img src="assets/svgs/menu-info.svg" alt="">
             <span>{{'Support' | translate}} <div class="dot" *ngIf="adminUnread">{{adminUnread}}</div> </span>
           </a>
         </li>
-        <li class="nav-item" *ngxPermissionsOnly="['ORGANIZATIONAL: SYSTEM ADMINISTRATOR']" (click)="toggleSidebar()" data-test-id="listItemSystem">
+        <li class="nav-item" *ngxPermissionsOnly="['SYSTEM DEVELOPER']" (click)="toggleSidebar()" data-test-id="listItemSystem">
           <a class="nav-item-link" href="{{ baseURLLegacy }}/admin/index.htm" target="_blank" data-test-id="linkSystem">
             <img src="assets/svgs/user-settings.svg" alt="">
             <span>{{'System Admin' | translate}}</span>
           </a>
         </li>
-        <li class="nav-item" *ngxPermissionsOnly="['ORGANIZATIONAL: SYSTEM ADMINISTRATOR']" (click)="toggleSidebar()" data-test-id="listItemUser">
+        <li class="nav-item" *ngxPermissionsOnly="['SYSTEM DEVELOPER']" (click)="toggleSidebar()" data-test-id="listItemUser">
           <a class="nav-item-link" href="{{ baseURLLegacy }}/admin/users/users.list" target="_blank" data-test-id="linkUser">
             <img src="assets/svgs/add-user.svg" alt="">
             <span>{{'User Creation' | translate}}</span>
           </a>
         </li>
-        <li class="nav-item" *ngxPermissionsOnly="['ORGANIZATIONAL: SYSTEM ADMINISTRATOR', 'PROJECT MANAGER', 'REPORTING MODULE']" (click)="toggleSidebar()" data-test-id="listItemReport">
+        <li class="nav-item" *ngxPermissionsOnly="['SYSTEM DEVELOPER','PROJECT MANAGER', 'DATA MANAGER']" (click)="toggleSidebar()" data-test-id="listItemReport">
           <a class="nav-item-link"  routerLink="/admin/reports" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }" data-test-id="linkReport">
             <img src="assets/svgs/report.svg" alt="">
             <span>{{'Reports' | translate}}</span>
           </a>
         </li>
-        <li class="nav-item" *ngxPermissionsOnly="['ORGANIZATIONAL: SYSTEM ADMINISTRATOR']" (click)="toggleSidebar()" data-test-id="listMonitoeingSheet">
+        <li class="nav-item" *ngxPermissionsOnly="['SYSTEM DEVELOPER','PROJECT MANAGER','DATA MANAGER']" (click)="toggleSidebar()" data-test-id="listMonitoeingSheet">
           <a class="nav-item-link"  routerLink="/admin/monitoring" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }" data-test-id="linkReport">
             <img src="assets/svgs/file.svg" alt="">
             <span>{{'Monitoring Sheet' | translate}}</span>
           </a>
         </li>
-        <li class="nav-item" *ngxPermissionsOnly="['ORGANIZATIONAL: SYSTEM ADMINISTRATOR']" (click)="toggleSidebar()" data-test-id="linkVideoLibrary">
+        <li class="nav-item" *ngxPermissionsOnly="['SYSTEM DEVELOPER','PROJECT MANAGER','DATA MANAGER']" (click)="toggleSidebar()" data-test-id="linkVideoLibrary">
           <a class="nav-item-link" routerLink="/admin/video-library" data-test-id="linkVideoLibrary">
             <img src="assets/svgs/video-library-icon.svg" alt="">
             <span>{{'Video Library' | translate}}</span>

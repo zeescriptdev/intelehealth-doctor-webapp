@@ -908,21 +908,30 @@ export class VisitSummaryComponent implements OnInit, OnDestroy {
   * @return {void}
   */
   startVisitNote() {
-    const json = {
-      patient: this.visit.patient.uuid,
-      encounterType: 'd7151f82-c1f3-4152-a605-2f9ea7414a79', // Visit Note encounter
-      encounterProviders: [
-        {
-          provider: this.provider.uuid,
-          encounterRole: '73bbb069-9781-4afc-a9d1-54b6b2270e03', // Doctor encounter role
-        },
-      ],
-      visit: this.visit.uuid,
-      encounterDatetime: new Date(Date.now() - 30000),
-    };
-    this.encounterService.postEncounter(json).subscribe((response) => {
-      if (response) {
-        this.getVisit(this.visit.uuid);
+    this.visitService.getVisitEncounters(this.route.snapshot.paramMap.get('id')).subscribe((visitDetails) => {
+      let visitNote = visitDetails.encounters.find((visit) => (visit.display.match("Visit Note") !== null));
+      if (visitNote) {
+        this.toastr.warning("Another doctor is viewing this case", 'Can\'t start the visit');
+      } else {
+        if (!this.visitNotePresent) {
+          const json = {
+            patient: this.visit.patient.uuid,
+            encounterType: 'd7151f82-c1f3-4152-a605-2f9ea7414a79', // Visit Note encounter
+            encounterProviders: [
+              {
+                provider: this.provider.uuid,
+                encounterRole: '73bbb069-9781-4afc-a9d1-54b6b2270e03', // Doctor encounter role
+              },
+            ],
+            visit: this.visit.uuid,
+            encounterDatetime: new Date(Date.now() - 30000),
+          };
+          this.encounterService.postEncounter(json).subscribe((response) => {
+            if (response) {
+              this.getVisit(this.visit.uuid);
+            }
+          });
+        }
       }
     });
   }
@@ -1524,17 +1533,21 @@ export class VisitSummaryComponent implements OnInit, OnDestroy {
     if (this.followUpForm.value.wantFollowUp === 'No') {
       body.value = 'No';
     } else {
-      if (this.followUpForm.invalid || !this.isVisitNoteProvider) {
+      if (this.followUpForm.invalid) {
         return;
       }
       body.value = (this.followUpForm.value.followUpReason) ?
         `${moment(this.followUpForm.value.followUpDate).format('YYYY-MM-DD')}, Time: ${this.followUpForm.value.followUpTime}, Remark: ${this.followUpForm.value.followUpReason}` : `${moment(this.followUpForm.value.followUpDate).format('YYYY-MM-DD')}, Time: ${this.followUpForm.value.followUpTime}`;
     }
-    this.encounterService.postObs(body).subscribe((res: ObsModel) => {
-      if (res) {
-        this.followUpForm.patchValue({ present: true, uuid: res.uuid });
-      }
-    });
+    if(this.isVisitNoteProvider) {
+      this.encounterService.postObs(body).subscribe((res: ObsModel) => {
+        if (res) {
+          this.followUpForm.patchValue({ present: true, uuid: res.uuid });
+        }
+      });
+    } else {
+      this.toastr.warning("Another doctor is viewing this case");
+    }
   }
 
   /**
@@ -1565,7 +1578,9 @@ export class VisitSummaryComponent implements OnInit, OnDestroy {
         if (this.isVisitNoteProvider) {
           if (this.provider.attributes.length) {
             if (navigator.onLine) {
-              if (!this.visitCompleted) {
+              this.visitService.getVisitEncounters(this.route.snapshot.paramMap.get('id')).subscribe((visitDetails) => {
+                let visitComplete = visitDetails.encounters.find((visit) => (visit.display.match("Visit Complete") !== null));
+                if (!visitComplete && this.isVisitNoteProvider) {
                 this.encounterService.postEncounter({
                   patient: this.visit.patient.uuid,
                   encounterType: 'bd1fbfaa-f5fb-4ebd-b75c-564506fc309e', // visit complete encounter type uuid
@@ -1619,15 +1634,9 @@ export class VisitSummaryComponent implements OnInit, OnDestroy {
                   });
                 });
               } else {
-                this.coreService.openSharePrescriptionSuccessModal().subscribe((result: string | boolean) => {
-                  if (result === 'view') {
-                    // Open visit summary modal here....
-                    this.coreService.openVisitPrescriptionModal({ uuid: this.visit.uuid });
-                  } else if (result === 'dashboard') {
-                    this.router.navigate(['/dashboard']);
-                  }
-                });
+                this.toastr.warning("Another doctor is viewing this case", 'Can\'t start the visit');
               }
+            });
             } else {
               this.coreService.openSharePrescriptionErrorModal({ msg: 'Unable to send prescription due to poor network connection. Please try again or come back later', confirmBtnText: 'Try again' }).subscribe((c: boolean) => {
                 if (c) {
