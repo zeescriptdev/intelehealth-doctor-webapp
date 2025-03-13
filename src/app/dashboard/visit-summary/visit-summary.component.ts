@@ -159,7 +159,7 @@ export class VisitSummaryComponent implements OnInit, OnDestroy, AfterViewInit {
   brandName = environment.brandName === 'KCDO';
   diagnosticList;
   sanitizedValue: SafeHtml;
-
+  changedFields: any;
   editFormValues: boolean = false;
   changesMade: boolean = false;
   isCallInProgress: boolean = false;
@@ -1862,6 +1862,7 @@ export class VisitSummaryComponent implements OnInit, OnDestroy, AfterViewInit {
       this.toastr.warning(this.translateService.instant('Follow-up not added'), this.translateService.instant('Follow-up Required'));
       return false;
     }
+    this.changedFields = [];
     this.saveAllObs().subscribe({
       next: (responses) => {
         //Open Share Prescription Confirmation Modal
@@ -2348,25 +2349,40 @@ export class VisitSummaryComponent implements OnInit, OnDestroy, AfterViewInit {
     }
   }
 
-  saveAllObs(changedFields: string[] = []): Observable<any>{
+  saveAllObs(): Observable<any> {
     const postObsRequests = [];
 
-    // Only push if the field is in changedFields array
-    if (changedFields.includes('hwInteraction') && this.updatedObsData.hwInteraction) postObsRequests.push(this.saveHWInteraction());
-    if (changedFields.includes('patientInteraction') && this.updatedObsData.patientInteraction) postObsRequests.push(this.savePatientInteraction());
-    if (changedFields.includes('additionalInstruction') && this.updatedObsData.additionalInstruction) postObsRequests.push(this.saveAdditionalInstruction());
-    if (changedFields.includes('test') && this.updatedObsData.test) postObsRequests.push(this.saveTest());
-    if (changedFields.includes('patientInteractionComment') && this.updatedObsData.patientInteractionComment) postObsRequests.push(this.savePatientInteractionComment());
-    if (this.appConfigService.patient_visit_summary?.dp_dignosis_secondary && changedFields.includes('diagnosisSecondary') && this.updatedObsData.diagnosisSecondary) postObsRequests.push(this.saveDiagnosisSecondary());
-    if (this.appConfigService.patient_visit_summary?.dp_discussion_summary && changedFields.includes('discussionSummary') && this.updatedObsData.discussionSummary) postObsRequests.push(this.saveDiscussionSummary());
-    if (this.appConfigService.patient_visit_summary?.dp_referral_secondary && changedFields.includes('referralSecondary') && this.updatedObsData.referralSecondary) postObsRequests.push(this.saveReferralSecondary());
-    if (this.isFeatureAvailable('follow-up-instruction') && changedFields.includes('followUpInstruction') && this.updatedObsData.followUpInstruction) postObsRequests.push(this.followUpInstructionComponentRef.addInstructions());
-    if (this.appConfigService?.patient_visit_summary?.dp_call_status && changedFields.includes('patientCallStatus') && this.updatedObsData.patientCallStatus) postObsRequests.push(this.saveCallStatus());
+    // If changedFields is empty, save all fields
+    if (!this.changedFields.length) {
+      // Basic observations
+      postObsRequests.push(
+        this.saveHWInteraction(),
+        this.savePatientInteraction(),
+        this.saveAdditionalInstruction(),
+        this.saveTest(),
+        this.savePatientInteractionComment()
+      );
 
-    // Medicines - only save new medicines
-    if (changedFields.includes('addMedicine')) {
+      // Conditional observations based on config
+      if (this.appConfigService.patient_visit_summary?.dp_dignosis_secondary) {
+        postObsRequests.push(this.saveDiagnosisSecondary());
+      }
+      if (this.appConfigService.patient_visit_summary?.dp_discussion_summary) {
+        postObsRequests.push(this.saveDiscussionSummary());
+      }
+      if (this.appConfigService.patient_visit_summary?.dp_referral_secondary) {
+        postObsRequests.push(this.saveReferralSecondary());
+      }
+      if (this.isFeatureAvailable('follow-up-instruction')) {
+        postObsRequests.push(this.followUpInstructionComponentRef.addInstructions());
+      }
+      if (this.appConfigService?.patient_visit_summary?.dp_call_status) {
+        postObsRequests.push(this.saveCallStatus());
+      }
+
+      // Handle medicines
       for (const medicine of this.medicines) {
-        if(medicine?.uuid) continue;
+        if (medicine?.uuid) continue;
         postObsRequests.push(
           this.encounterService.postObs({
             concept: conceptIds.conceptMed,
@@ -2374,16 +2390,148 @@ export class VisitSummaryComponent implements OnInit, OnDestroy, AfterViewInit {
             obsDatetime: new Date(),
             value: `${medicine.drug}:${medicine.strength}:${medicine.days}:${medicine.timing}:${medicine.remark ?? ''}:${medicine.frequency ?? ''}`,
             encounter: this.visitNotePresent.uuid
-          }).pipe(tap((res:ObsModel)=>medicine.uuid=res.uuid))
+          }).pipe(tap((res: ObsModel) => medicine.uuid = res.uuid))
         );
       }
-    }
 
-    // Advices - only save new advices
-    if (changedFields.includes('addAdvice')) {
+      // Handle advices
       for (const advice of this.advices) {
-        if(advice?.uuid) continue;
+        if (advice?.uuid) continue;
         postObsRequests.push(
+          this.encounterService.postObs({
+            concept: conceptIds.conceptAdvice,
+            person: this.visit.patient.uuid,
+            obsDatetime: new Date(),
+            value: advice.value,
+            encounter: this.visitNotePresent.uuid
+          }).pipe(tap((res: ObsModel) => advice.uuid = res.uuid))
+        );
+      }
+
+      // Handle diagnosis
+      if (!this.appConfigService.patient_visit_summary?.dp_dignosis_secondary) {
+        for (const diagnosis of this.existingDiagnosis) {
+          if (diagnosis?.uuid) continue;
+          postObsRequests.push(
+            this.encounterService.postObs({
+              concept: conceptIds.conceptDiagnosis,
+              person: this.visit.patient.uuid,
+              obsDatetime: new Date(),
+              value: `${this.diagnosisCode?.value ? this.diagnosisCode?.value : 'NA'}::${diagnosis.diagnosisName}:${diagnosis.diagnosisType} & ${diagnosis.diagnosisStatus}`,
+              encounter: this.visitNotePresent.uuid
+            }).pipe(tap((res: ObsModel) => diagnosis.uuid = res.uuid))
+          );
+          if (diagnosis?.isSnomed && isFeaturePresent("snomedCtDiagnosis")) {
+            postObsRequests.push(this.diagnosisService.addSnomedDiagnosis(diagnosis.diagnosisName, diagnosis.diagnosisCode));
+          }
+        }
+      }
+
+      // Handle referrals
+      if (!this.appConfigService.patient_visit_summary?.dp_referral_secondary) {
+        for (const referral of this.referrals) {
+          if (referral.uuid) continue;
+          postObsRequests.push(
+            this.encounterService.postObs({
+              concept: conceptIds.conceptReferral,
+              person: this.visit.patient.uuid,
+              obsDatetime: new Date(),
+              value: `${referral.speciality}:${referral.facility}:${referral.priority}:${referral?.reason}`,
+              encounter: this.visitNotePresent.uuid
+            }).pipe(tap((res: ObsModel) => referral.uuid = res.uuid))
+          );
+        }
+      }
+
+      // Handle notes
+      if (this.notesRef) {
+        for (const note of this.notesRef.notes) {
+          if (note.uuid) continue;
+          postObsRequests.push(
+            this.encounterService.postObs({
+              concept: conceptIds.conceptNote,
+              person: this.visit.patient.uuid,
+              obsDatetime: new Date(),
+              value: note.value,
+              encounter: this.visitNotePresent.uuid
+            }).pipe(tap((res: ObsModel) => note.uuid = res.uuid))
+          );
+        }
+      }
+
+      // Handle family history notes
+      if (this.familyHistoryNoteRef) {
+        for (const note of this.familyHistoryNoteRef.notes) {
+          if (note.uuid) continue;
+          postObsRequests.push(
+            this.encounterService.postObs({
+              concept: conceptIds.conceptFamilyHistoryNotes,
+              person: this.visit.patient.uuid,
+              obsDatetime: new Date(),
+              value: note.value,
+              encounter: this.visitNotePresent.uuid
+            }).pipe(tap((res: ObsModel) => note.uuid = res.uuid))
+          );
+        }
+      }
+
+      // Handle past medical history notes
+      if (this.pastMedicalHistoryNoteRef) {
+        for (const note of this.pastMedicalHistoryNoteRef.notes) {
+          if (note.uuid) continue;
+          postObsRequests.push(
+            this.encounterService.postObs({
+              concept: conceptIds.conceptPastMedicalHistoryNotes,
+              person: this.visit.patient.uuid,
+              obsDatetime: new Date(),
+              value: note.value,
+              encounter: this.visitNotePresent.uuid
+            }).pipe(tap((res: ObsModel) => note.uuid = res.uuid))
+          );
+        }
+      }
+    } else {
+      // If changedFields has values, only save those specific fields
+      const observationHandlers = {
+        hwInteraction: () => this.saveHWInteraction(),
+        patientInteraction: () => this.savePatientInteraction(),
+        additionalInstruction: () => this.saveAdditionalInstruction(),
+        test: () => this.saveTest(),
+        patientInteractionComment: () => this.savePatientInteractionComment(),
+        diagnosisSecondary: () => this.appConfigService.patient_visit_summary?.dp_dignosis_secondary ? this.saveDiagnosisSecondary() : of(null),
+        discussionSummary: () => this.appConfigService.patient_visit_summary?.dp_discussion_summary ? this.saveDiscussionSummary() : of(null),
+        referralSecondary: () => this.appConfigService.patient_visit_summary?.dp_referral_secondary ? this.saveReferralSecondary() : of(null),
+        followUpInstruction: () => this.isFeatureAvailable('follow-up-instruction') ? this.followUpInstructionComponentRef.addInstructions() : of(null),
+        patientCallStatus: () => this.appConfigService?.patient_visit_summary?.dp_call_status ? this.saveCallStatus() : of(null)
+      };
+
+      // Add handlers for specific fields
+      this.changedFields.forEach(field => {
+        if (observationHandlers[field]) {
+          postObsRequests.push(observationHandlers[field]());
+        }
+      });
+
+      // Handle medicines if addMedicine is in changedFields
+      if (this.changedFields.includes('addMedicine')) {
+        for (const medicine of this.medicines) {
+          if (medicine?.uuid) continue;
+          postObsRequests.push(
+            this.encounterService.postObs({
+              concept: conceptIds.conceptMed,
+              person: this.visit.patient.uuid,
+              obsDatetime: new Date(),
+              value: `${medicine.drug}:${medicine.strength}:${medicine.days}:${medicine.timing}:${medicine.remark ?? ''}:${medicine.frequency ?? ''}`,
+              encounter: this.visitNotePresent.uuid
+            }).pipe(tap((res: ObsModel) => medicine.uuid = res.uuid))
+          );
+        }
+      }
+      // Advices - only save new advices
+      if (this.changedFields.includes('addAdvice')) {
+        for (const advice of this.advices) {
+          if(advice?.uuid) continue;
+          postObsRequests.push(
           this.encounterService.postObs({
             concept: conceptIds.conceptAdvice,
             person: this.visit.patient.uuid,
@@ -2396,7 +2544,7 @@ export class VisitSummaryComponent implements OnInit, OnDestroy, AfterViewInit {
     }
 
     // Diagnosis - only save new diagnoses
-    if (changedFields.includes('diagnosis') && !this.appConfigService.patient_visit_summary?.dp_dignosis_secondary) {
+    if (this.changedFields.includes('diagnosis') && !this.appConfigService.patient_visit_summary?.dp_dignosis_secondary) {
       for (const diagnosis of this.existingDiagnosis) {
         if (diagnosis?.uuid) continue;
         postObsRequests.push(
@@ -2415,7 +2563,7 @@ export class VisitSummaryComponent implements OnInit, OnDestroy, AfterViewInit {
     }
 
     // Referrals - only save new referrals
-    if (changedFields.includes('addReferral') && !this.appConfigService.patient_visit_summary?.dp_referral_secondary) {
+    if (this.changedFields.includes('addReferral') && !this.appConfigService.patient_visit_summary?.dp_referral_secondary) {
       for (const referral of this.referrals) {
         if(referral.uuid) continue;
         postObsRequests.push(
@@ -2431,7 +2579,7 @@ export class VisitSummaryComponent implements OnInit, OnDestroy, AfterViewInit {
     }
 
     // Notes - only save new notes
-    if (changedFields.includes('notes') && this.notesRef) {
+    if (this.changedFields.includes('notes') && this.notesRef) {
       for (const note of this.notesRef.notes) {
         if(note.uuid) continue;
         postObsRequests.push(
@@ -2447,7 +2595,7 @@ export class VisitSummaryComponent implements OnInit, OnDestroy, AfterViewInit {
     }
 
     // Family History Notes - only save new notes
-    if (changedFields.includes('familyHistoryNote') && this.familyHistoryNoteRef) {
+    if (this.changedFields.includes('familyHistoryNote') && this.familyHistoryNoteRef) {
       for (const note of this.familyHistoryNoteRef.notes) {
         if(note.uuid) continue;
         postObsRequests.push(
@@ -2463,7 +2611,7 @@ export class VisitSummaryComponent implements OnInit, OnDestroy, AfterViewInit {
     }
 
     // Past Medical History Notes - only save new notes
-    if (changedFields.includes('pastMedicalHistoryNote') && this.pastMedicalHistoryNoteRef) {
+    if (this.changedFields.includes('pastMedicalHistoryNote') && this.pastMedicalHistoryNoteRef) {
       for (const note of this.pastMedicalHistoryNoteRef.notes) {
         if(note.uuid) continue;
         postObsRequests.push(
@@ -2477,20 +2625,23 @@ export class VisitSummaryComponent implements OnInit, OnDestroy, AfterViewInit {
         );
       }
     }
-    // Use forkJoin to wait for all requests to complete
-    return forkJoin(postObsRequests)
+    }
+
+    return postObsRequests.length > 0 ? forkJoin(postObsRequests) : of(null);
   }
 
   /**
    * Save all changes as draft
    */
+
+  
   saveAsDraft() {
     // Get all fields that have been changed
-    const changedFields = Object.keys(this.updatedObsData).filter(key => 
+    this.changedFields = Object.keys(this.updatedObsData).filter(key => 
       this.updatedObsData[key] !== this.obsData[key]
     );
 
-    this.saveAllObs(changedFields).subscribe({
+    this.saveAllObs().subscribe({
       next: (responses) => {        
         // Unsubscribe from all existing subscriptions
         this.unsubscribeFromFormTracking();
