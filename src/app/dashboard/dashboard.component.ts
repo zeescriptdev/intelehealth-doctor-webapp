@@ -594,6 +594,31 @@ export class DashboardComponent implements OnInit {
       if(!this.pvs.awaiting_visits_patient_type_demarcation){
         this.displayedColumns3 = this.displayedColumns3.filter(col=>(col!=='patient_type'));
       }
+
+      if(environment.brandName === 'NAS'){
+        this.pluginConfigObsAppointment.tableColumns = this.pluginConfigObsAppointment.tableColumns.filter(col=>col.key !== 'TMH_patient_id');
+        this.pluginConfigObsPriority.tableColumns = this.pluginConfigObsPriority.tableColumns.filter(col=>col.key !== 'TMH_patient_id');
+        this.pluginConfigObsAwaiting.tableColumns = this.pluginConfigObsAwaiting.tableColumns.filter(col=>col.key !== 'TMH_patient_id');
+        this.pluginConfigObsInProgress.tableColumns = this.pluginConfigObsInProgress.tableColumns.filter(col=>col.key !== 'TMH_patient_id');
+        this.pluginConfigObsCompleted.tableColumns = this.pluginConfigObsCompleted.tableColumns.filter(col=>col.key !== 'TMH_patient_id');
+        this.pluginConfigObsFollowUp.tableColumns = this.pluginConfigObsFollowUp.tableColumns.filter(col=>col.key !== 'TMH_patient_id');
+        
+        const patientIdColumn = {
+          label: "Patient ID",
+          key: "patient_id",
+          formatHtml: (element)=> `<span>${element?.patient?.identifier ? element?.patient?.identifier : ''}</span>`,
+        };
+        
+        this.pluginConfigObsAppointment.tableColumns.unshift({
+          ...patientIdColumn,
+          formatHtml: (element)=> `<span>${element?.openMrsId ? element?.openMrsId : ''}</span>`
+        });
+        this.pluginConfigObsPriority.tableColumns.unshift(patientIdColumn);
+        this.pluginConfigObsAwaiting.tableColumns.unshift(patientIdColumn);
+        this.pluginConfigObsInProgress.tableColumns.unshift(patientIdColumn);
+        this.pluginConfigObsCompleted.tableColumns.unshift(patientIdColumn);
+        this.pluginConfigObsFollowUp.tableColumns.unshift(patientIdColumn);
+      }
     }
 
   createFilteredDateRangeForm(): FormGroup {

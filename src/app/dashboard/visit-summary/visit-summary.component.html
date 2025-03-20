@@ -1738,15 +1738,21 @@
                     [formGroup]="testForm"
                   >
                     <div class="form-group">
-                      <textarea
-                        formControlName="test"
-                        class="form-control"
-                        rows="3"
-                        placeholder="{{'Type here'|translate}}"
-                        data-test-id="etAI"
-                        (keyup)="autoGrowTextZone($event)"
-                        [attr.disabled]="(isMCCUser || !isVisitNoteProvider || visitEnded)? 'disabled' : null"
-                      ></textarea>
+                      <ng-container *ngIf="isFeatureAvailable('investigationsDropdown'); else investigationsTxtArea">
+                        <input type="text" class="form-control" formControlName="test" placeholder="{{'Type here'|translate}}"
+                          [ngbTypeahead]="search2" data-test-id="etTest" />
+                      </ng-container>
+                      <ng-template #investigationsTxtArea>
+                        <textarea
+                          formControlName="test"
+                          class="form-control"
+                          rows="3"
+                          placeholder="{{'Type here'|translate}}"
+                          data-test-id="etAI"
+                          (keyup)="autoGrowTextZone($event)"
+                          [attr.disabled]="(isMCCUser || !isVisitNoteProvider || visitEnded)? 'disabled' : null"
+                        ></textarea>
+                      </ng-template>
                     </div>
                   </form>
                 </mat-expansion-panel>

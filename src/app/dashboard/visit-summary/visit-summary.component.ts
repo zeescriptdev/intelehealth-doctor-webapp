@@ -1628,8 +1628,7 @@ export class VisitSummaryComponent implements OnInit, OnDestroy, AfterViewInit {
   * @returns {void}
   */
   getTestsList(): void {
-    const testUuid = '98c5881f-b214-4597-83d4-509666e9a7c9';
-    this.diagnosisService.concept(testUuid).subscribe(res => {
+    this.diagnosisService.concept(conceptIds.conceptInvestigationsTest).subscribe(res => {
       const result = res.answers;
       result.forEach((ans: { display: string; }) => {
         this.testsList.push(this.translationService.getDropdownTranslation('tests', ans.display));

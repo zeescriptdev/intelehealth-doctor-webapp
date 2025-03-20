@@ -233,6 +233,7 @@ export const conceptIds = {
   conceptMed : 'c38c0c50-2fd2-4ae3-b7ba-7dd25adca4ca',
   conceptAdvice : '67a050c1-35e5-451c-a4ab-fff9d57b0db1',
   conceptTest : '23601d71-50e6-483f-968d-aeef3031346d',
+  conceptInvestigationsTest: '98c5881f-b214-4597-83d4-509666e9a7c9',
   conceptReferral : '605b6f15-8f7a-4c45-b06d-14165f6974be',
   conceptFollow : 'e8caffd6-5d22-41c4-8d6a-bc31a44d0c86',
   conceptDDx : 'bc48889e-b461-4e5e-98d1-31eb9dd6160e',
