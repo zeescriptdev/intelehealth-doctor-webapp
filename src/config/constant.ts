@@ -241,7 +241,8 @@ export const conceptIds = {
   conceptPastMedicalHistoryNotes: 'dc27d56c-f970-4eaa-88d0-46d55c2ab24c',
   conceptFamilyHistoryNotes: '675bafa3-2d9b-4cd1-9d38-55a2f47a69a5',
   conceptFollowUpInstruction: 'e444b5e9-e3b9-4cb1-92ee-29bba00b33d0',
-  conceptDiscussionSummary: 'b673cd54-a01d-4d8a-9c07-8fb19bf4982c'
+  conceptDiscussionSummary: 'b673cd54-a01d-4d8a-9c07-8fb19bf4982c',
+  conceptFrequencyList: '9847b24f-8434-4ade-8978-157184c435d2',
 }
 
 export const WEBRTC = {

@@ -545,6 +545,8 @@ export class VisitSummaryComponent implements OnInit, OnDestroy, AfterViewInit {
               this.checkIfPatientCallDurationPresent(visit.attributes)
               this.checkIfCallStatusPresent(visit.attributes)
               this.checkIfDiscussionSummaryPresent()
+
+              if(isFeaturePresent('medicationFrequencyList')) this.getFrequencyList();
             }
             if (this.patientVisitSummary.notes_section) {
               this.getAdditionalNote(visit.attributes);
@@ -1553,10 +1555,24 @@ export class VisitSummaryComponent implements OnInit, OnDestroy, AfterViewInit {
     this.diagnosisService.concept(adviceUuid).subscribe(res => {
       const result = res.answers;
       result.forEach((ans: { display: string; }) => {
-        this.advicesList.push(this.translationService.getDropdownTranslation('advice', ans.display));
+        this.advicesList.push(ans.display);
       });
     });
   }
+
+    /**
+    * Get frequency list
+    * @returns {void}
+    */
+    getFrequencyList(): void {
+      this.diagnosisService.concept(conceptIds.conceptFrequencyList).subscribe(res => {
+        const result = res.answers;
+        this.frequencyList = [];
+        result.forEach((ans: { display: string; }) => {
+          this.frequencyList.push(ans.display);
+        });
+      });
+    }
 
   /**
   * Toggle advice add form, show/hide add more advice button
