@@ -1021,7 +1021,7 @@ export class ViewVisitPrescriptionComponent implements OnInit, OnDestroy {
       return true;
     });
     console.log(pdfObj)
-    pdfMake.createPdf(pdfObj).download('e-prescription');
+    pdfMake.createPdf(pdfObj).download(`e-prescription_${this.openMrsId || Date.now()}`);
   }
 
   /**
@@ -1766,5 +1766,9 @@ export class ViewVisitPrescriptionComponent implements OnInit, OnDestroy {
         ''
       ]
     ]
+  }
+
+  get openMrsId() {
+    return this.getPatientIdentifier('OpenMRS ID');
   }
 }

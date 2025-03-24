@@ -233,6 +233,7 @@ export const conceptIds = {
   conceptMed : 'c38c0c50-2fd2-4ae3-b7ba-7dd25adca4ca',
   conceptAdvice : '67a050c1-35e5-451c-a4ab-fff9d57b0db1',
   conceptTest : '23601d71-50e6-483f-968d-aeef3031346d',
+  conceptInvestigationsTest: '98c5881f-b214-4597-83d4-509666e9a7c9',
   conceptReferral : '605b6f15-8f7a-4c45-b06d-14165f6974be',
   conceptFollow : 'e8caffd6-5d22-41c4-8d6a-bc31a44d0c86',
   conceptDDx : 'bc48889e-b461-4e5e-98d1-31eb9dd6160e',
@@ -240,7 +241,8 @@ export const conceptIds = {
   conceptPastMedicalHistoryNotes: 'dc27d56c-f970-4eaa-88d0-46d55c2ab24c',
   conceptFamilyHistoryNotes: '675bafa3-2d9b-4cd1-9d38-55a2f47a69a5',
   conceptFollowUpInstruction: 'e444b5e9-e3b9-4cb1-92ee-29bba00b33d0',
-  conceptDiscussionSummary: 'b673cd54-a01d-4d8a-9c07-8fb19bf4982c'
+  conceptDiscussionSummary: 'b673cd54-a01d-4d8a-9c07-8fb19bf4982c',
+  conceptFrequencyList: '9847b24f-8434-4ade-8978-157184c435d2',
 }
 
 export const WEBRTC = {

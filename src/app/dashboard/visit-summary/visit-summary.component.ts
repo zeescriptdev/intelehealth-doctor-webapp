@@ -453,6 +453,8 @@ export class VisitSummaryComponent implements OnInit, OnDestroy, AfterViewInit {
               this.checkIfPatientCallDurationPresent(visit.attributes)
               this.checkIfCallStatusPresent(visit.attributes)
               this.checkIfDiscussionSummaryPresent()
+
+              if(isFeaturePresent('medicationFrequencyList')) this.getFrequencyList();
             }
             if (this.patientVisitSummary.notes_section) {
               this.getAdditionalNote(visit.attributes);
@@ -1453,10 +1455,24 @@ export class VisitSummaryComponent implements OnInit, OnDestroy, AfterViewInit {
     this.diagnosisService.concept(adviceUuid).subscribe(res => {
       const result = res.answers;
       result.forEach((ans: { display: string; }) => {
-        this.advicesList.push(this.translationService.getDropdownTranslation('advice', ans.display));
+        this.advicesList.push(ans.display);
       });
     });
   }
+
+    /**
+    * Get frequency list
+    * @returns {void}
+    */
+    getFrequencyList(): void {
+      this.diagnosisService.concept(conceptIds.conceptFrequencyList).subscribe(res => {
+        const result = res.answers;
+        this.frequencyList = [];
+        result.forEach((ans: { display: string; }) => {
+          this.frequencyList.push(ans.display);
+        });
+      });
+    }
 
   /**
   * Toggle advice add form, show/hide add more advice button
@@ -1528,8 +1544,7 @@ export class VisitSummaryComponent implements OnInit, OnDestroy, AfterViewInit {
   * @returns {void}
   */
   getTestsList(): void {
-    const testUuid = '98c5881f-b214-4597-83d4-509666e9a7c9';
-    this.diagnosisService.concept(testUuid).subscribe(res => {
+    this.diagnosisService.concept(conceptIds.conceptInvestigationsTest).subscribe(res => {
       const result = res.answers;
       result.forEach((ans: { display: string; }) => {
         this.testsList.push(this.translationService.getDropdownTranslation('tests', ans.display));
