@@ -599,7 +599,8 @@ table {
 .ddx-table {
   width: fit-content;
 
-  th, td {
+  th,
+  td {
     padding: 0.2rem 0.5rem;
   }
 }
@@ -745,6 +746,14 @@ th.mat-header-cell:last-child {
   }
 }
 
+.desktop {
+  display: table;
+}
+
+.mobile-list {
+  display: none;
+}
+
 @media (max-width: 768px) {
 
   ::ng-deep .visit-summary-tab-group.mat-tab-group {
@@ -760,12 +769,13 @@ th.mat-header-cell:last-child {
 
   .intel-card {
     margin-bottom: 25px;
+
     .card-body {
       padding: 10px !important;
     }
   }
 
-  .patient-info-wrapper{
+  .patient-info-wrapper {
     margin: 0 !important;
   }
 
@@ -784,7 +794,7 @@ th.mat-header-cell:last-child {
     align-items: flex-start;
   }
 
-  .intel-accordion-title{
+  .intel-accordion-title {
     flex-wrap: nowrap !important;
   }
 
@@ -834,6 +844,14 @@ th.mat-header-cell:last-child {
   .cheif-complaint-wrapper {
     padding: 5px 0px 0px !important;
   }
+
+  .desktop {
+    display: none;
+  }
+
+  .mobile-list {
+    display: block;
+  }
 }
 
 .webrtc-controls {
@@ -859,7 +877,7 @@ th.mat-header-cell:last-child {
   max-width: 100%;
 }
 
-.btn{
+.btn {
   position: absolute;
   right: 30px;
   top: 60px;
@@ -870,7 +888,7 @@ th.mat-header-cell:last-child {
 }
 
 
-.rows{
+.rows {
   display: flex;
   flex-wrap: wrap;
 }
