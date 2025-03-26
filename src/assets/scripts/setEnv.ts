@@ -73,7 +73,7 @@ const environmentFileContent = `
     externalPrescriptionCred: '${process.env.EXTERNAL_PRESCRIPTION_CRED}',
     vapidPublicKey: '${process.env.VAPID_PUBLIC_KEY}',
     authGatwayURL: '${process.env.AUTH_GATE_WAY_URL}',
-    showCaptcha: ${showCaptcha},
+    showCaptcha: false,
     recordsPerPage: 100
   };
 `;
