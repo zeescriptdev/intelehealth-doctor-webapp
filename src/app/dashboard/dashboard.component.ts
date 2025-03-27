@@ -543,6 +543,12 @@ export class DashboardComponent implements OnInit {
   isFilterApplied2 = false;
   isFilterApplied3 = false;
   isFilterApplied4 = false;
+
+  currentAppointmentFilter : string = "today";
+  todayAppointmentFilterCount : number = 0;
+  upcomingAppointmentVisitsCount : number = 0;
+  pendingAppointmentVisitsCount : number = 0;
+  brandName: string = "";
   
   @ViewChild(MatMenuTrigger) menuTrigger: MatMenuTrigger;
 
@@ -619,6 +625,35 @@ export class DashboardComponent implements OnInit {
         this.pluginConfigObsCompleted.tableColumns.unshift(patientIdColumn);
         this.pluginConfigObsFollowUp.tableColumns.unshift(patientIdColumn);
       }
+
+      if(environment.brandName === 'KCDO'){
+        this.pluginConfigObsAppointment.tableColumns = this.pluginConfigObsAppointment.tableColumns.filter(col=>!['age','telephone','starts_in'].includes(col.key));
+        this.pluginConfigObsAppointment.pageSizeOptions = [10];
+        this.pluginConfigObsAppointment.filter = {
+          fromDate: moment().format('DD/MM/YYYY'),
+          toDate: moment().format('DD/MM/YYYY'),
+          pending_visits: false
+        }
+        
+        this.pluginConfigObsAppointment.tableColumns.splice(2, 0, {
+          label: "Type of Case",
+          key: "type_of_case",
+          formatHtml: (element:any) => {
+            return this.findTypeOfCase(element);
+          }
+        });
+
+        this.pluginConfigObsAppointment.tableColumns.splice(3, 0, {
+          label: "Time",
+          key: "starts_in",
+          formatHtml: (element:any) => {
+            return element.slotTime;
+          }
+        });
+        this.pluginConfigObsAppointment.tableHeader = "Today's Appointment"
+      }
+
+      this.brandName = environment.brandName;
     }
 
   createFilteredDateRangeForm(): FormGroup {
@@ -638,6 +673,9 @@ export class DashboardComponent implements OnInit {
         this.specialization = this.getSpecialization(provider.attributes);
       } else {
         this.router.navigate(['/dashboard/get-started']);
+      }
+      if(environment.brandName === 'KCDO'){
+        this.getAppointmentCount()
       }
       // if (this.pvs.appointment_button) {
       //   this.getAppointments();
@@ -1499,6 +1537,7 @@ export class DashboardComponent implements OnInit {
     switch (visitsCountDate.tableTagName) {
       case "Appointment":
         this.appointmentVisitsCount = visitsCountDate.visitsCount;
+        if(environment.brandName === "KCDO") this.setAppointmentCount()
         break;
       case "Awaiting":
         this.awaitingVisitsCount = visitsCountDate.visitsCount;
@@ -1519,6 +1558,133 @@ export class DashboardComponent implements OnInit {
         console.warn(`Unrecognized tableTagName: ${visitsCountDate.tableTagName}`);
         break;
     }
+  }
+
+  changeAppointmentFilter(filterType: string){
+    if(this.currentAppointmentFilter !== filterType){
+      let tableCols = this.pluginConfigObsAppointment.tableColumns.filter(col=>!["starts_in","reason","type_of_case"].includes(col.key));
+      tableCols.splice(2, 0, {
+        label: (filterType === 'today' ? "Time" : "Time/Day"),
+        key: "starts_in",
+        formatHtml: (element:any) => {
+          return filterType === 'today' ? element.slotTime : element.slotTime+" "+element.slotDay;
+        }
+      });
+      this.currentAppointmentFilter = filterType;
+      switch (filterType) {
+        case "today":
+          tableCols.splice(2, 0, {
+            label: "Type of Case",
+            key: "type_of_case",
+            formatHtml: (element:any) => {
+              return this.findTypeOfCase(element);
+            }
+          });
+          this.pluginConfigObsAppointment = {...this.pluginConfigObsAppointment, filter:{
+            fromDate: moment().format('DD/MM/YYYY'),
+            toDate: moment().format('DD/MM/YYYY'),
+            pending_visits: false
+          }, tableHeader: "Today's Appointments", tableColumns: tableCols } 
+          break;
+          
+        case "upcoming":
+          tableCols.splice(2, 0, {
+            label: "Type of Case",
+            key: "type_of_case",
+            formatHtml: (element:any) => {
+              return this.findTypeOfCase(element);
+            }
+          });
+          this.pluginConfigObsAppointment = {...this.pluginConfigObsAppointment, filter: {
+            fromDate: moment().startOf('year').format('DD/MM/YYYY'),
+            toDate: moment().endOf('year').format('DD/MM/YYYY'),
+            pending_visits: false
+          }, tableHeader: "Upcoming Appointments", tableColumns: tableCols}
+          break;
+          
+        case "pending":
+          tableCols.splice(2,0,{
+            label: "Reason",
+            key: "reason",
+            formatHtml: (element:any) => {
+              try {
+                let callStatus = element.visit?.attributes?.find(attr=>attr.attribute_type.name=="Call Status");
+                if(callStatus && callStatus.value){
+                  return JSON.parse(callStatus.value)?.reason
+                }
+                return "";
+              } catch (error) {
+                return "";
+              }
+            }
+          })
+          this.pluginConfigObsAppointment = {...this.pluginConfigObsAppointment, filter:{
+            fromDate: moment().startOf('year').format('DD/MM/YYYY'),
+            toDate: moment().endOf('year').format('DD/MM/YYYY'),
+            pending_visits: true
+          }, tableHeader: "Pending Visits", tableColumns:tableCols}
+          break;
+      
+        default:
+          break;
+      }
+    }
+  }
+
+  getAppointmentCount(){
+    this.appointmentService.getUserSlots(
+      getCacheData(true, doctorDetails.USER).uuid,
+      moment().startOf('year').format('DD/MM/YYYY'), 
+      moment().endOf('year').format('DD/MM/YYYY'),
+      this.isMCCUser ? this.specialization : null, false)
+    .subscribe((res: ApiResponseModel)=>{
+      if(res && res.data)
+        this.upcomingAppointmentVisitsCount = res.data.length
+    })
+
+    this.appointmentService.getUserSlots(
+      getCacheData(true, doctorDetails.USER).uuid,
+      moment().startOf('year').format('DD/MM/YYYY'), 
+      moment().endOf('year').format('DD/MM/YYYY'),
+      this.isMCCUser ? this.specialization : null,
+      true)
+    .subscribe((res: ApiResponseModel)=>{
+      if(res && res.data)
+        this.pendingAppointmentVisitsCount = res.data.length
+    })
+  }
+
+  setAppointmentCount(){
+    switch (this.currentAppointmentFilter) {
+      case "today":
+        this.todayAppointmentFilterCount = this.appointmentVisitsCount
+        break;
+      
+      case "upcoming":
+        this.upcomingAppointmentVisitsCount = this.appointmentVisitsCount
+        break;
+      
+      case "pending":
+        this.pendingAppointmentVisitsCount = this.appointmentVisitsCount
+        break;
+    
+      default:
+        break;
+    }
+  }
+
+  findTypeOfCase(element){
+    let encounter = element.visit.encounters.find(enc=>enc.type.name === "ADULTINITIAL")
+    if(encounter){
+      let caseSummary = encounter.obs.find(obs=>obs.value_text.includes("<b>Case Summary</b>"))
+      if(caseSummary){
+        let arrMatches = caseSummary.value_text.match("(?<=• Type of Case - )([A-Za-z ]*)")
+        if(arrMatches && arrMatches.length > 0){
+          return arrMatches[0]
+        }
+      }
+    }
+    return "";
   }
 
 }
