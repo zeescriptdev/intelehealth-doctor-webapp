@@ -1639,7 +1639,7 @@ export class DashboardComponent implements OnInit {
       this.isMCCUser ? this.specialization : null, false)
     .subscribe((res: ApiResponseModel)=>{
       if(res && res.data)
-        this.upcomingAppointmentVisitsCount = res.data.length
+        this.upcomingAppointmentVisitsCount = res.data.filter(obj=>(obj.visit && obj.status == 'booked' && (obj.visitStatus == 'Awaiting Consult'||obj.visitStatus == 'Visit In Progress'))).length
     })
 
     this.appointmentService.getUserSlots(
@@ -1650,7 +1650,7 @@ export class DashboardComponent implements OnInit {
       true)
     .subscribe((res: ApiResponseModel)=>{
       if(res && res.data)
-        this.pendingAppointmentVisitsCount = res.data.length
+        this.pendingAppointmentVisitsCount = res.data.filter(obj=>(obj.visit && obj.status == 'booked' && (obj.visitStatus == 'Awaiting Consult'||obj.visitStatus == 'Visit In Progress'))).length
     })
   }
 
@@ -1676,9 +1676,9 @@ export class DashboardComponent implements OnInit {
   findTypeOfCase(element){
     let encounter = element.visit.encounters.find(enc=>enc.type.name === "ADULTINITIAL")
     if(encounter){
-      let caseSummary = encounter.obs.find(obs=>obs.value_text.includes("<b>Case Summary</b>"))
+      let caseSummary = encounter.obs.find(obs=>obs.value_text?.includes("<b>Case Summary</b>"))
       if(caseSummary){
-        let arrMatches = caseSummary.value_text.match("(?<=• Type of Case - )([A-Za-z ]*)")
+        let arrMatches = caseSummary.value_text?.match("(?<=• Type of Case - )([A-Za-z ]*)")
         if(arrMatches && arrMatches.length > 0){
           return arrMatches[0]
         }
