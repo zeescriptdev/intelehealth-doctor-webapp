@@ -55,7 +55,7 @@
       </div>
     </div>
     <div id="todaysAppointment" class="col p-1" (click)="scrollToPanel('anchor-appointment');changeAppointmentFilter('today')" *ngIf="brandName === 'KCDO'">
-      <div class="chip-item chip-today-apt chip-item-blue" [ngClass]="{'active-card' : currentAppointmentFilter == 'today'}" title="{{'Appointments' | translate}}">
+      <div class="chip-item chip-today-apt chip-item-blue" [ngClass]="{'active-card' : currentAppointmentFilter == 'today'}" title="{{'Today\'s Appointments' | translate}}">
         <div class="chip-info">
           <h6>{{todayAppointmentFilterCount}}</h6>
           <span class="chip-info-apt">{{'Today\'s Appointments' | translate}}</span><br/><br/>
@@ -63,7 +63,7 @@
       </div>
     </div>
     <div id="upcomingAppointment" class="col p-1" (click)="scrollToPanel('anchor-appointment');changeAppointmentFilter('upcoming')" *ngIf="brandName === 'KCDO'">
-      <div class="chip-item chip-upcoming-apt" [ngClass]="{'active-card' : currentAppointmentFilter == 'upcoming'}" title="{{'Appointments' | translate}}">
+      <div class="chip-item chip-upcoming-apt" [ngClass]="{'active-card' : currentAppointmentFilter == 'upcoming'}" title="{{'Upcoming Appointments' | translate}}">
         <div class="chip-info">
           <h6>{{upcomingAppointmentVisitsCount}}</h6>
           <span class="chip-info-apt">{{'Upcoming Appointments' | translate}}</span><br/>
@@ -72,7 +72,7 @@
       </div>
     </div>
     <div id="pendingVisits" class="col p-1" (click)="scrollToPanel('anchor-appointment');changeAppointmentFilter('pending')" *ngIf="brandName === 'KCDO'">
-      <div class="chip-item chip-pending-apt" [ngClass]="{'active-card' : currentAppointmentFilter == 'pending'}" title="{{'Appointments' | translate}}">
+      <div class="chip-item chip-pending-apt" [ngClass]="{'active-card' : currentAppointmentFilter == 'pending'}" title="{{'Pending Visits' | translate}}">
         <div class="chip-info">
           <h6>{{pendingAppointmentVisitsCount}}</h6>
           <span class="chip-info-apt">{{'Pending Visits' | translate}}</span><br/><br/>

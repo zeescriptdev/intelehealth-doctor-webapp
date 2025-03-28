@@ -321,14 +321,14 @@ export class DashboardComponent implements OnInit {
     },
     tableColumns: [
       {
-        label:"TMH Patient ID",
+        label:"Patient ID",
         key: "TMH_patient_id",
         // formatHtml: (element)=> {
         //   return `<span>${element?.TMH_patient_id?.value ? element?.TMH_patient_id?.value : ''}</span>`
         // },
       },
       {
-        label: "Patient",
+        label: "Name",
         key: "patient_name",
         formatHtml: (element)=> { 
           return `
@@ -647,7 +647,7 @@ export class DashboardComponent implements OnInit {
           label: "Time",
           key: "starts_in",
           formatHtml: (element:any) => {
-            return element.slotTime;
+            return moment(element.slotJsDate).format("hh:mm A");
           }
         });
         this.pluginConfigObsAppointment.tableHeader = "Today's Appointment"
@@ -1564,10 +1564,10 @@ export class DashboardComponent implements OnInit {
     if(this.currentAppointmentFilter !== filterType){
       let tableCols = this.pluginConfigObsAppointment.tableColumns.filter(col=>!["starts_in","reason","type_of_case"].includes(col.key));
       tableCols.splice(2, 0, {
-        label: (filterType === 'today' ? "Time" : "Time/Day"),
+        label: (filterType === 'today' ? "Time" : "Date & Time"),
         key: "starts_in",
         formatHtml: (element:any) => {
-          return filterType === 'today' ? element.slotTime : element.slotTime+" "+element.slotDay;
+          return filterType === 'today' ? moment(element.slotJsDate).format("hh:mm A") : moment(element.slotJsDate).format("DD/MM/YYYY hh:mm A");
         }
       });
       this.currentAppointmentFilter = filterType;
@@ -1596,8 +1596,8 @@ export class DashboardComponent implements OnInit {
             }
           });
           this.pluginConfigObsAppointment = {...this.pluginConfigObsAppointment, filter: {
-            fromDate: moment().startOf('year').format('DD/MM/YYYY'),
-            toDate: moment().endOf('year').format('DD/MM/YYYY'),
+            fromDate: moment().add("1", "day").format('DD/MM/YYYY'),
+            toDate: moment().add("1", "year").format('DD/MM/YYYY'),
             pending_visits: false
           }, tableHeader: "Upcoming Appointments", tableColumns: tableCols}
           break;
@@ -1619,8 +1619,8 @@ export class DashboardComponent implements OnInit {
             }
           })
           this.pluginConfigObsAppointment = {...this.pluginConfigObsAppointment, filter:{
-            fromDate: moment().startOf('year').format('DD/MM/YYYY'),
-            toDate: moment().endOf('year').format('DD/MM/YYYY'),
+            fromDate: moment().add("-1", "year").format('DD/MM/YYYY'),
+            toDate: moment().add("1", "year").format('DD/MM/YYYY'),
             pending_visits: true
           }, tableHeader: "Pending Visits", tableColumns:tableCols}
           break;
@@ -1634,8 +1634,8 @@ export class DashboardComponent implements OnInit {
   getAppointmentCount(){
     this.appointmentService.getUserSlots(
       getCacheData(true, doctorDetails.USER).uuid,
-      moment().startOf('year').format('DD/MM/YYYY'), 
-      moment().endOf('year').format('DD/MM/YYYY'),
+      moment().add("1", "day").format('DD/MM/YYYY'),
+      moment().add("1", "year").format('DD/MM/YYYY'),
       this.isMCCUser ? this.specialization : null, false)
     .subscribe((res: ApiResponseModel)=>{
       if(res && res.data)
@@ -1644,8 +1644,8 @@ export class DashboardComponent implements OnInit {
 
     this.appointmentService.getUserSlots(
       getCacheData(true, doctorDetails.USER).uuid,
-      moment().startOf('year').format('DD/MM/YYYY'), 
-      moment().endOf('year').format('DD/MM/YYYY'),
+      moment().add("-1", "year").format('DD/MM/YYYY'),
+      moment().add("1", "year").format('DD/MM/YYYY'),
       this.isMCCUser ? this.specialization : null,
       true)
     .subscribe((res: ApiResponseModel)=>{
