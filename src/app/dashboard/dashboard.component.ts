@@ -645,7 +645,7 @@ export class DashboardComponent implements OnInit {
 
         this.pluginConfigObsAppointment.tableColumns.splice(3, 0, {
           label: "Time",
-          key: "starts_in",
+          key: "time",
           formatHtml: (element:any) => {
             return moment(element.slotJsDate).format("hh:mm A");
           }
@@ -1562,10 +1562,10 @@ export class DashboardComponent implements OnInit {
 
   changeAppointmentFilter(filterType: string){
     if(this.currentAppointmentFilter !== filterType){
-      let tableCols = this.pluginConfigObsAppointment.tableColumns.filter(col=>!["starts_in","reason","type_of_case"].includes(col.key));
+      let tableCols = this.pluginConfigObsAppointment.tableColumns.filter(col=>!["time","date_time","starts_in","reason","type_of_case"].includes(col.key));
       tableCols.splice(2, 0, {
         label: (filterType === 'today' ? "Time" : "Date & Time"),
-        key: "starts_in",
+        key: (filterType === 'today' ? "time" : "date_time"),
         formatHtml: (element:any) => {
           return filterType === 'today' ? moment(element.slotJsDate).format("hh:mm A") : moment(element.slotJsDate).format("DD/MM/YYYY hh:mm A");
         }
@@ -1584,7 +1584,7 @@ export class DashboardComponent implements OnInit {
             fromDate: moment().format('DD/MM/YYYY'),
             toDate: moment().format('DD/MM/YYYY'),
             pending_visits: false
-          }, tableHeader: "Today's Appointments", tableColumns: tableCols } 
+          }, tableHeader: "Today's Appointments", tableColumns: tableCols, noRecordFound: "No any appointments scheduled." } 
           break;
           
         case "upcoming":
@@ -1599,7 +1599,7 @@ export class DashboardComponent implements OnInit {
             fromDate: moment().add("1", "day").format('DD/MM/YYYY'),
             toDate: moment().add("1", "year").format('DD/MM/YYYY'),
             pending_visits: false
-          }, tableHeader: "Upcoming Appointments", tableColumns: tableCols}
+          }, tableHeader: "Upcoming Appointments", tableColumns: tableCols, noRecordFound: "No any appointments scheduled."}
           break;
           
         case "pending":
@@ -1622,7 +1622,7 @@ export class DashboardComponent implements OnInit {
             fromDate: moment().add("-1", "year").format('DD/MM/YYYY'),
             toDate: moment().add("1", "year").format('DD/MM/YYYY'),
             pending_visits: true
-          }, tableHeader: "Pending Visits", tableColumns:tableCols}
+          }, tableHeader: "Pending Visits", tableColumns:tableCols, noRecordFound: "There are no pending visits"}
           break;
       
         default:
