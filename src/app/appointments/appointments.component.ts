@@ -12,6 +12,7 @@ import { TranslateService } from '@ngx-translate/core';
 import { getCacheData, checkIfDateOldThanOneDay} from '../utils/utility-functions';
 import { doctorDetails, languages, visitTypes } from 'src/config/constant';
 import { ApiResponseModel, AppointmentModel, CustomEncounterModel, CustomObsModel, CustomVisitModel, RescheduleAppointmentModalResponseModel } from '../model/model';
+import { MatSort } from '@angular/material/sort';
 
 @Component({
   selector: 'app-appointments',
@@ -22,7 +23,7 @@ export class AppointmentsComponent implements OnInit {
 
   items = ["Appointments"];
   expandedIndex = 0;
-  displayedColumns: string[] = ['name', 'age', 'starts_in', 'location', 'cheif_complaint', 'actions'];
+  displayedColumns: string[] = ['patientName', 'patientAge', 'starts_in', 'location', 'cheif_complaint', 'actions'];
   dataSource = new MatTableDataSource<any>();
   baseUrl: string = environment.baseURL;
   isLoaded: boolean = false;
@@ -30,6 +31,7 @@ export class AppointmentsComponent implements OnInit {
 
   @ViewChild(MatPaginator) paginator: MatPaginator;
   @ViewChild('searchInput', { static: true }) searchElement: ElementRef;
+  @ViewChild('appointmentMatSort', {static:true}) appointmentMatSort: MatSort;
 
   ngAfterViewInit() {
     this.dataSource.paginator = this.paginator;
@@ -63,13 +65,20 @@ export class AppointmentsComponent implements OnInit {
             if (appointment.visit) {
               appointment.cheif_complaint = this.getCheifComplaint(appointment.visit);
               appointment.starts_in = checkIfDateOldThanOneDay(appointment.slotJsDate);
+              appointment.location = appointment?.visit?.location.name;
               this.appointments.push(appointment);
             }
           }
         });
         this.dataSource.data = [...this.appointments];
         this.dataSource.paginator = this.paginator;
-        this.dataSource.filterPredicate = (data, filter: string) => data?.openMrsId.toLowerCase().indexOf(filter) != -1 || data?.patientName.toLowerCase().indexOf(filter) != -1;
+        this.dataSource.sort = this.appointmentMatSort;
+        this.dataSource.filterPredicate = (data, filter: string) => 
+        //data?.openMrsId.toLowerCase().indexOf(filter) != -1 ||
+         data?.patientName.toLowerCase().indexOf(filter) != -1 ||
+         data?.location.toLowerCase().indexOf(filter) != -1 ||
+         // data?.age.toLowerCase().indexOf(filter) != -1 ||
+         data?.cheif_complaint.find(c => c.toLowerCase() === filter.toLowerCase())
       });
   }
 

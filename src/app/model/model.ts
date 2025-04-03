@@ -228,7 +228,8 @@ export interface AppointmentModel {
   visitStatus: string,
   cheif_complaint?: string[],
   starts_in?: string,
-  appointmentId?: number
+  appointmentId?: number,
+  location?:string
 }
 
 export interface CustomVisitModel {

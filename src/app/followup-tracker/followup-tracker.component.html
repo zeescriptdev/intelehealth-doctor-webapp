@@ -25,47 +25,47 @@
             </mat-expansion-panel-header>
   
             <div class="mat-elevation-z8">
-              <table mat-table [dataSource]="dataSource">
+              <table mat-table [dataSource]="dataSource" #followUpMatSort="matSort" matSort>
   
                 <!-- Name Column -->
                 <ng-container matColumnDef="name">
-                  <th mat-header-cell *matHeaderCellDef> {{'Patient'|translate}} </th>
+                  <th mat-header-cell *matHeaderCellDef mat-sort-header> {{'Patient'|translate}} </th>
                   <td mat-cell *matCellDef="let element;let j=index;" [attr.data-test-id]="'compPatient'+j">
                     <div class="d-flex align-items-center">
                       <img src="{{ baseUrl + '/personimage/' + element.person.uuid }}" alt="" width="32px" height="32px" style="border-radius: 50%;">
-                      <span class="font-bold ml-2">{{element.patient_name.given_name}} {{element.patient_name?.middle_name ? element.patient_name?.middle_name+" " : ""}}{{element.patient_name.family_name}} ({{(element.person.gender) | translate}})</span>
+                      <span class="font-bold ml-2">{{element.name}} ({{(element.person.gender) | translate}})</span>
                     </div>
                   </td>
                 </ng-container>
   
                 <!-- Age Column -->
                 <ng-container matColumnDef="age">
-                  <th mat-header-cell *matHeaderCellDef> {{'Age'|translate}} </th>
-                  <td mat-cell *matCellDef="let element;let j=index;" [attr.data-test-id]="'compAge'+j"> {{element.person.age}} {{'y'|translate}} </td>
+                  <th mat-header-cell *matHeaderCellDef mat-sort-header> {{'Age'|translate}} </th>
+                  <td mat-cell *matCellDef="let element;let j=index;" [attr.data-test-id]="'compAge'+j"> {{element.age}} {{'y'|translate}} </td>
                 </ng-container>
   
                 <!-- Chief complaint Column -->
                 <ng-container matColumnDef="cheif_complaint">
-                  <th mat-header-cell *matHeaderCellDef> {{'Chief Complaint'|translate}} </th>
+                  <th mat-header-cell *matHeaderCellDef mat-sort-header> {{'Chief Complaint'|translate}} </th>
                   <td mat-cell *matCellDef="let element;let j=index;" [attr.data-test-id]="'compComplaint'+j"> {{element.cheif_complaint}} </td>
                 </ng-container>
 
                   <!-- Doctor Column -->
-                  <ng-container matColumnDef="doctor_name">
-                    <th mat-header-cell *matHeaderCellDef> {{'Doctor'|translate}} </th>
+                  <ng-container matColumnDef="encounter_provider">
+                    <th mat-header-cell *matHeaderCellDef mat-sort-header> {{'Doctor'|translate}} </th>
                     <td mat-cell *matCellDef="let element;let j=index;" [attr.data-test-id]="'compCreated'+j"> {{element.encounter_provider}} </td>
                   </ng-container>
     
 
                 <!-- FollowUp date Column -->
-                <ng-container matColumnDef="followUp_date">
-                  <th mat-header-cell *matHeaderCellDef> {{'Follow-up date'|translate}} </th>
+                <ng-container matColumnDef="followup_date">
+                  <th mat-header-cell *matHeaderCellDef mat-sort-header> {{'Follow-up date'|translate}} </th>
                   <td mat-cell *matCellDef="let element;let j=index;" [attr.data-test-id]="'compLocation'+j"> {{element.followup_date}} </td>
                 </ng-container>
   
                 <!-- Patient verdict Column -->
                 <ng-container matColumnDef="patient_verdict">
-                  <th mat-header-cell *matHeaderCellDef> {{'Patient Verdict'|translate}} </th>
+                  <th mat-header-cell *matHeaderCellDef mat-sort-header> {{'Patient Verdict'|translate}} </th>
                   <td mat-cell *matCellDef="let element;let j=index;" [attr.data-test-id]="'compPresSent'+j">
                       <span class="ml-2">{{element?.patient_verdict ? element?.patient_verdict : 'Follow-up pending'}}</span>
                   </td>

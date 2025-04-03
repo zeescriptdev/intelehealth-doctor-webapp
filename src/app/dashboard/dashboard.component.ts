@@ -16,6 +16,7 @@ import { MatMenuTrigger } from '@angular/material/menu';
 import { getCacheData, checkIfDateOldThanOneDay } from '../utils/utility-functions';
 import { doctorDetails, languages, visitTypes } from 'src/config/constant';
 import { ApiResponseModel, AppointmentModel, CustomEncounterModel, CustomObsModel, CustomVisitModel, EncounterModel, EncounterProviderModel, ObsModel, ProviderAttributeModel, RecentVisitsApiResponseModel, RescheduleAppointmentModalResponseModel, VisitModel } from '../model/model';
+import { MatSort } from '@angular/material/sort';
 
 @Component({
   selector: 'app-dashboard',
@@ -25,11 +26,11 @@ import { ApiResponseModel, AppointmentModel, CustomEncounterModel, CustomObsMode
 export class DashboardComponent implements OnInit {
 
   showAll: boolean = true;
-  displayedColumns1: string[] = ['name', 'age', 'starts_in', 'location', 'cheif_complaint', 'actions'];
+  displayedColumns1: string[] = ['patientName', 'patientAge', 'starts_in', 'location', 'cheif_complaint', 'actions'];
   displayedColumns2: string[] = ['name', 'age', 'location', 'cheif_complaint', 'visit_created'];
   displayedColumns3: string[] = ['name', 'age', 'location', 'cheif_complaint', 'visit_created'];
-  displayedColumns4: string[] = ['name', 'age', 'location', 'provided_by', 'cheif_complaint', 'prescription_started'];
-  displayedColumns5: string[] = ['name', 'age', 'location', 'provided_by', 'cheif_complaint', 'followup_date'];
+  displayedColumns4: string[] = ['name', 'age', 'location', 'encounter_provider', 'cheif_complaint', 'prescription_started'];
+  displayedColumns5: string[] = ['name', 'age', 'location', 'encounter_provider', 'cheif_complaint', 'followup_date'];
 
   dataSource1 = new MatTableDataSource<any>();
   dataSource2 = new MatTableDataSource<any>();
@@ -58,6 +59,13 @@ export class DashboardComponent implements OnInit {
   @ViewChild('awaitingPaginator') awaitingPaginator: MatPaginator;
   @ViewChild('inprogressPaginator') inprogressPaginator: MatPaginator;
   @ViewChild('followupPaginator') followupPaginator: MatPaginator;
+
+  @ViewChild('appointmentMatSort',{ static: true }) appointmentMatSort: MatSort;
+  @ViewChild('awaitingMatSort', { static: true }) awaitingMatSort: MatSort;
+  @ViewChild('priorityMatSort', { static: true }) priorityMatSort: MatSort;
+  @ViewChild('inprogressMatSort', { static: true }) inprogressMatSort: MatSort;
+  @ViewChild('followupMatSort', { static: true }) followupMatSort: MatSort;
+
 
   offset: number = environment.recordsPerPage;
   awatingRecordsFetched: number = 0;
@@ -152,7 +160,9 @@ export class DashboardComponent implements OnInit {
           let visit = av.data[i];
           visit.cheif_complaint = this.getCheifComplaint(visit);
           visit.visit_created = visit?.date_created ? this.getCreatedAt(visit.date_created) : this.getEncounterCreated(visit, visitTypes.ADULTINITIAL);
-          visit.person.age = this.visitService.calculateAge(visit.person.birthdate);
+          visit.age = this.visitService.calculateAge(visit.person.birthdate);
+          visit.name = visit.patient_name.given_name + " " + (visit.patient_name?.middle_name ? visit.patient_name?.middle_name+" " : "" )+ " " + visit.patient_name.family_name;
+          visit.location = visit.location.name;
           if (visit.cheif_complaint.filter(f => f.includes('Follow')).length > 0) {
             if(!this.visitService.getPatientVerdict(visit).includes('Patient is feeling better')) {
               newfollowupVisits.push(visit);
@@ -168,7 +178,13 @@ export class DashboardComponent implements OnInit {
         this.dataSource3.data = [...this.awaitingVisits];
         if (page == 1) {
           this.dataSource3.paginator = this.tempPaginator2;
-          this.dataSource3.filterPredicate = (data, filter: string) => data?.patient.identifier.toLowerCase().indexOf(filter) != -1 || data?.patient_name.given_name.concat((data?.patient_name.middle_name ? ' ' + data?.patient_name.middle_name : '') + ' ' + data?.patient_name.family_name).toLowerCase().indexOf(filter) != -1;
+          this.dataSource3.sort = this.awaitingMatSort;
+          this.dataSource3.filterPredicate = (data, filter: string) =>
+             data?.patient.identifier.toLowerCase().indexOf(filter) != -1 ||
+             data?.location.toLowerCase().indexOf(filter) != -1 ||
+            // data?.age.toLowerCase().indexOf(filter) != -1 ||
+             data?.cheif_complaint.find(c => c.toLowerCase() === filter.toLowerCase()) ||
+             data?.patient_name.given_name.concat((data?.patient_name.middle_name ? ' ' + data?.patient_name.middle_name : '') + ' ' + data?.patient_name.family_name).toLowerCase().indexOf(filter) != -1;
         } else {
           this.tempPaginator2.length = av.totalCount;
           this.tempPaginator2.nextPage();
@@ -219,8 +235,10 @@ export class DashboardComponent implements OnInit {
           let visit = pv.data[i];
           visit.cheif_complaint = this.getCheifComplaint(visit);
           visit.visit_created = visit?.date_created ? this.getCreatedAt(visit.date_created) : this.getEncounterCreated(visit, visitTypes.FLAGGED);
-          visit.person.age = this.visitService.calculateAge(visit.person.birthdate);
-          if (visit.cheif_complaint.filter(f => f.includes('Follow')).length > 0) {
+          visit.age = this.visitService.calculateAge(visit.person.birthdate);
+          visit.name = visit.patient_name.given_name + " " + (visit.patient_name?.middle_name ? visit.patient_name?.middle_name+" " : "" )+ " " + visit.patient_name.family_name;
+          visit.location = visit.location.name;
+           if (visit.cheif_complaint.filter(f => f.includes('Follow')).length > 0) {
             if(!this.visitService.getPatientVerdict(visit).includes('Patient is feeling better')) {
               newfollowupVisits.push(visit);
             } else {
@@ -235,8 +253,14 @@ export class DashboardComponent implements OnInit {
         this.dataSource2.data = [...this.priorityVisits];
         if (page == 1) {
           this.dataSource2.paginator = this.tempPaginator1;
-          this.dataSource2.filterPredicate = (data, filter: string) => data?.patient.identifier.toLowerCase().indexOf(filter) != -1 || data?.patient_name.given_name.concat((data?.patient_name.middle_name ? ' ' + data?.patient_name.middle_name : '') + ' ' + data?.patient_name.family_name).toLowerCase().indexOf(filter) != -1;
-        } else {
+          this.dataSource2.sort = this.priorityMatSort;
+          this.dataSource2.filterPredicate = (data, filter: string) =>
+             data?.patient.identifier.toLowerCase().indexOf(filter) != -1 || 
+             data?.patient_name.given_name.concat((data?.patient_name.middle_name ? ' ' + data?.patient_name.middle_name : '') + ' ' + data?.patient_name.family_name).toLowerCase().indexOf(filter) != -1 ||
+             data?.location.toLowerCase().indexOf(filter) != -1 ||
+             // data?.age.toLowerCase().indexOf(filter) != -1 ||
+             data?.cheif_complaint.find(c => c.toLowerCase() === filter.toLowerCase())
+          } else {
           this.tempPaginator1.length = pv.totalCount;
           this.tempPaginator1.nextPage();
         }
@@ -287,13 +311,22 @@ export class DashboardComponent implements OnInit {
           visit.visit_created = visit?.date_created ? this.getCreatedAt(visit.date_created) : this.getEncounterCreated(visit, visitTypes.ADULTINITIAL);
           visit.prescription_started = this.getEncounterCreated(visit, visitTypes.VISIT_NOTE);
           visit.encounter_provider = this.getEncounterProviderName(visit, visitTypes.VISIT_NOTE);
-          visit.person.age = this.visitService.calculateAge(visit.person.birthdate);
+          visit.age = this.visitService.calculateAge(visit.person.birthdate);
+          visit.name = visit.patient_name.given_name + " " + (visit.patient_name?.middle_name ? visit.patient_name?.middle_name+" " : "" )+ " " + visit.patient_name.family_name;
+          visit.location = visit.location.name;
           this.inProgressVisits.push(visit);
         }
         this.dataSource4.data = [...this.inProgressVisits];
         if (page == 1) {
           this.dataSource4.paginator = this.tempPaginator3;
-          this.dataSource4.filterPredicate = (data, filter: string) => data?.patient.identifier.toLowerCase().indexOf(filter) != -1 || data?.patient_name.given_name.concat((data?.patient_name.middle_name ? ' ' + data?.patient_name.middle_name : '') + ' ' + data?.patient_name.family_name).toLowerCase().indexOf(filter) != -1;
+          this.dataSource4.sort = this.inprogressMatSort;
+          this.dataSource4.filterPredicate = (data, filter: string) => 
+          data?.patient.identifier.toLowerCase().indexOf(filter) != -1 || 
+          data?.encounter_provider.toLowerCase().indexOf(filter) != -1 || 
+          data?.patient_name.given_name.concat((data?.patient_name.middle_name ? ' ' + data?.patient_name.middle_name : '') + ' ' + data?.patient_name.family_name).toLowerCase().indexOf(filter) != -1 ||
+          data?.location.toLowerCase().indexOf(filter) != -1 ||
+          // data?.age.toLowerCase().indexOf(filter) != -1 ||
+          data?.cheif_complaint.find(c => c.toLowerCase() === filter.toLowerCase())
         } else {
           this.tempPaginator3.length = this.inProgressVisits.length;
           this.tempPaginator3.nextPage();
@@ -314,7 +347,9 @@ export class DashboardComponent implements OnInit {
       this.visitService.recentVisits(visit.person.uuid).subscribe((res) => {
         const visits = res.results;
         let recentVisit = visits.filter(v => v.uuid !== visit.uuid && v.encounters.filter(e => e.encounterType.display == visitTypes.PATIENT_EXIT_SURVEY || e.encounterType.display == visitTypes.VISIT_COMPLETE).length > 0);
-        visit.person.age = this.visitService.calculateAge(visit.person.birthdate);
+        visit.age = this.visitService.calculateAge(visit.person.birthdate);
+        visit.name = visit.patient_name.given_name + " " + (visit.patient_name?.middle_name ? visit.patient_name?.middle_name+" " : "" )+ " " + visit.patient_name.family_name;
+        visit.location = visit.location;
         if (recentVisit.length > 0) {
           visit.followup_date = this.visitService.getFollowupDate(recentVisit[0], visitTypes.VISIT_NOTE);
           visit.encounter_provider = recentVisit[0]?.encounters.filter(e => e.encounterType.display == visitTypes.PATIENT_EXIT_SURVEY || e.encounterType.display == visitTypes.VISIT_COMPLETE)[0]
@@ -330,8 +365,14 @@ export class DashboardComponent implements OnInit {
         this.followupVisitsCount = this.filteredFollowUpVisits.length;
         if (page == 1) {
           this.dataSource5.paginator = this.tempPaginator4;
-          this.dataSource5.filterPredicate = (data, filter: string) => data?.encounter_provider.toLowerCase().indexOf(filter) != -1 ||
-           data?.patient_name.given_name.concat((data?.patient_name.middle_name ? ' ' + data?.patient_name.middle_name : '') + ' ' + data?.patient_name.family_name).toLowerCase().indexOf(filter) != -1;
+          this.dataSource5.sort = this.followupMatSort;
+          this.dataSource5.filterPredicate = (data, filter: string) => 
+          data?.patient.identifier.toLowerCase().indexOf(filter) != -1 || 
+          data?.encounter_provider.toLowerCase().indexOf(filter) != -1 || 
+          data?.patient_name.given_name.concat((data?.patient_name.middle_name ? ' ' + data?.patient_name.middle_name : '') + ' ' + data?.patient_name.family_name).toLowerCase().indexOf(filter) != -1 ||
+          data?.location.toLowerCase().indexOf(filter) != -1 ||
+          // data?.age.toLowerCase().indexOf(filter) != -1 ||
+          data?.cheif_complaint.find(c => c.toLowerCase() === filter.toLowerCase())
         } else {
           this.tempPaginator4.length = this.filteredFollowUpVisits.length;
           this.tempPaginator4.nextPage();
@@ -400,13 +441,20 @@ export class DashboardComponent implements OnInit {
             if (appointment.visit) {
               appointment.cheif_complaint = this.getCheifComplaint(appointment.visit);
               appointment.starts_in = checkIfDateOldThanOneDay(appointment.slotJsDate);
+              appointment.location = appointment?.visit?.location.name;
               this.appointments.push(appointment);
             }
           }
         });
         this.dataSource1.data = [...this.appointments];
         this.dataSource1.paginator = this.appointmentPaginator;
-        this.dataSource1.filterPredicate = (data, filter: string) => data?.openMrsId.toLowerCase().indexOf(filter) != -1 || data?.patientName.toLowerCase().indexOf(filter) != -1;
+        this.dataSource1.sort = this.appointmentMatSort;
+        this.dataSource1.filterPredicate = (data, filter: string) => 
+          data?.openMrsId.toLowerCase().indexOf(filter) != -1 ||
+         data?.patientName.toLowerCase().indexOf(filter) != -1 ||
+         data?.location.toLowerCase().indexOf(filter) != -1 ||
+         // data?.age.toLowerCase().indexOf(filter) != -1 ||
+         data?.cheif_complaint.find(c => c.toLowerCase() === filter.toLowerCase())
       });
   }
 

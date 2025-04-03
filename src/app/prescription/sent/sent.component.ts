@@ -1,5 +1,6 @@
 import { AfterViewInit, Component, ElementRef, EventEmitter, Input, OnChanges, OnInit, Output, SimpleChanges, ViewChild } from '@angular/core';
 import { MatPaginator, PageEvent } from '@angular/material/paginator';
+import { MatSort } from '@angular/material/sort';
 import { MatTableDataSource } from '@angular/material/table';
 import { TranslateService } from '@ngx-translate/core';
 import { CustomVisitModel } from 'src/app/model/model';
@@ -21,6 +22,7 @@ export class SentComponent implements OnInit, AfterViewInit, OnChanges {
   @Input() prescriptionsSent: CustomVisitModel[] = [];
   @Input() prescriptionsSentCount = 0;
   @ViewChild('sentPaginator') paginator: MatPaginator;
+  @ViewChild('sentMatSort', { static: true }) sentMatSort: MatSort;
   offset: number = environment.recordsPerPage;
   recordsFetched: number = environment.recordsPerPage;
   pageEvent: PageEvent;
@@ -35,9 +37,14 @@ export class SentComponent implements OnInit, AfterViewInit, OnChanges {
   ngOnInit(): void {
     this.translateService.use(getCacheData(false, languages.SELECTED_LANGUAGE));
     this.dataSource = new MatTableDataSource(this.prescriptionsSent);
-    this.dataSource.filterPredicate = (data, filter: string) => data?.patient.identifier.toLowerCase().indexOf(filter) !== -1 || data?.patient_name.given_name.concat(' ' + data?.patient_name.family_name).toLowerCase().indexOf(filter) !== -1;
-    this.dataSource.filterPredicate = (data, filter: string) => data?.patient.identifier.toLowerCase().indexOf(filter) !== -1 || data?.patient_name.given_name.concat(' ' + data?.patient_name.family_name).toLowerCase().indexOf(filter) !== -1;
+    this.dataSource.filterPredicate = (data, filter: string) =>
+    data?.patient.identifier.toLowerCase().indexOf(filter) != -1 ||
+    data?.patient_name.given_name.concat((data?.patient_name.middle_name ? ' ' + data?.patient_name.middle_name : '') + ' ' + data?.patient_name.family_name).toLowerCase().indexOf(filter) != -1 ||
+    data?.location.toLowerCase().indexOf(filter) != -1 ||
+    //data?.age.toLowerCase().indexOf(filter) != -1 ||
+    data?.cheif_complaint.find(c => c.toLowerCase() === filter.toLowerCase());
     this.dataSource.paginator = this.tempPaginator;
+    this.dataSource.sort = this.sentMatSort;
   }
 
   ngOnChanges(changes: SimpleChanges): void {
@@ -50,10 +57,15 @@ export class SentComponent implements OnInit, AfterViewInit, OnChanges {
   }
 
   ngAfterViewInit() {
-    this.dataSource.paginator = this.tempPaginator;
-    this.dataSource.filterPredicate = (data, filter: string) => data?.patient.identifier.toLowerCase().indexOf(filter) !== -1 || data?.patient_name.given_name.concat(' ' + data?.patient_name.family_name).toLowerCase().indexOf(filter) !== -1;
-    this.dataSource.filterPredicate = (data, filter: string) => data?.patient.identifier.toLowerCase().indexOf(filter) !== -1 || data?.patient_name.given_name.concat(' ' + data?.patient_name.family_name).toLowerCase().indexOf(filter) !== -1;
-  }
+    this.dataSource.filterPredicate = (data, filter: string) =>
+      data?.patient.identifier.toLowerCase().indexOf(filter) != -1 ||
+      data?.patient_name.given_name.concat((data?.patient_name.middle_name ? ' ' + data?.patient_name.middle_name : '') + ' ' + data?.patient_name.family_name).toLowerCase().indexOf(filter) != -1 ||
+      data?.location.toLowerCase().indexOf(filter) != -1 ||
+      //data?.age.toLowerCase().indexOf(filter) != -1 ||
+      data?.cheif_complaint.find(c => c.toLowerCase() === filter.toLowerCase());
+      this.dataSource.paginator = this.tempPaginator;
+      this.dataSource.sort = this.sentMatSort; 
+    }
 
   /**
   * Callback for page change event and Get visit for a selected page index and page size

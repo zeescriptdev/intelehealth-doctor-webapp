@@ -1850,7 +1850,7 @@ export class VisitSummaryComponent implements OnInit, OnDestroy {
   }
 
   /**
-   * Send notification to health worker for available prescription
+   * get Location and set details
    * @returns {void}
    */
   getLocationAndSetSanch() {

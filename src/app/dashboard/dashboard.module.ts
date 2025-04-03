@@ -33,6 +33,7 @@ import { SharedModule } from '../shared.module';
 import { OpenChatComponent } from './open-chat/open-chat.component';
 import { MatMenuModule } from '@angular/material/menu';
 import { MatCheckboxModule } from '@angular/material/checkbox';
+import { MatSortModule } from '@angular/material/sort';
 
 // AoT requires an exported function for factories
 export function HttpLoaderFactory(httpClient: HttpClient) {
@@ -60,6 +61,7 @@ export function HttpLoaderFactory(httpClient: HttpClient) {
     MatButtonModule,
     MatStepperModule,
     MatTabsModule,
+    MatSortModule,
     SignaturePadModule,
     NgSelectModule,
     FormsModule,

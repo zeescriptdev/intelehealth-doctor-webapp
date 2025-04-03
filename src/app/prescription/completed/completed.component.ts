@@ -1,5 +1,6 @@
 import { AfterViewInit, Component, ElementRef, EventEmitter, Input, OnChanges, OnInit, Output, SimpleChanges, ViewChild } from '@angular/core';
 import { MatPaginator, PageEvent } from '@angular/material/paginator';
+import { MatSort } from '@angular/material/sort';
 import { MatTableDataSource } from '@angular/material/table';
 import { CustomVisitModel } from 'src/app/model/model';
 import { environment } from 'src/environments/environment';
@@ -17,6 +18,7 @@ export class CompletedComponent implements OnInit, AfterViewInit, OnChanges {
   @Input() completedVisits: CustomVisitModel[] = [];
   @Input() completedVisitsCount: number = 0;
   @ViewChild('completedPaginator') paginator: MatPaginator;
+  @ViewChild('completedMatSort') completedMatSort: MatSort;
   offset: number = environment.recordsPerPage;
   recordsFetched: number = environment.recordsPerPage;
   pageEvent: PageEvent;
@@ -28,16 +30,24 @@ export class CompletedComponent implements OnInit, AfterViewInit, OnChanges {
 
   ngOnInit(): void {
     this.dataSource = new MatTableDataSource(this.completedVisits);
-    this.dataSource.paginator = this.tempPaginator;
-    this.dataSource.filterPredicate = (data, filter: string) => data?.patient.identifier.toLowerCase().indexOf(filter) != -1 || data?.patient_name.given_name.concat(' ' + data?.patient_name.family_name).toLowerCase().indexOf(filter) != -1;
-    this.dataSource.filterPredicate = (data, filter: string) => data?.patient.identifier.toLowerCase().indexOf(filter) != -1 || data?.patient_name.given_name.concat(' ' + data?.patient_name.family_name).toLowerCase().indexOf(filter) != -1;
-  }
+    this.dataSource.filterPredicate = (data, filter: string) =>
+      data?.patient.identifier.toLowerCase().indexOf(filter) != -1 ||
+      data?.patient_name.given_name.concat((data?.patient_name.middle_name ? ' ' + data?.patient_name.middle_name : '') + ' ' + data?.patient_name.family_name).toLowerCase().indexOf(filter) != -1 ||
+      data?.location.toLowerCase().indexOf(filter) != -1 ||
+      //data?.age.toLowerCase().indexOf(filter) != -1 ||
+      data?.cheif_complaint.find(c => c.toLowerCase() === filter.toLowerCase());
+      this.dataSource.paginator = this.tempPaginator;
+      this.dataSource.sort = this.completedMatSort;  }
 
   ngAfterViewInit() {
-    this.dataSource.paginator = this.tempPaginator;
-    this.dataSource.filterPredicate = (data, filter: string) => data?.patient.identifier.toLowerCase().indexOf(filter) != -1 || data?.patient_name.given_name.concat(' ' + data?.patient_name.family_name).toLowerCase().indexOf(filter) != -1;
-    this.dataSource.filterPredicate = (data, filter: string) => data?.patient.identifier.toLowerCase().indexOf(filter) != -1 || data?.patient_name.given_name.concat(' ' + data?.patient_name.family_name).toLowerCase().indexOf(filter) != -1;
-  }
+    this.dataSource.filterPredicate = (data, filter: string) =>
+      data?.patient.identifier.toLowerCase().indexOf(filter) != -1 ||
+      data?.patient_name.given_name.concat((data?.patient_name.middle_name ? ' ' + data?.patient_name.middle_name : '') + ' ' + data?.patient_name.family_name).toLowerCase().indexOf(filter) != -1 ||
+      data?.location.toLowerCase().indexOf(filter) != -1 ||
+      //data?.age.toLowerCase().indexOf(filter) != -1 ||
+      data?.cheif_complaint.find(c => c.toLowerCase() === filter.toLowerCase());
+      this.dataSource.paginator = this.tempPaginator;
+      this.dataSource.sort = this.completedMatSort;  }
 
   ngOnChanges(changes: SimpleChanges): void {
     if (!changes.completedVisits.firstChange) {

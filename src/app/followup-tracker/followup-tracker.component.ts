@@ -8,6 +8,7 @@ import { PageTitleService } from '../core/page-title/page-title.service';
 import { getCacheData } from '../utils/utility-functions';
 import { doctorDetails, visitTypes } from 'src/config/constant';
 import { VisitService } from '../services/visit.service';
+import { MatSort } from '@angular/material/sort';
 
 @Component({
   selector: 'app-followup-tracker',
@@ -15,7 +16,7 @@ import { VisitService } from '../services/visit.service';
   styleUrls: ['./followup-tracker.component.scss']
 })
 export class FollowupTrackerComponent {
-  displayedColumns: string[] = ['name', 'age', 'cheif_complaint', 'doctor_name', 'followUp_date', 'patient_verdict'];
+  displayedColumns: string[] = ['name', 'age', 'cheif_complaint', 'encounter_provider', 'followup_date', 'patient_verdict'];
   dataSource = new MatTableDataSource<any>();
   baseUrl: string = environment.baseURL;
   doctorFollowUpVisits: CustomVisitModel[] = [];
@@ -32,6 +33,7 @@ export class FollowupTrackerComponent {
   @Output() fetchPageEvent = new EventEmitter<number>();
   @ViewChild('tempPaginator') tempPaginator: MatPaginator;
   @ViewChild('completedPaginator') paginator: MatPaginator;
+  @ViewChild('followUpMatSort') followUpMatSort: MatSort;
 
   @ViewChild(MatMenuTrigger) trigger: MatMenuTrigger;
   showDate: boolean = true;
@@ -79,7 +81,9 @@ export class FollowupTrackerComponent {
               let enco = visit?.encounters.filter(e => e.type.name == visitTypes.PATIENT_EXIT_SURVEY || e.type.name == visitTypes.VISIT_COMPLETE)[0];
               visit.encounter_provider = JSON.parse(enco.obs[0].value_text).name;
               visit.encounter_provider_uuid = enco?.encounter_provider?.provider.uuid;
-              visit.person.age = this.visitService.calculateAge(visit.person.birthdate);
+             visit.age = this.visitService.calculateAge(visit.person.birthdate);
+          visit.name = visit.patient_name.given_name + " " + (visit.patient_name?.middle_name ? visit.patient_name?.middle_name+" " : "" )+ " " + visit.patient_name.family_name;
+          visit.location = visit.location.name;
               visit.followup_date = followUp_date;
               const visits = res.results;
               let recentVisit = visits.filter(v => v.uuid !== visit.uuid &&
@@ -119,6 +123,7 @@ export class FollowupTrackerComponent {
               this.filteredFollowUpVisits.sort((a, b) => new Date(b.followup_date) < new Date(a.followup_date) ? -1 : 1);
               this.dataSource.data = [...this.filteredFollowUpVisits];
               this.dataSource.paginator = this.tempPaginator;
+              this.dataSource.sort = this.followUpMatSort;
             });
           }
         }

@@ -14,6 +14,7 @@ import { TranslateHttpLoader } from '@ngx-translate/http-loader';
 import { MatPaginationIntlService } from '../services/mat-pagination.service';
 import { MatButtonModule } from '@angular/material/button';
 import { SharedModule } from '../shared.module';
+import { MatSortModule } from '@angular/material/sort';
 
 // AoT requires an exported function for factories
 export function HttpLoaderFactory(httpClient: HttpClient) {
@@ -30,6 +31,7 @@ export function HttpLoaderFactory(httpClient: HttpClient) {
     MatExpansionModule,
     MatPaginatorModule,
     MatTableModule,
+    MatSortModule,
     MatTooltipModule,
     MatIconModule,
     MatButtonModule,

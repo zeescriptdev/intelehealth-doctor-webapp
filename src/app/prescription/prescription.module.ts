@@ -21,6 +21,7 @@ import { DoctorCompleted } from './doctor-completed/doctor-completed.component';
 import { MatMenuModule } from '@angular/material/menu';
 import { MatCardModule } from '@angular/material/card';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
+import { MatSortModule } from '@angular/material/sort';
 
 // AoT requires an exported function for factories
 export function HttpLoaderFactory(httpClient: HttpClient) {
@@ -44,6 +45,7 @@ export function HttpLoaderFactory(httpClient: HttpClient) {
     MatTooltipModule,
     MatTableModule,
     MatPaginatorModule,
+    MatSortModule,
     MatButtonModule,
     MatMenuModule,
     MatCardModule,

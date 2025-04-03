@@ -69,7 +69,9 @@ export class PrescriptionComponent implements OnInit, OnChanges {
           } else {
             visit.visit_ended = this.checkIfDateOldThanOneDay(visit.date_stopped);
           }
-          visit.person.age = this.calculateAge(visit.person.birthdate);
+          visit.age = this.visitService.calculateAge(visit.person.birthdate);
+          visit.name = visit.patient_name.given_name + " " + (visit.patient_name?.middle_name ? visit.patient_name?.middle_name+" " : "" )+ " " + visit.patient_name.family_name;
+          visit.location = visit.location.name;
           records.push(visit);
         }
         this.completedVisits = this.completedVisits.concat(records);
@@ -104,7 +106,9 @@ export class PrescriptionComponent implements OnInit, OnChanges {
           visit.cheif_complaint = this.getCheifComplaint(visit);
           visit.visit_created = this.getEncounterCreated(visit, visitTypes.ADULTINITIAL);
           visit.prescription_sent = (vcenc) ? this.checkIfDateOldThanOneDay(vcenc.encounter_datetime) : null;
-          visit.person.age = this.calculateAge(visit.person.birthdate);
+          visit.age = this.visitService.calculateAge(visit.person.birthdate);
+          visit.name = visit.patient_name.given_name + " " + (visit.patient_name?.middle_name ? visit.patient_name?.middle_name+" " : "" )+ " " + visit.patient_name.family_name;
+          visit.location = visit.location.name;
           records.push(visit);
         }
         this.prescriptionSent = this.prescriptionSent.concat(records);
@@ -125,7 +129,9 @@ export class PrescriptionComponent implements OnInit, OnChanges {
           visit.cheif_complaint = this.getCheifComplaint(visit);
           visit.visit_created = this.getEncounterCreated(visit, visitTypes.ADULTINITIAL);
           visit.prescription_sent = (vcenc) ? this.checkIfDateOldThanOneDay(vcenc.encounter_datetime) : null;
-          visit.person.age = this.calculateAge(visit.person.birthdate);
+          visit.age = this.visitService.calculateAge(visit.person.birthdate);
+          visit.name = visit.patient_name.given_name + " " + (visit.patient_name?.middle_name ? visit.patient_name?.middle_name+" " : "" )+ " " + visit.patient_name.family_name;
+          visit.location = visit.location.name;
           records.push(visit);
         }
         this.doctorCompletedVisits = this.doctorCompletedVisits.concat(records);
