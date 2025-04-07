@@ -25,7 +25,13 @@
           </mat-expansion-panel-header>
           <div class="mat-elevation-z8">
             <table mat-table [dataSource]="dataSource" #appointmentMatSort="matSort" matSort>
-
+              <!-- ID Column -->
+              <ng-container matColumnDef="openMrsId">
+                <th mat-header-cell *matHeaderCellDef mat-sort-header>Patient ID</th>
+                <td mat-cell *matCellDef="let element">
+                  <span> {{ element?.openMrsId }}</span>
+                </td>
+              </ng-container>
               <!-- Name Column -->
               <ng-container matColumnDef="patientName">
                 <th mat-header-cell *matHeaderCellDef mat-sort-header> {{'Patient' | translate}} </th>

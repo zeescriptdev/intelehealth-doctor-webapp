@@ -16,7 +16,7 @@ import { MatSort } from '@angular/material/sort';
   styleUrls: ['./followup-tracker.component.scss']
 })
 export class FollowupTrackerComponent {
-  displayedColumns: string[] = ['name', 'age', 'cheif_complaint', 'encounter_provider', 'followup_date', 'patient_verdict'];
+  displayedColumns: string[] = ['openMrsId','name', 'age', 'cheif_complaint', 'encounter_provider', 'followup_date', 'patient_verdict'];
   dataSource = new MatTableDataSource<any>();
   baseUrl: string = environment.baseURL;
   doctorFollowUpVisits: CustomVisitModel[] = [];
@@ -81,10 +81,11 @@ export class FollowupTrackerComponent {
               let enco = visit?.encounters.filter(e => e.type.name == visitTypes.PATIENT_EXIT_SURVEY || e.type.name == visitTypes.VISIT_COMPLETE)[0];
               visit.encounter_provider = JSON.parse(enco.obs[0].value_text).name;
               visit.encounter_provider_uuid = enco?.encounter_provider?.provider.uuid;
-             visit.age = this.visitService.calculateAge(visit.person.birthdate);
-          visit.name = visit.patient_name.given_name + " " + (visit.patient_name?.middle_name ? visit.patient_name?.middle_name+" " : "" )+ " " + visit.patient_name.family_name;
-          visit.location = visit.location.name;
+              visit.age = this.visitService.calculateAge(visit.person.birthdate);
+              visit.name = visit.patient_name.given_name + " " + (visit.patient_name?.middle_name ? visit.patient_name?.middle_name+" " : "" )+ " " + visit.patient_name.family_name;
+              visit.location = visit.location.name;
               visit.followup_date = followUp_date;
+              visit.openMrsId = visit?.patient?.identifier;
               const visits = res.results;
               let recentVisit = visits.filter(v => v.uuid !== visit.uuid &&
                 v.attributes.filter(a => a.attributeType.display === 'Visit Speciality')[0].value === 'General Physician'

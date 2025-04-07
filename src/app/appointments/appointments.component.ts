@@ -23,7 +23,7 @@ export class AppointmentsComponent implements OnInit {
 
   items = ["Appointments"];
   expandedIndex = 0;
-  displayedColumns: string[] = ['patientName', 'patientAge', 'starts_in', 'location', 'cheif_complaint', 'actions'];
+  displayedColumns: string[] = ['openMrsId', 'patientName', 'patientAge', 'starts_in', 'location', 'cheif_complaint', 'actions'];
   dataSource = new MatTableDataSource<any>();
   baseUrl: string = environment.baseURL;
   isLoaded: boolean = false;
@@ -66,6 +66,7 @@ export class AppointmentsComponent implements OnInit {
               appointment.cheif_complaint = this.getCheifComplaint(appointment.visit);
               appointment.starts_in = checkIfDateOldThanOneDay(appointment.slotJsDate);
               appointment.location = appointment?.visit?.location.name;
+              appointment.openMrsId = appointment?.openMrsId;
               this.appointments.push(appointment);
             }
           }
@@ -74,7 +75,7 @@ export class AppointmentsComponent implements OnInit {
         this.dataSource.paginator = this.paginator;
         this.dataSource.sort = this.appointmentMatSort;
         this.dataSource.filterPredicate = (data, filter: string) => 
-        //data?.openMrsId.toLowerCase().indexOf(filter) != -1 ||
+         data?.openMrsId.toLowerCase().indexOf(filter) != -1 ||
          data?.patientName.toLowerCase().indexOf(filter) != -1 ||
          data?.location.toLowerCase().indexOf(filter) != -1 ||
          // data?.age.toLowerCase().indexOf(filter) != -1 ||
