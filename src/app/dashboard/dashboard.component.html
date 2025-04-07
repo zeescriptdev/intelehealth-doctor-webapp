@@ -49,8 +49,12 @@
   <div class="row mt-3">
     <div class="col-md-12 p-0">
       <div class="text-right my-2">
-        <button *ngIf="!showAll" mat-button (click)="accordion.openAll(); showAll=!showAll" data-test-id="btnShowAllDashboard"><span class="text-muted">{{'Show all' | translate}}</span> <mat-icon>expand_more</mat-icon> </button>
-        <button *ngIf="showAll" mat-button (click)="accordion.closeAll(); showAll=!showAll" data-test-id="btnHideAllDashboard"><span class="text-muted">{{'Hide all' | translate}}</span> <mat-icon>expand_less</mat-icon></button>
+        <button *ngIf="!showAll" mat-button (click)="accordion.openAll(); showAll=!showAll"
+          data-test-id="btnShowAllDashboard"><span class="text-muted">{{'Show all' | translate}}</span>
+          <mat-icon>expand_more</mat-icon> </button>
+        <button *ngIf="showAll" mat-button (click)="accordion.closeAll(); showAll=!showAll"
+          data-test-id="btnHideAllDashboard"><span class="text-muted">{{'Hide all' | translate}}</span>
+          <mat-icon>expand_less</mat-icon></button>
       </div>
       <mat-accordion class="intel-accordion-con" multi data-test-id="matAccDashboard">
 
@@ -59,15 +63,22 @@
             <mat-panel-title>
               <div class="intel-accordion-title">
                 <img src="assets/svgs/cam-icon.svg" alt="" width="44px">
-                <h6 class="mb-0 ml-2">{{'Appointments' | translate}} ({{appointments.length ? appointments.length : 0}})</h6>
-                <mat-icon aria-hidden="false" class="info-icon" aria-label="help icon" matTooltip="{{'Scheduled appointments' | translate}}" matTooltipPosition="right" data-test-id="matIcoHelpAppointment">help_outline</mat-icon>
+                <h6 class="mb-0 ml-2">{{'Appointments' | translate}} ({{appointments.length ? appointments.length : 0}})
+                </h6>
+                <mat-icon aria-hidden="false" class="info-icon" aria-label="help icon"
+                  matTooltip="{{'Scheduled appointments' | translate}}" matTooltipPosition="right"
+                  data-test-id="matIcoHelpAppointment">help_outline</mat-icon>
                 <div class="input-group search-bar ml-auto" (click)="$event.stopPropagation();">
-                  <input type="text" #apSearchInput class="form-control" placeholder="Search appointments" aria-label="search1" aria-describedby="basic-addon1" (keyup)="applyFilter1($event)" (keydown.Space)="$event.stopPropagation()" (keydown.Enter)="$event.stopPropagation()" data-test-id="etSearchAppointmentDashboard">
+                  <input type="text" #apSearchInput class="form-control" placeholder="Search appointments"
+                    aria-label="search1" aria-describedby="basic-addon1" (keyup)="applyFilter1($event)"
+                    (keydown.Space)="$event.stopPropagation()" (keydown.Enter)="$event.stopPropagation()"
+                    data-test-id="etSearchAppointmentDashboard">
                   <div class="input-group-append">
                     <span class="input-group-text" id="basic-addon1" *ngIf="!dataSource1.filter">
                       <img src="assets/svgs/search-icon.svg" alt="" width="20px" height="20px">
                     </span>
-                    <button data-test-id="btnResetApSerach" mat-icon-button aria-label="Reset appointment search" *ngIf="dataSource1.filter" (click)="clearFilter('Appointment')">
+                    <button data-test-id="btnResetApSerach" mat-icon-button aria-label="Reset appointment search"
+                      *ngIf="dataSource1.filter" (click)="clearFilter('Appointment')">
                       <mat-icon class="ml-0" style="line-height: normal;">close</mat-icon>
                     </button>
                   </div>
@@ -78,12 +89,21 @@
           <div class="mat-elevation-z8">
             <table mat-table [dataSource]="dataSource1" #appointmentMatSort="matSort" matSort>
 
+              <!-- ID Column -->
+              <ng-container matColumnDef="openMrsId">
+                <th mat-header-cell *matHeaderCellDef mat-sort-header>Patient ID</th>
+                <td mat-cell *matCellDef="let element">
+                  <span> {{ element?.openMrsId }}</span>
+                </td>
+              </ng-container>
               <!-- Name Column -->
               <ng-container matColumnDef="patientName">
-                <th mat-header-cell *matHeaderCellDef mat-sort-header> {{'Patient' | translate}} </th>
-                <td mat-cell *matCellDef="let element; let j=index;" [attr.data-test-id]="'apPatient'+j" [routerLink]="['/dashboard/visit-summary', element?.visitUuid]">
+                <th mat-header-cell *matHeaderCellDef mat-sort-header> {{'Name' | translate}} </th>
+                <td mat-cell *matCellDef="let element; let j=index;" [attr.data-test-id]="'apPatient'+j"
+                  [routerLink]="['/dashboard/visit-summary', element?.visitUuid]">
                   <div class="d-flex align-items-center">
-                    <img src="{{ baseUrl + '/personimage/' + element.patientId }}" alt="" width="32px" height="32px" style="border-radius: 50%;">
+                    <img src="{{ baseUrl + '/personimage/' + element.patientId }}" alt="" width="32px" height="32px"
+                      style="border-radius: 50%;">
                     <span class="font-bold ml-2">{{element.patientName}} ({{(element.patientGender)| translate}})</span>
                   </div>
                 </td>
@@ -92,25 +112,32 @@
               <!-- Age Column -->
               <ng-container matColumnDef="patientAge">
                 <th mat-header-cell *matHeaderCellDef mat-sort-header> {{'Age' | translate}} </th>
-                <td mat-cell *matCellDef="let element; let j=index;" [attr.data-test-id]="'apAge'+j" [routerLink]="['/dashboard/visit-summary', element?.visitUuid]"> {{element.patientAge}}{{'y'| translate}} </td>
+                <td mat-cell *matCellDef="let element; let j=index;" [attr.data-test-id]="'apAge'+j"
+                  [routerLink]="['/dashboard/visit-summary', element?.visitUuid]"> {{element.patientAge}}{{'y'|
+                  translate}} </td>
               </ng-container>
 
               <!-- Starts In Column -->
               <ng-container matColumnDef="starts_in">
                 <th mat-header-cell *matHeaderCellDef mat-sort-header> {{'Starts in' | translate}} </th>
-                <td mat-cell *matCellDef="let element; let j=index;" [attr.data-test-id]="'apStartIn'+j" [routerLink]="['/dashboard/visit-summary', element?.visitUuid]"> <span [ngClass]="{ 'alert-danger': element.starts_in.includes('Due'), 'alert-success': element.starts_in.includes('Hour')||element.starts_in.includes('Minute') }">{{element.starts_in}}</span></td>
+                <td mat-cell *matCellDef="let element; let j=index;" [attr.data-test-id]="'apStartIn'+j"
+                  [routerLink]="['/dashboard/visit-summary', element?.visitUuid]"> <span
+                    [ngClass]="{ 'alert-danger': element.starts_in.includes('Due'), 'alert-success': element.starts_in.includes('Hour')||element.starts_in.includes('Minute') }">{{element.starts_in}}</span>
+                </td>
               </ng-container>
 
               <!-- Location Column -->
               <ng-container matColumnDef="location">
                 <th mat-header-cell *matHeaderCellDef mat-sort-header> {{'Location' | translate}} </th>
-                <td mat-cell *matCellDef="let element; let j=index;" [attr.data-test-id]="'apLocation'+j" [routerLink]="['/dashboard/visit-summary', element?.visitUuid]"> {{element?.location}} </td>
+                <td mat-cell *matCellDef="let element; let j=index;" [attr.data-test-id]="'apLocation'+j"
+                  [routerLink]="['/dashboard/visit-summary', element?.visitUuid]"> {{element?.location}} </td>
               </ng-container>
 
               <!-- Chief complaint Column -->
               <ng-container matColumnDef="cheif_complaint">
                 <th mat-header-cell *matHeaderCellDef mat-sort-header> {{'Chief Complaint' | translate}} </th>
-                <td mat-cell *matCellDef="let element; let j=index;" [attr.data-test-id]="'apComplaint'+j" [routerLink]="['/dashboard/visit-summary', element?.visitUuid]"> {{element?.cheif_complaint}} </td>
+                <td mat-cell *matCellDef="let element; let j=index;" [attr.data-test-id]="'apComplaint'+j"
+                  [routerLink]="['/dashboard/visit-summary', element?.visitUuid]"> {{element?.cheif_complaint}} </td>
               </ng-container>
 
               <!-- Prescription Sent Column -->
@@ -118,8 +145,10 @@
                 <th mat-header-cell *matHeaderCellDef> {{'Actions'| translate}} </th>
                 <td mat-cell *matCellDef="let element; let j=index;" [attr.data-test-id]="'apAction'+j">
                   <div class="actions-btn-wrap d-flex align-items-center">
-                    <button class="action-btn blue-btn mr-2" [attr.data-test-id]="'btnReschedule'+j" type="button" (click)="reschedule(element)">{{'Reschedule' | translate}}</button>
-                    <button class="action-btn pink-btn " [attr.data-test-id]="'btnCancel'+j" type="button" (click)="cancel(element)">{{'Cancel' |translate}}</button>
+                    <button class="action-btn blue-btn mr-2" [attr.data-test-id]="'btnReschedule'+j" type="button"
+                      (click)="reschedule(element)">{{'Reschedule' | translate}}</button>
+                    <button class="action-btn pink-btn " [attr.data-test-id]="'btnCancel'+j" type="button"
+                      (click)="cancel(element)">{{'Cancel' |translate}}</button>
                   </div>
                 </td>
               </ng-container>
@@ -131,7 +160,8 @@
               </tr>
 
               <tr mat-header-row *matHeaderRowDef="displayedColumns1"></tr>
-              <tr mat-row *matRowDef="let row; let x=index; columns: displayedColumns1;" [attr.data-test-id]="'ap' + x" [class.upcoming]="row.starts_in.includes('hours')||row.starts_in.includes('minutes')"></tr>
+              <tr mat-row *matRowDef="let row; let x=index; columns: displayedColumns1;" [attr.data-test-id]="'ap' + x"
+                [class.upcoming]="row.starts_in.includes('hours')||row.starts_in.includes('minutes')"></tr>
             </table>
 
             <mat-paginator #appointmentPaginator hidePageSize [pageSizeOptions]="[5, 10, 20]"
@@ -145,15 +175,22 @@
             <mat-panel-title>
               <div class="intel-accordion-title">
                 <img src="assets/svgs/red-profile.svg" alt="" width="44px">
-                <h6 class="mb-0 ml-2"> {{ 'Priority visits'| translate }} ({{priorityVisitsCount ? priorityVisitsCount : 0}})</h6>
-                <mat-icon aria-hidden="false" class="info-icon" aria-label="help icon" matTooltip="{{'High priority visit' | translate}}" matTooltipPosition="right" data-test-id="matIcoHelpPriority">help_outline</mat-icon>
+                <h6 class="mb-0 ml-2"> {{ 'Priority visits'| translate }} ({{priorityVisitsCount ? priorityVisitsCount :
+                  0}})</h6>
+                <mat-icon aria-hidden="false" class="info-icon" aria-label="help icon"
+                  matTooltip="{{'High priority visit' | translate}}" matTooltipPosition="right"
+                  data-test-id="matIcoHelpPriority">help_outline</mat-icon>
                 <div class="input-group search-bar ml-auto" (click)="$event.stopPropagation();">
-                  <input type="text" #prSearchInput class="form-control" placeholder="Search priority visits" aria-label="search1" aria-describedby="basic-addon1" (keyup)="applyFilter2($event)" (keydown.Space)="$event.stopPropagation()" (keydown.Enter)="$event.stopPropagation()" data-test-id="etSearchPriorityDashboard">
+                  <input type="text" #prSearchInput class="form-control" placeholder="Search priority visits"
+                    aria-label="search1" aria-describedby="basic-addon1" (keyup)="applyFilter2($event)"
+                    (keydown.Space)="$event.stopPropagation()" (keydown.Enter)="$event.stopPropagation()"
+                    data-test-id="etSearchPriorityDashboard">
                   <div class="input-group-append">
                     <span class="input-group-text" id="basic-addon1" *ngIf="!dataSource2.filter">
                       <img src="assets/svgs/search-icon.svg" alt="" width="20px" height="20px">
                     </span>
-                    <button data-test-id="btnResetPrSerach" mat-icon-button aria-label="Reset priority search" *ngIf="dataSource2.filter" (click)="clearFilter('Priority')">
+                    <button data-test-id="btnResetPrSerach" mat-icon-button aria-label="Reset priority search"
+                      *ngIf="dataSource2.filter" (click)="clearFilter('Priority')">
                       <mat-icon class="ml-0" style="line-height: normal;">close</mat-icon>
                     </button>
                   </div>
@@ -164,13 +201,20 @@
 
           <div class="mat-elevation-z8">
             <table mat-table [dataSource]="dataSource2" #priorityMatSort="matSort" matSort>
-
+              <!-- ID Column -->
+              <ng-container matColumnDef="openMrsId">
+                <th mat-header-cell *matHeaderCellDef mat-sort-header>Patient ID</th>
+                <td mat-cell *matCellDef="let element">
+                  <span> {{ element?.openMrsId }}</span>
+                </td>
+              </ng-container>
               <!-- Name Column -->
               <ng-container matColumnDef="name">
-                <th mat-header-cell *matHeaderCellDef mat-sort-header> {{'Patient' | translate}} </th>
+                <th mat-header-cell *matHeaderCellDef mat-sort-header> {{'Name' | translate}} </th>
                 <td mat-cell *matCellDef="let element; let j=index;" [attr.data-test-id]="'prPatient'+j">
                   <div class="d-flex align-items-center">
-                    <img src="{{ baseUrl + '/personimage/' + element.person.uuid }}" alt="" width="32px" height="32px" style="border-radius: 50%;">
+                    <img src="{{ baseUrl + '/personimage/' + element.person.uuid }}" alt="" width="32px" height="32px"
+                      style="border-radius: 50%;">
                     <span class="font-bold ml-2">{{element.name}} ({{(element.person.gender) | translate}})</span>
                   </div>
                 </td>
@@ -179,19 +223,22 @@
               <!-- Age Column -->
               <ng-container matColumnDef="age">
                 <th mat-header-cell *matHeaderCellDef mat-sort-header> {{'Age' | translate}} </th>
-                <td mat-cell *matCellDef="let element;let j=index;" [attr.data-test-id]="'prAge'+j"> {{element.age}} {{'y'| translate}}</td>
+                <td mat-cell *matCellDef="let element;let j=index;" [attr.data-test-id]="'prAge'+j"> {{element.age}}
+                  {{'y'| translate}}</td>
               </ng-container>
 
               <!-- Location Column -->
               <ng-container matColumnDef="location">
                 <th mat-header-cell *matHeaderCellDef mat-sort-header> {{'Location' | translate}} </th>
-                <td mat-cell *matCellDef="let element;let j=index;" [attr.data-test-id]="'prLocation'+j"> {{element.location}} </td>
+                <td mat-cell *matCellDef="let element;let j=index;" [attr.data-test-id]="'prLocation'+j">
+                  {{element.location}} </td>
               </ng-container>
 
               <!-- Chief complaint Column -->
               <ng-container matColumnDef="cheif_complaint">
                 <th mat-header-cell *matHeaderCellDef mat-sort-header> {{'Chief Complaint' | translate}} </th>
-                <td mat-cell *matCellDef="let element;let j=index;" [attr.data-test-id]="'prComplaint'+j"> {{element.cheif_complaint}} </td>
+                <td mat-cell *matCellDef="let element;let j=index;" [attr.data-test-id]="'prComplaint'+j">
+                  {{element.cheif_complaint}} </td>
               </ng-container>
 
               <!-- Visit Uploaded Column -->
@@ -212,12 +259,16 @@
               </tr>
 
               <tr mat-header-row *matHeaderRowDef="displayedColumns2"></tr>
-              <tr mat-row *matRowDef="let row; let x=index; columns: displayedColumns2;" [attr.data-test-id]="'pr'+x" [routerLink]="['/dashboard/visit-summary', row.uuid]"></tr>
+              <tr mat-row *matRowDef="let row; let x=index; columns: displayedColumns2;" [attr.data-test-id]="'pr'+x"
+                [routerLink]="['/dashboard/visit-summary', row.uuid]"></tr>
             </table>
 
-            <mat-paginator #tempPaginator1 hidePageSize [pageSizeOptions]="[5, 10, 20]" hidden aria-label="Select page of periodic elements"></mat-paginator>
+            <mat-paginator #tempPaginator1 hidePageSize [pageSizeOptions]="[5, 10, 20]" hidden
+              aria-label="Select page of periodic elements"></mat-paginator>
             <mat-paginator #priorityPaginator hidePageSize [pageSizeOptions]="[5, 10, 20]"
-            [length]="priorityVisitsCount" [pageIndex]="pageIndex2" [pageSize]="pageSize2" (page)="pageEvent2 = getPriorityData($event)" aria-label="Select page of periodic elements" data-test-id="matPaginatorPriority">
+              [length]="priorityVisitsCount" [pageIndex]="pageIndex2" [pageSize]="pageSize2"
+              (page)="pageEvent2 = getPriorityData($event)" aria-label="Select page of periodic elements"
+              data-test-id="matPaginatorPriority">
             </mat-paginator>
           </div>
 
@@ -228,15 +279,22 @@
             <mat-panel-title>
               <div class="intel-accordion-title">
                 <img src="assets/svgs/green-profile.svg" alt="" width="44px">
-                <h6 class="mb-0 ml-2"> {{'Awaiting visits'|translate}} ({{awaitingVisitsCount ? awaitingVisitsCount : 0}})</h6>
-                <mat-icon aria-hidden="false" class="info-icon" aria-label="help icon" matTooltip="{{'General Uploaded Visits' | translate}}" matTooltipPosition="right" data-test-id="matIcoHelpAwaiting">help_outline</mat-icon>
+                <h6 class="mb-0 ml-2"> {{'Awaiting visits'|translate}} ({{awaitingVisitsCount ? awaitingVisitsCount :
+                  0}})</h6>
+                <mat-icon aria-hidden="false" class="info-icon" aria-label="help icon"
+                  matTooltip="{{'General Uploaded Visits' | translate}}" matTooltipPosition="right"
+                  data-test-id="matIcoHelpAwaiting">help_outline</mat-icon>
                 <div class="input-group search-bar ml-auto" (click)="$event.stopPropagation();">
-                  <input type="text" #awSearchInput class="form-control" placeholder="Search awaiting visits" aria-label="Username" aria-describedby="basic-addon1" (keyup)="applyFilter3($event)" (keydown.Space)="$event.stopPropagation()" (keydown.Enter)="$event.stopPropagation()" data-test-id="etSearchAwaitingDashboard">
+                  <input type="text" #awSearchInput class="form-control" placeholder="Search awaiting visits"
+                    aria-label="Username" aria-describedby="basic-addon1" (keyup)="applyFilter3($event)"
+                    (keydown.Space)="$event.stopPropagation()" (keydown.Enter)="$event.stopPropagation()"
+                    data-test-id="etSearchAwaitingDashboard">
                   <div class="input-group-append">
                     <span class="input-group-text" id="basic-addon1" *ngIf="!dataSource3.filter">
                       <img src="assets/svgs/search-icon.svg" alt="" width="20px" height="20px">
                     </span>
-                    <button data-test-id="btnResetAwSerach" mat-icon-button aria-label="Reset awaiting search" *ngIf="dataSource3.filter" (click)="clearFilter('Awaiting')">
+                    <button data-test-id="btnResetAwSerach" mat-icon-button aria-label="Reset awaiting search"
+                      *ngIf="dataSource3.filter" (click)="clearFilter('Awaiting')">
                       <mat-icon class="ml-0" style="line-height: normal;">close</mat-icon>
                     </button>
                   </div>
@@ -247,13 +305,20 @@
 
           <div class="mat-elevation-z8">
             <table mat-table [dataSource]="dataSource3" #awaitingMatSort="matSort" matSort>
-
+             <!-- ID Column -->
+             <ng-container matColumnDef="openMrsId">
+              <th mat-header-cell *matHeaderCellDef mat-sort-header>Patient ID</th>
+              <td mat-cell *matCellDef="let element">
+                <span> {{ element?.openMrsId }}</span>
+              </td>
+            </ng-container>
               <!-- Name Column -->
               <ng-container matColumnDef="name">
-                <th mat-header-cell *matHeaderCellDef mat-sort-header> {{'Patient' | translate}} </th>
+                <th mat-header-cell *matHeaderCellDef mat-sort-header> {{'Name' | translate}} </th>
                 <td mat-cell *matCellDef="let element;let j=index;" [attr.data-test-id]="'awPatient'+j">
                   <div class="d-flex align-items-center">
-                    <img [src]="baseUrl + '/personimage/' + element.person.uuid" alt="" width="32px" height="32px" style="border-radius: 50%;">
+                    <img [src]="baseUrl + '/personimage/' + element.person.uuid" alt="" width="32px" height="32px"
+                      style="border-radius: 50%;">
                     <span class="font-bold ml-2">{{element.name}} ({{(element.person.gender) | translate}})</span>
                   </div>
                 </td>
@@ -262,19 +327,22 @@
               <!-- Age Column -->
               <ng-container matColumnDef="age">
                 <th mat-header-cell *matHeaderCellDef mat-sort-header> {{'Age' | translate}} </th>
-                <td mat-cell *matCellDef="let element;let j=index;" [attr.data-test-id]="'awAge'+j"> {{element.age}} {{'y'| translate}} </td>
+                <td mat-cell *matCellDef="let element;let j=index;" [attr.data-test-id]="'awAge'+j"> {{element.age}}
+                  {{'y'| translate}} </td>
               </ng-container>
 
               <!-- Location Column -->
               <ng-container matColumnDef="location">
                 <th mat-header-cell *matHeaderCellDef mat-sort-header> {{'Location' | translate}} </th>
-                <td mat-cell *matCellDef="let element;let j=index;" [attr.data-test-id]="'awLocation'+j"> {{element.location}} </td>
+                <td mat-cell *matCellDef="let element;let j=index;" [attr.data-test-id]="'awLocation'+j">
+                  {{element.location}} </td>
               </ng-container>
 
               <!-- Chief complaint Column -->
-              <ng-container matColumnDef="cheif_complaint" >
+              <ng-container matColumnDef="cheif_complaint">
                 <th mat-header-cell *matHeaderCellDef mat-sort-header> {{'Chief Complaint' | translate}} </th>
-                <td mat-cell *matCellDef="let element;let j=index;" [attr.data-test-id]="'awComplaint'+j"> {{element.cheif_complaint}} </td>
+                <td mat-cell *matCellDef="let element;let j=index;" [attr.data-test-id]="'awComplaint'+j">
+                  {{element.cheif_complaint}} </td>
               </ng-container>
 
               <!-- Visit Uploaded Column -->
@@ -290,17 +358,21 @@
 
               <tr class="mat-row" *matNoDataRow>
                 <td class="mat-cell text-center" [attr.colspan]="displayedColumns3.length">
-                 {{'No any awaiting visits.' | translate}}
+                  {{'No any awaiting visits.' | translate}}
                 </td>
               </tr>
 
               <tr mat-header-row *matHeaderRowDef="displayedColumns3"></tr>
-              <tr mat-row *matRowDef="let row; let x=index; columns: displayedColumns3;" [attr.data-test-id]="'aw'+x"  [routerLink]="['/dashboard/visit-summary', row.uuid]"></tr>
+              <tr mat-row *matRowDef="let row; let x=index; columns: displayedColumns3;" [attr.data-test-id]="'aw'+x"
+                [routerLink]="['/dashboard/visit-summary', row.uuid]"></tr>
             </table>
 
-            <mat-paginator #tempPaginator2 hidePageSize [pageSizeOptions]="[5, 10, 20]" hidden aria-label="Select page of periodic elements"></mat-paginator>
+            <mat-paginator #tempPaginator2 hidePageSize [pageSizeOptions]="[5, 10, 20]" hidden
+              aria-label="Select page of periodic elements"></mat-paginator>
             <mat-paginator #awaitingPaginator hidePageSize [pageSizeOptions]="[5, 10, 20]"
-            [length]="awaitingVisitsCount" [pageIndex]="pageIndex1" [pageSize]="pageSize1" (page)="pageEvent1 = getAwaitingData($event)" aria-label="Select page of periodic elements" data-test-id="matPaginatorAwaiting">
+              [length]="awaitingVisitsCount" [pageIndex]="pageIndex1" [pageSize]="pageSize1"
+              (page)="pageEvent1 = getAwaitingData($event)" aria-label="Select page of periodic elements"
+              data-test-id="matPaginatorAwaiting">
             </mat-paginator>
           </div>
 
@@ -311,8 +383,11 @@
             <mat-panel-title>
               <div class="intel-accordion-title">
                 <img src="assets/svgs/followUp.svg" alt="" width="44px">
-                <h6 class="mb-0 ml-2">  {{'Follow-Up visits'| translate }} ({{followupVisitsCount ? followupVisitsCount : 0}})</h6>
-                <mat-icon aria-hidden="false" class="info-icon" aria-label="help icon" matTooltip="{{'Visits which have follow-up' | translate}}" matTooltipPosition="right" data-test-id="matIcoHelpFollowup">help_outline</mat-icon>
+                <h6 class="mb-0 ml-2"> {{'Follow-Up visits'| translate }} ({{followupVisitsCount ? followupVisitsCount :
+                  0}})</h6>
+                <mat-icon aria-hidden="false" class="info-icon" aria-label="help icon"
+                  matTooltip="{{'Visits which have follow-up' | translate}}" matTooltipPosition="right"
+                  data-test-id="matIcoHelpFollowup">help_outline</mat-icon>
                 <div class="input-group width1 search-bar ml-auto" (click)="$event.stopPropagation();">
                   <div class="input-group-append1" [matMenuTriggerFor]="dateFilter">
                     <span class="input-group-text" id="basic-addon1">
@@ -322,12 +397,16 @@
                   </div>
                 </div>
                 <div class="input-group search-bar ml-2" (click)="$event.stopPropagation();">
-                  <input type="text" #fuSearchInput class="form-control" placeholder="Search follow-up visits" aria-label="Username" aria-describedby="basic-addon1" (keyup)="applyFilter5($event)" (keydown.Space)="$event.stopPropagation()" (keydown.Enter)="$event.stopPropagation()" data-test-id="etSearchFollowupDashboard">
+                  <input type="text" #fuSearchInput class="form-control" placeholder="Search follow-up visits"
+                    aria-label="Username" aria-describedby="basic-addon1" (keyup)="applyFilter5($event)"
+                    (keydown.Space)="$event.stopPropagation()" (keydown.Enter)="$event.stopPropagation()"
+                    data-test-id="etSearchFollowupDashboard">
                   <div class="input-group-append">
                     <span class="input-group-text" id="basic-addon1" *ngIf="!dataSource5.filter">
                       <img src="assets/svgs/search-icon.svg" alt="" width="20px" height="20px">
                     </span>
-                    <button data-test-id="btnResetFuSerach" mat-icon-button aria-label="Reset follow-up search" *ngIf="dataSource5.filter" (click)="clearFilter('Follow-up')">
+                    <button data-test-id="btnResetFuSerach" mat-icon-button aria-label="Reset follow-up search"
+                      *ngIf="dataSource5.filter" (click)="clearFilter('Follow-up')">
                       <mat-icon class="ml-0" style="line-height: normal;">close</mat-icon>
                     </button>
                   </div>
@@ -338,13 +417,20 @@
 
           <div class="mat-elevation-z8">
             <table mat-table [dataSource]="dataSource5" #followupMatSort="matSort" matSort>
-
+             <!-- ID Column -->
+             <ng-container matColumnDef="openMrsId">
+              <th mat-header-cell *matHeaderCellDef mat-sort-header>Patient ID</th>
+              <td mat-cell *matCellDef="let element">
+                <span> {{ element?.openMrsId }}</span>
+              </td>
+            </ng-container>
               <!-- Name Column -->
               <ng-container matColumnDef="name">
-                <th mat-header-cell *matHeaderCellDef mat-sort-header> {{'Patient' | translate}} </th>
+                <th mat-header-cell *matHeaderCellDef mat-sort-header> {{'Name' | translate}} </th>
                 <td mat-cell *matCellDef="let element;let j=index;" [attr.data-test-id]="'fuPatient'+j">
                   <div class="d-flex align-items-center">
-                    <img src="{{ baseUrl + '/personimage/' + element.person.uuid }}" alt="" width="32px" height="32px" style="border-radius: 50%;">
+                    <img src="{{ baseUrl + '/personimage/' + element.person.uuid }}" alt="" width="32px" height="32px"
+                      style="border-radius: 50%;">
                     <span class="font-bold ml-2">{{element.name}} ({{(element.person.gender) | translate}})</span>
                   </div>
                 </td>
@@ -353,25 +439,29 @@
               <!-- Age Column -->
               <ng-container matColumnDef="age">
                 <th mat-header-cell *matHeaderCellDef mat-sort-header> {{'Age' | translate}} </th>
-                <td mat-cell *matCellDef="let element;let j=index;" [attr.data-test-id]="'fuAge'+j"> {{element.age}} {{'y'| translate}} </td>
+                <td mat-cell *matCellDef="let element;let j=index;" [attr.data-test-id]="'fuAge'+j"> {{element.age}}
+                  {{'y'| translate}} </td>
               </ng-container>
 
               <!-- Location Column -->
               <ng-container matColumnDef="location">
                 <th mat-header-cell *matHeaderCellDef mat-sort-header> {{'Location'|translate}} </th>
-                <td mat-cell *matCellDef="let element;let j=index;" [attr.data-test-id]="'fuLocation'+j"> {{element.location}} </td>
+                <td mat-cell *matCellDef="let element;let j=index;" [attr.data-test-id]="'fuLocation'+j">
+                  {{element.location}} </td>
               </ng-container>
 
               <!-- Provided by Column -->
               <ng-container matColumnDef="encounter_provider">
                 <th mat-header-cell *matHeaderCellDef mat-sort-header> {{'Provided by'|translate}} </th>
-                <td mat-cell *matCellDef="let element;let j=index;" [attr.data-test-id]="'fuProvidedby'+j"> {{element.encounter_provider}} </td>
+                <td mat-cell *matCellDef="let element;let j=index;" [attr.data-test-id]="'fuProvidedby'+j">
+                  {{element.encounter_provider}} </td>
               </ng-container>
 
               <!-- Chief complaint Column -->
               <ng-container matColumnDef="cheif_complaint">
                 <th mat-header-cell *matHeaderCellDef mat-sort-header> {{'Chief Complaint'|translate}} </th>
-                <td mat-cell *matCellDef="let element;let j=index;" [attr.data-test-id]="'fuComplaint'+j"> {{element.cheif_complaint}} </td>
+                <td mat-cell *matCellDef="let element;let j=index;" [attr.data-test-id]="'fuComplaint'+j">
+                  {{element.cheif_complaint}} </td>
               </ng-container>
 
               <!-- Prescription Started Column -->
@@ -392,31 +482,42 @@
               </tr>
 
               <tr mat-header-row *matHeaderRowDef="displayedColumns5"></tr>
-              <tr mat-row *matRowDef="let row; let x=index; columns: displayedColumns5;" [attr.data-test-id]="'ip'+x" [routerLink]="['/dashboard/visit-summary', row.uuid]"></tr>
+              <tr mat-row *matRowDef="let row; let x=index; columns: displayedColumns5;" [attr.data-test-id]="'ip'+x"
+                [routerLink]="['/dashboard/visit-summary', row.uuid]"></tr>
             </table>
 
-            <mat-paginator #tempPaginator4 hidePageSize [pageSizeOptions]="[5, 10, 20]" hidden aria-label="Select page of periodic elements"></mat-paginator>
+            <mat-paginator #tempPaginator4 hidePageSize [pageSizeOptions]="[5, 10, 20]" hidden
+              aria-label="Select page of periodic elements"></mat-paginator>
             <mat-paginator #followupPaginator hidePageSize [pageSizeOptions]="[5, 10, 20]"
-            [length]="followupVisitsCount" [pageIndex]="pageIndex3" [pageSize]="pageSize3" (page)="pageEvent3 = getFollowUpData($event)" aria-label="Select page of periodic elements" data-test-id="matPaginatorFollowup">
+              [length]="followupVisitsCount" [pageIndex]="pageIndex3" [pageSize]="pageSize3"
+              (page)="pageEvent3 = getFollowUpData($event)" aria-label="Select page of periodic elements"
+              data-test-id="matPaginatorFollowup">
             </mat-paginator>
           </div>
 
         </mat-expansion-panel>
-        
+
         <mat-expansion-panel [expanded]="true" data-test-id="matExpInprogress">
           <mat-expansion-panel-header data-test-id="matExpHeaderInprogress">
             <mat-panel-title>
               <div class="intel-accordion-title">
                 <img src="assets/svgs/pen-board.svg" alt="" width="44px">
-                <h6 class="mb-0 ml-2">  {{'In-progress visits'| translate }} ({{inprogressVisitsCount ? inprogressVisitsCount : 0}})</h6>
-                <mat-icon aria-hidden="false" class="info-icon" aria-label="help icon" matTooltip="{{'Visits going through the consultation' | translate}}" matTooltipPosition="right" data-test-id="matIcoHelpInprogress">help_outline</mat-icon>
+                <h6 class="mb-0 ml-2"> {{'In-progress visits'| translate }} ({{inprogressVisitsCount ?
+                  inprogressVisitsCount : 0}})</h6>
+                <mat-icon aria-hidden="false" class="info-icon" aria-label="help icon"
+                  matTooltip="{{'Visits going through the consultation' | translate}}" matTooltipPosition="right"
+                  data-test-id="matIcoHelpInprogress">help_outline</mat-icon>
                 <div class="input-group search-bar ml-auto" (click)="$event.stopPropagation();">
-                  <input type="text" #ipSearchInput class="form-control" placeholder="Search in-progress visits" aria-label="Username" aria-describedby="basic-addon1" (keyup)="applyFilter4($event)" (keydown.Space)="$event.stopPropagation()" (keydown.Enter)="$event.stopPropagation()" data-test-id="etSearchInprogressDashboard">
+                  <input type="text" #ipSearchInput class="form-control" placeholder="Search in-progress visits"
+                    aria-label="Username" aria-describedby="basic-addon1" (keyup)="applyFilter4($event)"
+                    (keydown.Space)="$event.stopPropagation()" (keydown.Enter)="$event.stopPropagation()"
+                    data-test-id="etSearchInprogressDashboard">
                   <div class="input-group-append">
                     <span class="input-group-text" id="basic-addon1" *ngIf="!dataSource4.filter">
                       <img src="assets/svgs/search-icon.svg" alt="" width="20px" height="20px">
                     </span>
-                    <button data-test-id="btnResetIpSerach" mat-icon-button aria-label="Reset inprogress search" *ngIf="dataSource4.filter" (click)="clearFilter('In-progress')">
+                    <button data-test-id="btnResetIpSerach" mat-icon-button aria-label="Reset inprogress search"
+                      *ngIf="dataSource4.filter" (click)="clearFilter('In-progress')">
                       <mat-icon class="ml-0" style="line-height: normal;">close</mat-icon>
                     </button>
                   </div>
@@ -426,14 +527,21 @@
           </mat-expansion-panel-header>
 
           <div class="mat-elevation-z8">
-            <table mat-table [dataSource]="dataSource4" #inprogressMatSort ="matSort" matSort>
-
+            <table mat-table [dataSource]="dataSource4" #inprogressMatSort="matSort" matSort>
+             <!-- ID Column -->
+             <ng-container matColumnDef="openMrsId">
+              <th mat-header-cell *matHeaderCellDef mat-sort-header>Patient ID</th>
+              <td mat-cell *matCellDef="let element">
+                <span> {{ element?.openMrsId }}</span>
+              </td>
+            </ng-container>
               <!-- Name Column -->
               <ng-container matColumnDef="name">
-                <th mat-header-cell *matHeaderCellDef mat-sort-header> {{'Patient' | translate}} </th>
+                <th mat-header-cell *matHeaderCellDef mat-sort-header> {{'Name' | translate}} </th>
                 <td mat-cell *matCellDef="let element;let j=index;" [attr.data-test-id]="'ipPatient'+j">
                   <div class="d-flex align-items-center">
-                    <img src="{{ baseUrl + '/personimage/' + element.person.uuid }}" alt="" width="32px" height="32px" style="border-radius: 50%;">
+                    <img src="{{ baseUrl + '/personimage/' + element.person.uuid }}" alt="" width="32px" height="32px"
+                      style="border-radius: 50%;">
                     <span class="font-bold ml-2">{{element.name}} ({{(element.person.gender) | translate}})</span>
                   </div>
                 </td>
@@ -442,25 +550,29 @@
               <!-- Age Column -->
               <ng-container matColumnDef="age">
                 <th mat-header-cell *matHeaderCellDef mat-sort-header> {{'Age' | translate}} </th>
-                <td mat-cell *matCellDef="let element;let j=index;" [attr.data-test-id]="'ipAge'+j"> {{element.age}} {{'y'| translate}} </td>
+                <td mat-cell *matCellDef="let element;let j=index;" [attr.data-test-id]="'ipAge'+j"> {{element.age}}
+                  {{'y'| translate}} </td>
               </ng-container>
 
               <!-- Location Column -->
               <ng-container matColumnDef="location">
                 <th mat-header-cell *matHeaderCellDef mat-sort-header> {{'Location'|translate}} </th>
-                <td mat-cell *matCellDef="let element;let j=index;" [attr.data-test-id]="'ipLocation'+j"> {{element.location}} </td>
+                <td mat-cell *matCellDef="let element;let j=index;" [attr.data-test-id]="'ipLocation'+j">
+                  {{element.location}} </td>
               </ng-container>
 
               <!-- Provided by Column -->
               <ng-container matColumnDef="encounter_provider">
                 <th mat-header-cell *matHeaderCellDef mat-sort-header> {{'Provided by'|translate}} </th>
-                <td mat-cell *matCellDef="let element;let j=index;" [attr.data-test-id]="'ipProvidedby'+j"> {{element.encounter_provider}} </td>
+                <td mat-cell *matCellDef="let element;let j=index;" [attr.data-test-id]="'ipProvidedby'+j">
+                  {{element.encounter_provider}} </td>
               </ng-container>
 
               <!-- Chief complaint Column -->
               <ng-container matColumnDef="cheif_complaint">
                 <th mat-header-cell *matHeaderCellDef mat-sort-header> {{'Chief Complaint'|translate}} </th>
-                <td mat-cell *matCellDef="let element;let j=index;" [attr.data-test-id]="'ipComplaint'+j"> {{element.cheif_complaint}} </td>
+                <td mat-cell *matCellDef="let element;let j=index;" [attr.data-test-id]="'ipComplaint'+j">
+                  {{element.cheif_complaint}} </td>
               </ng-container>
 
               <!-- Prescription Started Column -->
@@ -481,18 +593,22 @@
               </tr>
 
               <tr mat-header-row *matHeaderRowDef="displayedColumns4"></tr>
-              <tr mat-row *matRowDef="let row; let x=index; columns: displayedColumns4;" [attr.data-test-id]="'ip'+x" [routerLink]="['/dashboard/visit-summary', row.uuid]"></tr>
+              <tr mat-row *matRowDef="let row; let x=index; columns: displayedColumns4;" [attr.data-test-id]="'ip'+x"
+                [routerLink]="['/dashboard/visit-summary', row.uuid]"></tr>
             </table>
 
-            <mat-paginator #tempPaginator3 hidePageSize [pageSizeOptions]="[5, 10, 20]" hidden aria-label="Select page of periodic elements"></mat-paginator>
+            <mat-paginator #tempPaginator3 hidePageSize [pageSizeOptions]="[5, 10, 20]" hidden
+              aria-label="Select page of periodic elements"></mat-paginator>
             <mat-paginator #inprogressPaginator hidePageSize [pageSizeOptions]="[5, 10, 20]"
-            [length]="inprogressVisitsCount" [pageIndex]="pageIndex3" [pageSize]="pageSize3" (page)="pageEvent3 = getInprogressData($event)" aria-label="Select page of periodic elements" data-test-id="matPaginatorInprogress">
+              [length]="inprogressVisitsCount" [pageIndex]="pageIndex3" [pageSize]="pageSize3"
+              (page)="pageEvent3 = getInprogressData($event)" aria-label="Select page of periodic elements"
+              data-test-id="matPaginatorInprogress">
             </mat-paginator>
           </div>
 
         </mat-expansion-panel>
 
-        
+
 
       </mat-accordion>
     </div>
@@ -502,49 +618,57 @@
 <div class="d-flex align-items-center justify-content-end">
   <mat-menu #dateFilter="matMenu" [hasBackdrop]="false" class="menu1">
     <div (click)="$event.stopPropagation()" (keydown)="$event.stopPropagation()">
-      <button mat-icon-button  class="date-btn mt-2" [ngClass]="showRange || showAllVisits  ? 'bg-color-white': 'bg-color-lightGray'"
-       (click)="showDate = true; showRange = false; showAllVisits = false; fromDate=null; toDate=null">Date</button>
-      <button mat-icon-button class="date-btn mt-2" [ngClass]="showDate || showAllVisits ? 'bg-color-white': 'bg-color-lightGray'"
-       (click)="showRange = true; showDate = false;  showAllVisits = false; fromDate=null; toDate=null">Range</button>
-      <button mat-icon-button  class="range-btn mt-2" [ngClass]="showRange || showDate  ? 'bg-color-white': 'bg-color-lightGray'" 
-       (click)="showAllVisits = true; showDate = false; showRange = false; fromDate=null; toDate=null;">All</button>
+      <button mat-icon-button class="date-btn mt-2"
+        [ngClass]="showRange || showAllVisits  ? 'bg-color-white': 'bg-color-lightGray'"
+        (click)="showDate = true; showRange = false; showAllVisits = false; fromDate=null; toDate=null">Date</button>
+      <button mat-icon-button class="date-btn mt-2"
+        [ngClass]="showDate || showAllVisits ? 'bg-color-white': 'bg-color-lightGray'"
+        (click)="showRange = true; showDate = false;  showAllVisits = false; fromDate=null; toDate=null">Range</button>
+      <button mat-icon-button class="range-btn mt-2"
+        [ngClass]="showRange || showDate  ? 'bg-color-white': 'bg-color-lightGray'"
+        (click)="showAllVisits = true; showDate = false; showRange = false; fromDate=null; toDate=null;">All</button>
       <div *ngIf="showDate" class="date-filter">
         <div class="input-field-group">
           <input class="mt-4" type="date" [(ngModel)]="fromDate" data-test-id="etExpiryDateAddLicense">
         </div>
         <div class="actions-btn-wrap d-flex align-items-center ml-4 mt-4 mb-2">
-          <button class="action-btn white-btn mr-2" type="button" (click)="resetFilter()" data-test-id="btnCancel">Reset</button>
+          <button class="action-btn white-btn mr-2" type="button" (click)="resetFilter()"
+            data-test-id="btnCancel">Reset</button>
           <button class="action-btn blue-btn" type="button" [disabled]="(showDate && !fromDate)"
-                    (click)="applyDateFilter(showAllVisits)" data-test-id="btnSubmit">Apply</button>
+            (click)="applyDateFilter(showAllVisits)" data-test-id="btnSubmit">Apply</button>
         </div>
       </div>
       <div *ngIf="showRange" class="date-filter">
         <div class="input-field-group">
           <label class="mt-4">From</label>
           <input type="date" [(ngModel)]="fromDate" data-test-id="etExpiryDateAddLicense">
-        </div> 
+        </div>
         <div class="input-field-group">
           <label>To</label>
           <input type="date" [(ngModel)]="toDate" data-test-id="etExpiryDateAddLicense">
         </div>
         <small class="text-danger pl-2" *ngIf="isDatesValid">From date should not be greater than to date</small>
         <div class="actions-btn-wrap d-flex align-items-center ml-4 mt-4 mb-2">
-          <button class="action-btn white-btn mr-2 fw-bold" type="button" (click)="resetFilter()" data-test-id="btnCancel">Reset</button>
-          <button class="action-btn blue-btn" type="button" [disabled]="(showRange && (!fromDate || !toDate) || (fromDate > toDate))" 
-          (click)="applyDateFilter(showAllVisits)" data-test-id="btnSubmit">Apply</button>
+          <button class="action-btn white-btn mr-2 fw-bold" type="button" (click)="resetFilter()"
+            data-test-id="btnCancel">Reset</button>
+          <button class="action-btn blue-btn" type="button"
+            [disabled]="(showRange && (!fromDate || !toDate) || (fromDate > toDate))"
+            (click)="applyDateFilter(showAllVisits)" data-test-id="btnSubmit">Apply</button>
         </div>
       </div>
       <div *ngIf="showAllVisits" class="date-filter">
         <div class="form-check ml-4 mt-4 fw-bold">
-          <input class="form-check-input" type="checkbox" [checked]="selectAll" (change)="selectAllVisits($event)" id="flexCheckIndeterminate">
+          <input class="form-check-input" type="checkbox" [checked]="selectAll" (change)="selectAllVisits($event)"
+            id="flexCheckIndeterminate">
           <label class="form-check-label" for="flexCheckIndeterminate">
             All Doctor's Follow-up Visits
           </label>
         </div>
         <div class="actions-btn-wrap d-flex align-items-center ml-4 mt-4 mb-2">
-          <button class="action-btn white-btn mr-2" type="button" (click)="resetFilter()" data-test-id="btnCancel">Reset</button>
-          <button class="action-btn blue-btn" type="button"
-                    (click)="applyDateFilter(showAllVisits)" [disabled]="!selectAll" data-test-id="btnSubmit">Apply</button>
+          <button class="action-btn white-btn mr-2" type="button" (click)="resetFilter()"
+            data-test-id="btnCancel">Reset</button>
+          <button class="action-btn blue-btn" type="button" (click)="applyDateFilter(showAllVisits)"
+            [disabled]="!selectAll" data-test-id="btnSubmit">Apply</button>
         </div>
       </div>
     </div>

@@ -72,6 +72,7 @@ export class PrescriptionComponent implements OnInit, OnChanges {
           visit.age = this.visitService.calculateAge(visit.person.birthdate);
           visit.name = visit.patient_name.given_name + " " + (visit.patient_name?.middle_name ? visit.patient_name?.middle_name+" " : "" )+ " " + visit.patient_name.family_name;
           visit.location = visit.location.name;
+          visit.openMrsId = visit?.patient?.identifier;
           records.push(visit);
         }
         this.completedVisits = this.completedVisits.concat(records);
@@ -109,6 +110,7 @@ export class PrescriptionComponent implements OnInit, OnChanges {
           visit.age = this.visitService.calculateAge(visit.person.birthdate);
           visit.name = visit.patient_name.given_name + " " + (visit.patient_name?.middle_name ? visit.patient_name?.middle_name+" " : "" )+ " " + visit.patient_name.family_name;
           visit.location = visit.location.name;
+          visit.openMrsId = visit?.patient?.identifier;
           records.push(visit);
         }
         this.prescriptionSent = this.prescriptionSent.concat(records);
@@ -132,6 +134,7 @@ export class PrescriptionComponent implements OnInit, OnChanges {
           visit.age = this.visitService.calculateAge(visit.person.birthdate);
           visit.name = visit.patient_name.given_name + " " + (visit.patient_name?.middle_name ? visit.patient_name?.middle_name+" " : "" )+ " " + visit.patient_name.family_name;
           visit.location = visit.location.name;
+          visit.openMrsId = visit?.patient?.identifier;
           records.push(visit);
         }
         this.doctorCompletedVisits = this.doctorCompletedVisits.concat(records);

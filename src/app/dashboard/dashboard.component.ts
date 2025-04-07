@@ -26,11 +26,11 @@ import { MatSort } from '@angular/material/sort';
 export class DashboardComponent implements OnInit {
 
   showAll: boolean = true;
-  displayedColumns1: string[] = ['patientName', 'patientAge', 'starts_in', 'location', 'cheif_complaint', 'actions'];
-  displayedColumns2: string[] = ['name', 'age', 'location', 'cheif_complaint', 'visit_created'];
-  displayedColumns3: string[] = ['name', 'age', 'location', 'cheif_complaint', 'visit_created'];
-  displayedColumns4: string[] = ['name', 'age', 'location', 'encounter_provider', 'cheif_complaint', 'prescription_started'];
-  displayedColumns5: string[] = ['name', 'age', 'location', 'encounter_provider', 'cheif_complaint', 'followup_date'];
+  displayedColumns1: string[] = ['openMrsId','patientName', 'patientAge', 'starts_in', 'location', 'cheif_complaint', 'actions'];
+  displayedColumns2: string[] = ['openMrsId','name', 'age', 'location', 'cheif_complaint', 'visit_created'];
+  displayedColumns3: string[] = ['openMrsId','name', 'age', 'location', 'cheif_complaint', 'visit_created'];
+  displayedColumns4: string[] = ['openMrsId','name', 'age', 'location', 'encounter_provider', 'cheif_complaint', 'prescription_started'];
+  displayedColumns5: string[] = ['openMrsId','name', 'age', 'location', 'encounter_provider', 'cheif_complaint', 'followup_date'];
 
   dataSource1 = new MatTableDataSource<any>();
   dataSource2 = new MatTableDataSource<any>();
@@ -163,6 +163,7 @@ export class DashboardComponent implements OnInit {
           visit.age = this.visitService.calculateAge(visit.person.birthdate);
           visit.name = visit.patient_name.given_name + " " + (visit.patient_name?.middle_name ? visit.patient_name?.middle_name+" " : "" )+ " " + visit.patient_name.family_name;
           visit.location = visit.location.name;
+          visit.openMrsId = visit?.patient?.identifier;
           if (visit.cheif_complaint.filter(f => f.includes('Follow')).length > 0) {
             if(!this.visitService.getPatientVerdict(visit).includes('Patient is feeling better')) {
               newfollowupVisits.push(visit);
@@ -238,6 +239,7 @@ export class DashboardComponent implements OnInit {
           visit.age = this.visitService.calculateAge(visit.person.birthdate);
           visit.name = visit.patient_name.given_name + " " + (visit.patient_name?.middle_name ? visit.patient_name?.middle_name+" " : "" )+ " " + visit.patient_name.family_name;
           visit.location = visit.location.name;
+          visit.openMrsId = visit?.patient?.identifier;
            if (visit.cheif_complaint.filter(f => f.includes('Follow')).length > 0) {
             if(!this.visitService.getPatientVerdict(visit).includes('Patient is feeling better')) {
               newfollowupVisits.push(visit);
@@ -314,6 +316,7 @@ export class DashboardComponent implements OnInit {
           visit.age = this.visitService.calculateAge(visit.person.birthdate);
           visit.name = visit.patient_name.given_name + " " + (visit.patient_name?.middle_name ? visit.patient_name?.middle_name+" " : "" )+ " " + visit.patient_name.family_name;
           visit.location = visit.location.name;
+          visit.openMrsId = visit?.patient?.identifier;
           this.inProgressVisits.push(visit);
         }
         this.dataSource4.data = [...this.inProgressVisits];
@@ -350,6 +353,7 @@ export class DashboardComponent implements OnInit {
         visit.age = this.visitService.calculateAge(visit.person.birthdate);
         visit.name = visit.patient_name.given_name + " " + (visit.patient_name?.middle_name ? visit.patient_name?.middle_name+" " : "" )+ " " + visit.patient_name.family_name;
         visit.location = visit.location;
+        visit.openMrsId = visit?.patient?.identifier;
         if (recentVisit.length > 0) {
           visit.followup_date = this.visitService.getFollowupDate(recentVisit[0], visitTypes.VISIT_NOTE);
           visit.encounter_provider = recentVisit[0]?.encounters.filter(e => e.encounterType.display == visitTypes.PATIENT_EXIT_SURVEY || e.encounterType.display == visitTypes.VISIT_COMPLETE)[0]
@@ -442,6 +446,7 @@ export class DashboardComponent implements OnInit {
               appointment.cheif_complaint = this.getCheifComplaint(appointment.visit);
               appointment.starts_in = checkIfDateOldThanOneDay(appointment.slotJsDate);
               appointment.location = appointment?.visit?.location.name;
+              appointment.openMrsId = appointment?.openMrsId;
               this.appointments.push(appointment);
             }
           }

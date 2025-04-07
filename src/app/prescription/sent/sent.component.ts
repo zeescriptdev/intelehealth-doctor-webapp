@@ -16,7 +16,7 @@ import { environment } from 'src/environments/environment';
 })
 export class SentComponent implements OnInit, AfterViewInit, OnChanges {
 
-  displayedColumns: string[] = ['name', 'age', 'visit_created', 'location', 'cheif_complaint', 'prescription_sent'];
+  displayedColumns: string[] = ['openMrsId','name', 'age', 'visit_created', 'location', 'cheif_complaint', 'prescription_sent'];
   dataSource = new MatTableDataSource<any>();
   baseUrl: string = environment.baseURL;
   @Input() prescriptionsSent: CustomVisitModel[] = [];

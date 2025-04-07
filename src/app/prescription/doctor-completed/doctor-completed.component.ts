@@ -13,7 +13,7 @@ import { MatSort } from '@angular/material/sort';
 })
 export class DoctorCompleted implements OnInit, AfterViewInit, OnChanges {
 
-  displayedColumns: string[] = ['name', 'age', 'visit_created', 'location', 'cheif_complaint', 'prescription_sent'];
+  displayedColumns: string[] = ['openMrsId','name', 'age', 'visit_created', 'location', 'cheif_complaint', 'prescription_sent'];
   dataSource = new MatTableDataSource<any>();
   baseUrl: string = environment.baseURL;
   @Input() doctorCompletedVisits: CustomVisitModel[] = [];
