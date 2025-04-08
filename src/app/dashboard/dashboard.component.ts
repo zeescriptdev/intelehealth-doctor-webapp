@@ -1177,7 +1177,7 @@ export class DashboardComponent implements OnInit {
     const isCompleted = Boolean(len);
     if (isCompleted) {
       this.toastr.error("Visit is already completed, it can't be rescheduled.", 'Rescheduling failed');
-    } else if(appointment.visitStatus == 'Visit In Progress') {
+    } else if(appointment.visitStatus == 'Visit In Progress' && this.currentAppointmentFilter !== "pending") {
       this.toastr.error(this.translateService.instant("Visit is in progress, it can't be rescheduled."), this.translateService.instant('Rescheduling failed!'));
     } else {
       this.coreService.openRescheduleAppointmentModal(appointment).subscribe((res: RescheduleAppointmentModalResponseModel) => {
@@ -1211,7 +1211,7 @@ export class DashboardComponent implements OnInit {
   * @return {void}
   */
   cancel(appointment: AppointmentModel) {
-    if(appointment.visitStatus == 'Visit In Progress') {
+    if(appointment.visitStatus == 'Visit In Progress' && this.currentAppointmentFilter !== "pending") {
       this.toastr.error(this.translateService.instant("Visit is in progress, it can't be cancelled."), this.translateService.instant('Canceling failed!'));
       return;
     }
