@@ -690,23 +690,22 @@ export class VisitSummaryComponent implements OnInit, OnDestroy, AfterViewInit {
                       const processedStrings = splitByDash.slice(1, splitByDash.length).join('-').split(".").map(itemList => {
                         let splitByHyphen = itemList.split(" - ");
                         let value = splitByHyphen.pop() || "";
-                        if(this.isValidUnitFormat(value)){
-                          if (this.checkTestUnitValues(diagnostics?.testUnits, value, splitByHyphen)) {
-                            value = `<span class="light-green">${value}</span>`;
-                          } else {
-                            value = `<span class="red-color">${value}</span>`;
-                          }
-                        } else {
-                          if(this.checkTestNameValues(diagnostics?.testNames, value)) {
-                            value = `<span class="light-green">${value}</span>`;
-                          }
-                        }
+                        // if(this.isValidUnitFormat(value)){
+                        //   if (this.checkTestUnitValues(diagnostics?.testUnits, value, splitByHyphen)) {
+                        //     value = `<span class="light-green">${value}</span>`;
+                        //   } else {
+                        //     value = `<span class="red-color">${value}</span>`;
+                        //   }
+                        // } else {
+                        //   if(this.checkTestNameValues(diagnostics?.testNames, value)) {
+                        //     value = `<span class="light-green">${value}</span>`;
+                        //   }
+                        // }
                         splitByHyphen.push(value);
                         return splitByHyphen.join(" - ");
                       });
                       const resultString = processedStrings.join(". ").trim();
-                      this.sanitizedValue = this.sanitizer.bypassSecurityTrustHtml(resultString);
-                      obj1.data.push({ key: splitByDash[0].replace('• ', ''), value: this.sanitizedValue });
+                      obj1.data.push({ key: splitByDash[0].replace('• ', ''), value: resultString });
                     }
                   }
                   this.checkUpReasonData.push(obj1);
