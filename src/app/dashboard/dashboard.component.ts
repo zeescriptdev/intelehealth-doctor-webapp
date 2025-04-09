@@ -162,7 +162,7 @@ export class DashboardComponent implements OnInit {
           visit.visit_created = visit?.date_created ? this.getCreatedAt(visit.date_created) : this.getEncounterCreated(visit, visitTypes.ADULTINITIAL);
           visit.age = this.visitService.calculateAge(visit.person.birthdate);
           visit.name = visit.patient_name.given_name + " " + (visit.patient_name?.middle_name ? visit.patient_name?.middle_name+" " : "" )+ " " + visit.patient_name.family_name;
-          visit.location = visit.location.name;
+          visit.location = visit?.sanch;
           visit.openMrsId = visit?.patient?.identifier;
           if (visit.cheif_complaint.filter(f => f.includes('Follow')).length > 0) {
             if(!this.visitService.getPatientVerdict(visit).includes('Patient is feeling better')) {
@@ -238,7 +238,7 @@ export class DashboardComponent implements OnInit {
           visit.visit_created = visit?.date_created ? this.getCreatedAt(visit.date_created) : this.getEncounterCreated(visit, visitTypes.FLAGGED);
           visit.age = this.visitService.calculateAge(visit.person.birthdate);
           visit.name = visit.patient_name.given_name + " " + (visit.patient_name?.middle_name ? visit.patient_name?.middle_name+" " : "" )+ " " + visit.patient_name.family_name;
-          visit.location = visit.location.name;
+          visit.location = visit?.sanch;
           visit.openMrsId = visit?.patient?.identifier;
            if (visit.cheif_complaint.filter(f => f.includes('Follow')).length > 0) {
             if(!this.visitService.getPatientVerdict(visit).includes('Patient is feeling better')) {
@@ -315,7 +315,7 @@ export class DashboardComponent implements OnInit {
           visit.encounter_provider = this.getEncounterProviderName(visit, visitTypes.VISIT_NOTE);
           visit.age = this.visitService.calculateAge(visit.person.birthdate);
           visit.name = visit.patient_name.given_name + " " + (visit.patient_name?.middle_name ? visit.patient_name?.middle_name+" " : "" )+ " " + visit.patient_name.family_name;
-          visit.location = visit.location.name;
+          visit.location = visit?.sanch;
           visit.openMrsId = visit?.patient?.identifier;
           this.inProgressVisits.push(visit);
         }
@@ -352,7 +352,7 @@ export class DashboardComponent implements OnInit {
         let recentVisit = visits.filter(v => v.uuid !== visit.uuid && v.encounters.filter(e => e.encounterType.display == visitTypes.PATIENT_EXIT_SURVEY || e.encounterType.display == visitTypes.VISIT_COMPLETE).length > 0);
         visit.age = this.visitService.calculateAge(visit.person.birthdate);
         visit.name = visit.patient_name.given_name + " " + (visit.patient_name?.middle_name ? visit.patient_name?.middle_name+" " : "" )+ " " + visit.patient_name.family_name;
-        visit.location = visit.location;
+        visit.location = visit?.sanch;
         visit.openMrsId = visit?.patient?.identifier;
         if (recentVisit.length > 0) {
           visit.followup_date = this.visitService.getFollowupDate(recentVisit[0], visitTypes.VISIT_NOTE);
@@ -445,7 +445,7 @@ export class DashboardComponent implements OnInit {
             if (appointment.visit) {
               appointment.cheif_complaint = this.getCheifComplaint(appointment.visit);
               appointment.starts_in = checkIfDateOldThanOneDay(appointment.slotJsDate);
-              appointment.location = appointment?.visit?.location.name;
+              appointment.location = appointment?.visit?.sanch;
               appointment.openMrsId = appointment?.openMrsId;
               this.appointments.push(appointment);
             }

@@ -254,6 +254,7 @@ export interface CustomVisitModel {
     gender?: string,
     uuid?: string
   }
+  sanch?:string
 }
 
 export interface CustomEncounterModel {

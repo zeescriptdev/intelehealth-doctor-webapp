@@ -65,7 +65,7 @@ export class AppointmentsComponent implements OnInit {
             if (appointment.visit) {
               appointment.cheif_complaint = this.getCheifComplaint(appointment.visit);
               appointment.starts_in = checkIfDateOldThanOneDay(appointment.slotJsDate);
-              appointment.location = appointment?.visit?.location.name;
+              appointment.location = appointment?.visit?.sanch;
               appointment.openMrsId = appointment?.openMrsId;
               this.appointments.push(appointment);
             }

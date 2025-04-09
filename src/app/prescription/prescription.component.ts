@@ -71,7 +71,7 @@ export class PrescriptionComponent implements OnInit, OnChanges {
           }
           visit.age = this.visitService.calculateAge(visit.person.birthdate);
           visit.name = visit.patient_name.given_name + " " + (visit.patient_name?.middle_name ? visit.patient_name?.middle_name+" " : "" )+ " " + visit.patient_name.family_name;
-          visit.location = visit.location.name;
+          visit.location = visit?.sanch;
           visit.openMrsId = visit?.patient?.identifier;
           records.push(visit);
         }
@@ -109,7 +109,7 @@ export class PrescriptionComponent implements OnInit, OnChanges {
           visit.prescription_sent = (vcenc) ? this.checkIfDateOldThanOneDay(vcenc.encounter_datetime) : null;
           visit.age = this.visitService.calculateAge(visit.person.birthdate);
           visit.name = visit.patient_name.given_name + " " + (visit.patient_name?.middle_name ? visit.patient_name?.middle_name+" " : "" )+ " " + visit.patient_name.family_name;
-          visit.location = visit.location.name;
+          visit.location = visit?.sanch;
           visit.openMrsId = visit?.patient?.identifier;
           records.push(visit);
         }
@@ -133,7 +133,7 @@ export class PrescriptionComponent implements OnInit, OnChanges {
           visit.prescription_sent = (vcenc) ? this.checkIfDateOldThanOneDay(vcenc.encounter_datetime) : null;
           visit.age = this.visitService.calculateAge(visit.person.birthdate);
           visit.name = visit.patient_name.given_name + " " + (visit.patient_name?.middle_name ? visit.patient_name?.middle_name+" " : "" )+ " " + visit.patient_name.family_name;
-          visit.location = visit.location.name;
+          visit.location = visit?.sanch;
           visit.openMrsId = visit?.patient?.identifier;
           records.push(visit);
         }
