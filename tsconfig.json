@@ -1,11 +1,6 @@
 {
   "compileOnSave": false,
   "compilerOptions": {
-    "paths": {
-      "aiddx-library": [
-        "dist/aiddx-library"
-      ]
-    },
     "baseUrl": "./",
     "outDir": "./dist/out-tsc",
     "sourceMap": false,
