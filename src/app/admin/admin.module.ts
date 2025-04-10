@@ -56,7 +56,7 @@ import { PatientVisitSectionsComponent } from './admin-actions/patient-visit-sec
 import {DragDropModule} from '@angular/cdk/drag-drop';
 import { PatientDetailsComponent } from './admin-actions/patient-details/patient-details.component';
 import { PatientVisitDropdownComponent } from './admin-actions/patient-visit-dropdown/patient-visit-dropdown.component';
-import { HomeScreenComponent } from './admin-actions/home-screen/home-screen/home-screen.component';
+import { HomeScreenComponent } from './admin-actions/home-screen/home-screen.component';
 
 
 // AoT requires an exported function for factories
