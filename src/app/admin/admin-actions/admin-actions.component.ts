@@ -128,7 +128,7 @@ export class AdminActionsComponent implements OnInit {
     },
     {
       title:"Home Screen",
-      desc: "Home screen section for mobile",
+      desc: "Home screen section",
       icon: "assets/svgs/patient_visit_dropdown.svg",
       path: "admin/actions/home-screen",
       isLocalPath: true
