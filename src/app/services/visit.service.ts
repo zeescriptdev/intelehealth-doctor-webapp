@@ -280,8 +280,12 @@ export class VisitService {
   * @param {number} page - Page number
   * @return {Observable<any>}
   */
-    getFollowUpLogVisits(page: number = 1): Observable<any> {
+    getFollowUpLogVisits(providerId:string, page: number = 1): Observable<any> {
+     if(providerId) {
+      return this.http.get(`${this.baseURLMindmap}/openmrs/getFollowUpLogVisits/${providerId}?page=${page}`);
+     } else {
       return this.http.get(`${this.baseURLMindmap}/openmrs/getFollowUpLogVisits?page=${page}`);
+     }
     }
 
     
