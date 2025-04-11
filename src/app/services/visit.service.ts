@@ -129,6 +129,12 @@ export class VisitService {
     );
   }
 
+  getVisitCountsForDashboard(speciality:string): Observable<any> {
+    return this.http.get(
+      `${this.baseURLMindmap}/openmrs/getVisitCountsForDashboard?speciality=${speciality}`
+    );
+  }
+
   getDoctorsCompletedVisits(userId, page): Observable<any> {
     return this.http.get(
       `${this.baseURLMindmap}/openmrs/getDoctorsVisit/${userId}?page=${page}`

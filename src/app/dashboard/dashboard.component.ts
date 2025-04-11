@@ -132,13 +132,24 @@ export class DashboardComponent implements OnInit {
       } else {
         this.router.navigate(['/dashboard/get-started']);
       }
-      this.getAppointments();
+      this.getVisitCountsForDashboard();
       this.getAwaitingVisits(1);
       this.getPriorityVisits(1);
-      this.getInProgressVisits(1);
+     // this.getInProgressVisits(1);
     }
 
     this.socket.initSocket(true);
+  }
+
+
+  getVisitCountsForDashboard() {
+    this.visitService.getVisitCountsForDashboard(this.specialization).subscribe(({ data }: any) => {
+      if (data) {      
+        this.priorityVisitsCount = data.priorityVisit;
+        this.awaitingVisitsCount = data.awaitingVisit;
+        this.inprogressVisitsCount = data.inProgressVisit;
+      }
+    });
   }
 
   /**

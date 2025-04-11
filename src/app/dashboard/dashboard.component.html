@@ -58,7 +58,7 @@
       </div>
       <mat-accordion class="intel-accordion-con" multi data-test-id="matAccDashboard">
 
-        <mat-expansion-panel [expanded]="true" data-test-id="matExpAppointment">
+        <mat-expansion-panel [expanded]="false" (opened)="getAppointments()" data-test-id="matExpAppointment">
           <mat-expansion-panel-header data-test-id="matExpHeaderAppointment">
             <mat-panel-title>
               <div class="intel-accordion-title">
@@ -497,7 +497,7 @@
 
         </mat-expansion-panel>
 
-        <mat-expansion-panel [expanded]="true" data-test-id="matExpInprogress">
+        <mat-expansion-panel [expanded]="false" (opened)="getInProgressVisits(1)" data-test-id="matExpInprogress">
           <mat-expansion-panel-header data-test-id="matExpHeaderInprogress">
             <mat-panel-title>
               <div class="intel-accordion-title">

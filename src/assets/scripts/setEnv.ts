@@ -74,7 +74,7 @@ const environmentFileContent = `
     vapidPublicKey: '${process.env.VAPID_PUBLIC_KEY}',
     authGatwayURL: '${process.env.AUTH_GATE_WAY_URL}',
     showCaptcha: false,
-    recordsPerPage: 100
+    recordsPerPage: 25
   };
 `;
 
