@@ -1734,28 +1734,96 @@
                     </mat-panel-title>
                     <mat-icon>{{ panel6.expanded ? "remove" : "add" }}</mat-icon>
                   </mat-expansion-panel-header>
-                  <form
+                  <ng-container *ngIf="!appConfigService?.patient_visit_summary?.dp_investigations_secondary">
+                    <ul class="items-list" *ngIf="tests.length">
+                      <li *ngFor="let t of tests; let i = index">
+                        <div class="d-flex justify-content-between">
+                          <span>{{ t.value }}</span>
+                          <button
+                            mat-icon-button
+                            (click)="deleteTest(i, t.uuid)"
+                            data-test-id="{{'btnDeleteTestVisitSummary'+i}}"
+                            *ngIf="isVisitNoteProvider && !visitEnded"
+                          >
+                            <img src="assets/svgs/delete-icon.svg" alt="" />
+                          </button>
+                        </div>
+                      </li>
+                    </ul>
+                    <ng-template #noTests>
+                      <div class="no-docs text-center font-weight-bold">
+                        {{'No tests added!'|translate}}
+                      </div>
+                    </ng-template>
+                    <ng-container *ngIf="isVisitNoteProvider && !visitEnded">
+                      <div class="form-group mt-3" *ngIf="addMoreTest">
+                        <button
+                          type="button"
+                          class="add-more-btn"
+                          (click)="toggleTest()"
+                          data-test-id="btnAddMoreTest"
+                        >
+                          <img src="assets/svgs/plus-circle.svg" alt="" />
+                          <span class="ml-2">{{'Add more test'|translate}}</span>
+                        </button>
+                      </div>
+                      <form
+                        class="mt-3"
+                        [formGroup]="addTestForm"
+                        (ngSubmit)="addTest()"
+                        *ngIf="!addMoreTest"
+                      >
+                        <div class="form-group">
+                          <label for="note"><b>{{'Test'|translate}}*</b></label>
+                          <input
+                            type="text"
+                            class="form-control"
+                            formControlName="test"
+                            placeholder="{{'Type here'|translate}}"
+                            [ngbTypeahead]="search2"
+                            data-test-id="etTest"
+                          />
+                        </div>
+                        <div class="form-group">
+                          <button
+                            type="button"
+                            class="white-btn mr-2"
+                            (click)="toggleTest()"
+                            data-test-id="btnCancelTest"
+                          >
+                            {{'Cancel'|translate}}
+                          </button>
+                          <button
+                            type="submit"
+                            class="gray-btn"
+                            [disabled]="addTestForm.invalid"
+                            data-test-id="btnSubmitTest"
+                          >
+                            {{'Add test'|translate}}
+                          </button>
+                        </div>
+                      </form>
+                    </ng-container>
+                  </ng-container>
+                  <ng-container *ngIf="appConfigService?.patient_visit_summary?.dp_investigations_secondary">
+                    <form
                     class="mt-3"
                     [formGroup]="testForm"
-                  >
-                    <div class="form-group">
-                      <ng-container *ngIf="isFeatureAvailable('investigationsDropdown'); else investigationsTxtArea">
-                        <input type="text" class="form-control" formControlName="test" placeholder="{{'Type here'|translate}}"
-                          [ngbTypeahead]="search2" data-test-id="etTest" />
-                      </ng-container>
-                      <ng-template #investigationsTxtArea>
-                        <textarea
-                          formControlName="test"
-                          class="form-control"
-                          rows="3"
-                          placeholder="{{'Type here'|translate}}"
-                          data-test-id="etAI"
-                          (keyup)="autoGrowTextZone($event)"
-                          [attr.disabled]="(isMCCUser || !isVisitNoteProvider || visitEnded)? 'disabled' : null"
-                        ></textarea>
-                      </ng-template>
-                    </div>
-                  </form>
+                    >
+                      <div class="form-group">
+                          <textarea
+                            formControlName="test"
+                            class="form-control"
+                            rows="3"
+                            placeholder="{{'Type here'|translate}}"
+                            data-test-id="etAI"
+                            (keyup)="autoGrowTextZone($event)"
+                            [attr.disabled]="(isMCCUser || !isVisitNoteProvider || visitEnded)? 'disabled' : null"
+                          ></textarea>
+                      </div>
+                    </form>
+                  </ng-container>
+                  
                 </mat-expansion-panel>
 
                 <app-follow-up-instruction [title]="'Follow up'" [isVisitNoteProvider]="isVisitNoteProvider" [visitEnded]="visitEnded" [visit]="visit"

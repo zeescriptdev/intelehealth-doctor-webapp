@@ -117,6 +117,7 @@ export class VisitSummaryComponent implements OnInit, OnDestroy, AfterViewInit {
   addMedicineForm: FormGroup;
   additionalInstructionForm: FormGroup;
   addAdviceForm: FormGroup;
+  addTestForm: FormGroup;
   testForm: FormGroup;
   addReferralForm: FormGroup;
   followUpForm: FormGroup;
@@ -231,6 +232,7 @@ export class VisitSummaryComponent implements OnInit, OnDestroy, AfterViewInit {
     addMedicine: [],
     additionalInstruction: null,
     addAdvice: [],
+    addTests: [],
     test: null,
     addReferral: [],
     discussionSummary: null,
@@ -331,6 +333,10 @@ export class VisitSummaryComponent implements OnInit, OnDestroy, AfterViewInit {
 
     this.addAdviceForm = new FormGroup({
       advice: new FormControl(null, [Validators.required])
+    });
+
+    this.addTestForm = new FormGroup({
+      test: new FormControl(null, [Validators.required])
     });
 
     this.testForm = new FormGroup({
@@ -1652,6 +1658,15 @@ export class VisitSummaryComponent implements OnInit, OnDestroy, AfterViewInit {
   }
 
   /**
+  * Toggle test add form, show/hide add more test button
+  * @returns {void}
+  */
+  toggleTest() {
+    this.addMoreTest = !this.addMoreTest;
+    this.addTestForm.reset();
+  }
+
+  /**
   * Get tests for the visit
   * @returns {void}
   */
@@ -1661,7 +1676,10 @@ export class VisitSummaryComponent implements OnInit, OnDestroy, AfterViewInit {
       .subscribe((response: ObsApiResponseModel) => {
         response.results.forEach((obs: ObsModel) => {
           if (obs.encounter && obs.encounter.visit.uuid === this.visit.uuid) {
-            this.testForm.patchValue({uuid:obs.uuid, test:obs.value})
+            if(this.appConfigService.patient_visit_summary.dp_investigations_secondary)
+              this.testForm.patchValue({uuid:obs.uuid, test:obs.value})
+            else
+              this.tests.push(obs);
           }
         });
       });
@@ -1681,6 +1699,23 @@ export class VisitSummaryComponent implements OnInit, OnDestroy, AfterViewInit {
         });
       });
   }
+
+  /**
+  * Add test
+  * @returns {void}
+  */
+  addTest() {
+    if (this.addTestForm.invalid) {
+      return;
+    }
+    if (this.tests.find((o: TestModel) => o.value === this.addTestForm.value.test)) {
+      this.toastr.warning(this.translateService.instant('Test already added, please add another test.'), this.translateService.instant('Already Added'));
+      return;
+    }
+    this.tests.push({value: this.addTestForm.value.test });
+    this.addTestForm.reset();
+  }
+
 
   /**
   * Save test
@@ -2422,6 +2457,22 @@ export class VisitSummaryComponent implements OnInit, OnDestroy, AfterViewInit {
         );
       }
 
+      // Handle tests
+      if (!this.appConfigService.patient_visit_summary?.dp_investigations_secondary) {
+        for (const test of this.tests) {
+          if (test?.uuid) continue;
+          postObsRequests.push(
+            this.encounterService.postObs({
+              concept: conceptIds.conceptTest,
+              person: this.visit.patient.uuid,
+              obsDatetime: new Date(),
+              value: test.value,
+              encounter: this.visitNotePresent.uuid
+            }).pipe(tap((res: ObsModel) => test.uuid = res.uuid))
+          );
+        }
+      }
+
       // Handle diagnosis
       if (!this.appConfigService.patient_visit_summary?.dp_dignosis_secondary) {
         for (const diagnosis of this.existingDiagnosis) {
@@ -2555,6 +2606,21 @@ export class VisitSummaryComponent implements OnInit, OnDestroy, AfterViewInit {
           }).pipe(tap((res:ObsModel)=>advice.uuid=res.uuid))
         );
       }
+
+      // Advices - only save new advices
+      if (this.changedFields.includes('addTests')) {
+        for (const test of this.tests) {
+          if(test?.uuid) continue;
+          postObsRequests.push(
+          this.encounterService.postObs({
+            concept: conceptIds.conceptTest,
+            person: this.visit.patient.uuid,
+            obsDatetime: new Date(),
+            value: test.value,
+            encounter: this.visitNotePresent.uuid
+          }).pipe(tap((res:ObsModel)=>test.uuid=res.uuid)));
+        } 
+      }
     }
 
     // Diagnosis - only save new diagnoses
@@ -2671,6 +2737,7 @@ export class VisitSummaryComponent implements OnInit, OnDestroy, AfterViewInit {
           addMedicine: [],
           additionalInstruction: null,
           addAdvice: [],
+          addTests: [],
           test: null,
           addReferral: [],
           discussionSummary: null,
@@ -2857,6 +2924,21 @@ export class VisitSummaryComponent implements OnInit, OnDestroy, AfterViewInit {
           const newValue = [...this.advices];
           if (JSON.stringify(newValue) !== JSON.stringify(this.obsData.addAdvice)) {
             this.updatedObsData.addAdvice = newValue;
+            this.checkChanges(this.updatedObsData);
+          }
+        })
+      );
+    }
+
+    // Track add test form
+    if (this.addTestForm) {
+      this.obsData.addTests = [...this.tests];
+      
+      this.formSubscriptions.push(
+        this.addTestForm.valueChanges.subscribe(() => {
+          const newValue = [...this.tests];
+          if (JSON.stringify(newValue) !== JSON.stringify(this.obsData.addTests)) {
+            this.updatedObsData.addTests = newValue;
             this.checkChanges(this.updatedObsData);
           }
         })
