@@ -259,18 +259,19 @@ export class FollowupTrackerComponent {
   }
 
   resetFilter() {
-    this.filteredFollowUpVisits = this.doctorFollowUpVisits.filter((visit) => {
-      return visit.encounter_provider_uuid == this.provider.uuid;
-    });
-    this.dataSource.data = [...this.filteredFollowUpVisits];
-    this.tempPaginator.length = this.filteredFollowUpVisits.length;
-    this.tempPaginator.firstPage();
-    this.paginator.firstPage();
-    this.filteredFollowUpVisitsCount = this.filteredFollowUpVisits.length;
-    this.selectAll = false;
-    this.trigger.closeMenu();
-    this.fromDate = null;
-    this.toDate = null;
+    if (this.showAllVisits) {
+      this.getFollowupVisitsById(this.provider.uuid);
+    } else {
+      this.dataSource.data = [...this.filteredFollowUpVisits];
+      this.tempPaginator.length = this.filteredFollowUpVisits.length;
+      this.tempPaginator.firstPage();
+      this.paginator.firstPage();
+      this.filteredFollowUpVisitsCount = this.doctorFollowpCount;
+      this.selectAll = false;
+      this.trigger.closeMenu();
+      this.fromDate = null;
+      this.toDate = null;
+    }
   }
 
   /**
