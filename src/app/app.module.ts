@@ -128,6 +128,7 @@ registerLocaleData(localeEn);
         'https://afi.ekalarogya.org:3004/api/appointment/',
         'https://afi.ekalarogya.org:3004/api/openmrs/getVisitCounts',
         'https://afi.ekalarogya.org:3004/api/openmrs/getVisitCountsForDashboard',
+        'https://afi.ekalarogya.org:3004/api/user/createUpdateStatus',
         'https://afi.ekalarogya.org/gen',
         'https://afi.ekalarogya.org/vl2',
         'https://afi.ekalarogya.org/bs',

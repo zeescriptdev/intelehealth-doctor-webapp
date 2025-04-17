@@ -145,8 +145,6 @@ export class DashboardComponent implements OnInit {
   getVisitCountsForDashboard() {
     this.visitService.getVisitCountsForDashboard(this.specialization).subscribe(({ data }: any) => {
       if (data) {      
-        this.priorityVisitsCount = data.priorityVisit;
-        this.awaitingVisitsCount = data.awaitingVisit;
         this.inprogressVisitsCount = data.inProgressVisit;
       }
     });
