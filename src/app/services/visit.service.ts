@@ -129,9 +129,9 @@ export class VisitService {
     );
   }
 
-  getVisitCountsForDashboard(speciality:string): Observable<any> {
+  getVisitCountsForDashboard(userId:String, speciality:string): Observable<any> {
     return this.http.get(
-      `${this.baseURLMindmap}/openmrs/getVisitCountsForDashboard?speciality=${speciality}`
+      `${this.baseURLMindmap}/openmrs/getVisitCountsForDashboard/${userId}?speciality=${speciality}`
     );
   }
 

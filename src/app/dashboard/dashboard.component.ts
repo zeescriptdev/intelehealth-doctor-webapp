@@ -48,6 +48,7 @@ export class DashboardComponent implements OnInit {
   filteredFollowUpVisits: CustomVisitModel[] =[];
 
   specialization: string = '';
+  appointmentsCount:number = 0;
   priorityVisitsCount: number = 0;
   awaitingVisitsCount: number = 0;
   inprogressVisitsCount: number = 0;
@@ -143,9 +144,10 @@ export class DashboardComponent implements OnInit {
 
 
   getVisitCountsForDashboard() {
-    this.visitService.getVisitCountsForDashboard(this.specialization).subscribe(({ data }: any) => {
+    this.visitService.getVisitCountsForDashboard(getCacheData(true, doctorDetails.USER).uuid,this.specialization).subscribe(({ data }: any) => {
       if (data) {      
         this.inprogressVisitsCount = data.inProgressVisit;
+        this.appointmentsCount = data.appointmentVisit;
       }
     });
   }
@@ -460,6 +462,7 @@ export class DashboardComponent implements OnInit {
             }
           }
         });
+        this.appointmentsCount = this.appointments.length;
         this.dataSource1.data = [...this.appointments];
         this.dataSource1.paginator = this.appointmentPaginator;
         this.dataSource1.sort = this.appointmentMatSort;

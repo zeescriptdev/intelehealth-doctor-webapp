@@ -4,7 +4,7 @@
       <div class="chip-item chip-item-blue" title="{{'Appointments' | translate}}">
         <img class="chip-img" src="assets/svgs/video-frame.svg" alt="" />
         <div class="chip-info">
-          <h6>{{appointments.length ? appointments.length : 0}}</h6>
+          <h6>{{appointmentsCount}}</h6>
           <span>{{'Appointments' | translate}}</span>
         </div>
       </div>
@@ -63,7 +63,7 @@
             <mat-panel-title>
               <div class="intel-accordion-title">
                 <img src="assets/svgs/cam-icon.svg" alt="" width="44px">
-                <h6 class="mb-0 ml-2">{{'Appointments' | translate}} ({{appointments.length ? appointments.length : 0}})
+                <h6 class="mb-0 ml-2">{{'Appointments' | translate}} ({{appointmentsCount}})
                 </h6>
                 <mat-icon aria-hidden="false" class="info-icon" aria-label="help icon"
                   matTooltip="{{'Scheduled appointments' | translate}}" matTooltipPosition="right"
