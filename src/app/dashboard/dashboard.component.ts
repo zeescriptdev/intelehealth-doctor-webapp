@@ -678,6 +678,8 @@ export class DashboardComponent implements OnInit {
       }
       if(environment.brandName === 'KCDO'){
         this.getAppointmentCount()
+      } else if (this.pvs.appointment_button) {
+        this.getAppointments();
       }
       // if (this.pvs.appointment_button) {
       //   this.getAppointments();
@@ -1536,6 +1538,7 @@ export class DashboardComponent implements OnInit {
 
   // Handle the emitted visits count data from TableGridComponent
   onVisitsCountDate(visitsCountDate: any): void {
+    console.log("visitsCountDate", visitsCountDate)
     switch (visitsCountDate.tableTagName) {
       case "Appointment":
         this.appointmentVisitsCount = visitsCountDate.visitsCount;
@@ -1671,6 +1674,14 @@ export class DashboardComponent implements OnInit {
   getAppointmentCount() {
     const uuid = getCacheData(true, doctorDetails.USER).uuid;
     const spec = this.isMCCUser ? this.specialization : null;
+
+    const todaySlots$ = this.appointmentService.getUserSlots(
+      uuid,
+      moment().format('DD/MM/YYYY'),
+      moment().format('DD/MM/YYYY'),
+      spec,
+      false
+    );
   
     const futureSlots$ = this.appointmentService.getUserSlots(
       uuid,
@@ -1688,16 +1699,17 @@ export class DashboardComponent implements OnInit {
       true
     );
   
-    forkJoin([futureSlots$, allSlots$])
+    forkJoin([futureSlots$, allSlots$, todaySlots$])
       .pipe(
-        map(([futureRes, allRes]) => {
+        map(([futureRes, pendingRes, todayRes]) => {
           const isValidVisit = (obj: any) =>
             obj.visit &&
             obj.status === 'booked' &&
             (obj.visitStatus === 'Awaiting Consult' || obj.visitStatus === 'Visit In Progress');
   
           this.upcomingAppointmentVisitsCount = futureRes?.data?.filter(isValidVisit).length || 0;
-          this.pendingAppointmentVisitsCount = allRes?.data?.filter(isValidVisit).length || 0;
+          this.pendingAppointmentVisitsCount = pendingRes?.data?.filter(isValidVisit).length || 0;
+          this.todayAppointmentFilterCount = todayRes?.data?.filter(isValidVisit).length || 0;
         })
       )
       .subscribe({
