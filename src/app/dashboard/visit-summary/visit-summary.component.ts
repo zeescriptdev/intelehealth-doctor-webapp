@@ -179,6 +179,7 @@ export class VisitSummaryComponent implements OnInit, OnDestroy, AfterViewInit {
   @ViewChild('notes') notesRef: NotesComponent;
   genderData: any = { "M": "Male", "F": "Female", "O": "Other" }
   patientInteractionCommentForm: FormGroup
+  patientInteractionNotesForm: FormGroup
   @ViewChild('lazyDDxContainer', { read: ViewContainerRef, static: false }) lazyLoadDDxContainer!: ViewContainerRef;
   ddxCompRef: any;
 
@@ -187,12 +188,13 @@ export class VisitSummaryComponent implements OnInit, OnDestroy, AfterViewInit {
       this.lazyLoadDDxContainer.clear();
       const { DiagnosisComponent } = await import(/* webpackChunkName: "diagnosis-aillm-ddx" */'./diagnosis/diagnosis.component');
       this.ddxCompRef = this.lazyLoadDDxContainer.createComponent(DiagnosisComponent);
-      if(this.ddxCompRef){
+      if (this.ddxCompRef) {
         this.ddxCompRef.instance.visit = this.visit;
         this.ddxCompRef.instance.patientInfo = this.patient;
         this.ddxCompRef.instance.isMCCUser = this.isMCCUser;
         this.ddxCompRef.instance.isVisitNoteProvider = this.isVisitNoteProvider;
         this.ddxCompRef.instance.visitEnded = this.visitEnded;
+        this.ddxCompRef.instance.patientInteractionNotesForm = this.patientInteractionNotesForm;
       }
     }, 1000);
   }
@@ -347,6 +349,11 @@ export class VisitSummaryComponent implements OnInit, OnDestroy, AfterViewInit {
       value: new FormControl(null, [Validators.required])
     })
 
+    this.patientInteractionNotesForm = new FormGroup({
+      uuid: new FormControl(null),
+      value: new FormControl(null)
+    });
+
     this.diagnosisSubject = new BehaviorSubject<any[]>([]);
     this.diagnosis$ = this.diagnosisSubject.asObservable();
 
@@ -360,11 +367,11 @@ export class VisitSummaryComponent implements OnInit, OnDestroy, AfterViewInit {
     this.pvsConfigs = this.appConfigService.patient_visit_sections;
     this.isMCCUser = !!this.rolesService.getRole('ORGANIZATIONAL:MCC');
   }
-  
+
   ngAfterViewInit(): void {
-    setTimeout(()=>{
-      if(this.visitNoteDiv) autoGrowAllTextAreaZone(this.visitNoteDiv.nativeElement.querySelectorAll('textarea'));
-    },2000)
+    setTimeout(() => {
+      if (this.visitNoteDiv) autoGrowAllTextAreaZone(this.visitNoteDiv.nativeElement.querySelectorAll('textarea'));
+    }, 2000)
   }
 
   ngOnInit(): void {
@@ -432,6 +439,7 @@ export class VisitSummaryComponent implements OnInit, OnDestroy, AfterViewInit {
     this.visitService.fetchVisitDetails(uuid).subscribe((visit: VisitModel) => {
       if (visit) {
         this.visit = visit;
+        this.visit.demarcation = this.visitDemarcation;
         if (this.visitSummaryService.checkIfEncounterExists(visit.encounters, visitTypes.FLAGGED)) {
           this.visit['visitUploadTime'] = this.visitSummaryService.checkIfEncounterExists(visit.encounters, visitTypes.FLAGGED) ? this.visitSummaryService.checkIfEncounterExists(visit.encounters, visitTypes.FLAGGED)['encounterDatetime'] : null;
         } else if (this.visitSummaryService.checkIfEncounterExists(visit.encounters, visitTypes.ADULTINITIAL) || this.visitSummaryService.checkIfEncounterExists(visit.encounters, visitTypes.VITALS)) {
@@ -490,7 +498,7 @@ export class VisitSummaryComponent implements OnInit, OnDestroy, AfterViewInit {
             }
           }
           this.checkOpenChatBoxFlag();
-          if(this.isFeatureAvailable('aiDDx')) this.lazyLoadDDx();
+          if (this.isFeatureAvailable('aiDDx')) this.lazyLoadDDx();
         });
       }
     }, (error) => {
@@ -1107,6 +1115,36 @@ export class VisitSummaryComponent implements OnInit, OnDestroy, AfterViewInit {
         this.patientInteractionCommentForm.patchValue(attr)
       }
     });
+  }
+
+  saveDDxNotes(): void {
+    if (this.patientInteractionNotesForm.value.uuid) {
+      this.encounterService.updateObs(this.patientInteractionNotesForm.value.uuid, {
+        concept: conceptIds.conceptNote,
+        person: this.visit.patient.uuid,
+        obsDatetime: new Date(),
+        value: this.patientInteractionNotesForm.value.value,
+        encounter: this.visitNotePresent.uuid
+      }).subscribe({
+        next: (res: ObsModel) => {
+          this.patientInteractionNotesForm.patchValue({ uuid: res.uuid })
+          this.ddxCompRef.instance.saveDDxNotes();
+        }
+      });
+    } else {
+      this.encounterService.postObs({
+        concept: conceptIds.conceptNote,
+        person: this.visit.patient.uuid,
+        obsDatetime: new Date(),
+        value: this.patientInteractionNotesForm.value.value,
+        encounter: this.visitNotePresent.uuid
+      }).subscribe({
+        next: (res: ObsModel) => {
+          this.patientInteractionNotesForm.patchValue({ uuid: res.uuid })
+          this.ddxCompRef.instance.saveDDxNotes();
+        }
+      });
+    }
   }
 
   /**
@@ -1796,7 +1834,7 @@ export class VisitSummaryComponent implements OnInit, OnDestroy, AfterViewInit {
     if (this.appConfigService.patient_visit_summary?.dp_dignosis_secondary && this.diagnosisSecondaryForm.invalid) {
       this.toastr.warning(this.translateService.instant('Enter Diagnosis'), this.translateService.instant('Diagnosis Required'));
       return false;
-    } else if (!this.appConfigService.patient_visit_summary?.dp_dignosis_secondary && this.existingDiagnosis.length === 0) {
+    } else if (!this.appConfigService.patient_visit_summary?.dp_dignosis_secondary && this.existingDiagnosis.length === 0 && this.ddxCompRef.instance.existingDiagnosis.length === 0) {
       this.toastr.warning(this.translateService.instant('Diagnosis not added'), this.translateService.instant('Diagnosis Required'));
       return false;
     }
@@ -2364,7 +2402,7 @@ export class VisitSummaryComponent implements OnInit, OnDestroy, AfterViewInit {
       }
     }
 
-    if(this.isFeatureAvailable('aiDDx') && this.ddxCompRef?.instance) {
+    if (this.isFeatureAvailable('aiDDx') && this.ddxCompRef?.instance) {
       for (const diagnosis of this.ddxCompRef.instance.existingDiagnosis) {
         if (diagnosis?.uuid) continue;
         postObsRequests.push(
@@ -2459,5 +2497,9 @@ export class VisitSummaryComponent implements OnInit, OnDestroy, AfterViewInit {
         console.error('Error saving observations', error);
       }
     });
+  }
+
+  get visitDemarcation() {
+    return this.visitService.getDemarcation(this.visit?.encounters);
   }
 }

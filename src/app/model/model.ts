@@ -480,7 +480,8 @@ export interface VisitModel {
   cheif_complaint?: string[],
   prescription_sent?: string,
   visitUploadTime?: string,
-  dateCreated?: string
+  dateCreated?: string,
+  demarcation?: string
 }
 
 export interface VisitAttributeModel {
