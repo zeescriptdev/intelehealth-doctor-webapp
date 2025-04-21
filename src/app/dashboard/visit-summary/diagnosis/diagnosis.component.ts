@@ -11,7 +11,7 @@ import { AiddxLibraryModule, AiddxService, AillmddxComponent, ENVIRONMENT } from
 import { isFeaturePresent } from 'src/app/utils/utility-functions';
 import { environment } from 'src/environments/environment';
 import { AppConfigService } from 'src/app/services/app-config.service';
-import { EncounterModel } from 'src/app/model/model';
+import { EncounterModel, ObsApiResponseModel, ObsModel } from 'src/app/model/model';
 import { DiagnosisService } from 'src/app/services/diagnosis.service';
 import { ToastrService } from 'ngx-toastr';
 import { TranslateService } from '@ngx-translate/core';
@@ -45,6 +45,7 @@ export class DiagnosisComponent implements OnInit {
   @Input() isMCCUser: boolean = false;
   @Input() isVisitNoteProvider: boolean = false;
   @Input() visitEnded: EncounterModel | string;
+  @Input() patientInteractionNotesForm: FormGroup;
 
   diagnosisForm: FormGroup;
   diagnosisSecondaryForm: FormGroup;
@@ -76,6 +77,7 @@ export class DiagnosisComponent implements OnInit {
       this.searchDiagnosis(val);
     });
     this.checkIfDiagnosisPresent();
+    this.checkIfNotePresent();
   }
 
   get selectedDiagnoses(): string[] {
@@ -257,5 +259,30 @@ export class DiagnosisComponent implements OnInit {
 
   onAIDiagnosisSelected(): void {
     this.diagnosisForm.get('diagnosisName').patchValue(this.selectedDiagnoses[0]);
+  }
+
+  saveDDxNotes(): void {
+    this.aillmddxComponent.getAIDiagnosis(this.patientInteractionNotesForm.value.value);
+  }
+
+  /**
+   * Get notes for the visit
+   * @returns {void}
+   */
+  checkIfNotePresent(): void {
+    this.diagnosisService.getObs(this.visit.patient.uuid, conceptIds.conceptNote)
+      .subscribe({
+        next: (response: ObsApiResponseModel) => {
+          response.results.forEach((obs: ObsModel) => {
+            if (obs.encounter.visit.uuid === this.visit.uuid) {
+              this.patientInteractionNotesForm.patchValue({ uuid: obs.uuid, value: obs.value });
+            }
+          });
+          this.aillmddxComponent.getAIDiagnosis(this.patientInteractionNotesForm.value.value);
+        },
+        error: () => {
+          this.aillmddxComponent.getAIDiagnosis(this.patientInteractionNotesForm.value.value);
+        }
+      });
   }
 }

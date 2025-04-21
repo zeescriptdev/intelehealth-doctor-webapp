@@ -198,7 +198,7 @@
 
   <ng-container *ngIf="isFeatureAvailable('aiDDx')" class="mt-2">
     <app-aillmddx [patientInfo]="patientInfo" [visit]="visit" (diagnosisSelected)="onAIDiagnosisSelected()"
-      [existingDiagnosis]="existingDiagnosis"></app-aillmddx>
+      [existingDiagnosis]="existingDiagnosis" [notes]="patientInteractionNotesForm.value.value"></app-aillmddx>
   </ng-container>
 
 </mat-expansion-panel>
