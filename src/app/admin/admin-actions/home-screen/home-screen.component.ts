@@ -18,7 +18,7 @@ import { CoreService } from 'src/app/services/core/core.service';
 
 export class HomeScreenComponent {
 
-  displayedColumns: string[] = ['id', 'name', 'label', 'updatedAt', 'is_enabled'];
+  displayedColumns: string[] = ['id', 'name', 'platform', 'updatedAt', 'is_enabled'];
   dataSource = new MatTableDataSource<any>();
   @ViewChild(MatPaginator) paginator: MatPaginator;
   data: FeatureModel[];
