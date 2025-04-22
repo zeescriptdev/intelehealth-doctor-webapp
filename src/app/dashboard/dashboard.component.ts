@@ -1538,7 +1538,6 @@ export class DashboardComponent implements OnInit {
 
   // Handle the emitted visits count data from TableGridComponent
   onVisitsCountDate(visitsCountDate: any): void {
-    console.log("visitsCountDate", visitsCountDate)
     switch (visitsCountDate.tableTagName) {
       case "Appointment":
         this.appointmentVisitsCount = visitsCountDate.visitsCount;
