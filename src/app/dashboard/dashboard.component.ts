@@ -25,6 +25,8 @@ import { MatMenuTrigger } from '@angular/material/menu';
 import { DateAdapter, MAT_DATE_FORMATS, NativeDateAdapter } from '@angular/material/core';
 import { formatDate } from '@angular/common';
 import { FormControl, FormGroup, Validators } from '@angular/forms';
+import { forkJoin } from 'rxjs';
+import { map } from 'rxjs/operators';
 
 
 export const PICK_FORMATS = {
@@ -676,6 +678,8 @@ export class DashboardComponent implements OnInit {
       }
       if(environment.brandName === 'KCDO'){
         this.getAppointmentCount()
+      } else if (this.pvs.appointment_button) {
+        this.getAppointments();
       }
       // if (this.pvs.appointment_button) {
       //   this.getAppointments();
@@ -1177,7 +1181,7 @@ export class DashboardComponent implements OnInit {
     const isCompleted = Boolean(len);
     if (isCompleted) {
       this.toastr.error("Visit is already completed, it can't be rescheduled.", 'Rescheduling failed');
-    } else if(appointment.visitStatus == 'Visit In Progress') {
+    } else if(appointment.visitStatus == 'Visit In Progress' && this.currentAppointmentFilter !== "pending") {
       this.toastr.error(this.translateService.instant("Visit is in progress, it can't be rescheduled."), this.translateService.instant('Rescheduling failed!'));
     } else {
       this.coreService.openRescheduleAppointmentModal(appointment).subscribe((res: RescheduleAppointmentModalResponseModel) => {
@@ -1211,7 +1215,7 @@ export class DashboardComponent implements OnInit {
   * @return {void}
   */
   cancel(appointment: AppointmentModel) {
-    if(appointment.visitStatus == 'Visit In Progress') {
+    if(appointment.visitStatus == 'Visit In Progress' && this.currentAppointmentFilter !== "pending") {
       this.toastr.error(this.translateService.instant("Visit is in progress, it can't be cancelled."), this.translateService.instant('Canceling failed!'));
       return;
     }
@@ -1537,7 +1541,7 @@ export class DashboardComponent implements OnInit {
     switch (visitsCountDate.tableTagName) {
       case "Appointment":
         this.appointmentVisitsCount = visitsCountDate.visitsCount;
-        if(environment.brandName === "KCDO") this.setAppointmentCount()
+        if(environment.brandName === "KCDO") this.getAppointmentCount()
         break;
       case "Awaiting":
         this.awaitingVisitsCount = visitsCountDate.visitsCount;
@@ -1560,116 +1564,169 @@ export class DashboardComponent implements OnInit {
     }
   }
 
-  changeAppointmentFilter(filterType: string){
-    if(this.currentAppointmentFilter !== filterType){
-      let tableCols = this.pluginConfigObsAppointment.tableColumns.filter(col=>!["time","date_time","starts_in","reason","type_of_case"].includes(col.key));
-      tableCols.splice(2, 0, {
-        label: (filterType === 'today' ? "Time" : "Date & Time"),
-        key: (filterType === 'today' ? "time" : "date_time"),
-        formatHtml: (element:any) => {
-          return filterType === 'today' ? moment(element.slotJsDate).format("hh:mm A") : moment(element.slotJsDate).format("DD/MM/YYYY hh:mm A");
+  changeAppointmentFilter(filterType: string) {
+    if (this.currentAppointmentFilter === filterType) return;
+  
+    const config = this.getAppointmentFilterConfig(filterType);
+    if (!config) return;
+  
+    const updatedCols = this.getAppointmentColumns(filterType);
+  
+    this.pluginConfigObsAppointment = {
+      ...this.pluginConfigObsAppointment,
+      filter: config.filter,
+      tableHeader: config.tableHeader,
+      tableColumns: updatedCols,
+      noRecordFound: config.noRecordFound
+    };
+  
+    this.currentAppointmentFilter = filterType;
+  }
+  
+  private getAppointmentColumns(filterType: string) {
+    const formatDateTime = (element: any) => moment(element.slotJsDate).format("DD/MM/YYYY hh:mm A");
+    const formatTime = (element: any) => moment(element.slotJsDate).format("hh:mm A");
+  
+    const timeOrDateCol = {
+      label: filterType === "today" ? "Time" : "Date & Time",
+      key: filterType === "today" ? "time" : "date_time",
+      formatHtml: filterType === "today" ? formatTime : formatDateTime
+    };
+  
+    const typeOfCaseCol = {
+      label: "Type of Case",
+      key: "type_of_case",
+      formatHtml: (element: any) => this.findTypeOfCase(element)
+    };
+  
+    const reasonCol = {
+      label: "Reason",
+      key: "reason",
+      formatHtml: (element: any) => {
+        try {
+          const attr = element.visit?.attributes?.find(a => a.attribute_type.name === "Call Status");
+          return attr?.value ? JSON.parse(attr.value)?.reason || "" : "";
+        } catch {
+          return "";
         }
-      });
-      this.currentAppointmentFilter = filterType;
-      switch (filterType) {
-        case "today":
-          tableCols.splice(2, 0, {
-            label: "Type of Case",
-            key: "type_of_case",
-            formatHtml: (element:any) => {
-              return this.findTypeOfCase(element);
-            }
-          });
-          this.pluginConfigObsAppointment = {...this.pluginConfigObsAppointment, filter:{
-            fromDate: moment().format('DD/MM/YYYY'),
-            toDate: moment().format('DD/MM/YYYY'),
-            pending_visits: false
-          }, tableHeader: "Today's Appointments", tableColumns: tableCols, noRecordFound: "No any appointments scheduled." } 
-          break;
-          
-        case "upcoming":
-          tableCols.splice(2, 0, {
-            label: "Type of Case",
-            key: "type_of_case",
-            formatHtml: (element:any) => {
-              return this.findTypeOfCase(element);
-            }
-          });
-          this.pluginConfigObsAppointment = {...this.pluginConfigObsAppointment, filter: {
-            fromDate: moment().add("1", "day").format('DD/MM/YYYY'),
-            toDate: moment().add("1", "year").format('DD/MM/YYYY'),
-            pending_visits: false
-          }, tableHeader: "Upcoming Appointments", tableColumns: tableCols, noRecordFound: "No any appointments scheduled."}
-          break;
-          
-        case "pending":
-          tableCols.splice(2,0,{
-            label: "Reason",
-            key: "reason",
-            formatHtml: (element:any) => {
-              try {
-                let callStatus = element.visit?.attributes?.find(attr=>attr.attribute_type.name=="Call Status");
-                if(callStatus && callStatus.value){
-                  return JSON.parse(callStatus.value)?.reason
-                }
-                return "";
-              } catch (error) {
-                return "";
-              }
-            }
-          })
-          this.pluginConfigObsAppointment = {...this.pluginConfigObsAppointment, filter:{
-            fromDate: moment().add("-1", "year").format('DD/MM/YYYY'),
-            toDate: moment().add("1", "year").format('DD/MM/YYYY'),
-            pending_visits: true
-          }, tableHeader: "Pending Visits", tableColumns:tableCols, noRecordFound: "There are no pending visits"}
-          break;
-      
-        default:
-          break;
       }
-    }
+    };
+  
+    const originalCols = this.pluginConfigObsAppointment.tableColumns;
+  
+    const baseCols = originalCols.filter(
+      col => !["time", "date_time", "type_of_case", "reason", "starts_in", "actions"].includes(col.key)
+    );
+  
+    const actionsCol = originalCols.find(col => col.key === "actions");
+  
+    const dynamicCols = [
+      filterType === "pending" ? reasonCol : typeOfCaseCol,
+      timeOrDateCol
+    ];
+  
+    return [
+      ...baseCols,
+      ...dynamicCols,
+      ...(actionsCol ? [actionsCol] : [])
+    ];
+  }
+  
+  private getAppointmentFilterConfig(filterType: string) {
+    const today = moment().format('DD/MM/YYYY');
+    const oneYearLater = moment().add(1, "year").format('DD/MM/YYYY');
+    const oneYearAgo = moment().add(-1, "year").format('DD/MM/YYYY');
+  
+    const configs = {
+      today: {
+        filter: {
+          fromDate: today,
+          toDate: today,
+          pending_visits: false
+        },
+        tableHeader: "Today's Appointments",
+        noRecordFound: "No any appointments scheduled."
+      },
+      upcoming: {
+        filter: {
+          fromDate: moment().add(1, "day").format('DD/MM/YYYY'),
+          toDate: oneYearLater,
+          pending_visits: false
+        },
+        tableHeader: "Upcoming Appointments",
+        noRecordFound: "No any appointments scheduled."
+      },
+      pending: {
+        filter: {
+          fromDate: oneYearAgo,
+          toDate: oneYearLater,
+          pending_visits: true
+        },
+        tableHeader: "Pending Visits",
+        noRecordFound: "There are no pending visits"
+      }
+    };
+  
+    return configs[filterType];
   }
 
-  getAppointmentCount(){
-    this.appointmentService.getUserSlots(
-      getCacheData(true, doctorDetails.USER).uuid,
-      moment().add("1", "day").format('DD/MM/YYYY'),
-      moment().add("1", "year").format('DD/MM/YYYY'),
-      this.isMCCUser ? this.specialization : null, false)
-    .subscribe((res: ApiResponseModel)=>{
-      if(res && res.data)
-        this.upcomingAppointmentVisitsCount = res.data.filter(obj=>(obj.visit && obj.status == 'booked' && (obj.visitStatus == 'Awaiting Consult'||obj.visitStatus == 'Visit In Progress'))).length
-    })
+  getAppointmentCount() {
+    const uuid = getCacheData(true, doctorDetails.USER).uuid;
+    const spec = this.isMCCUser ? this.specialization : null;
 
-    this.appointmentService.getUserSlots(
-      getCacheData(true, doctorDetails.USER).uuid,
-      moment().add("-1", "year").format('DD/MM/YYYY'),
-      moment().add("1", "year").format('DD/MM/YYYY'),
-      this.isMCCUser ? this.specialization : null,
-      true)
-    .subscribe((res: ApiResponseModel)=>{
-      if(res && res.data)
-        this.pendingAppointmentVisitsCount = res.data.filter(obj=>(obj.visit && obj.status == 'booked' && (obj.visitStatus == 'Awaiting Consult'||obj.visitStatus == 'Visit In Progress'))).length
-    })
+    const todaySlots$ = this.appointmentService.getUserSlots(
+      uuid,
+      moment().format('DD/MM/YYYY'),
+      moment().format('DD/MM/YYYY'),
+      spec,
+      false
+    );
+  
+    const futureSlots$ = this.appointmentService.getUserSlots(
+      uuid,
+      moment().add(1, 'day').format('DD/MM/YYYY'),
+      moment().add(1, 'year').format('DD/MM/YYYY'),
+      spec,
+      false
+    );
+  
+    const allSlots$ = this.appointmentService.getUserSlots(
+      uuid,
+      moment().add(-1, 'year').format('DD/MM/YYYY'),
+      moment().add(1, 'year').format('DD/MM/YYYY'),
+      spec,
+      true
+    );
+  
+    forkJoin([futureSlots$, allSlots$, todaySlots$])
+      .pipe(
+        map(([futureRes, pendingRes, todayRes]) => {
+          const isValidVisit = (obj: any) =>
+            obj.visit &&
+            obj.status === 'booked' &&
+            (obj.visitStatus === 'Awaiting Consult' || obj.visitStatus === 'Visit In Progress');
+  
+          this.upcomingAppointmentVisitsCount = futureRes?.data?.filter(isValidVisit).length || 0;
+          this.pendingAppointmentVisitsCount = pendingRes?.data?.filter(isValidVisit).length || 0;
+          this.todayAppointmentFilterCount = todayRes?.data?.filter(isValidVisit).length || 0;
+        })
+      )
+      .subscribe({
+        next: () => this.setAppointmentCount(),
+        error: (err) => console.error('Error fetching appointment counts:', err)
+      });
   }
 
-  setAppointmentCount(){
-    switch (this.currentAppointmentFilter) {
-      case "today":
-        this.todayAppointmentFilterCount = this.appointmentVisitsCount
-        break;
-      
-      case "upcoming":
-        this.upcomingAppointmentVisitsCount = this.appointmentVisitsCount
-        break;
-      
-      case "pending":
-        this.pendingAppointmentVisitsCount = this.appointmentVisitsCount
-        break;
-    
-      default:
-        break;
+  setAppointmentCount() {
+    const countMap = {
+      today: 'todayAppointmentFilterCount',
+      upcoming: 'upcomingAppointmentVisitsCount',
+      pending: 'pendingAppointmentVisitsCount'
+    };
+  
+    const key = countMap[this.currentAppointmentFilter];
+    if (key) {
+      this[key] = this.appointmentVisitsCount;
     }
   }
 
