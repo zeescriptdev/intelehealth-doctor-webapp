@@ -162,8 +162,8 @@ export class VisitSummaryComponent implements OnInit, OnDestroy, AfterViewInit {
   sanitizedValue: SafeHtml;
   changedFields: any;
   editFormValues: boolean = false;
-  changesMade: boolean = false;
-  isCallInProgress: boolean = false;
+  public changesMade: boolean = false;
+  public isCallInProgress: boolean = false;
   callTimerInterval: Subscription;
   callDuration: number = 0;
   arrCallDurations: any[] = [];
@@ -1914,6 +1914,7 @@ export class VisitSummaryComponent implements OnInit, OnDestroy, AfterViewInit {
     this.changedFields = [];
     this.saveAllObs().subscribe({
       next: (responses) => {
+        this.changesMade = false;
         //Open Share Prescription Confirmation Modal
         this.coreService.openSharePrescriptionConfirmModal().subscribe((res: boolean) => {
           if (res) {
@@ -2722,7 +2723,7 @@ export class VisitSummaryComponent implements OnInit, OnDestroy, AfterViewInit {
     );
 
     this.saveAllObs().subscribe({
-      next: (responses) => {        
+      next: (responses) => {     
         // Unsubscribe from all existing subscriptions
         this.unsubscribeFromFormTracking();
         
@@ -3076,5 +3077,19 @@ export class VisitSummaryComponent implements OnInit, OnDestroy, AfterViewInit {
   onInstructionsChanged(): void {
     this.updatedObsData.followUpInstruction = true;
     this.checkChanges(this.updatedObsData);
+  }
+
+  /**
+  * confirm exit this page without saving data
+  * @return {void}
+  */
+  public onExitPageConfirmDialog(nextRouteURL, msg: string): void{
+    this.coreService.openConfirmationDialog({ confirmationMsg: msg, cancelBtnText: 'Stay Here', confirmBtnText: 'Exit' }).afterClosed().subscribe(res=>{
+      if(res){
+        this.changesMade = false;
+        this.isCallInProgress = false;
+        this.router.navigate([nextRouteURL]);
+      }
+    });
   }
 }
