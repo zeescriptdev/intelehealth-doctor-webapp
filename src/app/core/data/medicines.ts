@@ -1367,10 +1367,10 @@ export default [
 },
 {
   "id": 196,
-  "name": "Levocetirizine Dihydrochloride",
-  "mname": "Levocetirizine Dihydrochloride",
+  "name": "Levocetirizine",
+  "mname": "Levocetirizine",
   "form": "Syrup",
-  "strength": "5mg/5ml"
+  "strength": "2.5mg/5ml"
 },
 {
   "id": 197,
@@ -2204,5 +2204,187 @@ export default [
   "mname": "Zinc Sulphate Dispersible",
   "form": "Tablet",
   "strength": "20mg"
+},
+{
+  "id": 316,
+  "name": "Drotaverine 20mg",
+  "mname": "Drotaverine",
+  "form": "Tablet",
+  "strength": "20mg"
+},
+{
+  "id": 317,
+  "name": "Drotaverine 40mg",
+  "mname": "Drotaverine",
+  "form": "Tablet",
+  "strength": "40mg"
+},
+{
+  "id": 318,
+  "name": "Levocetirizine 5mg",
+  "mname": "Levocetirizine",
+  "form": "Tablet",
+  "strength": "5mg"
+},
+{
+  "id": 319,
+  "name": "Betahistine 8mg",
+  "mname": "Betahistine",
+  "form": "Tablet",
+  "strength": "8mg"
+},
+{
+  "id": 320,
+  "name": "Betahistine 16mg",
+  "mname": "Betahistine",
+  "form": "Tablet",
+  "strength": "16mg"
+},
+{
+  "id": 321,
+  "name": "Prochlorperazine",
+  "mname": "Prochlorperazine",
+  "form": "Tablet",
+  "strength": "5mg"
+},
+{
+  "id": 322,
+  "name": "Prebiotic and Probiotic",
+  "mname": "Prebiotic and Probiotic",
+  "form": "Capsule",
+  "strength": null
+},
+{
+  "id": 323,
+  "name": "Vitamin C (Chewable)",
+  "mname": "Vitamin C (Chewable)",
+  "form": "Tablet",
+  "strength": null
+},
+{
+  "id": 324,
+  "name": "Diclofenac",
+  "mname": "Diclofenac",
+  "form": "Gel",
+  "strength": "1%w/w"
+},
+{
+  "id": 325,
+  "name": "Paracetamol 1000mg",
+  "mname": "Paracetamol",
+  "form": "Tablet",
+  "strength": "1000mg"
+},
+{
+  "id": 326,
+  "name": "Drotaverine 20mg/5ml",
+  "mname": "Drotaverine",
+  "form": "Syrup",
+  "strength": "20mg/5ml"
+},
+{
+  "id": 327,
+  "name": "Zinc",
+  "mname": "Zinc",
+  "form": "Syrup",
+  "strength": null
+},
+{
+  "id": 328,
+  "name": "Rantac",
+  "mname": "Rantac",
+  "form": "Syrup",
+  "strength": "75mg/5ml"
+},
+{
+  "id": 329,
+  "name": "Silver Nitrate",
+  "mname": "Silver Nitrate",
+  "form": "Gel",
+  "strength": "0.2% w/w"
+},
+{
+  "id": 330,
+  "name": "Hydrocortisone",
+  "mname": "Hydrocortisone",
+  "form": "Cream",
+  "strength": "1% w/w"
+},
+{
+  "id": 331,
+  "name": "Dextromethorphan (15mg/ml) Chlorpheneramine(2mg/5ml) Phenylephrine(5mg/5ml)",
+  "mname": "Dextromethorphan (15mg/ml) Chlorpheneramine(2mg/5ml) Phenylephrine(5mg/5ml)",
+  "form": "Syrup",
+  "strength": null
+},
+{
+  "id": 332,
+  "name": "Ambroxol (30mg/5ml) Levosalbutamol (1mg/5ml) Guaifenesin (50mg/5ml)",
+  "mname": "Ambroxol (30mg/5ml) Levosalbutamol (1mg/5ml) Guaifenesin (50mg/5ml)",
+  "form": "Syrup",
+  "strength": null
+},
+{
+  "id": 333,
+  "name": "Ambroxol (15mg/5ml) Levosalbutamol (0.5mg/5ml) Guaifenesin (50mg/5ml)",
+  "mname": "Ambroxol (15mg/5ml) Levosalbutamol (0.5mg/5ml) Guaifenesin (50mg/5ml)",
+  "form": "Syrup",
+  "strength": null
+},
+{
+  "id": 334,
+  "name": "Dextromethorphan (5mg/ml) Chlorpheneramine(1mg/5ml) Phenylephrine(2.5mg/5ml)",
+  "mname": "Dextromethorphan (5mg/ml) Chlorpheneramine(1mg/5ml) Phenylephrine(2.5mg/5ml)",
+  "form": "Syrup",
+  "strength": null
+},
+{
+  "id": 335,
+  "name": "Aceclofenac",
+  "mname": "Aceclofenac",
+  "form": "Tablet",
+  "strength": "100mg"
+},
+{
+  "id": 336,
+  "name": "Meclizine",
+  "mname": "Meclizine",
+  "form": "Tablet",
+  "strength": "25mg"
+},
+{
+  "id": 337,
+  "name": "Paracetamol 250mg",
+  "mname": "Paracetamol",
+  "form": "Tablet",
+  "strength": "250mg"
+},
+{
+  "id": 338,
+  "name": "Cinnarizine 20mg + Dimenhydrinate 40mg",
+  "mname": "Cinnarizine 20mg + Dimenhydrinate 40mg",
+  "form": "Tablet",
+  "strength": null
+},
+{
+  "id": 339,
+  "name": "Dicyclomine 20mg + Paracetamol 325mg",
+  "mname": "Dicyclomine 20mg + Paracetamol 325mg",
+  "form": "Tablet",
+  "strength": null
+},
+{
+  "id": 340,
+  "name": "Ofloxacin 200mg + Ornidazole 400mg",
+  "mname": "Ofloxacin 200mg + Ornidazole 400mg",
+  "form": "Tablet",
+  "strength": null
+},
+{
+  "id": 341,
+  "name": "Ofloxacin",
+  "mname": "Ofloxacin",
+  "form": "Tablet",
+  "strength": "400mg"
 }
 ];

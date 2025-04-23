@@ -287,6 +287,31 @@ export const remark = {
     {
       "id": 24,
       "name": "At bedtime"
+    },
+    {
+      "id": 25,
+      "name": "Once daily after meals"
+    }
+    ,
+    {
+      "id": 26,
+      "name": "Once daily before meals"
+    },
+    {
+      "id": 27,
+      "name": "Twice daily after meals"
+    },
+    {
+      "id": 28,
+      "name": "Twice daily before meals"
+    },
+    {
+      "id": 29,
+      "name": "Thrice daily after meals"
+    },
+    {
+      "id": 30,
+      "name": "Thrice daily before meals"
     }
   ]
 };
