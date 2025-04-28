@@ -387,6 +387,7 @@ export class DashboardComponent implements OnInit {
         actionButtons: [
           {
             label: "Reschedule",
+            validationRequired: false,
             callBack: (element: any) => this.reschedule(element),
             style: {
               color: "#2e1e91",
@@ -395,6 +396,7 @@ export class DashboardComponent implements OnInit {
           },
           {
             label: "Cancel",
+            validationRequired: false,
             callBack: (element: any) => this.cancel(element),
             style: {
               color: "#ff475d",
@@ -1181,7 +1183,7 @@ export class DashboardComponent implements OnInit {
     const isCompleted = Boolean(len);
     if (isCompleted) {
       this.toastr.error("Visit is already completed, it can't be rescheduled.", 'Rescheduling failed');
-    } else if(appointment.visitStatus == 'Visit In Progress' && this.currentAppointmentFilter !== "pending") {
+    } else if(appointment.visitStatus == 'Visit In Progress') {
       this.toastr.error(this.translateService.instant("Visit is in progress, it can't be rescheduled."), this.translateService.instant('Rescheduling failed!'));
     } else {
       this.coreService.openRescheduleAppointmentModal(appointment).subscribe((res: RescheduleAppointmentModalResponseModel) => {
