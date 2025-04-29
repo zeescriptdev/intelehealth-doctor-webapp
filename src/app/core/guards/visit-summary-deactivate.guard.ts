@@ -11,7 +11,7 @@ export class CanDeactivateVisitSummary implements CanDeactivate<VisitSummaryComp
             component.onExitPageConfirmDialog(nextState.url,'You have unsaved changes that will be lost.');
             return false;
         } else if(component.isCallInProgress){
-            component.onExitPageConfirmDialog(nextState.url,'Whatsapp Call In-progress');
+            component.onExitPageConfirmDialog(nextState.url,'WhatsApp Call In-progress');
             return false;
         }else {
             return true;
