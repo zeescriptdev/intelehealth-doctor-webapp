@@ -3053,6 +3053,14 @@ export class VisitSummaryComponent implements OnInit, OnDestroy, AfterViewInit {
       return true;
     }
 
+    if(this.isFeatureAvailable("callDuration") && this.isCallInProgress){
+      this.coreService.openConfirmationDialog({ confirmationMsg: "Please Stop the WhatsApp Call", cancelBtnText: 'Exit', confirmBtnText: 'Stop Call' }).afterClosed().subscribe(res=>{
+        if(res){
+          this.endWhatsAppCall();
+        }
+      });
+    }
+
     // Compare actual values instead of just checking boolean flags
     const changedFields = Object.keys(updatedObsData).filter(key => {
       // For arrays, compare stringified versions
@@ -3091,5 +3099,13 @@ export class VisitSummaryComponent implements OnInit, OnDestroy, AfterViewInit {
         this.router.navigate([nextRouteURL]);
       }
     });
+  }
+
+  /**
+  * page click event
+  * @return {void}
+  */
+  pageClick(event: any){
+    console.log(event)
   }
 }
