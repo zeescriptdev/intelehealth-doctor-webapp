@@ -179,6 +179,7 @@ export class VisitSummaryComponent implements OnInit, OnDestroy, AfterViewInit {
   @ViewChild('notes') notesRef: NotesComponent;
   genderData: any = {"M":"Male", "F":"Female", "O":"Other"}
   patientInteractionCommentForm: FormGroup
+  isWhatsappCallWarningShown = false;
 
   reasons = {
     'Completed': [
@@ -3053,12 +3054,8 @@ export class VisitSummaryComponent implements OnInit, OnDestroy, AfterViewInit {
       return true;
     }
 
-    if(this.isFeatureAvailable("callDuration") && this.isCallInProgress){
-      this.coreService.openConfirmationDialog({ confirmationMsg: "Please Stop the WhatsApp Call", cancelBtnText: 'Exit', confirmBtnText: 'Stop Call' }).afterClosed().subscribe(res=>{
-        if(res){
-          this.endWhatsAppCall();
-        }
-      });
+    if(this.isFeatureAvailable("callDuration") && this.isCallInProgress && (!this.isWhatsappCallWarningShown)){
+      this.onWhatsappOngoingDialog();
     }
 
     // Compare actual values instead of just checking boolean flags
@@ -3095,8 +3092,21 @@ export class VisitSummaryComponent implements OnInit, OnDestroy, AfterViewInit {
     this.coreService.openConfirmationDialog({ confirmationMsg: msg, cancelBtnText: 'Stay Here', confirmBtnText: 'Exit' }).afterClosed().subscribe(res=>{
       if(res){
         this.changesMade = false;
-        this.isCallInProgress = false;
         this.router.navigate([nextRouteURL]);
+      }
+    });
+  }
+
+  /**
+  * confirm exit this page without saving data
+  * @return {void}
+  */
+  public onWhatsappOngoingDialog(): void{
+    this.coreService.openConfirmationDialog({ confirmationMsg: "Please end the call to proceed", cancelBtnText: 'Close', confirmBtnText: 'End Call' }).afterClosed().subscribe(res=>{
+      if(res){
+        this.endWhatsAppCall();
+      } else {
+        this.isWhatsappCallWarningShown = true;
       }
     });
   }
