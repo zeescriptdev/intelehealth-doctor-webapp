@@ -65,7 +65,7 @@ import { getCacheData } from "./utils/utility-functions";
 import { languages } from "src/config/constant";
 import { AppConfigService } from "./services/app-config.service";
 import { SidebarMenuListComponent } from "./main-container/sidebar-menu-list/sidebar-menu-list.component";
-import {LibPresciptionModule} from 'lib-presciption'
+import { LibPresciptionModule } from 'lib-presciption'
 
 const ngxUiLoaderConfig: NgxUiLoaderConfig = {
   bgsColor: "#2E1E91",

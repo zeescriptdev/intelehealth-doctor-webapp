@@ -676,6 +676,7 @@ export interface PatientVisitSummaryModel {
 }
 
 export interface PatientVisitSummaryConfigModel {
+  allow_duplicate_phoneno_and_email: boolean
   appointment_button: boolean
   attachment_section: boolean
   doctor_specialty_section: boolean
@@ -694,7 +695,8 @@ export interface PatientVisitSummaryConfigModel {
   dp_medication_secondary: boolean
   dp_investigations_secondary: boolean
   dp_referral_secondary: boolean
-  dp_discussion_summary: boolean  
+  dp_discussion_summary: boolean
+  inprogress_visit_section: boolean
 }
 
 export interface PagerdutyList {

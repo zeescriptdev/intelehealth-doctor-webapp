@@ -486,7 +486,7 @@
                             <ng-container *ngIf="!appConfigService?.patient_visit_summary?.dp_dignosis_secondary">
                               <h6 data-test-id="etChiefComCheckup">{{ d?.name|translate}}</h6>
                               <div class="complaint-chips">
-                                <div class="chip-item" *ngFor="let c of cheifComplaints" [attr.data-test-id]="'etChiefCom'+c.slice(0,3)+'Checkup'">
+                                <div class="chip-item" *ngFor="let c of cheifComplaints" [attr.data-test-id]="'etChiefCom'+c?.slice(0,3)+'Checkup'">
                                   {{ c }}
                                 </div>
                               </div>
@@ -494,21 +494,21 @@
                             <div class="check-up-reason-con">
                               <ng-container *ngFor="let ckr of checkUpReasonData">
                                 <ng-container *ngIf="ckr.title != 'Associated symptoms'">
-                                  <h6 class="my-3" [attr.data-test-id]="'etTitle'+ckr.title.slice(0,3)+'Checkup'" *ngIf="!appConfigService?.patient_visit_summary?.dp_dignosis_secondary">{{ ckr.title }}</h6>
+                                  <h6 class="my-3" [attr.data-test-id]="'etTitle'+ckr.title?.slice(0,3)+'Checkup'" *ngIf="!appConfigService?.patient_visit_summary?.dp_dignosis_secondary">{{ ckr.title }}</h6>
                                   <ul class="items-list pt-0">
                                     <li *ngFor="let ckri of ckr.data">
                                       <div class="list-item">
-                                        <label [attr.data-test-id]="'etKey'+ckri.key.slice(0,3)+'Checkup'">{{ ckri.key }}</label>
+                                        <label [attr.data-test-id]="'etKey'+ckri.key?.slice(0,3)+'Checkup'">{{ ckri.key }}</label>
                                         <div
                                           class="list-item-content"
                                           [class.text-muted]="!ckri.value"
-                                          [attr.data-test-id]="'etValue'+ckri.value.changingThisBreaksApplicationSecurity.slice(0,4).trim()+'Checkup'"
+                                          [attr.data-test-id]="'etValue'+ckri.value.changingThisBreaksApplicationSecurity?.slice(0,4).trim()+'Checkup'"
                                           [innerHTML]="ckri.value ? ckri.value : ('None' | translate)">
                                         </div>
                                         <!-- <div
                                           class="list-item-content"
                                           [class.text-muted]="!ckri.value"
-                                          [attr.data-test-id]="'etValue'+ckri.value.changingThisBreaksApplicationSecurity.slice(0,4).trim()+'Checkup'"
+                                          [attr.data-test-id]="'etValue'+ckri.value.changingThisBreaksApplicationSecurity?.slice(0,4).trim()+'Checkup'"
                                         >
                                           {{ ckri.value ? ckri.value : ('None'|translate) }}
                                         </div> -->
@@ -517,15 +517,15 @@
                                   </ul>
                                 </ng-container>
                                 <ng-container *ngIf="ckr.title == 'Associated symptoms'">
-                                  <h6 class="my-3" [attr.data-test-id]="'etTitle'+ckr.title.slice(0,3)+'Checkup'">{{ ckr.title }}</h6>
+                                  <h6 class="my-3" [attr.data-test-id]="'etTitle'+ckr.title?.slice(0,3)+'Checkup'">{{ ckr.title }}</h6>
                                   <ul class="items-list pt-0">
                                     <li *ngFor="let ckri of ckr.data">
                                       <div class="list-item-col">
-                                        <label [attr.data-test-id]="'etKey'+ckri.key.slice(0,3)+'Checkup'">{{ ckri.key }}</label>
+                                        <label [attr.data-test-id]="'etKey'+ckri.key?.slice(0,3)+'Checkup'">{{ ckri.key }}</label>
                                         <div
                                           class="list-item-content"
                                           [class.text-muted]="!ckri.value"
-                                          [attr.data-test-id]="'etValue'+ckri.value.slice(0,4).trim()+'Checkup'"
+                                          [attr.data-test-id]="'etValue'+ckri.value?.slice(0,4).trim()+'Checkup'"
                                         >
                                           {{ ckri.value ? ckri.value :  ('None'|translate) }}
                                         </div>
@@ -544,15 +544,15 @@
                           <ng-container *ngFor="let pe of physicalExaminationData">
                             <div class="cheif-complaint-wrapper">
                               <ng-container *ngIf="pe.title != 'Abdomen'">
-                                <h6 class="my-3" [attr.data-test-id]="'etTitle'+pe.title.slice(0,3)+'PhysicalExam'">{{ pe.title }}</h6>
+                                <h6 class="my-3" [attr.data-test-id]="'etTitle'+pe.title?.slice(0,3)+'PhysicalExam'">{{ pe.title }}</h6>
                                 <ul class="items-list pt-0">
                                   <li *ngFor="let pei of pe.data">
                                     <div class="list-item">
-                                      <label [attr.data-test-id]="'etKey'+pei.key.slice(0,3)+'PhysicalExam'">{{ pei.key }}</label>
+                                      <label [attr.data-test-id]="'etKey'+pei.key?.slice(0,3)+'PhysicalExam'">{{ pei.key }}</label>
                                       <div
                                         class="list-item-content"
                                         [class.text-muted]="!pei.value"
-                                        [attr.data-test-id]="'etValue'+pei.value.slice(0,2).trim()+'PhysicalExam'"
+                                        [attr.data-test-id]="'etValue'+pei.value?.slice(0,2).trim()+'PhysicalExam'"
                                       >
                                         {{ pei.value ? pei.value : ('None'|translate) }}
                                       </div>
@@ -586,11 +586,11 @@
                                 </ul>
                               </ng-container>
                               <ng-container *ngIf="pe.title == 'Abdomen'">
-                                <h6 class="my-3" [attr.data-test-id]="'etTitle'+pe.title.slice(0,3)+'PhysicalExam'">{{ pe.title }}</h6>
+                                <h6 class="my-3" [attr.data-test-id]="'etTitle'+pe.title?.slice(0,3)+'PhysicalExam'">{{ pe.title }}</h6>
                                 <ul class="items-list pt-0">
                                   <li *ngFor="let pei of pe.data">
                                     <div class="list-item">
-                                      <label [attr.data-test-id]="'etKey'+pei.key.slice(0,3)+'PhysicalExam'">{{ pei.key }}</label>
+                                      <label [attr.data-test-id]="'etKey'+pei.key?.slice(0,3)+'PhysicalExam'">{{ pei.key }}</label>
                                     </div>
                                   </li>
                                   <li *ngIf="getImagesBySection(pe.title).length">
@@ -629,11 +629,11 @@
                         <ng-container *ngSwitchCase="pvsConstant['medical_history'].key">
                           <ng-container *ngFor="let ph of patientHistoryData">
                             <div class="cheif-complaint-wrapper">
-                              <h6 class="my-3" [attr.data-test-id]="'etTitle'+ph.title.slice(0,3)+'Medicalhis'">{{ ph.title }}</h6>
+                              <h6 class="my-3" [attr.data-test-id]="'etTitle'+ph.title?.slice(0,3)+'Medicalhis'">{{ ph.title }}</h6>
                               <ul class="items-list pt-0">
                                 <li *ngFor="let phi of ph.data; let x = index">
                                   <div class="list-item">
-                                    <label [attr.data-test-id]="'etKey'+phi.key.slice(0,3)+'Medicalhis'">{{ phi.key }}</label>
+                                    <label [attr.data-test-id]="'etKey'+phi.key?.slice(0,3)+'Medicalhis'">{{ phi.key }}</label>
                                     <div
                                       class="list-item-content"
                                       [class.text-muted]="!phi.value"
@@ -946,6 +946,7 @@
                           target="_blank"
                           class="icon-btn m-0 mr-2"
                           data-test-id="linkPatientPhone"
+                          *ngIf="!brandName"
                         >
                           <img src="assets/svgs/phone-green.svg" alt="" />
                         </a>
@@ -1734,32 +1735,101 @@
                     </mat-panel-title>
                     <mat-icon>{{ panel6.expanded ? "remove" : "add" }}</mat-icon>
                   </mat-expansion-panel-header>
-                  <form
+                  <ng-container *ngIf="!appConfigService?.patient_visit_summary?.dp_investigations_secondary">
+                    <ul class="items-list" *ngIf="tests.length">
+                      <li *ngFor="let t of tests; let i = index">
+                        <div class="d-flex justify-content-between">
+                          <span>{{ t.value }}</span>
+                          <button
+                            mat-icon-button
+                            (click)="deleteTest(i, t.uuid)"
+                            data-test-id="{{'btnDeleteTestVisitSummary'+i}}"
+                            *ngIf="isVisitNoteProvider && !visitEnded"
+                          >
+                            <img src="assets/svgs/delete-icon.svg" alt="" />
+                          </button>
+                        </div>
+                      </li>
+                    </ul>
+                    <ng-template #noTests>
+                      <div class="no-docs text-center font-weight-bold">
+                        {{'No tests added!'|translate}}
+                      </div>
+                    </ng-template>
+                    <ng-container *ngIf="isVisitNoteProvider && !visitEnded">
+                      <div class="form-group mt-3" *ngIf="addMoreTest">
+                        <button
+                          type="button"
+                          class="add-more-btn"
+                          (click)="toggleTest()"
+                          data-test-id="btnAddMoreTest"
+                        >
+                          <img src="assets/svgs/plus-circle.svg" alt="" />
+                          <span class="ml-2">{{'Add more test'|translate}}</span>
+                        </button>
+                      </div>
+                      <form
+                        class="mt-3"
+                        [formGroup]="addTestForm"
+                        (ngSubmit)="addTest()"
+                        *ngIf="!addMoreTest"
+                      >
+                        <div class="form-group">
+                          <label for="note"><b>{{'Test'|translate}}*</b></label>
+                          <input
+                            type="text"
+                            class="form-control"
+                            formControlName="test"
+                            placeholder="{{'Type here'|translate}}"
+                            [ngbTypeahead]="search2"
+                            data-test-id="etTest"
+                          />
+                        </div>
+                        <div class="form-group">
+                          <button
+                            type="button"
+                            class="white-btn mr-2"
+                            (click)="toggleTest()"
+                            data-test-id="btnCancelTest"
+                          >
+                            {{'Cancel'|translate}}
+                          </button>
+                          <button
+                            type="submit"
+                            class="gray-btn"
+                            [disabled]="addTestForm.invalid"
+                            data-test-id="btnSubmitTest"
+                          >
+                            {{'Add test'|translate}}
+                          </button>
+                        </div>
+                      </form>
+                    </ng-container>
+                  </ng-container>
+                  <ng-container *ngIf="appConfigService?.patient_visit_summary?.dp_investigations_secondary">
+                    <form
                     class="mt-3"
                     [formGroup]="testForm"
-                  >
-                    <div class="form-group">
-                      <ng-container *ngIf="isFeatureAvailable('investigationsDropdown'); else investigationsTxtArea">
-                        <input type="text" class="form-control" formControlName="test" placeholder="{{'Type here'|translate}}"
-                          [ngbTypeahead]="search2" data-test-id="etTest" />
-                      </ng-container>
-                      <ng-template #investigationsTxtArea>
-                        <textarea
-                          formControlName="test"
-                          class="form-control"
-                          rows="3"
-                          placeholder="{{'Type here'|translate}}"
-                          data-test-id="etAI"
-                          (keyup)="autoGrowTextZone($event)"
-                          [attr.disabled]="(isMCCUser || !isVisitNoteProvider || visitEnded)? 'disabled' : null"
-                        ></textarea>
-                      </ng-template>
-                    </div>
-                  </form>
+                    >
+                      <div class="form-group">
+                          <textarea
+                            formControlName="test"
+                            class="form-control"
+                            rows="3"
+                            placeholder="{{'Type here'|translate}}"
+                            data-test-id="etAI"
+                            (keyup)="autoGrowTextZone($event)"
+                            [attr.disabled]="(isMCCUser || !isVisitNoteProvider || visitEnded)? 'disabled' : null"
+                          ></textarea>
+                      </div>
+                    </form>
+                  </ng-container>
+                  
                 </mat-expansion-panel>
 
-                <app-follow-up-instruction [title]="'Follow up'"  [isVisitNoteProvider]="isVisitNoteProvider" [visitEnded]="visitEnded" [visit]="visit"
-              [visitNotePresent]="visitNotePresent" [isMCCUser]="isMCCUser" *ngIf="isFeatureAvailable('follow-up-instruction')">
+                <app-follow-up-instruction [title]="'Follow up'" [isVisitNoteProvider]="isVisitNoteProvider" [visitEnded]="visitEnded" [visit]="visit"
+              [visitNotePresent]="visitNotePresent" [isMCCUser]="isMCCUser" (instructionsChanged)="onInstructionsChanged()"
+              *ngIf="isFeatureAvailable('follow-up-instruction')">
                 </app-follow-up-instruction> 
             </ng-template>
 
@@ -2271,6 +2341,7 @@
         type="button"
         class="blue-btn mr-2 mb-2"
         (click)="saveAsDraft()"
+        [disabled]="!changesMade || !editFormValues"
         *ngIf="!isMCCUser && visitNotePresent && !visitEnded && isVisitNoteProvider && !visitCompleted"
       >
        {{'Save as Draft'|translate}}
