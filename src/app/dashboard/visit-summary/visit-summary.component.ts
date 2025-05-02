@@ -2266,6 +2266,7 @@ export class VisitSummaryComponent implements OnInit, OnDestroy, AfterViewInit {
   */
   endWhatsAppCall(){
     this.isCallInProgress = false;
+    this.isWhatsappCallWarningShown = false;
     this.callTimerInterval.unsubscribe();
     this.arrCallDurations.push({callDuration:this.callDuration,timestamp:this.callDurationTimeStamp})
     if(this.callDurationsUuid) 
@@ -3092,6 +3093,7 @@ export class VisitSummaryComponent implements OnInit, OnDestroy, AfterViewInit {
     this.coreService.openConfirmationDialog({ confirmationMsg: msg, cancelBtnText: 'Stay Here', confirmBtnText: 'Exit' }).afterClosed().subscribe(res=>{
       if(res){
         this.changesMade = false;
+        this.isCallInProgress = false;
         this.router.navigate([nextRouteURL]);
       }
     });
