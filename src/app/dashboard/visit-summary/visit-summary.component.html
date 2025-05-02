@@ -2238,7 +2238,82 @@
               </div>
             </mat-expansion-panel>
 
+            <!-- Call Status Removed from the UI for now and Added Reschedule -->
             <mat-expansion-panel [expanded]="true" #panel9 hideToggle *ngIf="appConfigService?.patient_visit_summary?.dp_call_status">
+              <mat-expansion-panel-header>
+                <mat-panel-title>
+                  <div class="intel-accordion-title">
+                    <img
+                      src="assets/svgs/patient-interaction.svg"
+                      alt=""
+                      width="44px"
+                    />
+                    <h6 class="mb-0 ml-2">{{'Reschedule'|translate}}</h6>
+                  </div>
+                </mat-panel-title>
+                <mat-icon>{{ panel9.expanded ? "remove" : "add" }}</mat-icon>
+              </mat-expansion-panel-header>
+
+              <form 
+                [formGroup]="patientCallStatusForm"
+                *ngIf="!isMCCUser"
+              >
+                <ul class="items-list">
+                  <li>
+                    <div class="row">
+                      <label class="col-sm-3 col-form-label">{{ 'Reschedule' | translate }}*</label>
+                      <div class="col-sm-9 d-flex align-items-center">
+                        <div class="pretty p-default p-round">
+                          <input
+                            type="radio"
+                            value="Review of Imaging"
+                            formControlName="callStatus"
+                            (change)="onCallStatusChange()"
+                            (click)="onCallStatusClick('Review of Imaging')"
+                            data-test-id="radioCallStatusCompleted"
+                            [attr.disabled]="(!isVisitNoteProvider || visitEnded)? 'disabled' : null"
+                          />
+                          <div class="state p-success">
+                            <label>{{ 'Review of Imaging' | translate }}</label>
+                          </div>
+                        </div>
+                        <div class="pretty p-default p-round">
+                          <input
+                            type="radio"
+                            value="Review with Reports"
+                            formControlName="callStatus"
+                            (change)="onCallStatusChange()"
+                            (click)="onCallStatusClick('Review with Reports')"
+                            data-test-id="radioCallStatusReschedule"
+                            [attr.disabled]="(!isVisitNoteProvider || visitEnded)? 'disabled' : null"
+                          />
+                          <div class="state p-success">
+                            <label>{{ 'Review with Reports' | translate }}</label>
+                          </div>
+                        </div>
+                        <div class="pretty p-default p-round">
+                          <input
+                            type="radio"
+                            value="Referral"
+                            formControlName="callStatus"
+                            (change)="onCallStatusChange()"
+                            (click)="onCallStatusClick('Referral')"
+                            data-test-id="radioCallStatusClose"
+                            [attr.disabled]="(isMCCUser || !isVisitNoteProvider || visitEnded)? 'disabled' : null"
+                          />
+                          <div class="state p-success">
+                            <label>{{ 'Reschedule Referral' | translate }}</label>
+                          </div>
+                        </div>
+                  
+                      </div>
+                    </div>
+                  </li>
+                </ul>
+              </form>
+            </mat-expansion-panel>
+            <!-- TODO : Call Status Removed from the UI for now -->
+            <!-- <mat-expansion-panel [expanded]="true" #panel9 hideToggle *ngIf="appConfigService?.patient_visit_summary?.dp_call_status">
               <mat-expansion-panel-header>
                 <mat-panel-title>
                   <div class="intel-accordion-title">
@@ -2329,7 +2404,7 @@
                   </li>
                 </ul>
               </form>
-            </mat-expansion-panel>
+            </mat-expansion-panel> -->
           </mat-accordion>
         </div>
       </div>

@@ -1607,7 +1607,7 @@ export class DashboardComponent implements OnInit {
       formatHtml: (element: any) => {
         try {
           const attr = element.visit?.attributes?.find(a => a.attribute_type.name === "Call Status");
-          return attr?.value ? JSON.parse(attr.value)?.reason || "" : "";
+          return attr?.value ? JSON.parse(attr.value)?.callStatus || "" : "";
         } catch {
           return "";
         }

@@ -308,8 +308,8 @@ export class VisitSummaryComponent implements OnInit, OnDestroy, AfterViewInit {
 
     this.patientCallStatusForm = new FormGroup({
       uuid: new FormControl(null),
-      reason: new FormControl(null, [Validators.required]),
-      callStatus: new FormControl(null, [Validators.required]),
+      reason: new FormControl(null, []),
+      callStatus: new FormControl(null, []),
     });
 
     this.diagnosisForm = new FormGroup({
@@ -3117,7 +3117,15 @@ export class VisitSummaryComponent implements OnInit, OnDestroy, AfterViewInit {
   * page click event
   * @return {void}
   */
-  pageClick(event: any){
+  pageClick(event: any): void{
     console.log(event)
+  }
+
+
+  onCallStatusClick(value: string): void{
+    if(this.patientCallStatusForm.get('callStatus').value === value){
+      this.patientCallStatusForm.get('callStatus').setValue(null)
+    }
+    return null;
   }
 }
