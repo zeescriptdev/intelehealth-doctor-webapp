@@ -1537,11 +1537,11 @@
                         <thead>
                           <tr>
                             <th scope="col" width="20%">{{'Drug name'|translate}}</th>
-                            <th scope="col" width="15%">{{'Strength'|translate}}</th>
-                            <th scope="col" width="10%">{{'No. of days'|translate}}</th>
-                            <th scope="col" width="15%">{{'Timing'|translate}}</th>
-                            <th scope="col" width="15%">{{'Frequency'|translate}}</th>
-                            <th scope="col" width="25%">{{'Remarks'|translate}}</th>
+                            <th scope="col" width="15%">{{'Dose'|translate}}</th>
+                            <th scope="col" width="10%">{{'Frequency'|translate}}</th>
+                            <th scope="col" width="15%">{{'Duration (number)'|translate}}</th>
+                            <th scope="col" width="15%">{{'Duration (units)'|translate}}</th>
+                            <th scope="col" width="25%">{{'Instruction(Remarks)'|translate}}</th>
                             <th scope="col"></th>
                           </tr>
                         </thead>
@@ -1549,11 +1549,11 @@
                           <ng-container *ngIf="medicines.length else noMedicines">
                             <tr *ngFor="let m of medicines; let i = index">
                               <td>{{ m.drug }}</td>
-                              <td>{{ m.strength }}</td>
-                              <td>{{ m.days }}</td>
-                              <td>{{ m.timing }}</td>
-                              <td>{{ m?.frequency }}</td>
-                              <td>{{ m.remark }}</td>
+                              <td>{{ m.dose }}</td>
+                              <td>{{ m.frequency }}</td>
+                              <td>{{ m.durationNo }}</td>
+                              <td>{{ m?.durationUnit }}</td>
+                              <td>{{ m.instructRemark }}</td>
                               <td class="pr-0">
                                 <button
                                   type="button"
@@ -1608,42 +1608,14 @@
                               <td>
                                 <div class="form-group mb-0">
                                   <input
-                                    formControlName="strength"
+                                    formControlName="dose"
                                     type="text"
                                     class="form-control"
-                                    placeholder="{{'Enter strength'|translate}}*"
+                                    placeholder="{{'Enter Dose'|translate}}*"
                                     [ngbTypeahead]="search4"
-                                    data-test-id="etDrugStrength"
+                                    data-test-id="etDose"
                                   />
                                 </div>
-                              </td>
-                              <td>
-                                <div class="form-group mb-0">
-                                  <input
-                                    formControlName="days"
-                                    type="text"
-                                    class="form-control"
-                                    placeholder="{{'Enter days'|translate}}*"
-                                    [ngbTypeahead]="search5"
-                                    data-test-id="etDays"
-                                  />
-                                </div>
-                              </td>
-                              <td>
-                                <ng-select
-                                  appendTo=".visit-summary-tab-group"
-                                  formControlName="timing"
-                                  class="visit-select custom"
-                                  [items]="timingList"
-                                  bindLabel="name"
-                                  bindValue="name"
-                                  [clearable]="false"
-                                  [searchable]="true"
-                                  [addTag]="true"
-                                  placeholder="{{'Select timing'|translate}}*"
-                                  data-test-id="selectTiming"
-                                >
-                                </ng-select>
                               </td>
                               <td>
                                 <ng-select
@@ -1658,14 +1630,43 @@
                                 >
                                 </ng-select>
                               </td>
+                              <td>
+                                <div class="form-group mb-0">
+                                  <input
+                                    formControlName="durationNo"
+                                    type="text"
+                                    class="form-control"
+                                    placeholder="Enter duration"
+                                    data-test-id="durationNo"
+                                    (keypress)="onKeyPress($event)"
+                                  />
+                                </div>
+                              </td>
+                              <td>
+                                <ng-select
+                                  appendTo=".visit-summary-tab-group"
+                                  formControlName="durationUnit"
+                                  class="visit-select custom"
+                                  [items]="durationUnitList"
+                                  bindLabel="name"
+                                  bindValue="name"
+                                  [clearable]="false"
+                                  [searchable]="true"
+                                  [addTag]="true"
+                                  placeholder="{{'Select duration unit'|translate}}*"
+                                  data-test-id="etDurationUnit"
+                                >
+                                </ng-select>
+                              </td>
                               <td colspan="2">
                                 <div class="form-group mb-0">
                                   <input
-                                    formControlName="remark"
+                                    formControlName="instructRemark"
                                     type="text"
                                     class="form-control"
-                                    placeholder="{{'Enter Remark'|translate}}"
+                                    placeholder="{{'Enter Instruction(Remarks)'|translate}}"
                                     data-test-id="etRemarkMed"
+                                    [ngbTypeahead]="search7"
                                   />
                                 </div>
                               </td>
