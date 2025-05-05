@@ -2456,8 +2456,6 @@ export class VisitSummaryComponent implements OnInit, OnDestroy, AfterViewInit {
   }
 
   formatMedicineSave(medicine: MedicineModel): string {
-    //drug:dose:duration_no:duration_unit:instruction_remarks:frequency
-    console.log("medicine ==> ", medicine);
     return `${medicine.drug ?? ''}:${medicine.dose ?? ''}:${medicine.durationNo ?? ''}:${medicine.durationUnit ?? ''  }:${medicine.instructRemark ?? ''}:${medicine.frequency ?? ''}`;
   }
 
@@ -2573,6 +2571,24 @@ export class VisitSummaryComponent implements OnInit, OnDestroy, AfterViewInit {
           );
           if (diagnosis?.isSnomed && isFeaturePresent("snomedCtDiagnosis")) {
             postObsRequests.push(this.diagnosisService.addSnomedDiagnosis(diagnosis.diagnosisName, diagnosis.diagnosisCode));
+          }
+        }
+      }
+
+      if (this.isFeatureAvailable('aiDDx') && this.ddxCompRef?.instance) {
+        for (const diagnosis of this.ddxCompRef.instance.existingDiagnosis) {
+          if (diagnosis?.uuid) continue;
+          postObsRequests.push(
+            this.encounterService.postObs({
+              concept: conceptIds.conceptDiagnosis,
+              person: this.visit.patient.uuid,
+              obsDatetime: new Date(),
+              value: `${this.diagnosisCode?.value ? this.diagnosisCode?.value : 'NA'}::${diagnosis.diagnosisName}:${diagnosis.diagnosisType} & ${diagnosis.diagnosisStatus}`,
+              encounter: this.visitNotePresent.uuid
+            }).pipe(tap((res: ObsModel) => diagnosis.uuid = res.uuid))
+          );
+          if (diagnosis?.isSnomed && isFeaturePresent("snomedCtDiagnosis")) {
+            postObsRequests.push(this.diagnosisService.addSnomedDiagnosis(diagnosis.diagnosisName, diagnosis.diagnosisCode))
           }
         }
       }
