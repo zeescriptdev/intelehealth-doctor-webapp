@@ -62,33 +62,33 @@ th:last-child {
   font-family: DM Sans;
 
   .mat-card-title {
-    padding-bottom: 16px;
-    border-bottom: 1px solid var(--color-lightGray);
+      padding-bottom: 16px;
+      border-bottom: 1px solid var(--color-lightGray);
   }
 
   .intelehealth-card-title {
-    display: flex;
-    flex-direction: row;
-    align-items: center;
+      display: flex;
+      flex-direction: row;
+      align-items: center;
 
-    h6 {
-      font-size: 18px;
-      font-weight: bold;
-      color: var(--color-black);
-    }
+      h6 {
+          font-size: 18px;
+          font-weight: bold;
+          color: var(--color-black);
+      }
   }
 }
 
 .card-header-actions {
   .btn {
-    height: 50px;
-    background: var(--color-darkBlue);
-    border-radius: 8px;
-    font-size: 18px;
-    color: var(--color-white);
-    position: relative;
-    min-width: 100px;
-    font-weight: bold;
+      height: 50px;
+      background: var(--color-darkBlue);
+      border-radius: 8px;
+      font-size: 18px;
+      color: var(--color-white);
+      position: relative;
+      min-width: 100px;
+      font-weight: bold;
   }
 }
 
@@ -104,23 +104,50 @@ th:last-child {
   font-weight: bold;
 }
 
-.sub-title {
-  color: var(--color-gray);
-  font-size: 0.8rem;
-  line-height: 0;
-  .label {
-    margin-right: 1rem;
-  }
-}
-
 @media (max-width: 768px) {
   .card-header-actions {
-    .btn {
-      display: none;
-    }
+      .btn {
+          display: none;
+      }
   }
 
   .btn-block {
-    display: block;
+      display: block;
   }
+
+  .priority-v {
+      flex-direction: column !important;
+      align-items: end !important;
+  }
+
+  .red-pill {
+      margin-top: .5rem !important;
+      font-size: small;
+  }
+}
+
+.tooltip-box {
+  position: relative;
+
+  .tooltip-con {
+      position: absolute;
+      z-index: 2;
+      top: 0;
+      bottom: 0;
+      left: 0;
+      right: 0;
+  }
+}
+
+.red-pill {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: nowrap;
+  align-items: center;
+  background: var(--color-lightPink);
+  border-radius: 4px;
+  height: 32px;
+  color: var(--color-lightRed);
+  padding: 4px 6px;
+  width: fit-content;
 }
