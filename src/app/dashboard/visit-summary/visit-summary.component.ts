@@ -1879,8 +1879,15 @@ export class VisitSummaryComponent implements OnInit, OnDestroy, AfterViewInit {
           encounter: this.visitNotePresent.uuid
         });
       }
+    } else {
+      return this.encounterService.postObs({
+        concept: conceptIds.conceptFollow,
+        person: this.visit.patient.uuid,
+        obsDatetime: new Date(),
+        value: this.followUpForm.value.wantFollowUp,
+        encounter: this.visitNotePresent.uuid
+      });
     }
-    return of(null); // Return an Observable if no action needed
   }
 
   /**
@@ -1906,7 +1913,7 @@ export class VisitSummaryComponent implements OnInit, OnDestroy, AfterViewInit {
       this.toastr.warning(this.translateService.instant('Diagnosis not added'), this.translateService.instant('Diagnosis Required'));
       return false;
     }
-    if (this.isFeatureAvailable('visitFollowUp') && !this.followUpForm.value.present) {
+    if (this.isFeatureAvailable('visitFollowUp') && !this.followUpForm.value.wantFollowUp) {
       this.toastr.warning(this.translateService.instant('Follow-up not added'), this.translateService.instant('Follow-up Required'));
       return false;
     }
