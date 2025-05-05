@@ -31,7 +31,7 @@ export class AppConfigService {
   constructor(private http: HttpClient) { }
 
   load(): Promise<any> {
-    const promise = this.http.get(`${this.baseURL}/config/getPublishedConfig`)
+    const promise = this.http.get(`${this.baseURL}/config/getPublishedConfig?ngsw-bypass=true`)
       .toPromise()
       .then((data) => {
         this.setPatientVisitSections(data)

@@ -1,7 +1,6 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Observable, of } from 'rxjs';
-import { map } from 'rxjs/operators';
+import { BehaviorSubject, Observable, of } from 'rxjs';
 import { environment } from '../../environments/environment';
 import { MatSnackBar } from "@angular/material/snack-bar";
 import { getCacheData, getEncounterProviderUUID } from '../utils/utility-functions';

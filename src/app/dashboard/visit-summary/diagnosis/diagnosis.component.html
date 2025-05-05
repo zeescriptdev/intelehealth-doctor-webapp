@@ -1,0 +1,204 @@
+<mat-expansion-panel [expanded]="true" #panel2 hideToggle>
+  <mat-expansion-panel-header>
+    <mat-panel-title>
+      <div class="intel-accordion-title">
+        <div class="ayu-icon">
+          <img src="assets/svgs/diagnosis.svg" alt="" width="44px" />
+        </div>
+        <div class="diagnosis-title">
+          <h6 class="mb-0 ml-2">Ayu suggested diagnosis</h6>
+        </div>
+      </div>
+    </mat-panel-title>
+    <mat-icon>{{ panel2.expanded ? "remove" : "add" }}</mat-icon>
+  </mat-expansion-panel-header>
+
+  <div class="table-responsive">
+    <table class="table" aria-describedby="">
+      <thead>
+        <tr>
+          <th scope="col">{{'Diagnosis'|translate}}</th>
+          <th scope="col">{{'Type'|translate}}</th>
+          <th scope="col">{{'Status'|translate}}</th>
+          <th scope="col"></th>
+        </tr>
+      </thead>
+      <tbody>
+        <ng-container *ngIf="existingDiagnosis.length">
+          <tr *ngFor="let d of existingDiagnosis; let i = index">
+            <td>{{ d.diagnosisName }}</td>
+            <td>{{ d.diagnosisType }}</td>
+            <td>{{ d.diagnosisStatus }}</td>
+            <td class="pr-0">
+              <button mat-icon-button class="float-right" *ngIf="!isMCCUser && isVisitNoteProvider && !visitEnded"
+                (click)="deleteDiagnosis(i, d.uuid)" data-test-id="{{'btnDeleteDiagnosisVisitSummary' + i}}">
+                <img src="assets/svgs/delete-icon.svg" alt="" />
+              </button>
+            </td>
+          </tr>
+        </ng-container>
+        <ng-container *ngIf="!isMCCUser && isVisitNoteProvider && !visitEnded">
+          <tr *ngIf="addMoreDiagnosis">
+            <td colspan="4" class="px-0">
+              <div class="form-group mb-0">
+                <button type="button" class="add-more-btn" (click)="toggleDiagnosis()"
+                  data-test-id="btnAddMoreDiagnosis">
+                  <img src="assets/svgs/plus-circle.svg" alt="" />
+                  <span class="ml-2">{{'Add more diagnosis'|translate}}</span>
+                </button>
+              </div>
+            </td>
+          </tr>
+        </ng-container>
+      </tbody>
+    </table>
+  </div>
+  <ng-container>
+    <form [formGroup]="diagnosisForm" (ngSubmit)="saveDiagnosis()" *ngIf="!addMoreDiagnosis">
+      <ul class="items-list">
+        <li>
+          <div class="row">
+            <label for="select-diagnosis" class="col-sm-3 col-form-label">{{'Select diagnosis'|translate}}*</label>
+            <div class="col-sm-6 d-grid">
+              <ng-select appendTo=".visit-summary-tab-group" class="visit-select custom" formControlName="diagnosisName"
+                (search)="onKeyUp($event)" (change)="onDiagnosisChange($event)" [items]="diagnosis$ | async"
+                bindLabel="name" bindValue="name" [clearable]="true" [searchable]="true"
+                placeholder="{{'Select diagnosis'|translate}}" [addTag]="false" data-test-id="selectDiagnosisName">
+              </ng-select>
+              <div class="selected-diagnoses mt-1" *ngIf="selectedDiagnoses.length > 0">
+                <span *ngFor="let diagnosis of selectedDiagnoses" class="selected-item mr-2"
+                  [class.selected-primary]="diagnosis === selectedDiagnoses[0]">
+                  {{ diagnosis }}
+                  <button class="remove-icon" mat-icon-button (click)="removeDiagnosis(diagnosis)">
+                    <mat-icon>close</mat-icon>
+                  </button>
+                </span>
+              </div>
+            </div>
+          </div>
+        </li>
+        <li>
+          <div class="row">
+            <label class="col-sm-3 col-form-label">{{'Diagnosis type'|translate}}*</label>
+            <div class="col-sm-9 d-flex align-items-center">
+              <div class="pretty p-default p-round">
+                <input type="radio" [value]="'Primary'" formControlName="diagnosisType"
+                  data-test-id="radioDiagnosisTypePrimary" />
+                <div class="state p-success">
+                  <label>{{'Primary'|translate}}</label>
+                </div>
+              </div>
+              <div class="pretty p-default p-round">
+                <input type="radio" [value]="'Secondary'" formControlName="diagnosisType"
+                  data-test-id="radioDiagnosisTypeSecondary" />
+                <div class="state p-success">
+                  <label>{{'Secondary'|translate}}</label>
+                </div>
+              </div>
+            </div>
+          </div>
+        </li>
+        <li>
+          <div class="row">
+            <label class="col-sm-3 col-form-label">{{'Status'|translate}}*</label>
+            <div class="col-sm-9 d-flex align-items-center">
+              <div class="pretty p-default p-round">
+                <input type="radio" [value]="'Provisional'" formControlName="diagnosisStatus"
+                  data-test-id="radioDiagnosisStatusProvisional" />
+                <div class="state p-success">
+                  <label>{{'Provisional'|translate}}</label>
+                </div>
+              </div>
+              <div class="pretty p-default p-round">
+                <input type="radio" [value]="'Confirmed'" formControlName="diagnosisStatus"
+                  data-test-id="radioDiagnosisStatusConfirmed" />
+                <div class="state p-success">
+                  <label>{{'Confirmed'|translate}}</label>
+                </div>
+              </div>
+              <div *ngIf="appConfigService?.patient_visit_summary?.diagnosis_under_evaluation"
+                class="pretty p-default p-round">
+                <input type="radio" [value]="'Under Evaluation'" formControlName="diagnosisStatus"
+                  data-test-id="radioDiagnosisStatusUnderEvaluation" />
+                <div class="state p-success">
+                  <label>{{'Under Evaluation'|translate}}</label>
+                </div>
+              </div>
+            </div>
+          </div>
+        </li>
+      </ul>
+      <div class="form-group mb-0" *ngIf="!isMCCUser">
+        <button type="button" class="white-btn mr-2 mt-3" (click)="toggleDiagnosis()" data-test-id="btnCancelDiagnosis">
+          {{'Cancel'|translate}}
+        </button>
+        <button type="submit" class="gray-btn" [disabled]="diagnosisForm.invalid" data-test-id="btnSubmitDiagnosis">
+          {{'Add'|translate}}
+        </button>
+      </div>
+    </form>
+  </ng-container>
+
+  <ng-container *ngIf="appConfigService?.patient_visit_summary?.dp_dignosis_secondary">
+    <form [formGroup]="diagnosisSecondaryForm">
+      <ul class="items-list">
+        <li>
+          <div class="row">
+            <label for="select-diagnosis" class="col-sm-1 col-form-label">{{'Diagnosis'|translate}}*</label>
+            <div class="col-sm-11">
+              <textarea formControlName="diagnosis" class="form-control" rows="3"
+                placeholder="{{'Type here'|translate}}" data-test-id="etAI" (keyup)="autoGrowTextZone($event)"
+                [attr.disabled]="(isMCCUser || !isVisitNoteProvider || visitEnded)? 'disabled' : null"></textarea>
+            </div>
+          </div>
+        </li>
+        <li>
+          <div class="row">
+            <label class="col-sm-1 col-form-label">{{'Type'|translate}}</label>
+            <div class="col-sm-11 d-flex align-items-center">
+              <div class="pretty p-default p-round">
+                <input type="radio" [value]="'Provisional'" formControlName="type"
+                  data-test-id="radioDiagnosisStatusProvisional"
+                  [attr.disabled]="(isMCCUser || !isVisitNoteProvider || visitEnded)? 'disabled' : null" />
+                <div class="state p-success">
+                  <label>{{'Provisional'|translate}}</label>
+                </div>
+              </div>
+              <div class="pretty p-default p-round">
+                <input type="radio" [value]="'Confirmed'" formControlName="type"
+                  data-test-id="radioDiagnosisStatusConfirmed"
+                  [attr.disabled]="(isMCCUser || !isVisitNoteProvider || visitEnded)? 'disabled' : null" />
+                <div class="state p-success">
+                  <label>{{'Confirmed'|translate}}</label>
+                </div>
+              </div>
+            </div>
+          </div>
+        </li>
+        <li>
+          <div class="row">
+            <label class="col-sm-1 col-form-label" for="note">{{'TNM'|translate}}</label>
+            <div class="col-sm-5">
+              <textarea class="form-control" rows="3" placeholder="{{'Type here'|translate}}" formControlName="tnm"
+                (keyup)="autoGrowTextZone($event)"
+                [attr.disabled]="(isMCCUser || !isVisitNoteProvider || visitEnded)? 'disabled' : null"></textarea>
+            </div>
+
+            <label class="col-sm-1 col-form-label" for="note">{{'Other Staging'|translate}}</label>
+            <div class="col-sm-5">
+              <textarea class="form-control" rows="3" placeholder="{{'Type here'|translate}}"
+                formControlName="otherStaging" (keyup)="autoGrowTextZone($event)"
+                [attr.disabled]="(isMCCUser || !isVisitNoteProvider || visitEnded)? 'disabled' : null"></textarea>
+            </div>
+          </div>
+        </li>
+      </ul>
+    </form>
+  </ng-container>
+
+  <ng-container *ngIf="isFeatureAvailable('aiDDx')" class="mt-2">
+    <app-aillmddx [patientInfo]="patientInfo" [visit]="visit" (diagnosisSelected)="onAIDiagnosisSelected()"
+      [existingDiagnosis]="existingDiagnosis" [notes]="patientInteractionNotesForm.value.value"></app-aillmddx>
+  </ng-container>
+
+</mat-expansion-panel>
