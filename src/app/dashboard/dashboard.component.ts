@@ -110,6 +110,7 @@ export class DashboardComponent implements OnInit {
         // formatHtml: (element) => {
         //   return element?.patient_type || "N/A"; // Only return text
         // }
+        isSortable: true,
       },
       {
         label: "Visit Uploaded",
@@ -123,6 +124,7 @@ export class DashboardComponent implements OnInit {
             <span>${element?.visit_created}</span>
           `
         },
+        isSortable: true,
       },
     ],
   }; 
@@ -181,6 +183,7 @@ export class DashboardComponent implements OnInit {
             <span>${element?.visit_created}</span>
           `
         },
+        isSortable: true,
       }
     ],
   }; 
@@ -246,6 +249,7 @@ export class DashboardComponent implements OnInit {
             <span>${element?.completed}</span>
           `
         },
+        isSortable: true,
       }
     ],
   }; 
@@ -300,6 +304,7 @@ export class DashboardComponent implements OnInit {
             <span>${element?.followUp}</span>
           `
         },
+        isSortable: true,
       }
     ],
   }; 
@@ -463,6 +468,7 @@ export class DashboardComponent implements OnInit {
               <span>${element.prescription_started}</span>
             `
         },
+        isSortable: true,
       }
     ],
   };
