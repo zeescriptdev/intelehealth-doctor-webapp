@@ -155,6 +155,7 @@ export class VisitSummaryComponent implements OnInit, OnDestroy, AfterViewInit {
   hasVitalsEnabled: boolean = false;
   hasPatientAddressEnabled: boolean = false;
   hasPatientOtherEnabled: boolean = false;
+  hasAILLMEnabled: boolean = false;
 
   collapsed: boolean = false;
   isMCCUser: boolean = false;
@@ -363,6 +364,7 @@ export class VisitSummaryComponent implements OnInit, OnDestroy, AfterViewInit {
     this.hasVitalsEnabled = this.appConfigService?.patient_vitals_section;
     this.hasPatientAddressEnabled = this.appConfigService?.patient_reg_address;
     this.hasPatientOtherEnabled = this.appConfigService?.patient_reg_other;
+    this.hasAILLMEnabled = this.appConfigService?.ai_llm_section;
 
     this.pvsConfigs = this.appConfigService.patient_visit_sections;
     this.isMCCUser = !!this.rolesService.getRole('ORGANIZATIONAL:MCC');
@@ -498,7 +500,7 @@ export class VisitSummaryComponent implements OnInit, OnDestroy, AfterViewInit {
             }
           }
           this.checkOpenChatBoxFlag();
-          if (this.isFeatureAvailable('aiDDx')) this.lazyLoadDDx();
+          if (this.hasAILLMEnabled) this.lazyLoadDDx();
         });
       }
     }, (error) => {
@@ -2402,7 +2404,7 @@ export class VisitSummaryComponent implements OnInit, OnDestroy, AfterViewInit {
       }
     }
 
-    if (this.isFeatureAvailable('aiDDx') && this.ddxCompRef?.instance) {
+    if (this.hasAILLMEnabled && this.ddxCompRef?.instance) {
       for (const diagnosis of this.ddxCompRef.instance.existingDiagnosis) {
         if (diagnosis?.uuid) continue;
         postObsRequests.push(
