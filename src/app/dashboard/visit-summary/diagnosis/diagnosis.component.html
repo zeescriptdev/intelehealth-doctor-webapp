@@ -196,7 +196,7 @@
     </form>
   </ng-container>
 
-  <ng-container *ngIf="isFeatureAvailable('aiDDx')" class="mt-2">
+  <ng-container *ngIf="hasAILLMEnabled" class="mt-2">
     <app-aillmddx [patientInfo]="patientInfo" [visit]="visit" (diagnosisSelected)="onAIDiagnosisSelected()"
       [existingDiagnosis]="existingDiagnosis" [notes]="patientInteractionNotesForm.value.value"></app-aillmddx>
   </ng-container>

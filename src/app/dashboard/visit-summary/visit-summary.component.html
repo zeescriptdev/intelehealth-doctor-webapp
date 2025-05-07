@@ -1080,7 +1080,7 @@
                   </form>
                 </li>
               </ul>
-              <div *ngIf="isFeatureAvailable('aiDDx') && visit?.demarcation === 'New'" class="notes-section">
+              <div *ngIf="hasAILLMEnabled && visit?.demarcation === 'New'" class="notes-section">
                 <h6 class="notes-label">Notes</h6>
                 <form [formGroup]="patientInteractionNotesForm">
                   <textarea
@@ -1096,7 +1096,7 @@
               </div>
             </mat-expansion-panel>  
 
-            <div *ngIf="isFeatureAvailable('aiDDx') && visit?.demarcation === 'New'; else diagnosisTemplate" id="ddxContainer" #lazyDDxContainer></div>
+            <div *ngIf="hasAILLMEnabled && visit?.demarcation === 'New'; else diagnosisTemplate" id="ddxContainer" #lazyDDxContainer></div>
             <ng-template #diagnosisTemplate>
               <mat-expansion-panel [expanded]="true" #panel2 hideToggle>
                 <mat-expansion-panel-header>
