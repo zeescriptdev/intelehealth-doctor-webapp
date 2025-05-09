@@ -58,7 +58,7 @@
               <button
                 type="button"
                 class="video-ctrl-btn red"
-                (click)="endCallInRoom()"
+                (click)="endCallInRoom(); setFlag();"
                 data-test-id="btnEnd"
               >
                 <img src="assets/svgs/call-end.svg" alt="" />
@@ -143,7 +143,7 @@
             <button
             type="button"
             class="video-ctrl-btn red"
-            (click)="endCallInRoom()"
+            (click)="endCallInRoom();setFlag();"
           >
             <img src="assets/svgs/call-end.svg" alt="" />
           </button>

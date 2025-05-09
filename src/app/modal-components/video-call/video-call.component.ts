@@ -50,6 +50,7 @@ export class VideoCallComponent implements OnInit, OnDestroy {
   activeSpeakerIds: any = [];
   connecting = false;
   callEndTimeout = null;
+  endCall: boolean = false;
 
   constructor(
     @Inject(MAT_DIALOG_DATA) public data,
@@ -200,8 +201,8 @@ export class VideoCallComponent implements OnInit, OnDestroy {
     const ringingTimeout = 60 * 1000;
     this.callEndTimeout = setTimeout(() => {
       if (!this.callConnected) {
-        this.socketSvc.emitEvent('call_time_up', this.nurseId);
-        this.endCallInRoom();
+  //      this.socketSvc.emitEvent('call_time_up', this.nurseId);
+        this.endCallInRoom('call_time_up');
         this.toastr.info("Sevika not available to pick the call, please try again later.", null, { timeOut: 3000 });
       }
     }, ringingTimeout);
@@ -445,31 +446,38 @@ export class VideoCallComponent implements OnInit, OnDestroy {
     });
   }
 
+  setFlag() {
+    this.endCall = true;
+  }
+  
   /**
   * End call and disconnect from the room
   * @return {void}
   */
-  endCallInRoom() {
+  endCallInRoom(flag?) {
     setTimeout(() => {
       this.close();
       this.webrtcSvc.room.disconnect(true);
     }, 0);
     this.webrtcSvc.token = '';
     this.webrtcSvc.handleDisconnect();
-    this.socketSvc.emitEvent("bye", {
-      ...this.incomingData,
-      nurseId: this.nurseId,
-      webapp: true,
-      initiator: this.initiator,
-    });
-
-    this.socketSvc.emitEvent("cancel_dr", {
-      ...this.incomingData,
-      nurseId: this.nurseId,
-      webapp: true,
-      initiator: this.initiator,
-    });
-
+    if (this.callDuration) {
+      this.socketSvc.emitEvent("bye", {
+        ...this.incomingData,
+        nurseId: this.nurseId,
+        webapp: true,
+        initiator: this.initiator,
+      });
+    } else if(this.endCall) {
+      this.socketSvc.emitEvent("cancel_dr", {
+        ...this.incomingData,
+        nurseId: this.nurseId,
+        webapp: true,
+        initiator: this.initiator,
+      });
+    } else if (this.callDuration === "" && !this.endCall && (flag === 'call_time_up')) {
+      this.socketSvc.emitEvent('call_time_up', this.nurseId);
+    } 
     this.close();
   }
 
