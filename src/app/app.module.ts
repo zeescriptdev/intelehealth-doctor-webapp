@@ -62,6 +62,7 @@ import { TranslateHttpLoader } from "@ngx-translate/http-loader";
 import { JwtInterceptor } from "./core/interceptors/jwt.interceptor";
 import { getCacheData } from "./utils/utility-functions";
 import { languages } from "src/config/constant";
+import { LoaderInterceptor } from "./core/interceptors/loader.interceptor";
 
 const ngxUiLoaderConfig: NgxUiLoaderConfig = {
   bgsColor: "#2E1E91",
@@ -118,25 +119,25 @@ registerLocaleData(localeEn);
     }),
     AppRoutingModule,
     NgxUiLoaderModule.forRoot(ngxUiLoaderConfig),
-    NgxUiLoaderHttpModule.forRoot({
-      showForeground: true,
-      exclude: [
-        'https://afi.ekalarogya.org:3004/api/messages/',
-        'https://afi.ekalarogya.org:3004/api/support/',
-        'https://afi.ekalarogya.org:3004/api/auth/validateProviderAttribute',
-        'https://afi.ekalarogya.org:3000/api/getToken',
-        'https://afi.ekalarogya.org:3004/api/appointment/',
-        'https://afi.ekalarogya.org:3004/api/openmrs/getVisitCounts',
-        'https://afi.ekalarogya.org:3004/api/openmrs/getVisitCountsForDashboard',
-        'https://afi.ekalarogya.org:3004/api/user/createUpdateStatus',
-        'https://afitraining.ekalarogya.org/openmrs/ws/rest/v1/obs',
-        'https://afi.ekalarogya.org/gen',
-        'https://afi.ekalarogya.org/vl2',
-        'https://afi.ekalarogya.org/bs',
-        'https://afi.ekalarogya.org/vlrv',
-        'https://afi.ekalarogya.org/lcrep'
-      ]
-    }),
+    // NgxUiLoaderHttpModule.forRoot({
+    //   showForeground: true,
+    //   exclude: [
+    //     'https://afi.ekalarogya.org:3004/api/messages/',
+    //     'https://afi.ekalarogya.org:3004/api/support/',
+    //     'https://afi.ekalarogya.org:3004/api/auth/validateProviderAttribute',
+    //     'https://afi.ekalarogya.org:3000/api/getToken',
+    //     'https://afi.ekalarogya.org:3004/api/appointment/',
+    //     'https://afi.ekalarogya.org:3004/api/openmrs/getVisitCounts',
+    //     'https://afi.ekalarogya.org:3004/api/openmrs/getVisitCountsForDashboard',
+    //     'https://afi.ekalarogya.org:3004/api/user/createUpdateStatus',
+    //     'https://afitraining.ekalarogya.org/openmrs/ws/rest/v1/obs',
+    //     'https://afi.ekalarogya.org/gen',
+    //     'https://afi.ekalarogya.org/vl2',
+    //     'https://afi.ekalarogya.org/bs',
+    //     'https://afi.ekalarogya.org/vlrv',
+    //     'https://afi.ekalarogya.org/lcrep'
+    //   ]
+    // }),
     NgxPermissionsModule.forRoot({
       permissionsIsolate: false,
       rolesIsolate: false,
@@ -174,6 +175,12 @@ registerLocaleData(localeEn);
     {
       provide: HTTP_INTERCEPTORS,
       useClass: ErrorInterceptor,
+      multi: true,
+    },
+    ,
+    {
+      provide: HTTP_INTERCEPTORS,
+      useClass: LoaderInterceptor,
       multi: true,
     },
     // {
