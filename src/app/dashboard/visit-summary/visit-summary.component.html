@@ -78,12 +78,12 @@
               </div>
             </div>
 
-            <div class="col-md-3 patient-info-section p-3" *ngIf="checkPatientRegField('Phone Number') && getPersonAttributeValue('Telephone Number') !== 'NA'">
+            <div class="col-md-3 patient-info-section p-3" *ngIf="checkPatientRegField('Phone Number') && getPhoneNumber()">
               <div class="patient-info-item">
                 <h6 data-test-id="etPatient">{{'Phone Number'| translate}}</h6>
                 <div class="contact-info">
                   <p data-test-id="etPhoneNumber">
-                    {{ getPersonAttributeValue("Telephone Number") }}
+                    {{ getPhoneNumber() }}
                     <a
                       href="{{ getWhatsAppLink() }}"
                       target="_blank"
@@ -94,7 +94,7 @@
                       <img src="assets/svgs/whatsapp-icon.svg" alt="" />
                     </a>
                     <a
-                      href="tel:{{ getPersonAttributeValue('Telephone Number') }}"
+                      href="tel:{{ getPhoneNumber() }}"
                       target="_blank"
                       class="icon-btn"
                       data-test-id="linkPhoneNumber"
@@ -934,14 +934,14 @@
                     <div
                       class="col-sm-9 d-flex align-items-center"
                       *ngIf="
-                        this.hwPhoneNo;
+                        this.getPhoneNumber()
                         else noContactDetails
                       "
                     >
                       <div class="d-flex">
                         <a
                           href="tel:{{
-                            this.hwPhoneNo
+                            this.getPhoneNumber()
                           }}"
                           target="_blank"
                           class="icon-btn m-0 mr-2"
@@ -967,7 +967,7 @@
                     <ng-template #noContactDetails>
                       <div class="col-sm-9 d-flex align-items-center">
                         <span class="text-muted"
-                          >{{'Health worker number is not available'|translate}}</span
+                          >{{'Phone number is not available'|translate}}</span
                         >
                       </div>
                     </ng-template>

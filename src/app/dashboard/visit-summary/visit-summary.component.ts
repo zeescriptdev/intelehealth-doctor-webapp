@@ -973,7 +973,7 @@ export class VisitSummaryComponent implements OnInit, OnDestroy, AfterViewInit {
   * @return {string} - Whatsapp link
   */
   getWhatsAppLink(): string {
-    return this.visitService.getWhatsappLink(this.hwPhoneNo, `Hello I'm calling for consultation`);
+    return this.visitService.getWhatsappLink(this.getPhoneNumber(), `Hello I'm calling for consultation`);
   }
 
   /**
@@ -3127,5 +3127,13 @@ export class VisitSummaryComponent implements OnInit, OnDestroy, AfterViewInit {
       this.patientCallStatusForm.get('callStatus').setValue(null)
     }
     return null;
+  }
+
+  getPhoneNumber(): string{
+    if(["NAS"].includes(environment.brandName)){
+      return this.hwPhoneNo;
+    } else {
+      return this.getPersonAttributeValue('Telephone Number') != "NA" ? this.getPersonAttributeValue('Telephone Number') : "";
+    } 
   }
 }
