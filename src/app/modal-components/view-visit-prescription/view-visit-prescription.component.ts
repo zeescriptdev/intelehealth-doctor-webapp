@@ -565,7 +565,7 @@ export class ViewVisitPrescriptionComponent implements OnInit, OnDestroy {
         if (currentPage == pageCount) {
           return {
             columns: [
-              { text: "Disclaimer: If your condition does not improve after treatment, please visit your nearest hospital or consult a doctor as soon as possible. Telemedicine services are a limited consultation and are not a substitute for an in-person examination.", fontSize: 8, margin: [20, 0, 0, 0]},
+              { text: "Note - If your condition does not improve after treatment, please visit your nearest hospital or consult a doctor as soon as possible. Telemedicine services are a limited consultation and are not a substitute for an in-person examination.", fontSize: 8, margin: [20, 0, 0, 0]},
             ]
           }
         } else {
