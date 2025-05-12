@@ -2258,57 +2258,53 @@
                 [formGroup]="patientCallStatusForm"
                 *ngIf="!isMCCUser"
               >
-                <ul class="items-list">
-                  <li>
-                    <div class="row">
-                      <div class="col-sm-9 d-flex align-items-center">
-                        <div class="pretty p-default p-round">
-                          <input
-                            type="radio"
-                            value="Review of Imaging"
-                            formControlName="callStatus"
-                            (change)="onCallStatusChange()"
-                            (click)="onCallStatusClick('Review of Imaging')"
-                            data-test-id="radioCallStatusCompleted"
-                            [attr.disabled]="(!isVisitNoteProvider || visitEnded)? 'disabled' : null"
-                          />
-                          <div class="state p-success">
-                            <label>{{ 'Review of Imaging' | translate }}</label>
-                          </div>
+                  <div class="row items-list">
+                    <div class="col-sm-12 d-flex align-items-center justify-content-center">
+                      <div class="pretty p-default p-round">
+                        <input
+                          type="radio"
+                          value="Review of Imaging"
+                          formControlName="callStatus"
+                          (change)="onCallStatusChange()"
+                          (click)="onCallStatusClick('Review of Imaging')"
+                          data-test-id="radioCallStatusCompleted"
+                          [attr.disabled]="(!isVisitNoteProvider || visitEnded)? 'disabled' : null"
+                        />
+                        <div class="state p-success">
+                          <label>{{ 'Review of Imaging' | translate }}</label>
                         </div>
-                        <div class="pretty p-default p-round">
-                          <input
-                            type="radio"
-                            value="Review with Reports"
-                            formControlName="callStatus"
-                            (change)="onCallStatusChange()"
-                            (click)="onCallStatusClick('Review with Reports')"
-                            data-test-id="radioCallStatusReschedule"
-                            [attr.disabled]="(!isVisitNoteProvider || visitEnded)? 'disabled' : null"
-                          />
-                          <div class="state p-success">
-                            <label>{{ 'Review with Reports' | translate }}</label>
-                          </div>
-                        </div>
-                        <div class="pretty p-default p-round">
-                          <input
-                            type="radio"
-                            value="Referral"
-                            formControlName="callStatus"
-                            (change)="onCallStatusChange()"
-                            (click)="onCallStatusClick('Referral')"
-                            data-test-id="radioCallStatusClose"
-                            [attr.disabled]="(isMCCUser || !isVisitNoteProvider || visitEnded)? 'disabled' : null"
-                          />
-                          <div class="state p-success">
-                            <label>{{ 'Reschedule Referral' | translate }}</label>
-                          </div>
-                        </div>
-                  
                       </div>
+                      <div class="pretty p-default p-round">
+                        <input
+                          type="radio"
+                          value="Review with Reports"
+                          formControlName="callStatus"
+                          (change)="onCallStatusChange()"
+                          (click)="onCallStatusClick('Review with Reports')"
+                          data-test-id="radioCallStatusReschedule"
+                          [attr.disabled]="(!isVisitNoteProvider || visitEnded)? 'disabled' : null"
+                        />
+                        <div class="state p-success">
+                          <label>{{ 'Review with Reports' | translate }}</label>
+                        </div>
+                      </div>
+                      <div class="pretty p-default p-round">
+                        <input
+                          type="radio"
+                          value="Referral"
+                          formControlName="callStatus"
+                          (change)="onCallStatusChange()"
+                          (click)="onCallStatusClick('Referral')"
+                          data-test-id="radioCallStatusClose"
+                          [attr.disabled]="(isMCCUser || !isVisitNoteProvider || visitEnded)? 'disabled' : null"
+                        />
+                        <div class="state p-success">
+                          <label>{{ 'Reschedule Referral' | translate }}</label>
+                        </div>
+                      </div>
+                
                     </div>
-                  </li>
-                </ul>
+                  </div>
               </form>
             </mat-expansion-panel>
             <!-- TODO : Call Status Removed from the UI for now -->
