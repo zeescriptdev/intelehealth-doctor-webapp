@@ -335,8 +335,8 @@ export class VisitSummaryComponent implements OnInit, OnDestroy, AfterViewInit {
 
     this.patientCallStatusForm = new FormGroup({
       uuid: new FormControl(null),
-      reason: new FormControl(null, [Validators.required]),
-      callStatus: new FormControl(null, [Validators.required]),
+      reason: new FormControl(null, []),
+      callStatus: new FormControl(null, []),
     });
 
     this.diagnosisForm = new FormGroup({
@@ -1008,7 +1008,7 @@ export class VisitSummaryComponent implements OnInit, OnDestroy, AfterViewInit {
   * @return {string} - Whatsapp link
   */
   getWhatsAppLink(): string {
-    return this.visitService.getWhatsappLink(this.hwPhoneNo, `Hello I'm calling for consultation`);
+    return this.visitService.getWhatsappLink(this.getPhoneNumber(), `Hello I'm calling for consultation`);
   }
 
   /**
@@ -2344,6 +2344,7 @@ export class VisitSummaryComponent implements OnInit, OnDestroy, AfterViewInit {
   */
   endWhatsAppCall() {
     this.isCallInProgress = false;
+    this.isWhatsappCallWarningShown = false;
     this.callTimerInterval.unsubscribe();
     this.arrCallDurations.push({ callDuration: this.callDuration, timestamp: this.callDurationTimeStamp })
     if (this.callDurationsUuid)
@@ -3193,6 +3194,7 @@ export class VisitSummaryComponent implements OnInit, OnDestroy, AfterViewInit {
     this.coreService.openConfirmationDialog({ confirmationMsg: msg, cancelBtnText: 'Stay Here', confirmBtnText: 'Exit' }).afterClosed().subscribe(res=>{
       if(res){
         this.changesMade = false;
+        this.isCallInProgress = false;
         this.router.navigate([nextRouteURL]);
       }
     });
@@ -3216,8 +3218,24 @@ export class VisitSummaryComponent implements OnInit, OnDestroy, AfterViewInit {
   * page click event
   * @return {void}
   */
-  pageClick(event: any){
+  pageClick(event: any): void{
     console.log(event)
+  }
+
+
+  onCallStatusClick(value: string): void{
+    if(this.patientCallStatusForm.get('callStatus').value === value){
+      this.patientCallStatusForm.get('callStatus').setValue(null)
+    }
+    return null;
+  }
+
+  getPhoneNumber(): string{
+    if(["NAS"].includes(environment.brandName)){
+      return this.hwPhoneNo;
+    } else {
+      return this.getPersonAttributeValue('Telephone Number') != "NA" ? this.getPersonAttributeValue('Telephone Number') : "";
+    } 
   }
 
   onKeyPress(event: KeyboardEvent): boolean {

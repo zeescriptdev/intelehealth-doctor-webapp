@@ -7,7 +7,10 @@ export class CanDeactivateVisitSummary implements CanDeactivate<VisitSummaryComp
     canDeactivate(component: VisitSummaryComponent, currentRoute: ActivatedRouteSnapshot,
         currentState: RouterStateSnapshot,
         nextState: RouterStateSnapshot): boolean {
-        if(component.changesMade){
+        if(component.changesMade && component.isCallInProgress){
+            component.onExitPageConfirmDialog(nextState.url,'You have ongoing Whatsapp Call & unsaved changes that will be lost.');
+            return false;
+        } else if(component.changesMade){
             component.onExitPageConfirmDialog(nextState.url,'You have unsaved changes that will be lost.');
             return false;
         } else if(component.isCallInProgress){

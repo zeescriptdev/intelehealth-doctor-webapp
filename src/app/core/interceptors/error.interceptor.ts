@@ -18,9 +18,11 @@ export class ErrorInterceptor implements HttpInterceptor {
         this.authService.logOut();
       }
 
+      const error = err?.error?.message || err?.error?.error?.message  || err?.error?.error || err?.statusText;
+      
       if ([404].indexOf(err.status) != -1) {
         this.toastr.error('Not found', '404 Not Found');
-        return throwError(err.error.message || err.error.error.message || err.statusText  || err.error.error);
+        return throwError(error);
       }
 
       const error = err?.error?.message || err?.error?.error?.message  || err?.error?.error || err?.statusText;
