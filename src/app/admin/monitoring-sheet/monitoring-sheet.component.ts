@@ -16,6 +16,7 @@ export class MonitoringSheetComponent implements OnInit {
   active: number = 1;
   sevikaData: any = [];
   doctorData: any = [];
+  callData: any [];
   allData: any = [];
   filteredData: any = [];
   drDisplayedColumns: string[] = [];
@@ -45,7 +46,18 @@ export class MonitoringSheetComponent implements OnInit {
     { label: "No. of Days", key: "days", class: 'n-day' },
     { label: "Current Status", key: "status" }
   ];
-
+  callDataColumns: any = [
+    { label: "Patient Id", key: "patientId" },
+    { label: "Patient Name", key: "patientName" },
+    { label: "Village", key: "location" },
+    { label: "Doctor Name", key: "doctorName" },
+    { label: "Sevika Name", key: "sevikaName" },
+    { label: "Start Time", key: "start_time"},
+    { label: "End Time", key: "end_time"},
+    { label: "Call Duration(In second)", key: "call_duration"},
+    { label: "Call Status", key: "call_status" },
+    { label: "Reason for call failure", key: "reason" },
+  ];
   constructor(private pageTitleService: PageTitleService,
     private translateService: TranslateService,
     private monitorService: MonitoringService) {
@@ -55,6 +67,7 @@ export class MonitoringSheetComponent implements OnInit {
     this.translateService.use(getCacheData(false, languages.SELECTED_LANGUAGE));
     this.pageTitleService.setTitle({ title: 'Monitoring Sheet', imgUrl: 'assets/svgs/file-logo.svg' });
     this.getStatuses();
+    this.getWebrtcStatus();
     setTimeout(() => {
       this.getStatuses();
     }, 2000);
@@ -68,6 +81,25 @@ export class MonitoringSheetComponent implements OnInit {
           this.sevikaData = this.filterData('Health Worker');
           this.doctorData = this.filterData('Doctor');
         }, 0);
+      },
+    });
+  }
+
+  getWebrtcStatus() {
+    this.monitorService.geWebrtcStatus().subscribe({
+      next: (res: any) => {
+       let data = res?.data?.callData;
+       this.callData = data.map(item => {
+        let tableCol: any = {}
+        this.callDataColumns.forEach(col => {
+          if (["start_time", "end_time"].includes(col.key)) {
+            tableCol[col.key] =  item[col.key] === null ? 'NA' : moment(item[col.key]).format("DD MMM, YYYY h:mm a");
+          } else {
+            tableCol[col.key] = item[col.key] === null ? 'NA' : item[col.key];
+          }
+        });
+        return tableCol;
+       });
       },
     });
   }
@@ -175,6 +207,31 @@ export class MonitoringSheetComponent implements OnInit {
 
     a.href = url;
     a.download = (type === 'sevika') ? 'Sevika Log.csv' : 'Doctor Log.csv';
+    a.click();
+    window.URL.revokeObjectURL(url);
+    a.remove();
+  }
+
+  exportCallData() {
+    const header = Object.keys(this.callData[0]);
+    const csv = this.callData.map((row) =>
+      header
+        .map((fieldName) => JSON.stringify(row[fieldName]))
+        .join(',')
+    );
+    let headers = [];
+    this.callDataColumns.forEach(col => {
+        return header.includes(col.key) ? headers.push(col.label) : null;
+      });
+    csv.unshift(headers.join(','));
+    const csvArray = csv.join('\r\n');
+
+    const a = document.createElement('a');
+    const blob = new Blob([csvArray], { type: 'text/csv' });
+    const url = window.URL.createObjectURL(blob);
+
+    a.href = url;
+    a.download ='Webrtc Log.csv';
     a.click();
     window.URL.revokeObjectURL(url);
     a.remove();

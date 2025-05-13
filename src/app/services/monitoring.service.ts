@@ -31,6 +31,10 @@ export class MonitoringService {
     return this.http.get(`${this.url}/user/getAllStatuses`);
   }
 
+  geWebrtcStatus(){
+    return this.http.get(`${this.url}/user/getWebrtcStatuses`);
+  }
+
   public getBrowser() {
     const { userAgent } = navigator;
     let match =

@@ -37,6 +37,7 @@ import { SevikaLogComponent } from './monitoring-sheet/sevika-log/sevika-log.com
 import { DoctorLogComponent } from './monitoring-sheet/doctor-log/doctor-log.component';
 import { MatTabsModule } from '@angular/material/tabs';
 import { MatChipsModule } from "@angular/material/chips";
+import { WebrtcLogComponent } from './monitoring-sheet/webrtc-log/webrtc-log.component';
 
 // AoT requires an exported function for factories
 export function HttpLoaderFactory(httpClient: HttpClient) {
@@ -86,7 +87,8 @@ const routes: Routes = [
     ReportListComponent,
     MonitoringSheetComponent,
     SevikaLogComponent,
-    DoctorLogComponent
+    DoctorLogComponent,
+    WebrtcLogComponent
   ],
   imports: [
     CommonModule,
