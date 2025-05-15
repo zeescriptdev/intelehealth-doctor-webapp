@@ -1195,7 +1195,19 @@ export class VisitSummaryComponent implements OnInit, OnDestroy, AfterViewInit {
       encounterDatetime: new Date(Date.now() - 30000),
     };
     this.encounterService.postEncounter(json).subscribe((response) => {
-      if (response) {
+      this.visitNotePresent = response;
+      // save diagnosis from case summary
+      if(environment.brandName == "KCDO" && this.checkUpReasonData.length >= 1){
+        let diagnosisData = this.checkUpReasonData[0].data?.find(obj=>obj.key.includes("Diagnosis"));
+        if(diagnosisData){
+          this.diagnosisSecondaryForm.patchValue({diagnosis:diagnosisData.value})
+          this.saveDiagnosisSecondary().subscribe(res=>{
+              this.getVisit(this.visit.uuid);
+          });
+        } else {
+          this.getVisit(this.visit.uuid);
+        }
+      } else {
         this.getVisit(this.visit.uuid);
       }
     });
