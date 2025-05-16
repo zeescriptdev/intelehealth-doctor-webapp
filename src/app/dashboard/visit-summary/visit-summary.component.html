@@ -1527,7 +1527,7 @@
                                     placeholder="{{'Enter drug'|translate}}*"
                                     [ngbTypeahead]="search3"
                                     data-test-id="etDrugName"
-                                    (change)="$event.target.title = $event.target.value"
+                                    title="{{addMedicineForm.get('drug')?.value}}"
                                   />
                                 </div>
                               </td>
