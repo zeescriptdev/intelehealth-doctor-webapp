@@ -48,7 +48,7 @@ export class SentComponent implements OnInit, AfterViewInit, OnChanges {
   }
 
   ngOnChanges(changes: SimpleChanges): void {
-    if (!changes.prescriptionsSent.firstChange) {
+    if (!changes?.prescriptionsSent?.firstChange) {
       this.recordsFetched += this.offset;
       this.dataSource.data = [...this.prescriptionsSent];
       this.tempPaginator.length = this.prescriptionsSent.length

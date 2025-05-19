@@ -39,14 +39,8 @@ export class SearchedPatientsComponent {
   view(uuid: string) {
     this.visitService.recentVisits(uuid).subscribe((response: RecentVisitsApiResponseModel) => {
       if(response.results?.length > 0){
-        let recentVisit = response.results.filter(v =>v.attributes.filter(a => a.attributeType.display === 'Visit Speciality')[0].value === 'General Physician'
-        );
-        if(recentVisit.length > 0) {
-          this.router.navigate(['/dashboard/visit-summary', recentVisit[0].uuid]); 
-          this.close(true);
-        } else {
-          this.toastr.error(this.translateService.instant('Visit Not Found for this patient'), this.translateService.instant('Visit Not Found!'));
-        }      
+          this.router.navigate(['/dashboard/visit-summary', response.results[0].uuid]); 
+          this.close(true); 
       } else {
         this.toastr.error(this.translateService.instant('Visit Not Found for this patient'), this.translateService.instant('Visit Not Found!'));
       }

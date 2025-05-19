@@ -265,7 +265,7 @@
                 </ul>
               </mat-expansion-panel>
 
-              <mat-expansion-panel [expanded]="true" class="bg-gray" data-test-id="matExpVitals">
+              <mat-expansion-panel [expanded]="true" [hidden]="isNcdSevikaVisit" class="bg-gray" data-test-id="matExpVitals">
                 <mat-expansion-panel-header data-test-id="matExpHeaderVitals">
                   <mat-panel-title>
                     <div class="intel-accordion-title">
@@ -505,7 +505,7 @@
                 </div>
               </mat-expansion-panel>
 
-              <mat-expansion-panel [expanded]="true" class="bg-gray" data-test-id="matExpPhysicalExam">
+              <mat-expansion-panel [expanded]="true" [hidden]="isNcdSevikaVisit" class="bg-gray" data-test-id="matExpPhysicalExam">
                 <mat-expansion-panel-header data-test-id="matExpHeaderPhysicalExam">
                   <mat-panel-title>
                     <div class="intel-accordion-title">
@@ -579,7 +579,7 @@
                 </ng-container>
               </mat-expansion-panel>
 
-              <mat-expansion-panel [expanded]="true" data-test-id="matExpMedicalHis">
+              <mat-expansion-panel [expanded]="true" [hidden]="isNcdSevikaVisit" data-test-id="matExpMedicalHis">
                 <mat-expansion-panel-header data-test-id="matExpHeaderMedicalHis">
                   <mat-panel-title>
                     <div class="intel-accordion-title">
@@ -608,7 +608,7 @@
                 </ng-container>
               </mat-expansion-panel>
 
-              <mat-expansion-panel [expanded]="true" class="bg-gray" data-test-id="matExpAdditionalNotes">
+              <mat-expansion-panel [expanded]="true" [hidden]="isNcdSevikaVisit" class="bg-gray" data-test-id="matExpAdditionalNotes">
                 <mat-expansion-panel-header data-test-id="matExpHeaderAdditionalNotes">
                   <mat-panel-title>
                     <div class="intel-accordion-title">
@@ -860,7 +860,7 @@
 
     <div class="col-md-12 p-0 py-2 mb-5 text-center"
       *ngIf="!visitNotePresent && !visitCompleted && !visitEnded && selectedTabIndex == 0">
-      <button type="button" *ngxPermissionsExcept="['PROJECT MANAGER']" [disabled]="checkUpReasonData.length === 0"
+      <button type="button" *ngxPermissionsExcept="['PROJECT MANAGER']" [disabled]="checkUpReasonData.length === 0  || isSevikaVisit || isNcdSevikaVisit"
         class="blue-btn" (click)="startVisitNote()" data-test-id="btnStartVisitNote">
         {{'Start visit note'|translate}}
       </button>
