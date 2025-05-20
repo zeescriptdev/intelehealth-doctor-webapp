@@ -191,7 +191,7 @@ export class VisitSummaryComponent implements OnInit, OnDestroy, AfterViewInit {
 
   async lazyLoadDDx() {
     setTimeout(async () => {
-      this.lazyLoadDDxContainer.clear();
+      this.lazyLoadDDxContainer?.clear();
       const { DiagnosisComponent } = await import(/* webpackChunkName: "diagnosis-aillm-ddx" */'./diagnosis/diagnosis.component');
       this.ddxCompRef = this.lazyLoadDDxContainer.createComponent(DiagnosisComponent);
       if (this.ddxCompRef) {
@@ -1946,21 +1946,23 @@ export class VisitSummaryComponent implements OnInit, OnDestroy, AfterViewInit {
       if (this.followUpForm.value.uuid) {
         return this.encounterService.updateObs(this.followUpForm.value.uuid, { value });
       } else {
-        return this.encounterService.postObs({
+        this.encounterService.postObs({
           concept: conceptIds.conceptFollow,
           person: this.visit.patient.uuid,
           obsDatetime: new Date(),
-          value,
+          value: value,
           encounter: this.visitNotePresent.uuid
+        }).subscribe ( () => {
         });
       }
     } else {
-      return this.encounterService.postObs({
+      this.encounterService.postObs({
         concept: conceptIds.conceptFollow,
         person: this.visit.patient.uuid,
         obsDatetime: new Date(),
         value: this.followUpForm.value.wantFollowUp,
         encounter: this.visitNotePresent.uuid
+      }).subscribe ( () => {
       });
     }
   }
