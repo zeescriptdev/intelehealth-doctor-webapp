@@ -1510,7 +1510,7 @@
               </ng-container>
             </mat-expansion-panel>
 
-            <ng-container *ngIf="!appConfigService?.patient_visit_summary?.dp_recommendation_group">
+            <ng-container *ngIf="!appConfigService?.patient_visit_summary?.dp_recommendation_group && !brandName">
               <ng-template *ngTemplateOutlet="tplDrRcom" ></ng-template>
             </ng-container>
 
@@ -1837,6 +1837,7 @@
               #panel7
               hideToggle
               class="overflow-show"
+              *ngIf="!brandName"
             >
             
             <mat-expansion-panel-header>
@@ -2020,6 +2021,37 @@
                 </div>
               </form>
             </mat-expansion-panel>  
+          <mat-expansion-panel
+            [expanded]="true"
+            #panel7
+            hideToggle
+            class="overflow-show"
+            *ngIf="isFeatureAvailable('doctor-recommendation')"
+          >
+            <mat-expansion-panel-header>
+              <mat-panel-title>
+                <div class="intel-accordion-title">
+                  <img src="assets/svgs/advice.svg" alt="" width="44px" />
+                  <h6 class="mb-0 ml-2">{{'Recommendation'|translate}}</h6>
+                  <!-- <mat-icon aria-hidden="false" class="info-icon" aria-label="help icon" matTooltip="{{'Recommendation' | translate}}" matTooltipPosition="right" data-test-id="matIcoHelpAppointment">help_outline</mat-icon> -->
+                </div>
+              </mat-panel-title>
+              <mat-icon>{{ panel7.expanded ? "remove" : "add" }}</mat-icon>
+            </mat-expansion-panel-header>
+
+            <form class="mt-3" [formGroup]="recommendationForm">
+              <div class="form-group">
+                <textarea
+                  formControlName="value"
+                  class="form-control"
+                  rows="10"
+                  placeholder="{{'Type here'|translate}}"
+                  data-test-id="etAI"
+                  [attr.disabled]="(isMCCUser || !isVisitNoteProvider || visitEnded)? 'disabled' : null"
+                ></textarea>
+              </div>
+            </form>
+          </mat-expansion-panel>  
 
             <mat-expansion-panel
               [expanded]="true"
