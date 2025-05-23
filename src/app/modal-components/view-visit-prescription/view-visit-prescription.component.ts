@@ -77,6 +77,8 @@ export class ViewVisitPrescriptionComponent implements OnInit, OnDestroy {
   sanitizedValue: SafeHtml;
   recommendation: { uuid: string; value: any; };
 
+  brandName = environment.brandName === 'KCDO';
+
   constructor(
     @Inject(MAT_DIALOG_DATA) public data,
     private dialogRef: MatDialogRef<ViewVisitPrescriptionComponent>,
