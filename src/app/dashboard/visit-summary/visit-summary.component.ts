@@ -173,6 +173,7 @@ export class VisitSummaryComponent implements OnInit, OnDestroy, AfterViewInit {
   referralSecondaryForm: FormGroup;
   diagnosisSecondaryForm: FormGroup;
   discussionSummaryForm: FormGroup;
+  recommendationForm: FormGroup;
   @ViewChild(FollowUpInstructionComponent) followUpInstructionComponentRef: FollowUpInstructionComponent;
   @ViewChild('familyHistoryNote') familyHistoryNoteRef: NotesComponent;
   @ViewChild('pastMedicalHistoryNote') pastMedicalHistoryNoteRef: NotesComponent;
@@ -240,6 +241,7 @@ export class VisitSummaryComponent implements OnInit, OnDestroy, AfterViewInit {
     patientCallStatus: null,
     diagnosisSecondary: null,
     referralSecondary: null,
+    recommendation: null,
     patientInteractionComment: null,
     hwInteraction: null,
     patientInteraction: null,
@@ -365,6 +367,11 @@ export class VisitSummaryComponent implements OnInit, OnDestroy, AfterViewInit {
     this.referralSecondaryForm = new FormGroup({
       uuid: new FormControl(null),
       ref: new FormControl(null, [Validators.required])
+    })
+
+    this.recommendationForm = new FormGroup({
+      uuid: new FormControl(null),
+      value: new FormControl(null, [Validators.required])
     })
 
     this.diagnosisSecondaryForm = new FormGroup({
@@ -551,8 +558,8 @@ export class VisitSummaryComponent implements OnInit, OnDestroy, AfterViewInit {
               this.checkIfFollowUpPresent();
               this.checkIfPatientCallDurationPresent(visit.attributes)
               this.checkIfCallStatusPresent(visit.attributes)
-              this.checkIfDiscussionSummaryPresent()
-
+              this.checkIfDiscussionSummaryPresent();
+              this.checkIfRecommendationPresent();
               if(isFeaturePresent('medicationFrequencyList')) this.getFrequencyList();
             }
             if (this.patientVisitSummary.notes_section) {
@@ -1795,6 +1802,22 @@ export class VisitSummaryComponent implements OnInit, OnDestroy, AfterViewInit {
       });
   }
 
+
+  /**
+  * Get Recommendation for the visit
+  * @returns {void}
+  */
+  checkIfRecommendationPresent(): void {
+    this.diagnosisService.getObs(this.visit.patient.uuid, conceptIds.conceptRecommendation)
+    .subscribe((response: ObsApiResponseModel) => {
+      response.results.forEach((obs: ObsModel) => {
+        if(obs.encounter && obs.encounter.visit.uuid === this.visit.uuid){
+          this.recommendationForm.patchValue({uuid: obs.uuid, value: obs.value})
+        }
+      });
+    });
+  }
+
   /**
   * Save referral
   * @returns {void}
@@ -2371,6 +2394,27 @@ export class VisitSummaryComponent implements OnInit, OnDestroy, AfterViewInit {
     }
   }
 
+  saveRecommendation(): Observable<any>{
+    if(this.recommendationForm.value.uuid){
+      if(this.recommendationForm.valid)
+        return this.encounterService.updateObs(this.recommendationForm.value.uuid,{
+          value: `${this.recommendationForm.value.value}`,
+        }).pipe(tap((res: ObsModel)=>this.recommendationForm.patchValue({uuid:res.uuid})))
+      else 
+        return this.diagnosisService.deleteObs(this.recommendationForm.value.uuid).pipe(tap((res)=>this.recommendationForm.patchValue({ uuid: null})))
+    } else if(this.recommendationForm.valid) {
+      return this.encounterService.postObs({
+        concept: conceptIds.conceptRecommendation,
+        person: this.visit.patient.uuid,
+        obsDatetime: new Date(),
+        value: `${this.recommendationForm.value.value}`,
+        encounter: this.visitNotePresent.uuid,
+      }).pipe(tap((res: ObsModel)=>this.recommendationForm.patchValue({uuid:res.uuid})))
+    } else {
+      return of(false)
+    }
+  }
+
   saveDiagnosisSecondary(): Observable<any>{
     if(this.diagnosisSecondaryForm.value.uuid){
       if(this.diagnosisSecondaryForm.valid)
@@ -2437,8 +2481,11 @@ export class VisitSummaryComponent implements OnInit, OnDestroy, AfterViewInit {
       if (this.appConfigService.patient_visit_summary?.dp_referral_secondary) {
         postObsRequests.push(this.saveReferralSecondary());
       }
+      if (this.isFeatureAvailable('doctor-recommendation')) {
+        postObsRequests.push(this.saveRecommendation());
+      }
       if (this.isFeatureAvailable('follow-up-instruction')) {
-        postObsRequests.push(this.followUpInstructionComponentRef.addInstructions());
+        postObsRequests.push(this.followUpInstructionComponentRef?.addInstructions());
       }
       if (this.appConfigService?.patient_visit_summary?.dp_call_status) {
         postObsRequests.push(this.saveCallStatus());
@@ -2581,6 +2628,7 @@ export class VisitSummaryComponent implements OnInit, OnDestroy, AfterViewInit {
         diagnosisSecondary: () => this.appConfigService.patient_visit_summary?.dp_dignosis_secondary ? this.saveDiagnosisSecondary() : of(null),
         discussionSummary: () => this.appConfigService.patient_visit_summary?.dp_discussion_summary ? this.saveDiscussionSummary() : of(null),
         referralSecondary: () => this.appConfigService.patient_visit_summary?.dp_referral_secondary ? this.saveReferralSecondary() : of(null),
+        recommendation: () => this.isFeatureAvailable('doctor-recommendation') ? this.saveRecommendation() : of(null),
         followUpInstruction: () => this.isFeatureAvailable('follow-up-instruction') ? this.followUpInstructionComponentRef.addInstructions() : of(null),
         patientCallStatus: () => this.appConfigService?.patient_visit_summary?.dp_call_status ? this.saveCallStatus() : of(null)
       };
@@ -2759,6 +2807,7 @@ export class VisitSummaryComponent implements OnInit, OnDestroy, AfterViewInit {
           patientCallStatus: null,
           diagnosisSecondary: null,
           referralSecondary: null,
+          recommendation: null,
           patientInteractionComment: null,
           hwInteraction: null,
           patientInteraction: null,
@@ -3029,6 +3078,20 @@ export class VisitSummaryComponent implements OnInit, OnDestroy, AfterViewInit {
           const newValue = this.referralSecondaryForm.value;
           if (JSON.stringify(newValue) !== JSON.stringify(this.obsData.referralSecondary)) {
             this.updatedObsData.referralSecondary = newValue;
+            this.checkChanges(this.updatedObsData);
+          }
+        })
+      );
+    }
+
+    // Track recommendation form
+    if (this.recommendationForm) {
+      this.obsData.recommendation = this.recommendationForm.value;
+      this.formSubscriptions.push(
+        this.recommendationForm.valueChanges.subscribe(() => {
+          const newValue = this.recommendationForm.value;
+          if (JSON.stringify(newValue) !== JSON.stringify(this.obsData.recommendation)) {
+            this.updatedObsData.recommendationForm = newValue;
             this.checkChanges(this.updatedObsData);
           }
         })

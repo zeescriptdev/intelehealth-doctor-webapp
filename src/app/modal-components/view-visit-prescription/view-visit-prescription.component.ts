@@ -75,6 +75,7 @@ export class ViewVisitPrescriptionComponent implements OnInit, OnDestroy {
   pvsConstant = VISIT_SECTIONS;
 
   sanitizedValue: SafeHtml;
+  recommendation: { uuid: string; value: any; };
 
   constructor(
     @Inject(MAT_DIALOG_DATA) public data,
@@ -140,7 +141,8 @@ export class ViewVisitPrescriptionComponent implements OnInit, OnDestroy {
               this.checkIfReferralPresent();
               this.checkIfFollowUpPresent();
               this.checkIfFollowUpInstructionsPresent();
-              this.checkIfDiscussionSummaryPresent()
+              this.checkIfDiscussionSummaryPresent();
+              this.checkIfRecommendationPresent();
             }
             this.getCheckUpReason(visit.encounters);
             this.getVitalObs(visit.encounters);
@@ -400,6 +402,21 @@ export class ViewVisitPrescriptionComponent implements OnInit, OnDestroy {
           }
         });
       });
+  }
+
+  /**
+  * Get Recommendation for the visit
+  * @returns {void}
+  */
+  checkIfRecommendationPresent(): void {
+    this.diagnosisService.getObs(this.visit.patient.uuid, conceptIds.conceptRecommendation)
+    .subscribe((response: ObsApiResponseModel) => {
+      response.results.forEach((obs: ObsModel) => {
+        if(obs.encounter && obs.encounter.visit.uuid === this.visit.uuid){
+          this.recommendation = {uuid: obs.uuid, value: obs.value}
+        }
+      });
+    });
   }
 
   /**
@@ -1603,7 +1620,7 @@ export class ViewVisitPrescriptionComponent implements OnInit, OnDestroy {
     ]
     ];
 
-    if(this.isFeatureAvailable('doctor-recommendation')){
+    if(this.appConfigService.patient_visit_summary.dp_recommendation_group){
       return [
         [
           {
