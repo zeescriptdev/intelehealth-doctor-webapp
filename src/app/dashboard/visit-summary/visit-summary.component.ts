@@ -38,7 +38,7 @@ import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
 import { FollowUpInstructionComponent } from './follow-up-instruction/follow-up-instruction.component';
 import { NotesComponent } from './notes/notes.component';
 import durationUnitList from 'src/app/core/data/durationUnitList';
-import instructionRemarks from 'src/app/core/data/instructionRemarks';
+//import instructionRemarks from 'src/app/core/data/instructionRemarks';
 
 class PickDateAdapter extends NativeDateAdapter {
   format(date: Date, displayFormat: Object): string {
@@ -93,6 +93,7 @@ export class VisitSummaryComponent implements OnInit, OnDestroy, AfterViewInit {
   strengthList: DataItemModel[] = strength.strengthList
   daysList: DataItemModel[] = days.daysList
   durationUnitList: DataItemModel[] = durationUnitList;
+  instructionRemarks:DataItemModel[] =[]; 
   timeList: string[] = [];
   drugNameList: DataItemModel[] = [];
   advicesList: string[] = [];
@@ -246,7 +247,7 @@ export class VisitSummaryComponent implements OnInit, OnDestroy, AfterViewInit {
   search4 = (text$: Observable<string>) => this.mainSearch(text$, doses.map((val) => val.name));
   search5 = (text$: Observable<string>) => this.mainSearch(text$, this.daysList.map((val) => val.name));
   search6 = (text$: Observable<string>) => this.mainSearch(text$, this.durationUnitList.map((val) => val.name));
-  search7 = (text$: Observable<string>) => this.mainSearch(text$, instructionRemarks.map((val) => val.name));
+  search7 = (text$: Observable<string>) => this.mainSearch(text$, this.instructionRemarks.map((val) => val.name));
 
   // Add this property to the component class
   obsData = {
@@ -454,6 +455,7 @@ export class VisitSummaryComponent implements OnInit, OnDestroy, AfterViewInit {
     this.changesMade = false;
     
     this.getVisit(id);
+    this.getInstructionRemarks();
     // this.formControlValueChanges();
     this.dSearchSubject.pipe(debounceTime(500), distinctUntilChanged()).subscribe(searchTextValue => {
       this.searchDiagnosis(searchTextValue);
@@ -2531,7 +2533,7 @@ export class VisitSummaryComponent implements OnInit, OnDestroy, AfterViewInit {
       // Handle medicines
       for (const medicine of this.medicines) {
         if (medicine?.uuid) continue;
-
+        this.updateInstructionRemarks(medicine);
         postObsRequests.push(
           this.encounterService.postObs({
             concept: conceptIds.conceptMed,
@@ -2698,6 +2700,7 @@ export class VisitSummaryComponent implements OnInit, OnDestroy, AfterViewInit {
       // Handle medicines if addMedicine is in changedFields
       if (this.changedFields.includes('addMedicine')) {
         for (const medicine of this.medicines) {
+          this.updateInstructionRemarks(medicine);
           if (medicine?.uuid) continue;
           postObsRequests.push(
             this.encounterService.postObs({
@@ -3264,5 +3267,26 @@ export class VisitSummaryComponent implements OnInit, OnDestroy, AfterViewInit {
 
   get visitDemarcation() {
     return this.visitService.getDemarcation(this.visit?.encounters);
+  }
+
+  getInstructionRemarks() {
+    this.instructionRemarks = [];
+    this.visitService.getInstructionRemarks().subscribe((data: DataItemModel[]) => {
+      if (data) {
+        this.instructionRemarks = data;
+      }
+    });
+  }
+
+  updateInstructionRemarks(medicine:MedicineModel) {
+    const exists = this.instructionRemarks.some(item => item.name.trim().toLowerCase() === medicine.instructRemark.trim().toLowerCase());
+    if (!exists) {
+      const newItem = { id: Date.now(), name: medicine.instructRemark };
+      this.visitService.addInstructionRemarks(newItem).subscribe((data: DataItemModel[]) => {
+        if (data) {
+          this.getInstructionRemarks();
+        }
+      });
+    }
   }
 }
