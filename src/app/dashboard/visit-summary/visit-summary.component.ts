@@ -1954,7 +1954,16 @@ export class VisitSummaryComponent implements OnInit, OnDestroy, AfterViewInit {
           obsDatetime: new Date(),
           value: value,
           encounter: this.visitNotePresent.uuid
-        }).subscribe ( () => {
+        }).subscribe ( (res) => {
+            this.followUpForm.patchValue({
+            present: true,
+            wantFollowUp: 'Yes',
+            followUpDate : this.followUpForm.value.followUpDate,
+            followUpTime : this.followUpForm.value.followUpTime,
+            followUpReason : this.followUpForm.value.followUpReason,
+            uuid: res.uuid,
+            followUpType : null
+          });
         });
       }
     } else {
@@ -1964,7 +1973,16 @@ export class VisitSummaryComponent implements OnInit, OnDestroy, AfterViewInit {
         obsDatetime: new Date(),
         value: this.followUpForm.value.wantFollowUp,
         encounter: this.visitNotePresent.uuid
-      }).subscribe ( () => {
+      }).subscribe ( (res) => {
+         this.followUpForm.patchValue({
+            present: true,
+            wantFollowUp: 'No',
+            followUpDate : null,
+            followUpTime : null,
+            followUpReason :null,
+            uuid: res.uuid,
+            followUpType : null
+          });
       });
     }
   }
