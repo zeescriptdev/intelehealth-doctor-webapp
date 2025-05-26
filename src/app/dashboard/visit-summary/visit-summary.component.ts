@@ -1943,7 +1943,7 @@ export class VisitSummaryComponent implements OnInit, OnDestroy, AfterViewInit {
   */
   saveFollowUp(): Observable<any> {
     if (this.followUpForm.value.wantFollowUp === 'Yes') {
-      const value = `${this.followUpForm.value.followUpDate},Time:${this.followUpForm.value.followUpTime},Remark:${this.followUpForm.value.followUpReason || ''},Type:${this.followUpForm.value.followUpType || ''}`;
+      const value = `${moment(this.followUpForm.value.followUpDate).format('YYYY-MM-DD')},Time:${this.followUpForm.value.followUpTime},Remark:${this.followUpForm.value.followUpReason || ''},Type:${this.followUpForm.value.followUpType || ''}`;
       
       if (this.followUpForm.value.uuid) {
         return this.encounterService.updateObs(this.followUpForm.value.uuid, { value });
