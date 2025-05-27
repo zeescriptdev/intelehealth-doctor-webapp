@@ -15,7 +15,7 @@ import { MatAccordion } from '@angular/material/expansion';
 import medicines from '../../core/data/medicines';
 import doses from '../../core/data/dose';
 import { BehaviorSubject, forkJoin, interval, Observable, of, Subject, Subscription } from 'rxjs';
-import { debounceTime, distinctUntilChanged, map, tap } from 'rxjs/operators';
+import { debounceTime, distinctUntilChanged, map, switchMap, tap } from 'rxjs/operators';
 import { MatTableDataSource } from '@angular/material/table';
 import { DateAdapter, MAT_DATE_FORMATS, NativeDateAdapter } from '@angular/material/core';
 import { formatDate } from '@angular/common';
@@ -241,13 +241,23 @@ export class VisitSummaryComponent implements OnInit, OnDestroy, AfterViewInit {
       map(term => term.length < 1 ? [] : list.filter(v => v.toLowerCase().indexOf(term.toLowerCase()) > -1).slice(0, 10))
     )
 
+  searchInstructionRemark = (text$: Observable<string>) => {
+  return text$.pipe(
+    debounceTime(200),
+    distinctUntilChanged(),
+    switchMap(term =>
+      term.length < 2 ? of([]) : this.getOptions(term)
+    )
+  );
+} 
+
   search = (text$: Observable<string>) => this.mainSearch(text$, this.advicesList);
   search2 = (text$: Observable<string>) => this.mainSearch(text$, this.testsList);
   search3 = (text$: Observable<string>) => this.mainSearch(text$, this.drugNameList.map((val) => val.name));
   search4 = (text$: Observable<string>) => this.mainSearch(text$, doses.map((val) => val.name));
   search5 = (text$: Observable<string>) => this.mainSearch(text$, this.daysList.map((val) => val.name));
   search6 = (text$: Observable<string>) => this.mainSearch(text$, this.durationUnitList.map((val) => val.name));
-  search7 = (text$: Observable<string>) => this.mainSearch(text$, this.instructionRemarks.map((val) => val.name));
+  search7 = (text$: Observable<string>) => this.searchInstructionRemark(text$);
 
   // Add this property to the component class
   obsData = {
@@ -3307,4 +3317,10 @@ export class VisitSummaryComponent implements OnInit, OnDestroy, AfterViewInit {
       });
     }
   }
+
+  getOptions(term: string): Observable<string[]> {
+  // This could be an API call
+  let data = this.instructionRemarks.map((val) => val.name);
+  return of(data.filter(v => v.toLowerCase().includes(term.toLowerCase())));
+}
 }
