@@ -32,10 +32,10 @@ import { AppConfigService } from 'src/app/services/app-config.service';
 import { checkIsEnabled, VISIT_SECTIONS } from 'src/app/utils/visit-sections';
 import { NgSelectComponent } from '@ng-select/ng-select';
 import { NgxRolesService } from 'ngx-permissions';
-import diagnostics from '../../core/data/diagnostics';
 import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
 import { FollowUpInstructionComponent } from './follow-up-instruction/follow-up-instruction.component';
 import { NotesComponent } from './notes/notes.component';
+import { keepOnlyPairedEvents } from 'src/app/utils/paired-events';
 
 class PickDateAdapter extends NativeDateAdapter {
   format(date: Date, displayFormat: Object): string {
@@ -274,6 +274,9 @@ export class VisitSummaryComponent implements OnInit, OnDestroy, AfterViewInit {
       this.checkChanges(this.updatedObsData);
     }
   }
+
+  eventLog: any[] = [];
+  eventLogAttributeUuid: string;
 
   constructor(
     private pageTitleService: PageTitleService,
@@ -574,6 +577,15 @@ export class VisitSummaryComponent implements OnInit, OnDestroy, AfterViewInit {
             this.getMedicalHistory(visit.encounters);
             if (this.patientVisitSummary.attachment_section) {
               this.getVisitAdditionalDocs(visit);
+            }
+            // Load event log from visit attributes
+            const eventLogAttr = visit.attributes.find(attr => attr.attributeType.uuid === '98660a74-9f8b-41d5-b142-ed3f22684068');
+            if (eventLogAttr) {
+              this.eventLog = keepOnlyPairedEvents(JSON.parse(eventLogAttr.value || '[]'));
+              this.eventLogAttributeUuid = eventLogAttr.uuid;
+            }
+            if (environment.brandName === 'KCDO' && this.visit && this.visit.uuid && this.visitNotePresent) {
+              this.logUserEvent('visit-summary open');
             }
           }
           this.checkOpenChatBoxFlag();
@@ -2152,6 +2164,10 @@ export class VisitSummaryComponent implements OnInit, OnDestroy, AfterViewInit {
     if(this.callTimerInterval && !this.callTimerInterval.closed) this.callTimerInterval.unsubscribe();
     // Add unsubscribe from form tracking
     this.unsubscribeFromFormTracking();
+    // Log back event
+    if (environment.brandName === 'KCDO' && this.visit && this.visit.uuid && !this.visitNotePresent) {
+      this.logUserEvent('back from visit summary');
+    }
   }
 
   /**
@@ -3210,5 +3226,27 @@ export class VisitSummaryComponent implements OnInit, OnDestroy, AfterViewInit {
     } else {
       return this.getPersonAttributeValue('Telephone Number') != "NA" ? this.getPersonAttributeValue('Telephone Number') : "";
     } 
+  }
+
+  /**
+   * Log user event and save to visit attribute
+   */
+  logUserEvent(eventType: string) {
+    const event = {
+      type: eventType,
+      timestamp: new Date().toISOString()
+    };
+    this.eventLog.push(event);
+    const payload = {
+      attributeType: '98660a74-9f8b-41d5-b142-ed3f22684068', // TODO: Visit_Provider_Activity_Logs
+      value: JSON.stringify(this.eventLog)
+    };
+    if (this.eventLogAttributeUuid) {
+      this.visitService.updateAttribute(this.visit.uuid, this.eventLogAttributeUuid, payload).subscribe();
+    } else {
+      this.visitService.postAttribute(this.visit.uuid, payload).subscribe((res: any) => {
+        this.eventLogAttributeUuid = res.uuid;
+      });
+    }
   }
 }
