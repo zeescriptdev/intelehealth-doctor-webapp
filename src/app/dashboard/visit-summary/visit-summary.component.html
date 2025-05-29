@@ -629,7 +629,7 @@
                 </ng-template>
               </mat-expansion-panel>
 
-              <mat-expansion-panel [expanded]="true" data-test-id="matExpAdditionalDoc">
+              <mat-expansion-panel [expanded]="true"  [hidden]="isNcdSevikaVisit" data-test-id="matExpAdditionalDoc">
                 <mat-expansion-panel-header data-test-id="matExpHeaderAdditionalDoc">
                   <mat-panel-title>
                     <div class="intel-accordion-title">
@@ -776,6 +776,9 @@
                         (element?.doctor?.gender) |translate
                         }})</span>
                     </div>
+                     <div class="d-flex align-items-center" *ngIf="!element.doctor">
+                    NA
+                    </div>
                   </td>
                 </ng-container>
 
@@ -811,6 +814,9 @@
                         <span class="ml-1">{{'View'|translate}}</span>
                       </div>
                     </a>
+                      <div *ngIf="!element.prescription_sent">
+                      NA
+                      </div>
                   </td>
                 </ng-container>
 
@@ -822,6 +828,9 @@
                       <img src="assets/svgs/pad-4.svg" alt="" />
                       <span class="ml-1">{{ element.prescription_sent }}</span>
                     </div>
+                      <div *ngIf="!element.prescription_sent">
+                      NA
+                      </div>
                   </td>
                 </ng-container>
                 <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>

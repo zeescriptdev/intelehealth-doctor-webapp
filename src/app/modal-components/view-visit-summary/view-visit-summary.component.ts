@@ -74,7 +74,7 @@ export class ViewVisitSummaryComponent implements OnInit {
           this.isSevikaVisit = !!this.visit.attributes.find(atr => atr.value === 'Specialist doctor not needed');
           this.isNcdSevikaVisit = Boolean(this.visit.attributes.find(atr => atr.display.includes('isNcdSevikaVisit'))?.value);
         }
-        this.checkVisitStatus(visit.encounters);
+        this.isNcdSevikaVisit ? this.visitStatus = "Ended Visit" : this.checkVisitStatus(visit.encounters);
         this.visitService.patientInfo(visit.patient.uuid).subscribe((patient: PatientModel) => {
           if (patient) {
             this.patient = patient;
@@ -637,7 +637,8 @@ export class ViewVisitSummaryComponent implements OnInit {
                           ul: [
                             {text: [{text: 'Visit ID:', bold: true}, ` ${(this.visit?.uuid) ? this.replaceWithStar(this.visit?.uuid).toUpperCase() : "" }`], margin: [0, 5, 0, 5]},
                             {text: [{text: 'Visit Created:', bold: true}, ` ${moment(this.visit?.startDatetime).format('DD MMM yyyy')}`],  margin: [0, 5, 0, 5]},
-                            {text: [{text: 'Appointment on:', bold: true}, ` No appointment`],  margin: [0, 5, 0, 5]},
+                            !this.isNcdSevikaVisit ? 
+                            {text: [{text: 'Appointment on:', bold: true}, ` No appointment`],  margin: [0, 5, 0, 5]} : {},
                             {text: [{text: 'Status:', bold: true}, ` ${this.visitStatus}`],  margin: [0, 5, 0, 5]},
                             {text: [{text: 'Location:', bold: true}, ` ${this.clinicName}`],  margin: [0, 5, 0, 5]},
                             {text: [{text: 'Provided by:', bold: true}, ` ${this.providerName}`],  margin: [0, 5, 0, 5]}
@@ -750,7 +751,7 @@ export class ViewVisitSummaryComponent implements OnInit {
                 '',
                 ''
               ] : [ {}, '', '', ''],
-              [
+              !this.isNcdSevikaVisit ? [
                 {
                   colSpan: 4,
                   table: {
@@ -768,7 +769,7 @@ export class ViewVisitSummaryComponent implements OnInit {
                 '',
                 '',
                 ''
-              ],
+              ]: [ {}, '', '', ''],
             ]
           },
           layout: 'noBorders'

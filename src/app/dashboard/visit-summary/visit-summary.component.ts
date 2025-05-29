@@ -1778,8 +1778,9 @@ export class VisitSummaryComponent implements OnInit, OnDestroy {
         visits.forEach((visit: VisitModel) => {
           if (visit.uuid !== this.visit.uuid) {
             this.visitService.fetchVisitDetails(visit.uuid).subscribe((visitdetail: VisitModel) => {
+             let isNcdSevikaVisit = Boolean(visitdetail.attributes.find(atr => atr.display.includes('isNcdSevikaVisit'))?.value);
               visitdetail.created_on = visitdetail.startDatetime;
-              visitdetail.cheif_complaint = this.visitSummaryService.getCheifComplaint(visitdetail, this.isNcdSevikaVisit);
+              visitdetail.cheif_complaint = this.visitSummaryService.getCheifComplaint(visitdetail, isNcdSevikaVisit);
               visitdetail.encounters.forEach((encounter: EncounterModel) => {
                 if (encounter.encounterType.display === visitTypes.VISIT_COMPLETE) {
                   visitdetail.prescription_sent = this.checkIfDateOldThanOneDay(encounter.encounterDatetime);
