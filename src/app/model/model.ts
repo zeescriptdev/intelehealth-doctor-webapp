@@ -782,3 +782,7 @@ export interface DropdownValuesModel {
   referral_facility: DropdownItemModel[],
   test: DropdownItemModel[]
 }
+
+export interface RecordingResponse {
+  recordingId: number;
+}

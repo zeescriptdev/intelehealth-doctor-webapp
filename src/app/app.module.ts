@@ -137,7 +137,10 @@ registerLocaleData(localeEn);
         `${environment.mindmapURL}/auth/validateProviderAttribute`,
         `${environment.webrtcTokenServerUrl}api/getToken`,
         `${environment.base}/pl/`,
-        `${environment.base}/ddx`
+        `${environment.base}/ddx`,
+        `${environment.webrtcTokenServerUrl}api/getToken`,
+        `${environment.webrtcTokenServerUrl}api/startRecording`,
+        `${environment.webrtcTokenServerUrl}api/stopRecording`,
       ]
     }),
     NgxPermissionsModule.forRoot({
