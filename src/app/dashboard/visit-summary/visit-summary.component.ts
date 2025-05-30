@@ -584,7 +584,7 @@ export class VisitSummaryComponent implements OnInit, OnDestroy, AfterViewInit {
               this.eventLog = keepOnlyPairedEvents(JSON.parse(eventLogAttr.value || '[]'));
               this.eventLogAttributeUuid = eventLogAttr.uuid;
             }
-            if (environment.brandName === 'KCDO' && this.visit && this.visit.uuid && this.visitNotePresent) {
+            if (environment.brandName === 'KCDO' && this.visit && this.visit.uuid && !this.visitNotePresent) {
               this.logUserEvent('visit-summary open');
             }
           }
@@ -2159,15 +2159,15 @@ export class VisitSummaryComponent implements OnInit, OnDestroy, AfterViewInit {
   }
 
   ngOnDestroy(): void {
+    // Log back event
+    if (environment.brandName === 'KCDO' && this.visit && this.visit.uuid && !this.visitNotePresent) {
+      this.logUserEvent('back from visit summary');
+    }
     deleteCacheData(visitTypes.PATIENT_VISIT_PROVIDER);
     if (this.dialogRef1) this.dialogRef1.close();
     if(this.callTimerInterval && !this.callTimerInterval.closed) this.callTimerInterval.unsubscribe();
     // Add unsubscribe from form tracking
     this.unsubscribeFromFormTracking();
-    // Log back event
-    if (environment.brandName === 'KCDO' && this.visit && this.visit.uuid && !this.visitNotePresent) {
-      this.logUserEvent('back from visit summary');
-    }
   }
 
   /**
