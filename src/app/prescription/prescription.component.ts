@@ -63,11 +63,14 @@ export class PrescriptionComponent implements OnInit, OnChanges {
           let pesenc = this.checkIfEncounterExists(visit.encounters, visitTypes.PATIENT_EXIT_SURVEY);
           visit.cheif_complaint = this.getCheifComplaint(visit);
           visit.visit_created = this.getEncounterCreated(visit, visitTypes.ADULTINITIAL);
-          visit.prescription_sent = (vcenc) ? this.checkIfDateOldThanOneDay(vcenc.encounter_datetime) : '-';
+          visit.prescription_sent = vcenc.encounter_datetime;
+          visit.prescription_started = (vcenc) ? this.checkIfDateOldThanOneDay(vcenc.encounter_datetime) : '-';
           if (pesenc) {
-            visit.visit_ended = this.checkIfDateOldThanOneDay(pesenc.encounter_datetime);
+            visit.endDate = this.checkIfDateOldThanOneDay(pesenc.encounter_datetime);
+            visit.visit_ended = pesenc.encounter_datetime;
           } else {
-            visit.visit_ended = this.checkIfDateOldThanOneDay(visit.date_stopped);
+            visit.endDate  = this.checkIfDateOldThanOneDay(visit.date_stopped);
+            visit.visit_ended = visit.date_stopped;
           }
           visit.age = this.visitService.calculateAge(visit.person.birthdate);
           visit.name = visit.patient_name.given_name + " " + (visit.patient_name?.middle_name ? visit.patient_name?.middle_name+" " : "" )+ " " + visit.patient_name.family_name;
@@ -106,7 +109,8 @@ export class PrescriptionComponent implements OnInit, OnChanges {
           let vcenc = this.checkIfEncounterExists(visit.encounters, visitTypes.VISIT_COMPLETE);
           visit.cheif_complaint = this.getCheifComplaint(visit);
           visit.visit_created = this.getEncounterCreated(visit, visitTypes.ADULTINITIAL);
-          visit.prescription_sent = (vcenc) ? this.checkIfDateOldThanOneDay(vcenc.encounter_datetime) : null;
+          visit.prescription_sent = (vcenc) ? vcenc.encounter_datetime : null;
+          visit.prescription_started = (vcenc) ? this.checkIfDateOldThanOneDay(vcenc.encounter_datetime) : null;
           visit.age = this.visitService.calculateAge(visit.person.birthdate);
           visit.name = visit.patient_name.given_name + " " + (visit.patient_name?.middle_name ? visit.patient_name?.middle_name+" " : "" )+ " " + visit.patient_name.family_name;
           visit.location = visit?.sanch;
@@ -130,7 +134,8 @@ export class PrescriptionComponent implements OnInit, OnChanges {
           let vcenc = this.checkIfEncounterExists(visit.encounters, visitTypes.VISIT_COMPLETE);
           visit.cheif_complaint = this.getCheifComplaint(visit);
           visit.visit_created = this.getEncounterCreated(visit, visitTypes.ADULTINITIAL);
-          visit.prescription_sent = (vcenc) ? this.checkIfDateOldThanOneDay(vcenc.encounter_datetime) : null;
+          visit.prescription_sent = (vcenc) ? vcenc.encounter_datetime : null;
+          visit.prescription_started = (vcenc) ? this.checkIfDateOldThanOneDay(vcenc.encounter_datetime) : null;        
           visit.age = this.visitService.calculateAge(visit.person.birthdate);
           visit.name = visit.patient_name.given_name + " " + (visit.patient_name?.middle_name ? visit.patient_name?.middle_name+" " : "" )+ " " + visit.patient_name.family_name;
           visit.location = visit?.sanch;

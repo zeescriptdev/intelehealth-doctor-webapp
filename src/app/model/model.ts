@@ -233,6 +233,7 @@ export interface AppointmentModel {
 }
 
 export interface CustomVisitModel {
+  prescription_started?: string | number | Date
   uuid: string,
   date_created?: string;
   followup_date?:string,

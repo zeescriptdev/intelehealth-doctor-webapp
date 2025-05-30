@@ -87,7 +87,7 @@
                 <td mat-cell *matCellDef="let element;let j=index;" [attr.data-test-id]="'compPresSent'+j">
                   <div class="green-pill" *ngIf="element?.prescription_sent">
                     <img *ngIf="element?.prescription_sent !== '-'" src="assets/svgs/green-pad.svg" alt="">
-                    <span class="ml-2">{{element?.prescription_sent}}</span>
+                    <span class="ml-2">{{element?.prescription_started}}</span>
                   </div>
                 </td>
               </ng-container>
