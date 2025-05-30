@@ -333,7 +333,7 @@ export class ViewVisitPrescriptionComponent implements OnInit, OnDestroy {
     this.diagnosisService.getObs(this.visit.patient.uuid, conceptIds.conceptMed).subscribe((response: ObsApiResponseModel) => {
       response.results.forEach((obs: ObsModel) => {
         if (obs.encounter.visit.uuid === this.visit.uuid) {
-          if (obs.value.includes(':') && !this.appConfigService?.patient_visit_summary?.dp_medication_secondary) {
+          if (obs.value.includes(':')) {
             this.medicines.push({
               drug: obs.value?.split(':')[0],
               strength: obs.value?.split(':')[1],
@@ -395,9 +395,7 @@ export class ViewVisitPrescriptionComponent implements OnInit, OnDestroy {
       .subscribe((response: ObsApiResponseModel) => {
         response.results.forEach((obs: ObsModel) => {
           if (obs.encounter && obs.encounter.visit.uuid === this.visit.uuid) {
-            if(this.appConfigService.patient_visit_summary?.dp_referral_secondary)
-              this.referralSecondary = obs.value
-            else if(obs.value.includes(":")) {
+            if(obs.value.includes(":")) {
               const obs_values = obs.value.split(':');
               this.referrals.push({ uuid: obs.uuid, speciality: obs_values[0].trim(), facility: obs_values[1].trim(), priority: obs_values[2].trim(), reason: obs_values[3].trim()? obs_values[3].trim():'-' });
             }
@@ -1076,7 +1074,7 @@ export class ViewVisitPrescriptionComponent implements OnInit, OnDestroy {
           this.additionalInstructions.forEach(ai => {
             records.push({ text: ai.value, margin: [0, 5, 0, 5] });
           });
-        } else if(!this.appConfigService?.patient_visit_summary?.dp_medication_secondary) {
+        } else {
           records.push([{ text: 'No additional instructions added'}]);
         }
         break;
@@ -1102,9 +1100,7 @@ export class ViewVisitPrescriptionComponent implements OnInit, OnDestroy {
         const referralFacility = this.isFeatureAvailable('referralFacility', true)
         const priorityOfReferral = this.isFeatureAvailable('priorityOfReferral', true)
         let length = 2;
-        if(this.appConfigService.patient_visit_summary?.dp_referral_secondary && this.referralSecondary){
-          records.push([{ text: this.referralSecondary, colSpan: length}]);
-        } else if (this.referrals.length) {
+        if (this.referrals.length) {
           this.referrals.forEach(r => {
             const referral = [r.speciality];
             if(referralFacility) referral.push(r.facility)
@@ -1471,16 +1467,6 @@ export class ViewVisitPrescriptionComponent implements OnInit, OnDestroy {
     const referralFacility = isFeaturePresent('referralFacility', true)
     const priorityOfReferral = isFeaturePresent('priorityOfReferral', true)
 
-    if (this.appConfigService.patient_visit_summary?.dp_referral_secondary) {
-      return {
-        widths: ['50%','50%'],
-        headerRows: 1,
-        body: [
-          ...this.getRecords('referral')
-        ]
-      }
-    }
-
     if (!referralFacility && !priorityOfReferral) {
       return {
         widths: ['35%', '65%'],
@@ -1622,7 +1608,7 @@ export class ViewVisitPrescriptionComponent implements OnInit, OnDestroy {
     ]
     ];
 
-    if(this.appConfigService.patient_visit_summary.dp_recommendation_group){
+    if(this.isFeatureAvailable('doctor-recommendation')){
       return [
         [
           {
@@ -1685,8 +1671,6 @@ export class ViewVisitPrescriptionComponent implements OnInit, OnDestroy {
   }
 
   getPrimaryMedicationData(){
-    if(this.appConfigService.patient_visit_summary?.dp_medication_secondary) 
-      return [];
     return [[
       {
         colSpan: 2,
