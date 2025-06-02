@@ -2601,7 +2601,7 @@ export class VisitSummaryComponent implements OnInit, OnDestroy, AfterViewInit {
         discussionSummary: () => this.isFeatureAvailable('dp_discussion_summary') ? this.saveDiscussionSummary() : of(null),
         recommendation: () => this.isFeatureAvailable('doctor-recommendation') ? this.saveRecommendation() : of(null),
         followUpInstruction: () => this.isFeatureAvailable('follow-up-instruction') ? this.followUpInstructionComponentRef.addInstructions() : of(null),
-        patientCallStatus: () => this.appConfigService?.patient_visit_summary?.dp_call_status ? this.saveCallStatus() : of(null)
+        patientCallStatus: () => this.isFeatureAvailable('dp_call_status') ? this.saveCallStatus() : of(null)
       };
 
       // Add handlers for specific fields

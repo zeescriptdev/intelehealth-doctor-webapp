@@ -279,7 +279,7 @@ export class ViewVisitPrescriptionComponent implements OnInit, OnDestroy {
     this.diagnosisService.getObs(this.visit.patient.uuid, conceptIds.conceptDiagnosis).subscribe((response: ObsApiResponseModel) => {
       response.results.forEach((obs: ObsModel) => {
         if (obs.encounter.visit.uuid === this.visit.uuid) {
-          if(this.appConfigService.patient_visit_summary?.dp_dignosis_secondary){
+          if(this.isFeatureAvailable('dp_diagnosis_secondary')){
             this.dignosisSecondary = obsParse(obs.value)
           } else {
             this.existingDiagnosis.push({
@@ -1050,7 +1050,7 @@ export class ViewVisitPrescriptionComponent implements OnInit, OnDestroy {
     const records = [];
     switch (type) {
       case 'diagnosis':
-        if(this.appConfigService.patient_visit_summary?.dp_dignosis_secondary){
+        if(this.isFeatureAvailable('dp_diagnosis_secondary')){
           records.push([this.dignosisSecondary['diagnosis'],this.dignosisSecondary['type'],this.dignosisSecondary['tnm'],this.dignosisSecondary['otherStaging']]);
         } else if (this.existingDiagnosis.length) {
           this.existingDiagnosis.forEach(d => {
@@ -1124,7 +1124,7 @@ export class ViewVisitPrescriptionComponent implements OnInit, OnDestroy {
           }
           break;
       case 'cheifComplaint':
-        if(this.appConfigService?.patient_visit_summary?.dp_dignosis_secondary && this.checkUpReasonData.length > 0){
+        if(this.isFeatureAvailable('dp_diagnosis_secondary') && this.checkUpReasonData.length > 0){
           this.checkUpReasonData[0].data.forEach((cc:any)=>{
             records.push({text: [{text: cc.key, bold: true}, cc.value.changingThisBreaksApplicationSecurity], margin: [0, 5, 0, 5]});
           });
@@ -1648,10 +1648,10 @@ export class ViewVisitPrescriptionComponent implements OnInit, OnDestroy {
               {
                 colSpan: 2,
                 table: {
-                  widths: this.appConfigService.patient_visit_summary?.dp_dignosis_secondary ? ['40%', '*', '*', '*'] : ['*', '*', '*'],
+                  widths: this.isFeatureAvailable('dp_diagnosis_secondary') ? ['40%', '*', '*', '*'] : ['*', '*', '*'],
                   headerRows: 1,
                   body: [
-                    this.appConfigService.patient_visit_summary?.dp_dignosis_secondary ? [{text: 'Diagnosis', style: 'tableHeader'}, {text: 'Type', style: 'tableHeader'}, {text: 'TNM', style: 'tableHeader'},{text: 'Other Staging', style: 'tableHeader'}] : [{text: 'Diagnosis', style: 'tableHeader'}, {text: 'Type', style: 'tableHeader'}, {text: 'Status', style: 'tableHeader'}],
+                    this.isFeatureAvailable('dp_diagnosis_secondary') ? [{text: 'Diagnosis', style: 'tableHeader'}, {text: 'Type', style: 'tableHeader'}, {text: 'TNM', style: 'tableHeader'},{text: 'Other Staging', style: 'tableHeader'}] : [{text: 'Diagnosis', style: 'tableHeader'}, {text: 'Type', style: 'tableHeader'}, {text: 'Status', style: 'tableHeader'}],
                     ...this.getRecords('diagnosis')
                   ]
                 },
@@ -1739,7 +1739,7 @@ export class ViewVisitPrescriptionComponent implements OnInit, OnDestroy {
   }
 
   getDiscussionSummary(){
-    if(!this.appConfigService.patient_visit_summary?.dp_discussion_summary) return [];
+    if(!this.isFeatureAvailable('dp_discussion_summary')) return [];
     return [
       [
         {

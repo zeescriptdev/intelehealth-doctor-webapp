@@ -403,7 +403,7 @@
                       
                   <!-- Checkup Reasons -->
                   <ng-container *ngSwitchCase="pvsConstant['check_up_reason'].key">
-                    <div class="data-section-content" *ngIf="!appConfigService?.patient_visit_summary?.dp_dignosis_secondary">
+                    <div class="data-section-content" *ngIf="!isFeatureAvailable('dp_diagnosis_secondary')">
                       <div class="cheif-complaint-wrapper">
                         <h6>{{'Chief complaint'|translate}}</h6>
                         <div class="complaint-chips">
@@ -415,7 +415,7 @@
                     </div>
                     <ng-container *ngFor="let ckr of checkUpReasonData">
                       <ng-container *ngIf="ckr.title != 'Associated symptoms'">
-                        <h6 class="my-3" [attr.data-test-id]="'etTitle'+ckr.title.slice(0,3)+'Checkup'" *ngIf="!appConfigService?.patient_visit_summary?.dp_dignosis_secondary">{{ ckr.title }}</h6>
+                        <h6 class="my-3" [attr.data-test-id]="'etTitle'+ckr.title.slice(0,3)+'Checkup'" *ngIf="!isFeatureAvailable('dp_diagnosis_secondary')">{{ ckr.title }}</h6>
                         <ul class="items-list pt-0">
                           <li *ngFor="let ckri of ckr.data">
                             <div class="list-item">
@@ -518,7 +518,7 @@
               <img src="assets/svgs/diagnosis.svg" alt="" />
               <h6>{{'Diagnosis Details'|translate}}</h6>
             </div>
-            <div class="data-section-content" *ngIf="!appConfigService?.patient_visit_summary?.dp_dignosis_secondary">
+            <div class="data-section-content" *ngIf="!isFeatureAvailable('dp_diagnosis_secondary')">
               <ul class="items-list">
                 <li *ngIf="!isDownloadPrescription">
                   <div class="list-item">
@@ -548,7 +548,7 @@
                 </table>
               </div>
             </div>
-            <div class="data-section-content" *ngIf="appConfigService?.patient_visit_summary?.dp_dignosis_secondary">
+            <div class="data-section-content" *ngIf="isFeatureAvailable('dp_diagnosis_secondary')">
               <div class="table-responsive" *ngIf="dignosisSecondary">
                 <table class="table">
                   <thead>
