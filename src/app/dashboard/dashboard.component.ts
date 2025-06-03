@@ -531,7 +531,7 @@ export class DashboardComponent implements OnInit {
       const display = encounter.type?.name;
       if (display.match(visitTypes.ADULTINITIAL) !== null) {
         const obs = encounter.obs;
-        obs.forEach((currentObs: CustomObsModel) => {
+        for (const currentObs of obs) {
           if (currentObs.concept_id == 163212) {
             const currentComplaint = this.visitService.getData2(currentObs)?.value_text.replace(new RegExp('►', 'g'), '').split('<b>');
             for (let i = 1; i < currentComplaint.length; i++) {
@@ -540,8 +540,9 @@ export class DashboardComponent implements OnInit {
                 recent.push(obs1[0]);
               }
             }
+            break;
           }
-        });
+        }
       }
     });
     return recent;
