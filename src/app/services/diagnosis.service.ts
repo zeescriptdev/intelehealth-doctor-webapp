@@ -55,7 +55,7 @@ export class DiagnosisService {
   * @return {Observable<any>}
   */
   getDiagnosisList(term: string): Observable<any> {
-    const url = `${environment.baseURL}/concept?class=${conceptIds.conceptDiagnosisClass}&source=ICD10&q=${term}`;
+    const url = `${environment.baseURL}/concept?q=${term}&v=full`;
     return this.http.get(url);
   }
 

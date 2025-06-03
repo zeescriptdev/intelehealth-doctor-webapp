@@ -1041,14 +1041,22 @@ export class VisitSummaryComponent implements OnInit, OnDestroy {
   searchDiagnosis(val: string) {
     if (val && val.length >= 3) {
       this.diagnosisService.getDiagnosisList(val).subscribe(response => {
-        if (response.results && response.results.length) {
-          const data = [];
-          response.results.forEach(element => {
-            if (element) {
-              data.push({ name: element.display });
-            }
-          });
-          this.diagnosisSubject.next(data);
+        if (response.results.length) {
+                 let diagnosisArray = [];
+                  response.results.forEach((concept: any) => {
+                    if(concept.mappings.length > 0) {
+                    concept.mappings.forEach(maping => {
+                      if (maping.conceptReferenceTerm.display.includes('ICD-10-WHO')) {
+                        diagnosisArray.push(concept.display);
+                      }
+                    });
+                   } else {
+                    if(concept.conceptClass.uuid === conceptIds.conceptDiagnosisClass) {
+                       diagnosisArray.push(concept.display);
+                    }
+                   }
+                  });
+          this.diagnosisSubject.next(diagnosisArray);
         } else {
           this.diagnosisSubject.next([]);
         }
@@ -1081,6 +1089,7 @@ export class VisitSummaryComponent implements OnInit, OnDestroy {
         if (res) {
           this.existingDiagnosis.unshift({ uuid: res.uuid, ...this.diagnosisForm.value });
           this.diagnosisForm.reset();
+          this.diagnosisSubject.next([]);
         }
       });
     } else {
