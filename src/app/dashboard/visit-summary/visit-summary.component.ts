@@ -33,7 +33,7 @@ import { AppConfigService } from 'src/app/services/app-config.service';
 import { checkIsEnabled, VISIT_SECTIONS } from 'src/app/utils/visit-sections';
 import { NgSelectComponent } from '@ng-select/ng-select';
 import { NgxRolesService } from 'ngx-permissions';
-// import diagnostics from '../../core/data/diagnostics';
+import diagnostics from '../../core/data/diagnostics';
 import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
 import { FollowUpInstructionComponent } from './follow-up-instruction/follow-up-instruction.component';
 import { NotesComponent } from './notes/notes.component';
