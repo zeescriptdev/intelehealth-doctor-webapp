@@ -242,14 +242,14 @@ export class VisitSummaryComponent implements OnInit, OnDestroy, AfterViewInit {
     )
 
   searchInstructionRemark = (text$: Observable<string>) => {
-  return text$.pipe(
-    debounceTime(200),
-    distinctUntilChanged(),
-    switchMap(term =>
-      term.length < 2 ? of([]) : this.getOptions(term)
-    )
-  );
-} 
+    return text$.pipe(
+      debounceTime(200),
+      distinctUntilChanged(),
+      switchMap(term =>
+        term.length < 2 ? of([]) : this.getOptions(term)
+      )
+    );
+  } 
 
   search = (text$: Observable<string>) => this.mainSearch(text$, this.advicesList);
   search2 = (text$: Observable<string>) => this.mainSearch(text$, this.testsList);
@@ -3319,8 +3319,8 @@ export class VisitSummaryComponent implements OnInit, OnDestroy, AfterViewInit {
   }
 
   getOptions(term: string): Observable<string[]> {
-  // This could be an API call
-  let data = this.instructionRemarks.map((val) => val.name);
-  return of(data.filter(v => v.toLowerCase().includes(term.toLowerCase())));
-}
+    // This could be an API call
+    let data = this.instructionRemarks.map((val) => val.name);
+    return of(data.filter(v => v.toLowerCase().includes(term.toLowerCase())));
+  }
 }

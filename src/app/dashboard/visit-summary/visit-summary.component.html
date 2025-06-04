@@ -1299,7 +1299,7 @@
               #panel5
               hideToggle
               class="overflow-show"
-              *ngIf="isFeatureAvailable('advice')"
+              *ngIf="isFeatureAvailable('advice') && !hasAILLMEnabled"
             >
               <mat-expansion-panel-header>
                 <mat-panel-title>
@@ -1446,6 +1446,7 @@
                 #panel4
                 hideToggle
                 class=""
+                *ngIf="!hasAILLMEnabled"
                 >
                   <mat-expansion-panel-header>
                     <mat-panel-title>
@@ -1652,6 +1653,7 @@
                   #panel6
                   hideToggle
                   class="overflow-show"
+                  *ngIf="!hasAILLMEnabled"
                 >
                   <mat-expansion-panel-header>
                     <mat-panel-title>
@@ -1765,6 +1767,7 @@
               #panel7
               hideToggle
               class="overflow-show"
+              *ngIf="!hasAILLMEnabled"
             >
             
             <mat-expansion-panel-header>
@@ -1953,7 +1956,7 @@
               [expanded]="true"
               #panel8
               hideToggle
-              *ngIf="isFeatureAvailable('visitFollowUp')"
+              *ngIf="isFeatureAvailable('visitFollowUp') && !hasAILLMEnabled"
             >
               <mat-expansion-panel-header>
                 <mat-panel-title>
