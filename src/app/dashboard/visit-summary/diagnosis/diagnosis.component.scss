@@ -119,6 +119,7 @@
     font-weight: bold;
     border: 1px solid var(--color-lightGray);
     padding: 10px 16px;
+    margin-bottom: 30px;
   }
 
   .gray-btn {
@@ -136,6 +137,7 @@
   .white-btn:disabled,
   .gray-btn:disabled {
     opacity: 0.5;
+    margin-bottom: 20px;
   }
 
   .blue-btn:focus,
@@ -278,7 +280,7 @@ textarea.form-control {
 .intel-accordion-title {
   display: flex;
   align-items: center;
-  gap: 16px;
+  gap: 6px;
 
   .ayu-icon {
     width: 44px;
@@ -290,13 +292,11 @@ textarea.form-control {
     border-radius: 50%;
   }
 
-  .diagnosis-title {
-    h6 {
-      color: #212529;
-      font-size: 16px;
-      font-weight: 600;
-      margin: 0;
-    }
+  h6 {
+    color: #212529;
+    font-size: 16px;
+    font-weight: 600;
+    margin: 0;
   }
 }
 
@@ -312,6 +312,7 @@ textarea.form-control {
 
     &.selected-primary {
       background: #EFE8FF;
+      margin-bottom: 6px;
     }
 
     .remove-icon {

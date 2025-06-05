@@ -1,6 +1,8 @@
 export const notifications = {
     ADMIN_UNREAD_COUNT:'adminUnreadCount',
     GET_ADMIN_UNREAD_COUNT:'getAdminUnreadCount',
+    DOCTOR_ADMIN_UNREAD_COUNT:'doctorAdminUnreadCount',
+    GET_DOCTOR_ADMIN_UNREAD_COUNT:'getDoctorAdminUnreadCount',
     DOCTOR_UNREAD_COUNT:'drUnreadCount',
     GET_DOCTOR_UNREAD_COUNT:'getDrUnreadCount',
     SUPPORT_MESSAGE:'supportMessage',
@@ -77,6 +79,10 @@ export const facility = {
     { id : 5 , name : 'DH'},
     { id : 6 , name : 'TH'},
     { id : 7 , name : 'GH'},
+    { id : 8 , name : 'RH'},
+    { id : 8 , name : 'Anganwadi Center'},
+    { id : 8 , name : 'HWC'},
+    { id : 8 , name : 'Government District Hospital'},
     { id : 8 , name : 'Private Hospital'},
   ]
 };

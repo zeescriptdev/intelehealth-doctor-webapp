@@ -255,6 +255,22 @@ export class VisitService {
   }
 
   /**
+   * get InstructionRemarks of Medication
+   *  @return {Observable<any>}
+   */
+  getInstructionRemarks() : Observable<any> {
+    return this.http.get(`${this.baseURLMindmap}/instructionRemarkList`);
+  }
+
+  /**
+   * Add InstructionRemarks of Medication
+   *  @return {Observable<any>}
+   */
+   addInstructionRemarks(json: Object) : Observable<any>{
+    return this.http.post(`${this.baseURLMindmap}/instructionRemarks`, json);
+   }
+
+  /**
    * Post visit data to abdm
    * @param {any} json - Attribute payload
    * @return {Observable<any>}
@@ -275,5 +291,19 @@ export class VisitService {
       });
     }
     return isFollowUp ? visitTypes.FOLLOW_UP : visitTypes.NEW;
+  }
+  
+  formatMedicineDisplay(medicine: string, uuid?: string): object {
+    const splitMed = medicine?.split?.(':');
+    let med: any = {
+      drug: splitMed?.[0] ?? '-',
+      dose: splitMed?.[1] ?? '-'  ,
+      durationNo: splitMed?.[2] ?? '-',
+      durationUnit: splitMed?.[3] ?? '-',
+      instructRemark: splitMed?.[4] ?? '-',
+      frequency: splitMed?.[5] ?? '-'
+    };
+    if (uuid) med.uuid = uuid;
+    return med;
   }
 }

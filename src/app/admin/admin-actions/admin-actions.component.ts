@@ -127,6 +127,13 @@ export class AdminActionsComponent implements OnInit {
       isLocalPath: true
     },
     {
+      title:"Home Screen",
+      desc: "Home screen section",
+      icon: "assets/svgs/patient_visit_dropdown.svg",
+      path: "admin/actions/home-screen",
+      isLocalPath: true
+    },
+    {
       title: "AI LLM",
       desc: "Manage AI LLM functionality",
       icon: "assets/svgs/webrtc.svg",

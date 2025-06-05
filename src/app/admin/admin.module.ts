@@ -54,6 +54,7 @@ import { PatientVisitSectionsComponent } from './admin-actions/patient-visit-sec
 import { DragDropModule } from '@angular/cdk/drag-drop';
 import { PatientDetailsComponent } from './admin-actions/patient-details/patient-details.component';
 import { PatientVisitDropdownComponent } from './admin-actions/patient-visit-dropdown/patient-visit-dropdown.component';
+import { HomeScreenComponent } from './admin-actions/home-screen/home-screen.component';
 import { AiLlmComponent } from './admin-actions/ai-llm/ai-llm.component';
 
 
@@ -153,6 +154,10 @@ const routes: Routes = [
             component: PatientVisitDropdownComponent
           },
           {
+            path: 'home-screen',
+            component: HomeScreenComponent
+          },
+          {
             path: 'ai-llm',
             component: AiLlmComponent
           },
@@ -194,6 +199,7 @@ const routes: Routes = [
     PatientVisitSectionsComponent,
     PatientDetailsComponent,
     PatientVisitDropdownComponent,
+    HomeScreenComponent,
     AiLlmComponent
   ],
   imports: [
