@@ -1494,15 +1494,19 @@ export class VisitSummaryComponent implements OnInit, OnDestroy, AfterViewInit {
     this.diagnosisService.getObs(this.visit.patient.uuid, conceptIds.conceptMed).subscribe((response: ObsApiResponseModel) => {
       response.results.forEach((obs: ObsModel) => {
         if (obs.encounter.visit.uuid === this.visit.uuid) {
-          this.medicines.push({
-            drug: obs.value?.split(':')[0],
-            strength: obs.value?.split(':')[1],
-            days: obs.value?.split(':')[2],
-            timing: obs.value?.split(':')[3],
-            remark: obs.value?.split(':')[4],
-            frequency: obs.value?.split(':')[5] ? obs.value?.split(':')[5] : "",
-            uuid: obs.uuid
-          });
+          if (obs.value.includes(':') ) {
+            this.medicines.push({
+              drug: obs.value?.split(':')[0],
+              strength: obs.value?.split(':')[1],
+              days: obs.value?.split(':')[2],
+              timing: obs.value?.split(':')[3],
+              remark: obs.value?.split(':')[4],
+              frequency: obs.value?.split(':')[5] ? obs.value?.split(':')[5] : "",
+              uuid: obs.uuid
+            });
+          } else {
+            this.additionalInstructionForm.patchValue({uuid:obs.uuid, value:obs.value});
+          }
         }
       });
     });
@@ -1899,22 +1903,21 @@ export class VisitSummaryComponent implements OnInit, OnDestroy, AfterViewInit {
   * @returns {Observable<any>}
   */
   saveFollowUp(): Observable<any> {
+    let value = "No";
     if (this.followUpForm.value.wantFollowUp === 'Yes') {
-      const value = `${this.followUpForm.value.followUpDate},Time:${this.followUpForm.value.followUpTime},Remark:${this.followUpForm.value.followUpReason || ''},Type:${this.followUpForm.value.followUpType || ''}`;
-      
-      if (this.followUpForm.value.uuid) {
-        return this.encounterService.updateObs(this.followUpForm.value.uuid, { value });
-      } else {
-        return this.encounterService.postObs({
-          concept: conceptIds.conceptFollow,
-          person: this.visit.patient.uuid,
-          obsDatetime: new Date(),
-          value,
-          encounter: this.visitNotePresent.uuid
-        });
-      }
+      value = `${this.followUpForm.value.followUpDate},Time:${this.followUpForm.value.followUpTime},Remark:${this.followUpForm.value.followUpReason || ''},Type:${this.followUpForm.value.followUpType || ''}`;
+    } 
+    if (this.followUpForm.value.uuid) {
+      return this.encounterService.updateObs(this.followUpForm.value.uuid, { value });
+    } else {
+      return this.encounterService.postObs({
+        concept: conceptIds.conceptFollow,
+        person: this.visit.patient.uuid,
+        obsDatetime: new Date(),
+        value,
+        encounter: this.visitNotePresent.uuid
+      });
     }
-    return of(null); // Return an Observable if no action needed
   }
 
   /**
@@ -2846,18 +2849,6 @@ export class VisitSummaryComponent implements OnInit, OnDestroy, AfterViewInit {
             this.updatedObsData.patientInteractionComment = newValue;
             this.checkChanges(this.updatedObsData);
           }
-        })
-      );
-    }
-
-    // Track follow-up form
-    if (this.followUpForm) {
-      this.obsData.followUp = false;
-      
-      this.formSubscriptions.push(
-        this.followUpForm.valueChanges.subscribe(() => {
-          this.updatedObsData.followUp = true;
-          this.checkChanges(this.updatedObsData);
         })
       );
     }

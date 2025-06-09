@@ -2018,7 +2018,7 @@
                 <mat-icon>{{ panel8.expanded ? "remove" : "add" }}</mat-icon>
               </mat-expansion-panel-header>
 
-              <form [formGroup]="followUpForm" (ngSubmit)="saveFollowUp()" *ngIf="!followUpForm.value.present && !isMCCUser">
+              <form [formGroup]="followUpForm" (ngSubmit)="saveFollowUp().subscribe()" *ngIf="!followUpForm.value.present && !isMCCUser">
                 <ul class="items-list">
                   <li>
                     <div class="row">
@@ -2041,7 +2041,7 @@
                           <input
                             type="radio"
                             value="{{'No' | translate}}"
-                            (change)="saveFollowUp()"
+                            (change)="saveFollowUp().subscribe()"
                             formControlName="wantFollowUp"
                             data-test-id="radioFollowUpNo"
                           />
