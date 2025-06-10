@@ -1329,11 +1329,11 @@ export class VisitSummaryComponent implements OnInit, OnDestroy, AfterViewInit {
                 if(obs.value.includes("::")){
                   obsValues = obs.value.split("::").pop()?.split(":");
                 }
-                const obsValuesOne = obsValues[1]?.split('&');
+                const obsValuesOne = obsValues?.[1]?.split('&');
                 this.existingDiagnosis.push({
-                  diagnosisName: obsValues[0]?.trim(),
-                  diagnosisType: obsValuesOne[0]?.trim(),
-                  diagnosisStatus: obsValuesOne[1]?.trim(),
+                  diagnosisName: obsValues?.[0]?.trim(),
+                  diagnosisType: obsValuesOne?.[0]?.trim() ?? obsValues?.[1]?.trim(),
+                  diagnosisStatus: obsValuesOne?.[1]?.trim() ?? obsValues?.[2]?.trim(),
                   uuid: obs.uuid,
                 });
               }
@@ -2475,7 +2475,7 @@ export class VisitSummaryComponent implements OnInit, OnDestroy, AfterViewInit {
             concept: conceptIds.conceptMed,
             person: this.visit.patient.uuid,
             obsDatetime: new Date(),
-            value: `${medicine.drug}:${medicine.strength}:${medicine.days}:${medicine.timing}:${medicine.remark ?? ''}:${medicine.frequency ?? ''}`,
+            value: `${medicine.drug ?? ''}:${medicine.strength ?? ''}:${medicine.days ?? ''}:${medicine.timing ?? ''}:${medicine.remark ?? ''}:${medicine.frequency ?? ''}`,
             encounter: this.visitNotePresent.uuid
           }).pipe(tap((res: ObsModel) => medicine.uuid = res.uuid))
         );
@@ -2518,7 +2518,7 @@ export class VisitSummaryComponent implements OnInit, OnDestroy, AfterViewInit {
               concept: conceptIds.conceptDiagnosis,
               person: this.visit.patient.uuid,
               obsDatetime: new Date(),
-              value: `${this.diagnosisCode?.value ? this.diagnosisCode?.value : 'NA'}::${diagnosis.diagnosisName}:${diagnosis.diagnosisType} & ${diagnosis.diagnosisStatus}`,
+              value: `${this.diagnosisCode?.value ? this.diagnosisCode?.value : 'NA'}:${diagnosis.diagnosisName ?? ''}:${diagnosis.diagnosisType?? ''}:${diagnosis.diagnosisStatus ?? ''}`,
               encounter: this.visitNotePresent.uuid
             }).pipe(tap((res: ObsModel) => diagnosis.uuid = res.uuid))
           );
@@ -2536,7 +2536,7 @@ export class VisitSummaryComponent implements OnInit, OnDestroy, AfterViewInit {
             concept: conceptIds.conceptReferral,
             person: this.visit.patient.uuid,
             obsDatetime: new Date(),
-            value: `${referral.speciality}:${referral.facility}:${referral.priority}:${referral?.reason}`,
+            value: `${referral.speciality??''}:${referral.facility??''}:${referral.priority??''}:${referral?.reason??''}`,
             encounter: this.visitNotePresent.uuid
           }).pipe(tap((res: ObsModel) => referral.uuid = res.uuid))
         );
