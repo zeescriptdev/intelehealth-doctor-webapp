@@ -375,7 +375,7 @@ export class VisitSummaryComponent implements OnInit, OnDestroy {
               this.checkIfFollowUpPresent();
             }
             this.getAdditionalNote(visit.attributes);
-            this.getAppointment(visit.uuid);
+           // this.getAppointment(visit.uuid);
             this.getVisitProvider(visit.encounters);
             this.getVitalObs(visit.encounters);
             this.getCheckUpReason(visit.encounters);
@@ -1670,7 +1670,7 @@ export class VisitSummaryComponent implements OnInit, OnDestroy {
                   }).subscribe((post) => {
                     this.visitCompleted = true;
                     this.notifyHwForAvailablePrescription();
-                    this.appointmentService.completeAppointment({ visitUuid: this.visit.uuid }).subscribe();
+                  //  this.appointmentService.completeAppointment({ visitUuid: this.visit.uuid }).subscribe();
                     this.linkSvc.shortUrl(`/i/${this.visit.uuid}`).subscribe({
                       next: (linkSvcRes: ApiResponseModel) => {
                         const link = linkSvcRes.data.hash;
