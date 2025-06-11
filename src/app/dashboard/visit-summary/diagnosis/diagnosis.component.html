@@ -198,7 +198,7 @@
 
   <ng-container *ngIf="hasAILLMEnabled" class="mt-2">
     <app-aillmddx [patientInfo]="patientInfo" [visit]="visit" (diagnosisSelected)="onAIDiagnosisSelected()"
-      [existingDiagnosis]="existingDiagnosis" (furtherQuestionsListReceived) ="onAIfurtherQuestionsListReceived($event)" [notes]="patientInteractionNotesForm.value.value"></app-aillmddx>
+      [existingDiagnosis]="existingDiagnosis" [notes]="patientInteractionNotesForm.value.value"></app-aillmddx>
   </ng-container>
 
 </mat-expansion-panel>

@@ -121,7 +121,6 @@ export class DiagnosisComponent implements OnInit {
   diagnosisCode: { value: string } = { value: '' };
 
   hasAILLMEnabled: boolean = false;
-furtherQuestionsListReceived = [];
 
   medicines: MedicineModel[] = [];
   advices: ObsModel[] = [];
@@ -513,11 +512,6 @@ furtherQuestionsListReceived = [];
 
   onAIDiagnosisSelected(): void {
     this.diagnosisForm.get('diagnosisName').patchValue(this.selectedDiagnoses[0]);
-  }
-
-  onAIfurtherQuestionsListReceived(event): void {
-    console.log("event", event);
-    this.furtherQuestionsListReceived = event;
   }
 
   removeMedicine(medicine: any): void {

@@ -1081,7 +1081,7 @@
                 </li>
               </ul>
               <div *ngIf="hasAILLMEnabled && visit?.demarcation === 'New'" class="notes-section">
-                <div class="top-row">
+              <div class="top-row">
                 <div class="notes-form">
                    <h6 class="notes-label">Notes</h6>
                    <small class="grey-color">Add notes on the interaction to support future reference</small>
@@ -1113,7 +1113,7 @@
                 </div>
               </div>
             </div>
-            </mat-expansion-panel>  
+          </mat-expansion-panel>  
 
             <div *ngIf="hasAILLMEnabled && visit?.demarcation === 'New'; else diagnosisTemplate" id="ddxContainer" #lazyDDxContainer></div>
             <ng-template #diagnosisTemplate>

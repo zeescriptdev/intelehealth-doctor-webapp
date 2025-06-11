@@ -963,66 +963,7 @@ th.mat-header-cell:last-child {
     margin-bottom: 16px;
   }
 
-  .notes-textarea {
-    width: 100%;
-    min-height: 100px;
-    padding: 16px;
-    background: #FFFFFF;
-    border: 1px solid #E5E7EB;
-    border-radius: 12px;
-    font-size: 14px;
-    line-height: 1.5;
-    color: #333333;
-    resize: none;
-    margin-bottom: 16px;
-
-    &::placeholder {
-      color: #666666;
-    }
-
-    &:focus {
-      outline: none;
-      border-color: #2563EB;
-    }
-
-    &:disabled {
-      background-color: #F3F4F6;
-      cursor: not-allowed;
-    }
-  }
-
-  .save-btn {
-    background: #4CAF50;
-    color: white;
-    border: none;
-    padding: 12px 32px;
-    font-size: 16px;
-    font-weight: 500;
-    border-radius: 8px;
-    cursor: pointer;
-    transition: background-color 0.2s ease;
-
-    &:hover {
-      background: #45a049;
-    }
-
-    &:disabled {
-      opacity: 0.7;
-      cursor: not-allowed;
-    }
-  }
-}
-
-.dose-column {
-  width: 180px; // Set your desired width
-  min-width: 150px;
-  max-width: 220px;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
- .top-row {
+    .top-row {
       display: flex;
       justify-content: space-between;
       gap: 20px;
@@ -1070,7 +1011,67 @@ th.mat-header-cell:last-child {
     .suggestions-box li {
       margin-bottom: 6px;
     }
-.textarea2 {
+
+  .notes-textarea {
+    width: 100%;
+    min-height: 100px;
+    padding: 16px;
+    background: #FFFFFF;
+    border: 1px solid #E5E7EB;
+    border-radius: 12px;
+    font-size: 14px;
+    line-height: 1.5;
+    color: #333333;
+    resize: none;
+    margin-bottom: 16px;
+
+    &::placeholder {
+      color: #666666;
+    }
+
+    &:focus {
+      outline: none;
+      border-color: #2563EB;
+    }
+
+    &:disabled {
+      background-color: #F3F4F6;
+      cursor: not-allowed;
+    }
+  }
+
+   .textarea2 {
       resize: vertical;
       height: 200px;
    }
+
+  .save-btn {
+    background: #4CAF50;
+    color: white;
+    border: none;
+    padding: 12px 32px;
+    font-size: 16px;
+    font-weight: 500;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+
+    &:hover {
+      background: #45a049;
+    }
+
+    &:disabled {
+      opacity: 0.7;
+      cursor: not-allowed;
+    }
+  }
+}
+
+.dose-column {
+  width: 180px; // Set your desired width
+  min-width: 150px;
+  max-width: 220px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
