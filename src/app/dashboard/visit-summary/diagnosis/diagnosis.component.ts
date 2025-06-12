@@ -1070,12 +1070,16 @@ export class DiagnosisComponent implements OnInit {
             const result = obs.value.split(',').filter(Boolean);
             const time = result.find((v: string) => v.includes('Time:'))?.split('Time:')?.[1]?.trim();
             const remark = result.find((v: string) => v.includes('Remark:'))?.split('Remark:')?.[1]?.trim();
-            const type = result.find((v: string) => v.includes('Type:'))?.split('Type:')?.[1]?.trim();
             followUpDate = moment(result[0]).format('YYYY-MM-DD');
             followUpTime = time ? time : null;
             followUpReason = remark ? remark : null;
-            followUpType = type && type !== 'null' ? type : null;
             wantFollowUp = 'Yes';
+
+            // Only try to get Type if the feature is enabled
+            if (this.isFeatureAvailable('followUpType')) {
+              const type = result.find((v: string) => v.includes('Type:'))?.split('Type:')?.[1]?.trim();
+              followUpType = type && type !== 'null' ? type : null;
+            }
           }
           this.followUpDatetime = obs.value;
           this.followUpForm.patchValue({
@@ -1085,7 +1089,7 @@ export class DiagnosisComponent implements OnInit {
             followUpTime,
             followUpReason,
             uuid: obs.uuid,
-            followUpType
+            followUpType: this.isFeatureAvailable('followUpType') ? followUpType : null
           });
 
           if (this.aillmtxFollowupComponent) {
@@ -1096,7 +1100,7 @@ export class DiagnosisComponent implements OnInit {
               followUpTime,
               followUpReason,
               uuid: obs.uuid,
-              followUpType
+              followUpType: this.isFeatureAvailable('followUpType') ? followUpType : null
             }];
           }
         }
@@ -1110,7 +1114,7 @@ export class DiagnosisComponent implements OnInit {
   */
   saveFollowUp(): Observable<any> {
     if (this.followUpForm.value.wantFollowUp === 'Yes') {
-      const value = `${moment(this.followUpForm.value.followUpDate).format('YYYY-MM-DD')},Time:${this.followUpForm.value.followUpTime},Remark:${this.followUpForm.value.followUpReason},Type:${this.followUpForm.value.followUpType}`;
+      const value = `${moment(this.followUpForm.value.followUpDate).format('YYYY-MM-DD')},Time:${this.followUpForm.value.followUpTime},Remark:${this.followUpForm.value.followUpReason}${this.isFeatureAvailable('followUpType') ? ',Type:' + (this.followUpForm.value.followUpType) : ''}`;
       
       if (this.followUpForm.value.uuid) {
         return this.encounterService.updateObs(this.followUpForm.value.uuid, { value });
@@ -1122,7 +1126,7 @@ export class DiagnosisComponent implements OnInit {
             followUpDate : this.followUpForm.value.followUpDate,
             followUpTime : this.followUpForm.value.followUpTime,
             followUpReason : this.followUpForm.value.followUpReason,
-            followUpType : null
+            followUpType : this.isFeatureAvailable('followUpType') ? this.followUpForm.value.followUpType : null
           });
         }
         this.encounterService.postObs({
@@ -1139,7 +1143,7 @@ export class DiagnosisComponent implements OnInit {
             followUpTime : this.followUpForm.value.followUpTime,
             followUpReason : this.followUpForm.value.followUpReason,
             uuid: res.uuid,
-            followUpType : null
+            followUpType : this.isFeatureAvailable('followUpType') ? this.followUpForm.value.followUpType : null
           });
         });
         this.followUpSaved.emit(this.followUpForm.value);
@@ -1159,7 +1163,7 @@ export class DiagnosisComponent implements OnInit {
             followUpTime : null,
             followUpReason :null,
             uuid: res.uuid,
-            followUpType : null
+            followUpType : this.isFeatureAvailable('followUpType') ? this.followUpForm.value.followUpType : null
           });
           if (this.aillmtxFollowupComponent) {
             this.aillmtxFollowupComponent.existingFollowUp.push({
@@ -1168,7 +1172,7 @@ export class DiagnosisComponent implements OnInit {
               followUpDate : null,
               followUpTime : null,
               followUpReason : null,
-              followUpType : null
+              followUpType : this.isFeatureAvailable('followUpType') ? this.followUpForm.value.followUpType : null
             });
           }
       });
