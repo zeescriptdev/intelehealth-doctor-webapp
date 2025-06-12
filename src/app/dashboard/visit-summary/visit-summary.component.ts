@@ -399,15 +399,16 @@ export class VisitSummaryComponent implements OnInit, OnDestroy, AfterViewInit {
     this.hasPatientAddressEnabled = this.appConfigService?.patient_reg_address;
     this.hasPatientOtherEnabled = this.appConfigService?.patient_reg_other;
 
-    this.pvsConfigs = this.appConfigService.patient_visit_sections;
+    this.pvsConfigs = this.appConfigService.patient_visit_sections.filter(obj=>!["share_prescription","share_patient_visit_summary"].includes(obj.key));
     this.isMCCUser = !!this.rolesService.getRole('ORGANIZATIONAL:MCC');
   }
   
   ngAfterViewInit(): void {
     this.formControlValueChanges();
-    this.trackFormChanges();
+    
     setTimeout(()=>{
       if(this.visitNoteDiv) autoGrowAllTextAreaZone(this.visitNoteDiv.nativeElement.querySelectorAll('textarea'));
+      this.trackFormChanges();
     },2000)
   }
 
@@ -1908,7 +1909,7 @@ export class VisitSummaryComponent implements OnInit, OnDestroy, AfterViewInit {
       value = `${this.followUpForm.value.followUpDate},Time:${this.followUpForm.value.followUpTime},Remark:${this.followUpForm.value.followUpReason || ''},Type:${this.followUpForm.value.followUpType || ''}`;
     } 
     if (this.followUpForm.value.uuid) {
-      return this.encounterService.updateObs(this.followUpForm.value.uuid, { value });
+      return this.encounterService.updateObs(this.followUpForm.value.uuid, { value }).pipe(tap((response: ObsModel) => this.followUpForm.patchValue({ present: true})));
     } else {
       return this.encounterService.postObs({
         concept: conceptIds.conceptFollow,
@@ -1916,7 +1917,7 @@ export class VisitSummaryComponent implements OnInit, OnDestroy, AfterViewInit {
         obsDatetime: new Date(),
         value,
         encounter: this.visitNotePresent.uuid
-      });
+      }).pipe(tap((response: ObsModel) => this.followUpForm.patchValue({ present: true})));
     }
   }
 
