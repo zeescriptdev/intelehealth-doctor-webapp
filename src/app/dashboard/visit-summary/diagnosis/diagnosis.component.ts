@@ -155,7 +155,8 @@ export class DiagnosisComponent implements OnInit {
   referSpecializations: DropdownItemModel[] = [];
   diagnostics: DiagnosticModel[] = [];
   timeList: string[] = [];
-  
+  minDate = new Date();
+
   constructor(
     private fb: FormBuilder,
     public appConfigService: AppConfigService,
