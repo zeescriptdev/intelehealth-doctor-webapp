@@ -589,6 +589,7 @@ export class DiagnosisComponent implements OnInit {
 
   toggleMedicine(): void {
     this.addMoreMedicine = !this.addMoreMedicine;
+    this.additionalInstructionForm.reset();
     this.addMedicineForm.reset();
   }
 
