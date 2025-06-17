@@ -1333,9 +1333,9 @@ export class VisitSummaryComponent implements OnInit, OnDestroy, AfterViewInit {
                 }
                 const obsValuesOne = obsValues?.[1]?.split('&');
                 this.existingDiagnosis.push({
-                  diagnosisName: obsValues?.[0]?.trim(),
-                  diagnosisType: obsValuesOne?.[0]?.trim() ?? obsValues?.[1]?.trim(),
-                  diagnosisStatus: obsValuesOne?.[1]?.trim() ?? obsValues?.[2]?.trim(),
+                  diagnosisName: obsValues?.[0]?.trim() ?? '',
+                  diagnosisType: obsValuesOne?.[0]?.trim() ?? '',
+                  diagnosisStatus: obsValuesOne?.[1]?.trim() ?? '',
                   uuid: obs.uuid,
                 });
               }
@@ -1357,47 +1357,54 @@ export class VisitSummaryComponent implements OnInit, OnDestroy, AfterViewInit {
   }
 
   /**
-  * Search disgnosis for a given value
-  * @param {string} val - search value
-  * @returns {void}
-  */
+   * Search diagnosis for a given value
+   * @param {string} val - search value
+   * @returns {void}
+   */
   searchDiagnosis(val: string): void {
-    if (val && val.length >= 3) {
-      this.diagnosisService.getDiagnosisList(val, isFeaturePresent("snomedCtDiagnosis") ? 'SNOMED' : 'ICD10').subscribe({
-        next: (response) => {
-          if (response.results && response.results.length) {
-            const data = [];
-            response.results.forEach((element: { name: any, mappings: any }) => {
-              if (element) {
-                data.push({ name: element?.name?.display, snomedId: element?.mappings?.[0] });
-              }
-            });
-            this.diagnosisSubject.next(data);
-          } else {
-            if (isFeaturePresent("snomedCtDiagnosis")) {
-              this.diagnosisService.getSnomedDiagnosisList(val).subscribe({
-                next: (res) => {
-                  if (res && res.result) {
-                    const data = res?.result.map((element: { term: string, conceptId: string }) => ({ name: element.term, conceptId: element?.conceptId }));
-                    this.diagnosisSubject.next(data);
-                  } else {
-                    this.diagnosisSubject.next([]);
-                  }
-                },
-                error: () => {
-                  this.diagnosisSubject.next([]);
-                }
-              });
-            } else {
-              this.diagnosisSubject.next([]);
-            }
-          }
-        },
-        error: () => {
-          this.diagnosisSubject.next([]);
-        }
-      });
+    if (!val || val.length < 3) {
+      return;
     }
+
+    // Helper to process OpenMRS diagnosis response
+    const processOpenMrsDiagnosis = (response: any) => {
+      if (response.results && response.results.length) {
+        const data = response.results
+          .filter((element: any) => element && element.conceptClass && element.conceptClass.uuid === conceptIds.conceptDiagnosisClass)
+          .map((element: any) => ({
+            name: element?.name?.display,
+            snomedId: element?.mappings?.[0],
+          }));
+        this.diagnosisSubject.next(data);
+      } else if (isFeaturePresent("snomedCtDiagnosis")) {
+        // If no results and SNOMED is enabled, fallback to SNOMED search
+        this.diagnosisService.getSnomedDiagnosisList(val).subscribe({
+          next: processSnomedDiagnosis,
+          error: () => this.diagnosisSubject.next([])
+        });
+      } else {
+        this.diagnosisSubject.next([]);
+      }
+    };
+
+    // Helper to process SNOMED diagnosis response
+    const processSnomedDiagnosis = (res: any) => {
+      if (res && res.result) {
+        const data = res.result.map((element: { term: string, conceptId: string }) => ({
+          name: element.term,
+          conceptId: element.conceptId
+        }));
+        this.diagnosisSubject.next(data);
+      } else {
+        this.diagnosisSubject.next([]);
+      }
+    };
+
+    // Main OpenMRS diagnosis search
+    this.diagnosisService.getDiagnosisList(val, isFeaturePresent("snomedCtDiagnosis") ? 'SNOMED' : 'ICD10').subscribe({
+      next: processOpenMrsDiagnosis,
+      error: () => this.diagnosisSubject.next([])
+    });
   }
 
   /**
@@ -2523,7 +2530,7 @@ export class VisitSummaryComponent implements OnInit, OnDestroy, AfterViewInit {
               concept: conceptIds.conceptDiagnosis,
               person: this.visit.patient.uuid,
               obsDatetime: new Date(),
-              value: `${this.diagnosisCode?.value ? this.diagnosisCode?.value : 'NA'}:${diagnosis.diagnosisName ?? ''}:${diagnosis.diagnosisType?? ''}:${diagnosis.diagnosisStatus ?? ''}`,
+              value: `${this.diagnosisCode?.value ? this.diagnosisCode?.value : 'NA'}::${diagnosis.diagnosisName ?? ''}:${diagnosis.diagnosisType ?? ''} & ${diagnosis.diagnosisStatus ?? ''}`,
               encounter: this.visitNotePresent.uuid
             }).pipe(tap((res: ObsModel) => diagnosis.uuid = res.uuid))
           );
@@ -2625,7 +2632,7 @@ export class VisitSummaryComponent implements OnInit, OnDestroy, AfterViewInit {
               concept: conceptIds.conceptMed,
               person: this.visit.patient.uuid,
               obsDatetime: new Date(),
-              value: `${medicine.drug}:${medicine.strength}:${medicine.days}:${medicine.timing}:${medicine.remark ?? ''}:${medicine.frequency ?? ''}`,
+              value: `${medicine.drug ?? ''}:${medicine.strength ?? ''}:${medicine.days ?? ''}:${medicine.timing ?? ''}:${medicine.remark ?? ''}:${medicine.frequency ?? ''}`,
               encounter: this.visitNotePresent.uuid
             }).pipe(tap((res: ObsModel) => medicine.uuid = res.uuid))
           );
@@ -2671,7 +2678,7 @@ export class VisitSummaryComponent implements OnInit, OnDestroy, AfterViewInit {
             concept: conceptIds.conceptDiagnosis,
             person: this.visit.patient.uuid,
             obsDatetime: new Date(),
-            value: `${this.diagnosisCode?.value ? this.diagnosisCode?.value : 'NA'}::${diagnosis.diagnosisName}:${diagnosis.diagnosisType} & ${diagnosis.diagnosisStatus}`,
+            value: `${this.diagnosisCode?.value ? this.diagnosisCode?.value : 'NA'}::${diagnosis.diagnosisName ?? ''}:${diagnosis.diagnosisType ?? ''} & ${diagnosis.diagnosisStatus ?? ''}`,
             encounter: this.visitNotePresent.uuid
           }).pipe(tap((res:ObsModel)=>diagnosis.uuid=res.uuid))
         );
@@ -2690,7 +2697,7 @@ export class VisitSummaryComponent implements OnInit, OnDestroy, AfterViewInit {
             concept: conceptIds.conceptReferral,
             person: this.visit.patient.uuid,
             obsDatetime: new Date(),
-            value: `${referral.speciality}:${referral.facility}:${referral.priority}:${referral?.reason}`,
+            value: `${referral.speciality ?? ''}:${referral.facility ?? ''}:${referral.priority ?? ''}:${referral?.reason ?? ''}`,
             encounter: this.visitNotePresent.uuid
           }).pipe(tap((res:ObsModel)=>referral.uuid=res.uuid))
         );
