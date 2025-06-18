@@ -64,7 +64,7 @@
 .items-list {
   font-family: DM Sans;
   font-size: 16px;
-  padding: 24px 0px 0px 24px;
+  padding: 0px 0px 0px 24px;
   margin-bottom: 0px;
 
   li {
@@ -96,6 +96,7 @@
 }
 
 .form-group {
+  margin-bottom: 0px !important;
   label {
     font-size: inherit;
     color: var(--color-darkestBlue);
@@ -119,7 +120,7 @@
     font-weight: bold;
     border: 1px solid var(--color-lightGray);
     padding: 10px 16px;
-    margin-bottom: 30px;
+    //margin-bottom: 30px;
   }
 
   .gray-btn {
@@ -137,7 +138,7 @@
   .white-btn:disabled,
   .gray-btn:disabled {
     opacity: 0.5;
-    margin-bottom: 20px;
+   // margin-bottom: 20px;
   }
 
   .blue-btn:focus,
@@ -232,6 +233,14 @@ textarea.form-control {
   }
 }
 
+.table {
+  margin-bottom: 0px !important;
+}
+ .borderc {
+    border-top: 0;
+    border-bottom: 1px solid #dee2e6;
+ }
+   
 @media (max-width: 768px) {
   .items-list {
     list-style-type: none;
