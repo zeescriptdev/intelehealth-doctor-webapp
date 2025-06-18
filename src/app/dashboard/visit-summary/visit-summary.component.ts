@@ -1909,16 +1909,16 @@ export class VisitSummaryComponent implements OnInit, OnDestroy, AfterViewInit {
       const value = `${this.followUpForm.value.followUpDate},Time:${this.followUpForm.value.followUpTime},Remark:${this.followUpForm.value.followUpReason || ''},Type:${this.followUpForm.value.followUpType || ''}`;
       
       if (this.followUpForm.value.uuid) {
-        return this.encounterService.updateObs(this.followUpForm.value.uuid, { value });
-      } else {
+      return this.encounterService.updateObs(this.followUpForm.value.uuid, { value }).pipe(tap((response: ObsModel) => this.followUpForm.patchValue({ present: true})));    
+    } else {
         return this.encounterService.postObs({
           concept: conceptIds.conceptFollow,
           person: this.visit.patient.uuid,
           obsDatetime: new Date(),
           value,
           encounter: this.visitNotePresent.uuid
-        });
-      }
+        }).pipe(tap((response: ObsModel) => this.followUpForm.patchValue({ present: true})));   
+     }
     }
     return of(null); // Return an Observable if no action needed
   }
