@@ -2208,6 +2208,7 @@ export class VisitSummaryComponent implements OnInit, OnDestroy, AfterViewInit {
         followupDatetime: followupDatetime
       }
     }
+    console.log("payload==",payload);
     this.mindmapService.notifyApp(hwUuid, payload).subscribe();
   }
 
