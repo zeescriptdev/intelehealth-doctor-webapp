@@ -1913,7 +1913,7 @@ export class VisitSummaryComponent implements OnInit, OnDestroy, AfterViewInit {
   saveFollowUp(): Observable<any> {
     let value = "No";
     if (this.followUpForm.value.wantFollowUp === 'Yes') {
-      value = `${this.followUpForm.value.followUpDate},Time:${this.followUpForm.value.followUpTime},Remark:${this.followUpForm.value.followUpReason || ''},Type:${this.followUpForm.value.followUpType || ''}`;
+      value = `${moment(this.followUpForm.value.followUpDate ?? new Date()).format('YYYY-MM-DD')},Time:${this.followUpForm.value.followUpTime ?? 'NA'},Remark:${this.followUpForm.value.followUpReason || 'NA'},Type:${this.followUpForm.value.followUpType || 'NA'}`;
     } 
     if (this.followUpForm.value.uuid) {
       return this.encounterService.updateObs(this.followUpForm.value.uuid, { value }).pipe(tap((response: ObsModel) => this.followUpForm.patchValue({ present: true})));
@@ -1931,11 +1931,8 @@ export class VisitSummaryComponent implements OnInit, OnDestroy, AfterViewInit {
           `Follow‑up date time added for ${this.visit?.patient?.person?.display || 'Patient'}`,
           'followup'
           ); // notify function
-        }
-      
-          )
-    );
-       
+        })
+      );  
     }
   }
 
