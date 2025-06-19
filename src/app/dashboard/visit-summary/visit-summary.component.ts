@@ -33,7 +33,7 @@ import { AppConfigService } from 'src/app/services/app-config.service';
 import { checkIsEnabled, VISIT_SECTIONS } from 'src/app/utils/visit-sections';
 import { NgSelectComponent } from '@ng-select/ng-select';
 import { NgxRolesService } from 'ngx-permissions';
-import diagnostics from '../../core/data/diagnostics';
+// import diagnostics from '../../core/data/diagnostics';
 import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
 import { FollowUpInstructionComponent } from './follow-up-instruction/follow-up-instruction.component';
 import { NotesComponent } from './notes/notes.component';
@@ -189,6 +189,7 @@ export class VisitSummaryComponent implements OnInit, OnDestroy, AfterViewInit {
   patientInteractionNotesForm: FormGroup
   @ViewChild('lazyDDxContainer', { read: ViewContainerRef, static: false }) lazyLoadDDxContainer!: ViewContainerRef;
   ddxCompRef: any;
+  furtherQuestionsList: string[] = [];
 
   async lazyLoadDDx() {
     setTimeout(async () => {
@@ -211,6 +212,15 @@ export class VisitSummaryComponent implements OnInit, OnDestroy, AfterViewInit {
             this.updatedObsData.diagnosis = diagnoses;
           }
         });
+
+        // Subscribe to further questions event
+        this.ddxCompRef.instance.furtherQuestionsReceived.subscribe((questions: string[]) => {
+          console.log('Received further questions:', questions);
+          if (questions && questions.length) {
+            this.furtherQuestionsList = [...questions];
+          }
+        });
+
         // Subscribe to medication saved event
         this.ddxCompRef.instance.medicationSaved.subscribe((medicines: any[]) => {
           this.medicines = [...medicines];
@@ -2807,7 +2817,7 @@ export class VisitSummaryComponent implements OnInit, OnDestroy, AfterViewInit {
             obsDatetime: new Date(),
             value: advice.value,
             encounter: this.visitNotePresent.uuid
-          }).pipe(tap((res:ObsModel)=>advice.uuid=res.uuid))
+          }).pipe(tap((res: ObsModel)=>advice.uuid=res.uuid))
         );
       }
 
@@ -3377,5 +3387,10 @@ export class VisitSummaryComponent implements OnInit, OnDestroy, AfterViewInit {
     // This could be an API call
     let data = this.instructionRemarks.map((val) => val.name);
     return of(data.filter(v => v.toLowerCase().includes(term.toLowerCase())));
+  }
+
+  // Add this method to receive questions from AILLMDDX
+  onFurtherQuestionsReceived(questions: string[]) {
+    this.furtherQuestionsList = questions;
   }
 }

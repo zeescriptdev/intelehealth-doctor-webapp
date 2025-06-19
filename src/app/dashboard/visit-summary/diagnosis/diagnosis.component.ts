@@ -84,7 +84,7 @@ class PickDateAdapter extends NativeDateAdapter {
   ],
   schemas: [NO_ERRORS_SCHEMA]
 })
-export class DiagnosisComponent implements OnInit {
+export class DiagnosisComponent implements OnInit, OnDestroy {
   @ViewChild(AillmddxComponent) aillmddxComponent: AillmddxComponent;
   @ViewChild(AillmtxMedicationComponent) aillmtxMedicationComponent: AillmtxMedicationComponent;
   @ViewChild(AillmtxAdviceComponent) aillmtxAdviceComponent: AillmtxAdviceComponent;
@@ -104,6 +104,7 @@ export class DiagnosisComponent implements OnInit {
   @Output() testSaved = new EventEmitter<any>();
   @Output() referralSaved = new EventEmitter<any>();
   @Output() followUpSaved = new EventEmitter<any>();
+  @Output() furtherQuestionsReceived = new EventEmitter<string[]>();
 
   diagnosisForm: FormGroup;
   diagnosisSecondaryForm: FormGroup;
@@ -167,6 +168,7 @@ export class DiagnosisComponent implements OnInit {
     private encounterService: EncounterService,
     private translationService: TranslationService,
     private visitSummaryService: VisitSummaryHelperService,
+    private aiTxService: AiTxService
   ) {
     this.diagnosisForm = this.fb.group({
       diagnosisName: ['', Validators.required],
@@ -245,6 +247,13 @@ export class DiagnosisComponent implements OnInit {
 
   ngAfterViewInit(): void {
     this.formControlValueChanges();
+    if (this.hasAILLMEnabled && this.aillmddxComponent) {
+      this.aillmddxComponent.furtherQuestionsListReceived.subscribe((questions: string[]) => {
+        if (questions && questions.length) {
+          this.furtherQuestionsReceived.emit(questions);
+        }
+      });
+    }
   }
 
   ngOnInit() {
@@ -270,6 +279,11 @@ export class DiagnosisComponent implements OnInit {
         this.visitNotePresent = visit.encounters.find(({ display = '' }) => display.includes('Visit Note'));
       }
     });
+  }
+
+  ngOnDestroy() {
+    // Clear the cache when component is destroyed
+    this.aiTxService.clearCache();
   }
 
   /**
@@ -440,6 +454,10 @@ export class DiagnosisComponent implements OnInit {
   saveDiagnosis(): void {
     if (this.selectedDiagnoses.length > 0) {
       this.diagnosisName = this.diagnosisForm.value.diagnosisName?.replace(/:/g, ' ');
+      
+      // Clear the cache before making new treatment calls
+      this.aiTxService.clearCache();
+      
       this.aillmtxMedicationComponent?.getAIMedicalWithRetry(this.diagnosisName);
       this.aillmtxAdviceComponent?.getAIAdviceWithRetry(this.diagnosisName);
       this.aillmtxTestComponent?.getAITestWithRetry(this.diagnosisName);
@@ -454,14 +472,21 @@ export class DiagnosisComponent implements OnInit {
       this.diagnosisForm.controls.diagnosisStatus.reset();
       this.diagnosisSaved.emit(this.existingDiagnosis);
     }
+
     if (this.diagnosisForm.invalid || !this.isVisitNoteProvider || !this.diagnosisValidated) {
       return;
     }
+
     if (this.existingDiagnosis.find(o => o.diagnosisName.toLocaleLowerCase() === this.diagnosisForm.value.diagnosisName.toLocaleLowerCase())) {
       this.toastr.warning(this.translateService.instant('Diagnosis Already Exist'), this.translateService.instant('Duplicate Diagnosis'));
       return;
     }
+
     this.diagnosisName = this.diagnosisForm.value.diagnosisName?.replace(/:/g, ' ');
+    
+    // Clear the cache before making new treatment calls
+    this.aiTxService.clearCache();
+    
     this.aillmtxMedicationComponent?.getAIMedicalWithRetry(this.diagnosisName);
     this.aillmtxAdviceComponent?.getAIAdviceWithRetry(this.diagnosisName);
     this.aillmtxTestComponent?.getAITestWithRetry(this.diagnosisName);
