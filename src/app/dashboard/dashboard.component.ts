@@ -1570,6 +1570,7 @@ export class DashboardComponent implements OnInit {
     if (this.currentAppointmentFilter === filterType) return;
   
     const config = this.getAppointmentFilterConfig(filterType);
+    console.log("config===",config);
     if (!config) return;
   
     const updatedCols = this.getAppointmentColumns(filterType);
