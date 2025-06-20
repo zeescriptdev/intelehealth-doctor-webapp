@@ -17,10 +17,10 @@
     <table class="table" aria-describedby="">
       <thead>
         <tr>
-          <th scope="col">{{'Diagnosis'|translate}}</th>
-          <th scope="col">{{'Type'|translate}}</th>
-          <th scope="col">{{'Status'|translate}}</th>
-          <th scope="col"></th>
+          <th scope="col" class="border-top-0">{{'Diagnosis'|translate}}</th>
+          <th scope="col" class="border-top-0">{{'Type'|translate}}</th>
+          <th scope="col" class="border-top-0">{{'Status'|translate}}</th>
+          <th scope="col" class="border-top-0"></th>
         </tr>
       </thead>
       <tbody>
@@ -129,7 +129,7 @@
         </li>
       </ul>
       <div class="form-group mb-0" *ngIf="!isMCCUser">
-        <button type="button" class="white-btn mr-2 mt-3 mb-3" (click)="toggleDiagnosis()" data-test-id="btnCancelDiagnosis">
+        <button type="button" class="white-btn mr-3 mt-3 mb-3" (click)="toggleDiagnosis()" data-test-id="btnCancelDiagnosis">
           {{'Cancel'|translate}}
         </button>
         <button type="submit" class="gray-btn mb-3" [disabled]="diagnosisForm.invalid" data-test-id="btnSubmitDiagnosis">
@@ -290,7 +290,7 @@
         <tr *ngIf="!addMoreMedicine && !isMCCUser">
           <td colspan="6" class="border-top-0">
             <div class="form-group mb-0">
-              <button type="button" class="white-btn mr-2" (click)="toggleMedicine()" data-test-id="btnCancelMed">
+              <button type="button" class="white-btn mr-3" (click)="toggleMedicine()" data-test-id="btnCancelMed">
                 {{'Cancel'|translate}}
               </button>
               <button type="submit" class="gray-btn" [disabled]="addMedicineForm.invalid" data-test-id="btnSubmitMed">
@@ -382,7 +382,7 @@
           [ngbTypeahead]="search1" data-test-id="etAdvice" />
       </div>
       <div class="form-group mt-2">
-        <button type="button" class="white-btn mr-2" (click)="toggleAdvice()" data-test-id="btnCancelAdvice">
+        <button type="button" class="white-btn mr-3" (click)="toggleAdvice()" data-test-id="btnCancelAdvice">
           {{'Cancel'|translate}}
         </button>
         <button type="submit" class="gray-btn" [disabled]="addAdviceForm.invalid" data-test-id="btnSubmitAdvice">
@@ -391,7 +391,7 @@
       </div>
     </form>
   </ng-container>
-
+  <hr *ngIf="advices.length > 0">
   <ul class="items-list mt-3" *ngIf="advices.length else noAdvices">
     <li *ngFor="let ad of advices; let i = index">
       <div class="d-flex justify-content-between">
@@ -440,7 +440,7 @@
             [ngbTypeahead]="search7" data-test-id="etTest" />
         </div>
         <div class="form-group  mt-2">
-          <button type="button" class="white-btn mr-2" (click)="toggleTest()" data-test-id="btnCancelTest">
+          <button type="button" class="white-btn mr-3" (click)="toggleTest()" data-test-id="btnCancelTest">
             {{'Cancel'|translate}}
           </button>
           <button type="submit" class="gray-btn" [disabled]="addTestForm.invalid" data-test-id="btnSubmitTest">
@@ -449,6 +449,7 @@
         </div>
       </form>
     </ng-container>
+    <hr *ngIf="tests.length > 0">
     <ul class="items-list mt-3" *ngIf="tests.length">
       <li *ngFor="let t of tests; let i = index">
         <div class="d-flex justify-content-between">
@@ -567,7 +568,7 @@
             <tr *ngIf="!addMoreReferral && !isMCCUser">
               <td colspan="6" class="border-top-0">
                 <div class="form-group mb-0">
-                  <button type="button" class="white-btn mr-2" (click)="toggleReferral()"
+                  <button type="button" class="white-btn mr-3" (click)="toggleReferral()"
                     data-test-id="btnCancelReferralVisitSummary">
                     {{'Cancel'|translate}}
                   </button>

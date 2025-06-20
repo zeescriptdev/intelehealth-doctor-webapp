@@ -832,8 +832,9 @@ body.font-lato td {
     .mat-expansion-panel-content {
       .mat-expansion-panel-body {
         padding: 0px;
-        margin-top: 24px;
+        margin-top: 10px;
         position: relative;
+        border-top: 1px solid #dee2e6;
       }
 
       .mat-expansion-panel-body::after {
