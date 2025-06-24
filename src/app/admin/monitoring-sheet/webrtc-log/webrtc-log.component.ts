@@ -21,6 +21,8 @@ export class WebrtcLogComponent {
   callDataColumns: any = [
     { label: "Patient Id", key: "patientId" },
     { label: "Patient Name", key: "patientName" },
+    { label: "State", key: "state" },
+    { label: "Sanch", key: "sanch" },
     { label: "Village", key: "location" },
     { label: "Doctor Name", key: "doctorName" },
     { label: "Sevika Name", key: "sevikaName" },
