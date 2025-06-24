@@ -25,7 +25,8 @@ export class AppConfigService {
   public patient_reg_address: boolean;
   public abha_section: boolean;
   public sidebar_menus: { [key: string]: boolean };
-  public patient_visit_sections: PatientVisitSection[]
+  public patient_visit_sections: PatientVisitSection[];
+  public patient_diagnostics_section: boolean;
 
   constructor(private http: HttpClient) { }
 
