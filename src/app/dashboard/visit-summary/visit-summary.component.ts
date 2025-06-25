@@ -3171,10 +3171,10 @@ export class VisitSummaryComponent implements OnInit, OnDestroy, AfterViewInit {
   }
 
   getPhoneNumber(): string{
-    if(["NAS"].includes(environment.brandName)){
-      return this.hwPhoneNo;
-    } else {
+    if(["KCDO"].includes(environment.brandName)){
       return this.getPersonAttributeValue('Telephone Number') != "NA" ? this.getPersonAttributeValue('Telephone Number') : "";
+    } else {
+      return this.hwPhoneNo;
     } 
   }
 
