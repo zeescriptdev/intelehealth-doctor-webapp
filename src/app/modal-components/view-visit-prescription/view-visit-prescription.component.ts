@@ -279,17 +279,28 @@ export class ViewVisitPrescriptionComponent implements OnInit, OnDestroy {
     this.diagnosisService.getObs(this.visit.patient.uuid, conceptIds.conceptDiagnosis).subscribe((response: ObsApiResponseModel) => {
       response.results.forEach((obs: ObsModel) => {
         if (obs.encounter.visit.uuid === this.visit.uuid) {
-          if(this.isFeatureAvailable('dp_diagnosis_secondary')){
+          if (this.isFeatureAvailable('dp_diagnosis_secondary')) {
             this.dignosisSecondary = obsParse(obs.value)
-          } else {
+          } else if (obs.value.includes("}")) {
+            let obsData: any = obsParse(obs.value, obs.uuid)
             this.existingDiagnosis.push({
-              diagnosisName: obs.value.split(':')[0].trim(),
-              diagnosisType: obs.value.split(':')[1].split('&')[0].trim(),
-              diagnosisStatus: obs.value.split(':')[1].split('&')[1].trim(),
-              uuid: obs.uuid
+              diagnosisName: obsData.diagnosis,
+              diagnosisStatus: obsData.type,
+              uuid: obsData.uuid,
+            });
+          } else {
+            let obsValues = obs.value.split(':');
+            if (obs.value.includes("::")) {
+              obsValues = obs.value.split("::").pop()?.split(":");
+            }
+            const obsValuesOne = obsValues?.[1]?.split('&');
+            this.existingDiagnosis.push({
+              diagnosisName: obsValues?.[0]?.trim() ?? '',
+              diagnosisType: obsValuesOne?.[0]?.trim() ?? '',
+              diagnosisStatus: obsValuesOne?.[1]?.trim() ?? '',
+              uuid: obs.uuid,
             });
           }
-          
         }
       });
     });
@@ -708,88 +719,6 @@ export class ViewVisitPrescriptionComponent implements OnInit, OnDestroy {
                   },
                   layout: 'noBorders'
                 },
-                // {
-                //   table: {
-                //     widths: ['100%'],
-                //     body: [
-                //       [
-                //         [
-                //           ...this.getPatientRegFieldsForPDF('Gender'),
-                //           ...this.getPatientRegFieldsForPDF('Age'),
-                //         ]
-                //       ]
-                //     ]
-                //   },
-                //   layout: {
-                //     vLineWidth: function (i, node) {
-                //       if (i === 0) {
-                //         return 1;
-                //       }
-                //       return 0;
-                //     },
-                //     hLineWidth: function (i, node) {
-                //       return 0;
-                //     },
-                //     vLineColor: function (i) {
-                //       return "lightgray";
-                //     },
-                //   }
-                // },
-                // {
-                //   table: {
-                //     widths: ['100%'],
-                //     body: [
-                //       [
-                //         [
-                //           ...this.getPatientRegFieldsForPDF('Address'),
-                //           ...this.getPatientRegFieldsForPDF('Occupation')
-                //         ]
-                //       ]
-                //     ]
-                //   },
-                //   layout: {
-                //     vLineWidth: function (i, node) {
-                //       if (i === 0) {
-                //         return 1;
-                //       }
-                //       return 0;
-                //     },
-                //     hLineWidth: function (i, node) {
-                //       return 0;
-                //     },
-                //     vLineColor: function (i) {
-                //       return "lightgray";
-                //     },
-                //   }
-                // },
-                // {
-                //   table: {
-                //     widths: ['100%'],
-                //     body: [
-                //       [ 
-                //         [ 
-                //           ...this.getPatientRegFieldsForPDF('National ID'),
-                //           ...this.getPatientRegFieldsForPDF('Phone Number'),
-                //           , {text: ' ', style: 'subheader'}, {text: ' '}
-                //         ]
-                //       ],
-                //     ]
-                //   },
-                //   layout: {
-                //     vLineWidth: function (i, node) {
-                //       if (i === 0) {
-                //         return 1;
-                //       }
-                //       return 0;
-                //     },
-                //     hLineWidth: function (i, node) {
-                //       return 0;
-                //     },
-                //     vLineColor: function (i) {
-                //       return "lightgray";
-                //     },
-                //   }
-                // }
               ],
               [
                 this.getPersonalInfo()
@@ -1037,7 +966,6 @@ export class ViewVisitPrescriptionComponent implements OnInit, OnDestroy {
       if(section[0].sectionName === 'advice' && !this.isFeatureAvailable('advice')) return false;
       return true;
     });
-    console.log(pdfObj)
     pdfMake.createPdf(pdfObj).download(`e-prescription_${this.openMrsId || Date.now()}`);
   }
 
@@ -1051,10 +979,17 @@ export class ViewVisitPrescriptionComponent implements OnInit, OnDestroy {
     switch (type) {
       case 'diagnosis':
         if(this.isFeatureAvailable('dp_diagnosis_secondary')){
-          records.push([this.dignosisSecondary['diagnosis'],this.dignosisSecondary['type'],this.dignosisSecondary['tnm'],this.dignosisSecondary['otherStaging']]);
+          const diagnosisRow = [
+            this.dignosisSecondary['diagnosis'] || "",
+            this.dignosisSecondary['type'] || "",
+            this.dignosisSecondary['tnm'] || "",
+            this.dignosisSecondary['otherStaging'] || ""
+          ];
+          records.push(diagnosisRow);
         } else if (this.existingDiagnosis.length) {
-          this.existingDiagnosis.forEach(d => {
-            records.push([d.diagnosisName, d.diagnosisType, d.diagnosisStatus]);
+          this.existingDiagnosis.forEach((d) => {
+            const row = [d.diagnosisName ?? '', d.diagnosisType ?? '', d.diagnosisStatus ?? ''];
+            records.push(row);
           });
         } else {
           records.push([{ text: 'No diagnosis added', colSpan: 3, alignment: 'center' }]);
@@ -1464,8 +1399,8 @@ export class ViewVisitPrescriptionComponent implements OnInit, OnDestroy {
   }
 
   renderReferralSectionPDF() {
-    const referralFacility = isFeaturePresent('referralFacility', true)
-    const priorityOfReferral = isFeaturePresent('priorityOfReferral', true)
+    const referralFacility = this.isFeatureAvailable('referralFacility', true)
+    const priorityOfReferral = this.isFeatureAvailable('priorityOfReferral', true)
 
     if (!referralFacility && !priorityOfReferral) {
       return {
