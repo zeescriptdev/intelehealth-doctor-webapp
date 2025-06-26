@@ -689,12 +689,8 @@ export interface PatientVisitSummaryConfigModel {
   awaiting_visits_patient_type_demarcation: boolean
   awaiting_visit_section: boolean
   diagnosis_at_secondary_level: boolean
-  dp_recommendation_group: boolean
   dp_call_status: boolean
   dp_dignosis_secondary: boolean
-  dp_medication_secondary: boolean
-  dp_investigations_secondary: boolean
-  dp_referral_secondary: boolean
   dp_discussion_summary: boolean
   inprogress_visit_section: boolean
 }
@@ -782,4 +778,8 @@ export interface DropdownValuesModel {
   refer_specialisation: DropdownItemModel[],
   referral_facility: DropdownItemModel[],
   test: DropdownItemModel[]
+}
+
+export interface RecordingResponse {
+  recordingId: number;
 }

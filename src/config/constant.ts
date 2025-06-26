@@ -245,6 +245,7 @@ export const conceptIds = {
   conceptFollowUpInstruction: 'e444b5e9-e3b9-4cb1-92ee-29bba00b33d0',
   conceptDiscussionSummary: 'b673cd54-a01d-4d8a-9c07-8fb19bf4982c',
   conceptFrequencyList: '9847b24f-8434-4ade-8978-157184c435d2',
+  conceptRecommendation: '59873e7c-0085-497d-8611-8722d9872143'
 }
 
 export const WEBRTC = {
