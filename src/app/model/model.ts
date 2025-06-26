@@ -509,10 +509,10 @@ export interface TestModel {
 
 export interface MedicineModel {
   drug?: string,
-  strength?: string,
-  days?: string,
-  timing?: string,
-  remark?: string,
+  dose?: string,
+  durationNo?: string,
+  durationUnit?: string,
+  instructRemark?: string,
   frequency?: string,
   uuid?: string
 }

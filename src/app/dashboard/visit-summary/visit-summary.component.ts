@@ -13,6 +13,7 @@ import { EncounterService } from 'src/app/services/encounter.service';
 import { MindmapService } from 'src/app/services/mindmap.service';
 import { MatAccordion } from '@angular/material/expansion';
 import medicines from '../../core/data/medicines';
+import doses from '../../core/data/dose';
 import { BehaviorSubject, forkJoin, interval, Observable, of, Subject, Subscription } from 'rxjs';
 import { debounceTime, distinctUntilChanged, map, tap } from 'rxjs/operators';
 import { MatTableDataSource } from '@angular/material/table';
@@ -32,9 +33,12 @@ import { AppConfigService } from 'src/app/services/app-config.service';
 import { checkIsEnabled, VISIT_SECTIONS } from 'src/app/utils/visit-sections';
 import { NgSelectComponent } from '@ng-select/ng-select';
 import { NgxRolesService } from 'ngx-permissions';
+// import diagnostics from '../../core/data/diagnostics';
 import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
 import { FollowUpInstructionComponent } from './follow-up-instruction/follow-up-instruction.component';
 import { NotesComponent } from './notes/notes.component';
+import durationUnitList from 'src/app/core/data/durationUnitList';
+import instructionRemarks from 'src/app/core/data/instructionRemarks';
 import { keepOnlyPairedEvents } from 'src/app/utils/paired-events';
 
 class PickDateAdapter extends NativeDateAdapter {
@@ -89,7 +93,7 @@ export class VisitSummaryComponent implements OnInit, OnDestroy, AfterViewInit {
   refer_priorities: DataItemModel[] = refer_prioritie.refer_priorities;
   strengthList: DataItemModel[] = strength.strengthList
   daysList: DataItemModel[] = days.daysList
-  timingList: DataItemModel[] = timing.timingList
+  durationUnitList: DataItemModel[] = durationUnitList;
   timeList: string[] = [];
   drugNameList: DataItemModel[] = [];
   advicesList: string[] = [];
@@ -218,9 +222,10 @@ export class VisitSummaryComponent implements OnInit, OnDestroy, AfterViewInit {
   search = (text$: Observable<string>) => this.mainSearch(text$, this.advicesList);
   search2 = (text$: Observable<string>) => this.mainSearch(text$, this.testsList);
   search3 = (text$: Observable<string>) => this.mainSearch(text$, this.drugNameList.map((val) => val.name));
-  search4 = (text$: Observable<string>) => this.mainSearch(text$, this.strengthList.map((val) => val.name));
+  search4 = (text$: Observable<string>) => this.mainSearch(text$, doses.map((val) => val.name));
   search5 = (text$: Observable<string>) => this.mainSearch(text$, this.daysList.map((val) => val.name));
-  search6 = (text$: Observable<string>) => this.mainSearch(text$, this.timingList.map((val) => val.name));
+  search6 = (text$: Observable<string>) => this.mainSearch(text$, this.durationUnitList.map((val) => val.name));
+  search7 = (text$: Observable<string>) => this.mainSearch(text$, instructionRemarks.map((val) => val.name));
 
   // Add this property to the component class
   obsData = {
@@ -324,11 +329,11 @@ export class VisitSummaryComponent implements OnInit, OnDestroy, AfterViewInit {
 
     this.addMedicineForm = new FormGroup({
       drug: new FormControl(null, [Validators.required]),
-      strength: new FormControl(null, [Validators.required]),
-      days: new FormControl(null, [Validators.required]),
-      timing: new FormControl(null, [Validators.required]),
+      dose: new FormControl(null, [Validators.required]),
       frequency: new FormControl(null),
-      remark: new FormControl('', [])
+      durationNo: new FormControl(null, [Validators.required, Validators.pattern('^[0-9]*$')]),
+      durationUnit: new FormControl(null, [Validators.required]),
+      instructRemark: new FormControl('', [])
     });
 
     this.additionalInstructionForm = new FormGroup({
@@ -1494,15 +1499,7 @@ export class VisitSummaryComponent implements OnInit, OnDestroy, AfterViewInit {
     this.diagnosisService.getObs(this.visit.patient.uuid, conceptIds.conceptMed).subscribe((response: ObsApiResponseModel) => {
       response.results.forEach((obs: ObsModel) => {
         if (obs.encounter.visit.uuid === this.visit.uuid) {
-          this.medicines.push({
-            drug: obs.value?.split(':')[0],
-            strength: obs.value?.split(':')[1],
-            days: obs.value?.split(':')[2],
-            timing: obs.value?.split(':')[3],
-            remark: obs.value?.split(':')[4],
-            frequency: obs.value?.split(':')[5] ? obs.value?.split(':')[5] : "",
-            uuid: obs.uuid
-          });
+          this.medicines.push(this.visitService.formatMedicineDisplay(obs.value, obs.uuid));
         }
       });
     });
@@ -1523,6 +1520,7 @@ export class VisitSummaryComponent implements OnInit, OnDestroy, AfterViewInit {
     // this.updatedObsData.medication = true;
     // this.checkChanges(this.updatedObsData);
     
+    console.log("this.addMedicineForm.value ==> ", this.addMedicineForm.value);
     this.medicines.push({ ...this.addMedicineForm.value});
     this.addMedicineForm.reset();
     // this.encounterService.postObs({
@@ -1896,25 +1894,24 @@ export class VisitSummaryComponent implements OnInit, OnDestroy, AfterViewInit {
 
   /**
   * Save followup
-  * @returns {Observable<any>}
+  * @returns void
   */
-  saveFollowUp(): Observable<any> {
+  saveFollowUp() {
+    let value = 'No';
     if (this.followUpForm.value.wantFollowUp === 'Yes') {
-      const value = `${this.followUpForm.value.followUpDate},Time:${this.followUpForm.value.followUpTime},Remark:${this.followUpForm.value.followUpReason || ''},Type:${this.followUpForm.value.followUpType || ''}`;
-      
-      if (this.followUpForm.value.uuid) {
-        return this.encounterService.updateObs(this.followUpForm.value.uuid, { value });
-      } else {
-        return this.encounterService.postObs({
+      value = `${moment(this.followUpForm.value.followUpDate ?? new Date()).format('YYYY-MM-DD')},Time:${this.followUpForm.value.followUpTime ?? 'NA'},Remark:${this.followUpForm.value.followUpReason || 'NA'},Type:${this.followUpForm.value.followUpType || 'NA'}`;
+    }
+    if (this.followUpForm.value.uuid) {
+      this.encounterService.updateObs(this.followUpForm.value.uuid, { value }).pipe(tap((response: ObsModel) => this.followUpForm.patchValue({ present: true}))).subscribe();
+    } else {
+        this.encounterService.postObs({
           concept: conceptIds.conceptFollow,
           person: this.visit.patient.uuid,
           obsDatetime: new Date(),
           value,
           encounter: this.visitNotePresent.uuid
-        });
-      }
-    }
-    return of(null); // Return an Observable if no action needed
+        }).pipe(tap((response: ObsModel) => this.followUpForm.patchValue({ present: true}))).subscribe();
+     }
   }
 
   /**
@@ -1940,6 +1937,7 @@ export class VisitSummaryComponent implements OnInit, OnDestroy, AfterViewInit {
       this.toastr.warning(this.translateService.instant('Diagnosis not added'), this.translateService.instant('Diagnosis Required'));
       return false;
     }
+    console.log('this.followUpForm.value: ', this.followUpForm.value);
     if (this.isFeatureAvailable('visitFollowUp') && !this.followUpForm.value.present) {
       this.toastr.warning(this.translateService.instant('Follow-up not added'), this.translateService.instant('Follow-up Required'));
       return false;
@@ -2416,6 +2414,12 @@ export class VisitSummaryComponent implements OnInit, OnDestroy, AfterViewInit {
     }
   }
 
+  formatMedicineSave(medicine: MedicineModel): string {
+    //drug:dose:duration_no:duration_unit:instruction_remarks:frequency
+    console.log("medicine ==> ", medicine);
+    return `${medicine.drug ?? ''}:${medicine.dose ?? ''}:${medicine.durationNo ?? ''}:${medicine.durationUnit ?? ''  }:${medicine.instructRemark ?? ''}:${medicine.frequency ?? ''}`;
+  }
+
   saveDiscussionSummary(): Observable<any>{
     if(this.discussionSummaryForm.value.uuid){
       if(this.discussionSummaryForm.valid)
@@ -2471,12 +2475,13 @@ export class VisitSummaryComponent implements OnInit, OnDestroy, AfterViewInit {
       // Handle medicines
       for (const medicine of this.medicines) {
         if (medicine?.uuid) continue;
+
         postObsRequests.push(
           this.encounterService.postObs({
             concept: conceptIds.conceptMed,
             person: this.visit.patient.uuid,
             obsDatetime: new Date(),
-            value: `${medicine.drug}:${medicine.strength}:${medicine.days}:${medicine.timing}:${medicine.remark ?? ''}:${medicine.frequency ?? ''}`,
+            value: this.formatMedicineSave(medicine),
             encounter: this.visitNotePresent.uuid
           }).pipe(tap((res: ObsModel) => medicine.uuid = res.uuid))
         );
@@ -2621,7 +2626,7 @@ export class VisitSummaryComponent implements OnInit, OnDestroy, AfterViewInit {
               concept: conceptIds.conceptMed,
               person: this.visit.patient.uuid,
               obsDatetime: new Date(),
-              value: `${medicine.drug}:${medicine.strength}:${medicine.days}:${medicine.timing}:${medicine.remark ?? ''}:${medicine.frequency ?? ''}`,
+              value: this.formatMedicineSave(medicine),
               encounter: this.visitNotePresent.uuid
             }).pipe(tap((res: ObsModel) => medicine.uuid = res.uuid))
           );
@@ -3152,6 +3157,15 @@ export class VisitSummaryComponent implements OnInit, OnDestroy, AfterViewInit {
     console.log(event)
   }
 
+  onKeyPress(event: KeyboardEvent): boolean {
+    const charCode = event.which ? event.which : event.keyCode;
+    // Allow only numbers (0-9), backspace (8), and delete (46)
+    if (charCode > 31 && (charCode < 48 || charCode > 57) && charCode !== 8 && charCode !== 46) {
+      event.preventDefault();
+      return false;
+    }
+    return true;
+  }
 
   onCallStatusClick(value: string): void{
     if(this.patientCallStatusForm.get('callStatus').value === value){

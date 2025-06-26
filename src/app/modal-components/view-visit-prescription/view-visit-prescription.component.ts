@@ -336,24 +336,12 @@ export class ViewVisitPrescriptionComponent implements OnInit, OnDestroy {
   * Get medicines for the visit
   * @returns {void}
   */
-  checkIfMedicationPresent() {
+  checkIfMedicationPresent(): void {
     this.medicines = [];
     this.diagnosisService.getObs(this.visit.patient.uuid, conceptIds.conceptMed).subscribe((response: ObsApiResponseModel) => {
       response.results.forEach((obs: ObsModel) => {
         if (obs.encounter.visit.uuid === this.visit.uuid) {
-          if (obs.value.includes(':')) {
-            this.medicines.push({
-              drug: obs.value?.split(':')[0],
-              strength: obs.value?.split(':')[1],
-              days: obs.value?.split(':')[2],
-              timing: obs.value?.split(':')[3],
-              remark: obs.value?.split(':')[4],
-              frequency: obs.value?.split(':')[5] ? obs.value?.split(':')[5] : '',
-              uuid: obs.uuid
-            });
-          } else {
-            this.additionalInstructions.push(obs);
-          }
+          this.medicines.push(this.visitService.formatMedicineDisplay(obs.value, obs.uuid));
         }
       });
     });
@@ -1071,7 +1059,7 @@ export class ViewVisitPrescriptionComponent implements OnInit, OnDestroy {
       case 'medication':
         if (this.medicines.length) {
           this.medicines.forEach(m => {
-            records.push([m.drug, m.strength, m.days, m.timing, m.frequency, m.remark]);
+            records.push([m.drug, m.dose, m.frequency, m.durationNo, m.durationUnit, m.instructRemark]);
           });
         } else {
           records.push([{ text: 'No medicines added', colSpan: 6, alignment: 'center' }]);
@@ -1686,7 +1674,7 @@ export class ViewVisitPrescriptionComponent implements OnInit, OnDestroy {
           widths: ['*', 'auto', 'auto', 'auto', 'auto', 'auto'],
           headerRows: 1,
           body: [
-            [{text: 'Drug name', style: 'tableHeader'}, {text: 'Strength', style: 'tableHeader'}, {text: 'No. of days', style: 'tableHeader'}, {text: 'Timing', style: 'tableHeader'}, {text: 'Frequency', style: 'tableHeader'}, {text: 'Remarks', style: 'tableHeader'}],
+            [{text: 'Drug name', style: 'tableHeader'}, {text: 'Dose', style: 'tableHeader'}, {text: 'Frequency', style: 'tableHeader'}, {text: 'Duration (number)', style: 'tableHeader'}, {text: 'Duration (units)', style: 'tableHeader'}, {text: 'Instruction(Remarks)', style: 'tableHeader'}],
             ...this.getRecords('medication')
           ]
         },
