@@ -288,23 +288,29 @@ export class ViewVisitPrescriptionComponent implements OnInit, OnDestroy {
               diagnosisStatus: obsData.type,
               uuid: obsData.uuid,
             });
-          } else {
-            let obsValues = obs.value.split(':');
-            if (obs.value.includes("::")) {
-              obsValues = obs.value.split("::").pop()?.split(":");
-            }
-            const obsValuesOne = obsValues?.[1]?.split('&');
-            this.existingDiagnosis.push({
-              diagnosisName: obsValues?.[0]?.trim() ?? '',
-              diagnosisType: obsValuesOne?.[0]?.trim() ?? '',
-              diagnosisStatus: obsValuesOne?.[1]?.trim() ?? '',
-              uuid: obs.uuid,
-            });
+          } else if (obs?.uuid) {
+            this.existingDiagnosis.push(this.extractDiagnosisInfo(obs.value, obs.uuid));
           }
         }
       });
     });
   }
+
+  extractDiagnosisInfo(value: string, uuid: string) {
+    let diagnosisParts = value?.split?.(':') ?? [];
+    if (value?.includes?.("::")) {
+      diagnosisParts = value?.split?.("::")?.pop()?.split?.(":") ?? [];
+    }
+
+    const typeStatusParts = diagnosisParts?.[1]?.split?.('&') || [];
+
+    return {
+      diagnosisName: diagnosisParts?.[0]?.trim?.() || '',
+      diagnosisType: typeStatusParts?.[0]?.trim?.() || '',
+      diagnosisStatus: typeStatusParts?.[1]?.trim?.() || '',
+      uuid
+    };
+  };
 
   /**
   * Get notes for the visit
