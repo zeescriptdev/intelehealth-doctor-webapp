@@ -663,6 +663,12 @@ export class ViewVisitPrescriptionComponent implements OnInit, OnDestroy {
     const checkUpReasonConfig = this.pvsConfigs.find((v) => v.key === this.pvsConstant['check_up_reason'].key);
     
     const vitalsConfig = this.pvsConfigs.find((v) => v.key === this.pvsConstant['vitals'].key); 
+    
+    let signatureValue = this.signature.value;
+    if (signatureValue.includes("amazonaws.com")) {
+        signatureValue = await this.toObjectUrl(`${this.signature.value}`);
+    }
+
     const pdfObj = {
       pageSize: 'A4',
       pageOrientation: 'portrait',
@@ -909,8 +915,8 @@ export class ViewVisitPrescriptionComponent implements OnInit, OnDestroy {
                   colSpan: 4,
                   alignment: 'right',
                   stack: [
-                    { image: `${this.signature?.value}`, width: 100, height: 100, margin: [0, 5, 0, 5] },
-                    { text: `Dr. ${this.consultedDoctor?.name}`, margin: [0, -30, 0, 0]},
+                    { image: `${signatureValue}`, width: 100, margin: [0, 5, 0, 5] },
+                    { text: `Dr. ${this.consultedDoctor?.name}`, margin: [0, 0, 0, 0]},
                     { text: `${this.consultedDoctor?.typeOfProfession}`},
                     { text: `Registration No. ${this.consultedDoctor?.registrationNumber}`},
                   ]
