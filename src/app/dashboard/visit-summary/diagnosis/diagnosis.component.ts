@@ -1238,6 +1238,7 @@ export class DiagnosisComponent implements OnInit, OnDestroy {
       if (this.aillmtxFollowupComponent) {
         this.aillmtxFollowupComponent.existingFollowUp = [];
         this.aillmtxFollowupComponent.selectedFollowUp = [];
+        this.followUpForm.reset();
       }
       this.followUpSaved.emit(followUp);
     });
@@ -1245,29 +1246,37 @@ export class DiagnosisComponent implements OnInit, OnDestroy {
 
   onAIFollowUpSelected(): void {
     if(this.aillmtxFollowupComponent.existingFollowUp.length === 0){
-      if (this.selectedFollowups.length > 0) {
-        const selectedFollowUp = this.selectedFollowups[0];
-        if (selectedFollowUp && selectedFollowUp.follow_up_duration && selectedFollowUp.reason_for_follow_up) {
-          const daysToAdd = this.convertDurationToDays(selectedFollowUp.follow_up_duration);
-          if (selectedFollowUp.follow_up_required) {
-            this.followUpForm.patchValue({
-              wantFollowUp: 'Yes',
-              followUpDate: moment().add(daysToAdd, 'days').toDate(),
-              followUpTime: '10:00 AM',
-              followUpReason: selectedFollowUp.reason_for_follow_up
-            });
-          }
-        }
-      } else {
-        this.followUpForm.reset();
-      }
+      this.setSelectedFollowUp();
     } else {
+      this.diagnosisService.deleteObs(this.aillmtxFollowupComponent.existingFollowUp[0]?.uuid).subscribe(() => {
+      this.aillmtxFollowupComponent.existingFollowUp = [];
       this.followUpForm.reset();
-      this.toastr.warning(this.translateService.instant('Required delete exit value'), this.translateService.instant('Follow-up Not Added'));
+      this.setSelectedFollowUp();
+      });
+      //this.followUpForm.reset();
+      //this.toastr.warning(this.translateService.instant('Required delete exit value'), this.translateService.instant('Follow-up Not Added'));
     }
-
   }
 
+  setSelectedFollowUp() {
+      const selectedFollowUp = this.selectedFollowups[0];
+      if (this.selectedFollowups.length > 0 && selectedFollowUp.follow_up_duration && selectedFollowUp.reason_for_follow_up) {
+        const daysToAdd = this.convertDurationToDays(selectedFollowUp.follow_up_duration);
+        if (selectedFollowUp.follow_up_required) {
+          this.followUpForm.patchValue({
+            present: false,
+            wantFollowUp: 'Yes',
+            followUpDate: moment().add(daysToAdd, 'days').toDate(),
+            followUpTime: '10:00 AM',
+            followUpReason: selectedFollowUp.reason_for_follow_up,
+            followUpType: null
+          });
+        }
+      }else {
+        this.followUpForm.reset();
+      }
+    }
+  
   convertDurationToDays(durationString) {
     // Match number and unit (week/day/month) from the input string
     const durationMatch = durationString.match(/(\d+)\s*(week|day|month)/i);
