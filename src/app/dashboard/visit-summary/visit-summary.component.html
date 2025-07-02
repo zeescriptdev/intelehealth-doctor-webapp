@@ -651,14 +651,18 @@
                       
                       <!-- Additional Note -->
                         <ng-container *ngSwitchCase="pvsConstant['additional_notes'].key">
-                          <ul class="items-list">
+                          <ul class="items-list" *ngIf="additionalNotes?.length > 0; else noAdditionalNotes">
                             <li>
                               <div class="d-flex justify-content-between">
                                 <span>{{ additionalNotes }}</span>
                               </div>
                             </li>
                           </ul>
+                          <ng-template #noAdditionalNotes>
+                            <div class="no-docs">{{'No additional notes available!'|translate}}</div>
+                          </ng-template>
                         </ng-container>
+                        
                       <!-- END Additional Note  -->
 
                       <!-- Additional Doc -->
