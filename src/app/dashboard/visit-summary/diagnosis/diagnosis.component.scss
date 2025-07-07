@@ -245,9 +245,11 @@ textarea.form-control {
   margin-bottom: 0px !important;
 }
 
-// .table th, .table td, .custom {
-//     padding: 0.60rem;
-// }
+.table1 th, .table1 td {
+    padding: 0.25rem;
+    padding-top: 12px;
+    padding-bottom: 6px;
+ }
 
 .borderc {
   border-top: 0;
@@ -397,7 +399,7 @@ textarea.form-control {
   position: absolute;
   top: 12px;
   left: 5px;
-  background: white;
+ // background: white;
   padding: 0 5px;
   font-size: 16px;
   color: #888;
@@ -508,31 +510,37 @@ textarea.form-control {
   border-radius: 8px;
 }
 
- .d1 {
-  margin-left: 341px;
-  margin-top: 10px;
- }
-  .d2 {
-  margin-left: 210px;
-  margin-top: 10px;
- }
+ .pretty {
+  min-width: fit-content;
+}
+
+.w-100 {
+  width: 100%;
+}
 
 .form-row {
   display: flex;
-  gap: 10px;
+  //gap: 10px;
   margin-bottom: 10px;
-  margin-left: 0px;
-  margin-right: 0px;
+  // margin-left: 0px;
+  // margin-right: 0px;
 }
 
 .form-row input,
 .form-row select {
   padding: 0.5rem;
-  border-radius: 4px;
+  border-radius: 8px;
   border: 1px solid #B2AFBE33;
   flex: 1;
   font-size: 16px;
 }
+
+.form-control,
+ng-select.form-control {
+  border-radius: 8px;
+  min-width: 0; /* allows flex-fill to shrink properly */
+}
+
 
 .form-row div {
  // padding: 0.5rem;
