@@ -63,7 +63,7 @@ export class PrescriptionComponent implements OnInit, OnChanges {
           let pesenc = this.checkIfEncounterExists(visit.encounters, visitTypes.PATIENT_EXIT_SURVEY);
           visit.cheif_complaint = this.getCheifComplaint(visit);
           visit.visit_created = this.getEncounterCreated(visit, visitTypes.ADULTINITIAL);
-          visit.prescription_sent = vcenc.encounter_datetime;
+          visit.prescription_sent = vcenc ? vcenc.encounter_datetime : '-';
           visit.prescription_started = (vcenc) ? this.checkIfDateOldThanOneDay(vcenc.encounter_datetime) : '-';
           if (pesenc) {
             visit.endDate = this.checkIfDateOldThanOneDay(pesenc.encounter_datetime);
@@ -79,6 +79,7 @@ export class PrescriptionComponent implements OnInit, OnChanges {
           records.push(visit);
         }
         this.completedVisits = this.completedVisits.concat(records);
+        this.completedVisits.sort((a,b) => new Date(b.visit_ended) < new Date(a.visit_ended) ? -1 : 1);
         this.loaded1 = true;
       }
     });
@@ -110,7 +111,8 @@ export class PrescriptionComponent implements OnInit, OnChanges {
           visit.cheif_complaint = this.getCheifComplaint(visit);
           visit.visit_created = this.getEncounterCreated(visit, visitTypes.ADULTINITIAL);
           visit.prescription_sent = (vcenc) ? vcenc.encounter_datetime : null;
-          visit.prescription_started = (vcenc) ? this.checkIfDateOldThanOneDay(vcenc.encounter_datetime) : null;
+          visit.prescription_started = (vcenc) ? vcenc.encounter_datetime : null;
+          visit.prescriptionStarted = (vcenc) ? this.checkIfDateOldThanOneDay(vcenc.encounter_datetime) : null;
           visit.age = this.visitService.calculateAge(visit.person.birthdate);
           visit.name = visit.patient_name.given_name + " " + (visit.patient_name?.middle_name ? visit.patient_name?.middle_name+" " : "" )+ " " + visit.patient_name.family_name;
           visit.location = visit?.sanch;
@@ -118,6 +120,7 @@ export class PrescriptionComponent implements OnInit, OnChanges {
           records.push(visit);
         }
         this.prescriptionSent = this.prescriptionSent.concat(records);
+        this.prescriptionSent.sort((a,b) => new Date(b.prescription_started) < new Date(a.prescription_started) ? -1 : 1);
         this.loaded2 = true;
       }
     });
@@ -135,7 +138,8 @@ export class PrescriptionComponent implements OnInit, OnChanges {
           visit.cheif_complaint = this.getCheifComplaint(visit);
           visit.visit_created = this.getEncounterCreated(visit, visitTypes.ADULTINITIAL);
           visit.prescription_sent = (vcenc) ? vcenc.encounter_datetime : null;
-          visit.prescription_started = (vcenc) ? this.checkIfDateOldThanOneDay(vcenc.encounter_datetime) : null;        
+          visit.prescription_started = (vcenc) ? vcenc.encounter_datetime : null;  
+          visit.prescriptionStarted = (vcenc) ? this.checkIfDateOldThanOneDay(vcenc.encounter_datetime) : null;      
           visit.age = this.visitService.calculateAge(visit.person.birthdate);
           visit.name = visit.patient_name.given_name + " " + (visit.patient_name?.middle_name ? visit.patient_name?.middle_name+" " : "" )+ " " + visit.patient_name.family_name;
           visit.location = visit?.sanch;
@@ -143,6 +147,7 @@ export class PrescriptionComponent implements OnInit, OnChanges {
           records.push(visit);
         }
         this.doctorCompletedVisits = this.doctorCompletedVisits.concat(records);
+        this.doctorCompletedVisits.sort((a,b) => new Date(b.prescription_started) < new Date(a.prescription_started) ? -1 : 1);
         this.loaded3 = true;
       }
     });

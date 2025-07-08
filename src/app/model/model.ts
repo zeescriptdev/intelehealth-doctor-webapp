@@ -240,6 +240,8 @@ export interface CustomVisitModel {
   encounters: CustomEncounterModel[],
   encounter_provider ?: string,
   encounter_provider_uuid?: string,
+  prescription_sent ?: string | number | Date
+  visit_ended ?:  string | number | Date
   location?: {
     name: string
   },
