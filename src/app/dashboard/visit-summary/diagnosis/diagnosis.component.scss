@@ -554,6 +554,11 @@ ng-select.form-control {
   font-size: 16px; /* or any desired size */
 }
 
+input::placeholder {
+  color: #888888; /* your desired color */
+  opacity: 1;     /* optional: ensure full visibility */
+}
+
 .custom-hr {
   margin-bottom: 10px;
   margin-top: 10px;

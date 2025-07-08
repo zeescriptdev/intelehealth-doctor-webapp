@@ -29,7 +29,7 @@
       </thead>
      </table> 
       <form [formGroup]="diagnosisForm" (ngSubmit)="saveDiagnosis()" *ngIf="!addMoreDiagnosis">
-        <div class="top-row mt-2 mb-3">
+        <div class="top-row mt-2">
           <div class="diagnosis-box">
             <ul class="items-list">
               <li>
@@ -277,7 +277,7 @@
               <input style="border-radius: 8px;" formControlName="instructRemark" type="text" class="form-control input-widths"
                  data-test-id="etRemarkMed"
                 [ngbTypeahead]="search6" [popupClass]="'custom-typeahead-popup'" id="instructRemark" />
-                <label for="instructRemark">{{'Instruction(Remarks)'|translate}}</label>
+                <label class="pl-2" for="instructRemark">{{'Instruction (Remarks)'|translate}}</label>
    </div>
    <div class="col-md-6" *ngIf="!appConfigService?.patient_visit_summary?.dp_medication_secondary">
        <form  [formGroup]="additionalInstructionForm" (ngSubmit)="saveAdditionalInstruction()">
@@ -304,7 +304,7 @@
                 <span class="ml-2">{{'Add more medicine'|translate}}</span>
               </button>
   </div>
-<table class="table mt-2" aria-describedby="">
+<table class="table mt-3" aria-describedby="">
         <tbody *ngIf="medicines.length else noMedicines">
           <ng-container *ngFor="let m of medicines; let i = index">
             <tr>

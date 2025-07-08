@@ -1118,7 +1118,7 @@ export class DiagnosisComponent implements OnInit, OnDestroy {
             const remark = result.find((v: string) => v.includes('Remark:'))?.split('Remark:')?.[1]?.trim();
             followUpDate = moment(result[0]).format('YYYY-MM-DD');
             followUpTime = time ? time : null;
-            followUpReason = remark ? remark : null;
+            followUpReason = (remark && remark !=="null") ? remark : null;
             wantFollowUp = 'Yes';
 
             // Only try to get Type if the feature is enabled
@@ -1238,7 +1238,6 @@ export class DiagnosisComponent implements OnInit, OnDestroy {
       if (this.aillmtxFollowupComponent) {
         this.aillmtxFollowupComponent.existingFollowUp = [];
         this.aillmtxFollowupComponent.selectedFollowUp = [];
-        this.followUpForm.reset();
       }
       this.followUpSaved.emit(followUp);
     });
