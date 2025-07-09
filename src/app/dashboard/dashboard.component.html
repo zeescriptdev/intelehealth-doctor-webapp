@@ -136,8 +136,11 @@
               Chief complaint Column
               <ng-container matColumnDef="cheif_complaint">
                 <th mat-header-cell *matHeaderCellDef mat-sort-header> {{'Chief Complaint' | translate}} </th>
-                <td mat-cell *matCellDef="let element; let j=index;" [attr.data-test-id]="'apComplaint'+j"
-                  [routerLink]="['/dashboard/visit-summary', element?.visitUuid]"> {{element?.cheif_complaint}} </td>
+                <td mat-cell *matCellDef="let element; let j=index;"    
+                class="truncate-cell"
+                [matTooltipClass]="{ 'tool-tip': true }"
+                [matTooltip]="element?.cheif_complaint"
+                [attr.data-test-id]="'apComplaint'+j" [routerLink]="['/dashboard/visit-summary', element?.visitUuid]"> {{element?.cheif_complaint}} </td>
               </ng-container>
 
               Prescription Sent Column
@@ -237,8 +240,11 @@
               <!-- Chief complaint Column -->
               <ng-container matColumnDef="cheif_complaint">
                 <th mat-header-cell *matHeaderCellDef mat-sort-header> {{'Chief Complaint' | translate}} </th>
-                <td mat-cell *matCellDef="let element;let j=index;" [attr.data-test-id]="'prComplaint'+j">
-                  {{element.cheif_complaint}} </td>
+                <td mat-cell *matCellDef="let element;let j=index;" 
+                class="truncate-cell"
+                [matTooltipClass]="{ 'tool-tip': true }"
+                [matTooltip]="element?.cheif_complaint"
+                [attr.data-test-id]="'prComplaint'+j"> {{element.cheif_complaint}} </td>
               </ng-container>
 
               <!-- Visit Uploaded Column -->
@@ -341,8 +347,11 @@
               <!-- Chief complaint Column -->
               <ng-container matColumnDef="cheif_complaint">
                 <th mat-header-cell *matHeaderCellDef mat-sort-header> {{'Chief Complaint' | translate}} </th>
-                <td mat-cell *matCellDef="let element;let j=index;" [attr.data-test-id]="'awComplaint'+j">
-                  {{element.cheif_complaint}} </td>
+                <td mat-cell *matCellDef="let element;let j=index;"
+                class="truncate-cell"
+                [matTooltipClass]="{ 'tool-tip': true }"
+                [matTooltip]="element?.cheif_complaint"
+                [attr.data-test-id]="'awComplaint'+j"> {{element.cheif_complaint}} </td>
               </ng-container>
 
               <!-- Visit Uploaded Column -->
@@ -460,8 +469,11 @@
               <!-- Chief complaint Column -->
               <ng-container matColumnDef="cheif_complaint">
                 <th mat-header-cell *matHeaderCellDef mat-sort-header> {{'Chief Complaint'|translate}} </th>
-                <td mat-cell *matCellDef="let element;let j=index;" [attr.data-test-id]="'fuComplaint'+j">
-                  {{element.cheif_complaint}} </td>
+                <td mat-cell *matCellDef="let element;let j=index;" 
+                [attr.data-test-id]="'fuComplaint'+j"
+                class="truncate-cell"
+                [matTooltipClass]="{ 'tool-tip': true }"
+                [matTooltip]="element?.cheif_complaint"> {{element.cheif_complaint}} </td>
               </ng-container>
 
               <!-- Prescription Started Column -->
@@ -571,8 +583,10 @@
               <!-- Chief complaint Column -->
               <ng-container matColumnDef="cheif_complaint">
                 <th mat-header-cell *matHeaderCellDef mat-sort-header> {{'Chief Complaint'|translate}} </th>
-                <td mat-cell *matCellDef="let element;let j=index;" [attr.data-test-id]="'ipComplaint'+j">
-                  {{element.cheif_complaint}} </td>
+                <td mat-cell *matCellDef="let element;let j=index;" [attr.data-test-id]="'ipComplaint'+j"
+                class="truncate-cell"
+                [matTooltipClass]="{ 'tool-tip': true }"
+                [matTooltip]="element?.cheif_complaint"> {{element.cheif_complaint}} </td>
               </ng-container>
 
               <!-- Prescription Started Column -->
