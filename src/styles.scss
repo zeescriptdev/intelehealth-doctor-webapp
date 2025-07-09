@@ -752,6 +752,9 @@ body.font-lato td {
   padding-top: -10spx;
   max-width: 240px;
  } 
+ .mat-tooltip-panel {
+  margin: -30px !important;
+}
 
 @media (max-width: 768px) {
   .vc-modal-lg {
