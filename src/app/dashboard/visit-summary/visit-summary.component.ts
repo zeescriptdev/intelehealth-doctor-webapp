@@ -27,7 +27,7 @@ import { TranslationService } from 'src/app/services/translation.service';
 import { calculateBMI, deleteCacheData, getCacheData, getFieldValueByLanguage, setCacheData, isFeaturePresent, getCallDuration, autoGrowTextZone, autoGrowAllTextAreaZone, obsStringify, obsParse} from 'src/app/utils/utility-functions';
 import { doctorDetails, languages, visitTypes, facility, refer_specialization, refer_prioritie, strength, days, timing, PICK_FORMATS, conceptIds, visitAttributeTypes } from 'src/config/constant';
 import { VisitSummaryHelperService } from 'src/app/services/visit-summary-helper.service';
-import { ApiResponseModel, DataItemModel, DiagnosisModel, DiagnosticModel, DocImagesModel, EncounterModel, EncounterProviderModel, MedicineModel, ObsApiResponseModel, ObsModel, PatientHistoryModel, PatientIdentifierModel, PatientModel, PatientVisitSection, PatientVisitSummaryConfigModel, PersonAttributeModel, ProviderAttributeModel, ProviderModel, RecentVisitsApiResponseModel, ReferralModel, SpecializationModel, TestModel, VisitAttributeModel, VisitModel, VitalModel, DiagnosticUnit, DiagnosticName } from 'src/app/model/model';
+import { ApiResponseModel, DataItemModel, DiagnosisModel, DiagnosticModel, DocImagesModel, EncounterModel, EncounterProviderModel, MedicineModel, ObsApiResponseModel, ObsModel, PatientHistoryModel, PatientIdentifierModel, PatientModel, PatientVisitSection, PatientVisitSummaryConfigModel, PersonAttributeModel, ProviderAttributeModel, ProviderModel, RecentVisitsApiResponseModel, ReferralModel, SpecializationModel, TestModel, VisitAttributeModel, VisitModel, VitalModel, DiagnosticUnit, DiagnosticName, DropdownItemModel } from 'src/app/model/model';
 import { AppConfigService } from 'src/app/services/app-config.service';
 import { checkIsEnabled, VISIT_SECTIONS } from 'src/app/utils/visit-sections';
 import { NgSelectComponent } from '@ng-select/ng-select';
@@ -85,7 +85,7 @@ export class VisitSummaryComponent implements OnInit, OnDestroy, AfterViewInit {
   selectedTabIndex = 0;
   facilities: DataItemModel[] = facility.facilities
   specializations: SpecializationModel[] = [];
-  refer_specializations: DataItemModel[] = refer_specialization.refer_specializations
+  referSpecializations: DropdownItemModel[] = [];
   refer_priorities: DataItemModel[] = refer_prioritie.refer_priorities;
   strengthList: DataItemModel[] = strength.strengthList
   daysList: DataItemModel[] = days.daysList
@@ -301,6 +301,7 @@ export class VisitSummaryComponent implements OnInit, OnDestroy, AfterViewInit {
     this.vitals = [...this.appConfigService.patient_vitals];
     this.diagnostics = this.appConfigService.patient_diagnostics_section ? [...this.appConfigService.patient_diagnostics] : [];
     this.specializations = [...this.appConfigService.specialization];
+    this.referSpecializations = this.appConfigService?.dropdown_values?.['refer specialisation']?.filter((val) => val?.is_enabled);
     this.patientVisitSummary = { ...this.appConfigService.patient_visit_summary };
     this.openChatFlag = this.router.getCurrentNavigation()?.extras?.state?.openChat;
 
@@ -401,15 +402,16 @@ export class VisitSummaryComponent implements OnInit, OnDestroy, AfterViewInit {
     if(!this.appConfigService.patient_diagnostics_section) {
       this.appConfigService.patient_visit_sections = this.appConfigService.patient_visit_sections.filter((e: PatientVisitSection) => e.key !== 'diagnostics');
     }
-    this.pvsConfigs = this.appConfigService.patient_visit_sections;
+    this.pvsConfigs = this.appConfigService.patient_visit_sections.filter(obj=>!["share_prescription","share_patient_visit_summary"].includes(obj.key));
     this.isMCCUser = !!this.rolesService.getRole('ORGANIZATIONAL:MCC');
   }
   
   ngAfterViewInit(): void {
     this.formControlValueChanges();
-    this.trackFormChanges();
+    
     setTimeout(()=>{
       if(this.visitNoteDiv) autoGrowAllTextAreaZone(this.visitNoteDiv.nativeElement.querySelectorAll('textarea'));
+      this.trackFormChanges();
     },2000)
   }
 
@@ -1503,15 +1505,19 @@ export class VisitSummaryComponent implements OnInit, OnDestroy, AfterViewInit {
     this.diagnosisService.getObs(this.visit.patient.uuid, conceptIds.conceptMed).subscribe((response: ObsApiResponseModel) => {
       response.results.forEach((obs: ObsModel) => {
         if (obs.encounter.visit.uuid === this.visit.uuid) {
-          this.medicines.push({
-            drug: obs.value?.split(':')[0],
-            strength: obs.value?.split(':')[1],
-            days: obs.value?.split(':')[2],
-            timing: obs.value?.split(':')[3],
-            remark: obs.value?.split(':')[4],
-            frequency: obs.value?.split(':')[5] ? obs.value?.split(':')[5] : "",
-            uuid: obs.uuid
-          });
+          if (obs.value.includes(':') ) {
+            this.medicines.push({
+              drug: obs.value?.split(':')[0],
+              strength: obs.value?.split(':')[1],
+              days: obs.value?.split(':')[2],
+              timing: obs.value?.split(':')[3],
+              remark: obs.value?.split(':')[4],
+              frequency: obs.value?.split(':')[5] ? obs.value?.split(':')[5] : "",
+              uuid: obs.uuid
+            });
+          } else {
+            this.additionalInstructionForm.patchValue({uuid:obs.uuid, value:obs.value});
+          }
         }
       });
     });
@@ -1908,22 +1914,31 @@ export class VisitSummaryComponent implements OnInit, OnDestroy, AfterViewInit {
   * @returns {Observable<any>}
   */
   saveFollowUp(): Observable<any> {
+    let value = "No";
     if (this.followUpForm.value.wantFollowUp === 'Yes') {
-      const value = `${moment(this.followUpForm.value.followUpDate ?? new Date()).format('YYYY-MM-DD')},Time:${this.followUpForm.value.followUpTime ?? 'NA'},Remark:${this.followUpForm.value.followUpReason || 'NA'},Type:${this.followUpForm.value.followUpType || 'NA'}`;
-      
-      if (this.followUpForm.value.uuid) {
-      return this.encounterService.updateObs(this.followUpForm.value.uuid, { value }).pipe(tap((response: ObsModel) => this.followUpForm.patchValue({ present: true})));    
-    } else {
-        return this.encounterService.postObs({
-          concept: conceptIds.conceptFollow,
-          person: this.visit.patient.uuid,
-          obsDatetime: new Date(),
-          value,
-          encounter: this.visitNotePresent.uuid
-        }).pipe(tap((response: ObsModel) => this.followUpForm.patchValue({ present: true})));   
-     }
+      value = `${moment(this.followUpForm.value.followUpDate ?? new Date()).format('YYYY-MM-DD')},Time:${this.followUpForm.value.followUpTime ?? 'NA'},Remark:${this.followUpForm.value.followUpReason || 'NA'},Type:${this.followUpForm.value.followUpType || 'NA'}`;
+    } 
+    if (this.followUpForm.value.uuid) {
+      return this.encounterService.updateObs(this.followUpForm.value.uuid, { value }).pipe(tap((response: ObsModel) => this.followUpForm.patchValue({ present: true})));
+    } else {  
+      return this.encounterService.postObs({
+        concept: conceptIds.conceptFollow,
+        person: this.visit.patient.uuid,
+        obsDatetime: new Date(),
+        value,
+        encounter: this.visitNotePresent.uuid
+      }).pipe(
+        tap((response: ObsModel) => {
+          this.followUpForm.patchValue({ present: true});
+          this.notifyHwForAvailablePrescription(
+          `Follow‑up date time added for ${this.visit?.patient?.person?.display || 'Patient'}`,
+          'followup',
+          `Date:${this.followUpForm.value.followUpDate},Time:${this.followUpForm.value.followUpTime}`
+
+          ); // notify function
+        })
+      );  
     }
-    return of(null); // Return an Observable if no action needed
   }
 
   /**
@@ -1983,7 +1998,9 @@ export class VisitSummaryComponent implements OnInit, OnDestroy, AfterViewInit {
                       ]
                     }).subscribe((post) => {
                       this.visitCompleted = true;
-                      this.notifyHwForAvailablePrescription();
+                      const followUpDate = `${this.followUpForm.value.followUpDate},Time:${this.followUpForm.value.followUpTime}`;
+
+                      this.notifyHwForAvailablePrescription("","",followUpDate);
                       this.appointmentService.completeAppointment({ visitUuid: this.visit.uuid }).subscribe();
     
                       if (this.appConfigService.abha_section) {
@@ -2177,8 +2194,9 @@ export class VisitSummaryComponent implements OnInit, OnDestroy, AfterViewInit {
   * Send notification to health worker for available prescription
   * @returns {void}
   */
-  notifyHwForAvailablePrescription(title = null, type = null): void {
+  notifyHwForAvailablePrescription(title = null, type = null,followupDatetime = null): void {
     const hwUuid = getCacheData(true, visitTypes.PATIENT_VISIT_PROVIDER)?.provider?.uuid;
+    
     const openMRSID = this.getPatientIdentifier("OpenMRS ID");
     const payload = {
       title: title || `Prescription available for ${this.visit?.patient?.person?.display || 'Patient'}`,
@@ -2191,9 +2209,10 @@ export class VisitSummaryComponent implements OnInit, OnDestroy, AfterViewInit {
         patientUuid: this.patient.uuid,
         patientOpenMrsId: openMRSID,
         visitUuid: this.visit.uuid,
-        followupDatetime: this.followUpDatetime
+        followupDatetime: followupDatetime
       }
     }
+    console.log("payload from web app==",payload);
     this.mindmapService.notifyApp(hwUuid, payload).subscribe();
   }
 
@@ -2855,18 +2874,6 @@ export class VisitSummaryComponent implements OnInit, OnDestroy, AfterViewInit {
             this.updatedObsData.patientInteractionComment = newValue;
             this.checkChanges(this.updatedObsData);
           }
-        })
-      );
-    }
-
-    // Track follow-up form
-    if (this.followUpForm) {
-      this.obsData.followUp = false;
-      
-      this.formSubscriptions.push(
-        this.followUpForm.valueChanges.subscribe(() => {
-          this.updatedObsData.followUp = true;
-          this.checkChanges(this.updatedObsData);
         })
       );
     }

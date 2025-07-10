@@ -1,7 +1,7 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { environment } from "../../environments/environment";
-import { LanguageModel, PatientRegistrationFieldsConfigModel, VitalModel, SpecializationModel, WebRTCConfigModel, PatientVisitSummaryConfigModel, PatientVisitSection } from '../model/model';
+import { LanguageModel, PatientRegistrationFieldsConfigModel, VitalModel, SpecializationModel, WebRTCConfigModel, PatientVisitSummaryConfigModel, PatientVisitSection, DropdownValuesModel } from '../model/model';
 
 @Injectable({
   providedIn: 'root'
@@ -25,7 +25,8 @@ export class AppConfigService {
   public patient_reg_address: boolean;
   public abha_section: boolean;
   public sidebar_menus: { [key: string]: boolean };
-  public patient_visit_sections: PatientVisitSection[];
+  public patient_visit_sections: PatientVisitSection[]
+  public dropdown_values: DropdownValuesModel[]
   public patient_diagnostics_section: boolean;
 
   constructor(private http: HttpClient) { }

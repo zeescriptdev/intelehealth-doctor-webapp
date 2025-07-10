@@ -764,3 +764,22 @@ export interface PatientVisitDropdownFieldsModel{
   is_enabled: boolean,
   updatedAt: string
 }
+
+export interface DropdownItemModel {
+  id: number,
+  is_enabled: boolean,
+  key: string,
+  name: string,
+}
+export interface DropdownValuesModel {
+  advice: DropdownItemModel[],
+  diagnosis: DropdownItemModel[],
+  medication: DropdownItemModel[],
+  refer_specialisation: DropdownItemModel[],
+  referral_facility: DropdownItemModel[],
+  test: DropdownItemModel[]
+}
+
+export interface RecordingResponse {
+  recordingId: number;
+}
