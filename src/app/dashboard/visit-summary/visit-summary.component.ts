@@ -3169,11 +3169,11 @@ export class VisitSummaryComponent implements OnInit, OnDestroy, AfterViewInit {
     return null;
   }
 
-  getPhoneNumber(): string{
-    if(["NAS"].includes(environment.brandName)){
-      return this.hwPhoneNo;
-    } else {
+  getPhoneNumber(getPatientNo: boolean = false): string{
+    if(["KCDO"].includes(environment.brandName) || getPatientNo){
       return this.getPersonAttributeValue('Telephone Number') != "NA" ? this.getPersonAttributeValue('Telephone Number') : "";
+    } else {
+      return this.hwPhoneNo;
     } 
   }
 
