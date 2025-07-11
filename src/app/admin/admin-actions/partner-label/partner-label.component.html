@@ -23,7 +23,7 @@
                     </div>
                     <div class="col-md-6">
                         <span><b>{{'Upload Thumbnail Logo' | translate}}</b></span>
-                        <app-file-upload [options]="thumbnailLogoUploadImageOptions" [filePath]="themeConfigData.thumbnail_logo" (onFileupload)="onThumbnailLogoUpload($event)" (onFileRemove)="onLogoFileDelete('thumbnail_logo')"></app-file-upload>
+                        <app-file-upload [options]="thumbnailLogoUploadImageOptions" [filePath]="themeConfigData.thumbnail_logo" (onFileupload)="onThumbnailLogoUpload($event)" (onFileRemove)="onLogoFileDelete($event,'thumbnail_logo')"></app-file-upload>
                     </div>
                 </div>
             </div>
