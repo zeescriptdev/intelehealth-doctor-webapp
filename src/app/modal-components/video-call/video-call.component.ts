@@ -9,8 +9,9 @@ import { CoreService } from 'src/app/services/core/core.service';
 import { getCacheData } from 'src/app/utils/utility-functions';
 import { Participant, RemoteParticipant, RemoteTrack, RemoteTrackPublication, Track } from 'livekit-client';
 import { WebrtcService } from 'src/app/services/webrtc.service';
-import { notifications, doctorDetails, visitTypes } from 'src/config/constant';
-import { ApiResponseModel, EncounterProviderModel, MessageModel, ProviderModel, UserModel } from 'src/app/model/model';
+import { doctorDetails, visitTypes } from 'src/config/constant';
+import { ApiResponseModel, EncounterProviderModel, MessageModel, RecordingResponse } from 'src/app/model/model';
+import { AppConfigService } from 'src/app/services/app-config.service';
 
 @Component({
   selector: 'app-video-call',
@@ -50,6 +51,9 @@ export class VideoCallComponent implements OnInit, OnDestroy {
   activeSpeakerIds: any = [];
   connecting = false;
   callEndTimeout = null;
+  patientRegFields: string[] = [];
+  recodingStarted = false;
+  tableId: number;
 
   constructor(
     @Inject(MAT_DIALOG_DATA) public data,
@@ -58,10 +62,12 @@ export class VideoCallComponent implements OnInit, OnDestroy {
     private socketSvc: SocketService,
     private cs: CoreService,
     private toastr: ToastrService,
-    private webrtcSvc: WebrtcService
+    private webrtcSvc: WebrtcService,
+    private appConfigService: AppConfigService
   ) { }
 
   async ngOnInit() {
+    this.patientRegFields = this.appConfigService.patientRegFields;
     this.room = this.data.patientId;
 
     const patientVisitProvider: EncounterProviderModel = getCacheData(true, visitTypes.PATIENT_VISIT_PROVIDER);
@@ -179,7 +185,7 @@ export class VideoCallComponent implements OnInit, OnDestroy {
   * @param {boolean} val - Dialog result
   * @return {void}
   */
-  onCallConnect() {
+  async onCallConnect(event: any) {
     this.socketSvc.incomingCallData = {
       nurseId: this.nurseId,
       doctorName: this.doctorName,
@@ -211,11 +217,29 @@ export class VideoCallComponent implements OnInit, OnDestroy {
   * Handle participant disconnect callback
   * @return {void}
   */
-  handleParticipantConnect() {
+  async handleParticipantConnect(): Promise<void> {
     this.callConnected = true;
     this.callStartedAt = moment();
     this.socketSvc.emitEvent('call-connected', this.incomingData);
-  }
+    await this.webrtcSvc.startRecording({
+      doctorName: this.doctorName,
+      roomId: this.room,
+      visitId: this.data?.visitId,
+      doctorId: this.data?.connectToDrId,
+      chwId: this.nurseId,
+      patientId: this.data?.patientId,
+      nurseName: this.hwName,
+      name: this.provider?.uuid
+    })
+      .toPromise()
+      .then((res: RecordingResponse) => {
+        this.recodingStarted = true
+        this.tableId = res.recordingId
+      })
+      .catch(err => {
+        console.log("start recoding error", err)
+      });
+ }
 
   /**
   * Returns call connected or not
@@ -450,9 +474,18 @@ export class VideoCallComponent implements OnInit, OnDestroy {
   * @return {void}
   */
   endCallInRoom() {
-    setTimeout(() => {
+    setTimeout(async () => {
       this.close();
       this.webrtcSvc.room.disconnect(true);
+      if(this.recodingStarted) {
+        this.recodingStarted = false;
+        await this.webrtcSvc.stopRecording(this.tableId, this.room)
+        // await this.webrtcSvc.stopRecording(this.provider?.uuid, this.room, this.nurseId)
+          .toPromise()
+          .catch(err => {
+            console.log("stop recoding error", err)
+          });
+      }
     }, 0);
     this.webrtcSvc.token = '';
     this.webrtcSvc.handleDisconnect();
@@ -527,11 +560,10 @@ export class VideoCallComponent implements OnInit, OnDestroy {
   * @return {string} - Call duration
   */
   get callDuration() {
-    let duration: any;
-    if (this.callStartedAt) {
-      duration = moment.duration(moment().diff(this.callStartedAt))
-    }
-    return duration ? `${duration.minutes()}:${duration.seconds()}` : '';
+    if (!this.callStartedAt) return '00:00';
+    const duration = moment.duration(moment().diff(this.callStartedAt));
+    const [h, m, s] = [duration.hours(), duration.minutes(), duration.seconds()].map(n => String(n).padStart(2, '0'));
+    return h !== '00' ? `${h}:${m}:${s}` : `${m}:${s}`;
   }
 
   /**
@@ -572,5 +604,9 @@ export class VideoCallComponent implements OnInit, OnDestroy {
     clearInterval(this.changeDetForDuration);
     this.webrtcSvc.disconnect();
     this.webrtcSvc.token = '';
+  }
+
+  checkPatientRegField(fieldName: string): boolean{
+    return this.patientRegFields.indexOf(fieldName) !== -1;
   }
 }

@@ -343,6 +343,7 @@ export class SetupCalendarComponent implements OnInit {
   */
   toggleAddMoreTiming() {
     this._addMoreTiming = !this._addMoreTiming;
+    if(this._addMoreTiming) this.timeslotError = "";
   }
 
   /**
@@ -362,6 +363,8 @@ export class SetupCalendarComponent implements OnInit {
     this.submitted = true;
     this.fs.clear();
     if (this.addSlotsForm.invalid) {
+      if(!this.addSlotsForm.value.speciality)
+        this.toastr.warning(this.translateService.instant("Please set the speciality"), this.translateService.instant("Speciality Missing"));
       return;
     }
     if (moment(this.addSlotsForm.value.startDate) > moment(this.addSlotsForm.value.endDate)) {
@@ -786,6 +789,7 @@ export class SetupCalendarComponent implements OnInit {
   */
   updateSlot() {
     this.fs.clear();
+    this.timeslotError = "";
     if (moment(this.addSlotsForm.value.startDate) > moment(this.addSlotsForm.value.endDate)) {
       this.toastr.warning(this.translateService.instant("Start date should greater than end date."), this.translateService.instant("Invalid Dates!"));
       return;

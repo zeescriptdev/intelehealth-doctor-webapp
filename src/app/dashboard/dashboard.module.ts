@@ -33,6 +33,11 @@ import { SharedModule } from '../shared.module';
 import { OpenChatComponent } from './open-chat/open-chat.component';
 import { CompletedVisitsComponent } from './completed-visits/completed-visits.component';
 import { FollowupVisitsComponent } from './followup-visits/followup-visits.component';
+import { NotesComponent } from './visit-summary/notes/notes.component';
+import { MatMenuModule, MatMenuTrigger } from '@angular/material/menu';
+import { FollowUpInstructionComponent } from './visit-summary/follow-up-instruction/follow-up-instruction.component';
+import { IhLibraryModule } from 'ih-library';
+import { CanDeactivateVisitSummary } from '../core/guards/visit-summary-deactivate.guard';
 
 // AoT requires an exported function for factories
 export function HttpLoaderFactory(httpClient: HttpClient) {
@@ -49,9 +54,13 @@ export function HttpLoaderFactory(httpClient: HttpClient) {
     HwProfileComponent,
     OpenChatComponent,
     CompletedVisitsComponent,
-    FollowupVisitsComponent
+    FollowupVisitsComponent,
+    NotesComponent,
+    FollowUpInstructionComponent
   ],
   imports: [
+    IhLibraryModule,
+    MatMenuModule,
     CommonModule,
     DashboardRoutingModule,
     MatExpansionModule,
@@ -87,6 +96,7 @@ export function HttpLoaderFactory(httpClient: HttpClient) {
   ],
   providers: [
     { provide: MatPaginatorIntl, useClass: MatPaginationIntlService },
+    CanDeactivateVisitSummary
   ],
   schemas: [NO_ERRORS_SCHEMA]
 })

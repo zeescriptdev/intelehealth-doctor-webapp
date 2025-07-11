@@ -50,6 +50,14 @@ import { NgxDropzoneModule } from 'ngx-dropzone';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { PatientDiagnosticsComponent } from './admin-actions/patient-diagnostics/patient-diagnostics.component';
 import { MenuConfigComponent } from './admin-actions/menu-config/menu-config.component';
+import { PatientVisitSectionsComponent } from './admin-actions/patient-visit-sections/patient-visit-sections.component';
+
+
+import {DragDropModule} from '@angular/cdk/drag-drop';
+import { PatientDetailsComponent } from './admin-actions/patient-details/patient-details.component';
+import { PatientVisitDropdownComponent } from './admin-actions/patient-visit-dropdown/patient-visit-dropdown.component';
+import { HomeScreenComponent } from './admin-actions/home-screen/home-screen.component';
+
 
 // AoT requires an exported function for factories
 export function HttpLoaderFactory(httpClient: HttpClient) {
@@ -88,6 +96,10 @@ const routes: Routes = [
           {
             path: 'patient-registration',
             component: PatientRegistrationComponent
+          },
+          {
+            path: 'patient-details',
+            component: PatientDetailsComponent
           },
           {
             path: 'partner-label',
@@ -135,6 +147,18 @@ const routes: Routes = [
             ]
           },
           {
+            path: 'patient-visit-section',
+            component: PatientVisitSectionsComponent
+          },
+          {
+            path: 'patient-visit-dropdown',
+            component: PatientVisitDropdownComponent
+          },
+          {
+            path: 'home-screen',
+            component: HomeScreenComponent
+          },
+          {
             path: '',
             component: AdminActionsComponent
           }
@@ -168,7 +192,11 @@ const routes: Routes = [
     UserCreationComponent,
     AddUserComponent,
     PatientDiagnosticsComponent,
-    MenuConfigComponent
+    MenuConfigComponent,
+    PatientVisitSectionsComponent,
+    PatientDetailsComponent,
+    PatientVisitDropdownComponent,
+    HomeScreenComponent
   ],
   imports: [
     CommonModule,
@@ -212,7 +240,8 @@ const routes: Routes = [
     MomentModule,
     NgbNavModule,
     SharedModule,
-    MatProgressSpinnerModule
+    MatProgressSpinnerModule,
+    DragDropModule
   ],
   providers: [
     { provide: MatPaginatorIntl, useClass: MatPaginationIntlService },

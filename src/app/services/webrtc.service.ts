@@ -61,6 +61,14 @@ export class WebrtcService {
       }));
   }
 
+  startRecording(payload) {
+    return this.http.post(`${environment.webrtcTokenServerUrl}api/startRecording`, payload);
+  }
+
+  stopRecording(id: number, roomId: string) {
+    return this.http.get(`${environment.webrtcTokenServerUrl}api/stopRecording?id=${id}&roomId=${roomId}`);
+  }
+
   async createRoomAndConnectCall({
     handleTrackSubscribed = this.handleTrackSubscribed.bind(this),
     handleTrackUnsubscribed = this.handleTrackUnsubscribed,
@@ -88,7 +96,10 @@ export class WebrtcService {
       adaptiveStream: true, /* automatically manage subscribed video quality */
       dynacast: true, /* optimize publishing bandwidth and CPU for published tracks */
       videoCaptureDefaults: {
-        resolution: VideoPresets43.h1080,
+        resolution: {
+          width: 355,
+          height: 793,
+        },
       },
       audioCaptureDefaults: {
         echoCancellation: true,
@@ -107,7 +118,6 @@ export class WebrtcService {
           await this.room.localParticipant.enableCameraAndMicrophone()
         } catch (error) {
           console.log("error", error)
-          location.reload();
         }
       })
       .on(RoomEvent.Disconnected, handleDisconnect)

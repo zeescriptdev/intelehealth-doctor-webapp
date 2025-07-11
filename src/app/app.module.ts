@@ -65,6 +65,7 @@ import { getCacheData } from "./utils/utility-functions";
 import { languages } from "src/config/constant";
 import { AppConfigService } from "./services/app-config.service";
 import { SidebarMenuListComponent } from "./main-container/sidebar-menu-list/sidebar-menu-list.component";
+import { LibPresciptionModule } from 'lib-presciption'
 
 const ngxUiLoaderConfig: NgxUiLoaderConfig = {
   bgsColor: "#2E1E91",
@@ -131,11 +132,13 @@ registerLocaleData(localeEn);
     NgxUiLoaderHttpModule.forRoot({
       showForeground: true,
       exclude: [
-        'https://dev.intelehealth.org:3004/api/messages/',
-        'https://dev.intelehealth.org:3004/api/support/',
-        'https://dev.intelehealth.org:3004/api/auth/validateProviderAttribute',
-        'https://dev.intelehealth.org:3000/api/getToken',
-        'https://dev.intelehealth.org/pl/'
+        'https://as.intelehealth.org:3004/api/messages/',
+        'https://as.intelehealth.org:3004/api/support/',
+        'https://as.intelehealth.org:3004/api/auth/validateProviderAttribute',
+        'https://as.intelehealth.org/pl/',
+        `${environment.webrtcTokenServerUrl}api/getToken`,
+        `${environment.webrtcTokenServerUrl}api/startRecording`,
+        `${environment.webrtcTokenServerUrl}api/stopRecording`,
       ]
     }),
     NgxPermissionsModule.forRoot({
@@ -147,6 +150,7 @@ registerLocaleData(localeEn);
     FormsModule,
     ReactiveFormsModule,
     MatBottomSheetModule,
+    LibPresciptionModule.forRoot(environment),
     TranslateModule.forRoot({
       loader: {
         provide: TranslateLoader,
@@ -189,7 +193,11 @@ registerLocaleData(localeEn);
       deps: [PwaService],
       multi: true
     },
-    DecimalPipe
+    DecimalPipe,
+    { 
+      provide: 'environment', 
+      useValue: environment
+    }
   ],
   schemas: [CUSTOM_ELEMENTS_SCHEMA, NO_ERRORS_SCHEMA],
   bootstrap: [AppComponent],

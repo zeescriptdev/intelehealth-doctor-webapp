@@ -236,8 +236,9 @@ export interface AppointmentModel {
   visitStatus: string,
   cheif_complaint?: string[],
   starts_in?: string,
-  appointmentId?: number
-  telephone?: string
+  appointmentId?: number,
+  telephone?: string,
+  TMH_patient_id?: any
 }
 
 export interface CustomVisitModel {
@@ -259,6 +260,7 @@ export interface CustomVisitModel {
     uuid?: string
     person_attribute?: any[]
   }
+  prescription_started?:any
 }
 
 export interface CustomEncounterModel {
@@ -344,6 +346,8 @@ export interface PatientModel {
     gender?: string,
     attributes?: PersonAttributeModel[],
     preferredAddress?: {
+      address6: string,
+      address3: string,
       address2: string,
       address1: string,
       cityVillage?: string,
@@ -509,6 +513,7 @@ export interface MedicineModel {
   days?: string,
   timing?: string,
   remark?: string,
+  frequency?: string,
   uuid?: string
 }
 
@@ -526,7 +531,9 @@ export interface DiagnosisModel {
   diagnosisName?: string,
   diagnosisType?: string,
   diagnosisStatus?: string,
-  uuid?: string
+  uuid?: string,
+  diagnosisCode?: string,
+  isSnomed? : boolean
 }
 
 export interface DocImagesModel {
@@ -553,7 +560,8 @@ export interface FollowUpDataModel {
   wantFollowUp?: string,
   followUpDate?: string,
   followUpTime?: string,
-  followUpReason?: string
+  followUpReason?: string,
+  followUpType?: string
 }
 
 export interface HwModel {
@@ -591,6 +599,7 @@ export interface PatientRegistrationFieldsModel {
   is_mandatory: boolean,
   is_editable: boolean,
   is_locked: boolean
+  validations?: any
 }
 
 export interface SpecializationModel {
@@ -634,7 +643,16 @@ export interface VitalModel {
   name: string,
   key: string,
   uuid: string,
-  is_mandatory: boolean
+  is_mandatory: boolean,
+  lang: object;
+}
+
+export interface DiagnosticModel {
+  name: string,
+  key: string,
+  uuid: string,
+  is_mandatory: boolean,
+  lang: object;
 }
 
 export interface FeatureModel extends BaseModel {}
@@ -658,6 +676,7 @@ export interface PatientVisitSummaryModel {
 }
 
 export interface PatientVisitSummaryConfigModel {
+  allow_duplicate_phoneno_and_email: boolean
   appointment_button: boolean
   attachment_section: boolean
   doctor_specialty_section: boolean
@@ -667,7 +686,13 @@ export interface PatientVisitSummaryConfigModel {
   severity_of_case_section: boolean
   completed_visit_section: boolean
   follow_up_visit_section: boolean
-  hw_interaction: boolean
+  awaiting_visits_patient_type_demarcation: boolean
+  awaiting_visit_section: boolean
+  diagnosis_at_secondary_level: boolean
+  dp_call_status: boolean
+  dp_dignosis_secondary: boolean
+  dp_discussion_summary: boolean
+  inprogress_visit_section: boolean
 }
 
 export interface PagerdutyList {
@@ -709,7 +734,52 @@ export interface PatientVisitSection {
   is_locked: boolean;
   is_editable: boolean;
   name: string;
+  lang: string;
   key: string;
+  order: number;
+  sub_sections?: any;
   updatedAt?: string;
   createdAt?: string
+}
+
+export interface DiagnosticUnit {
+  name: string;
+  unit: string;
+  min: number;
+  max?: number;
+  percentageMin?: number;
+  percentageMax?: number;
+  percentageUnit?: string;
+  gender?: string;
+}
+
+export interface DiagnosticName {
+  name: string;
+  testName: string;
+}
+
+export interface PatientVisitDropdownFieldsModel{
+  id?:number,
+  name?:string,
+  is_enabled: boolean,
+  updatedAt: string
+}
+
+export interface DropdownItemModel {
+  id: number,
+  is_enabled: boolean,
+  key: string,
+  name: string,
+}
+export interface DropdownValuesModel {
+  advice: DropdownItemModel[],
+  diagnosis: DropdownItemModel[],
+  medication: DropdownItemModel[],
+  refer_specialisation: DropdownItemModel[],
+  referral_facility: DropdownItemModel[],
+  test: DropdownItemModel[]
+}
+
+export interface RecordingResponse {
+  recordingId: number;
 }
