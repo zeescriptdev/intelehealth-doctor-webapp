@@ -100,7 +100,7 @@ export class PartnerLabelComponent implements OnInit{
   onLogoFileDelete(event,type){
     if(event.success)
       this.themeConfigData[type] = '';
-  //  this.updateThemeConfig(type,'');
+   this.updateThemeConfig(type,'');
   }
 
   updateThemeConfig(key,value){
