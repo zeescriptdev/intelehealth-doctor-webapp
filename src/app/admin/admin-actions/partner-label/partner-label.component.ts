@@ -173,14 +173,17 @@ uploadComponent!: FileUploadComponent;
   * Publish langauge changes.
   * @return {void}
   */
-  onPublish(): void {
+  async onPublish(): Promise<void> {
     console.log("pendingDeleteRequest and type==========",this.pendingDeleteRequest,this.setType);
      if(this.pendingDeleteRequest=="delete")
-     this.updateThemeConfig(this.setType,'');
-    this.configService.publishConfig().subscribe(res => {
+       this.updateThemeConfig(this.setType,'');
+
+  //  this.configService.publishConfig().subscribe(res => {
+  
+      const res = await this.configService.publishConfig();
       console.log("res from publish.....",res);
       this.toastr.success("Partner White Labelling has been successfully published", "Publish successfull!");
-    });
+    //});
   }
 
   validateJson(json: string): void {
