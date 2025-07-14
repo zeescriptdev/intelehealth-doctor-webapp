@@ -97,9 +97,10 @@ export class PartnerLabelComponent implements OnInit{
     }
   }
 
-  onLogoFileDelete(type){
-    this.themeConfigData[type] = '';
-    this.updateThemeConfig(type,'');
+  onLogoFileDelete(event,type){
+    if(event.success)
+      this.themeConfigData[type] = '';
+   this.updateThemeConfig(type,'');
   }
 
   updateThemeConfig(key,value){
