@@ -65,7 +65,7 @@ export class ConfigService {
    * Publish config
    * @return {Observable<any>}
    */
-  publishConfig(): Observable<any> {
+  publishConfig() {
     const url = `${this.baseURL}/config/publish`;
     return this.http.post(url, null);
   }
