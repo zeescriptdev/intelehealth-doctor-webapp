@@ -95,7 +95,7 @@ export class MonitoringSheetComponent implements OnInit {
           let tableCol: any = {}
           this.callDataColumns.forEach(col => {
             if (["start_time", "end_time"].includes(col.key)) {
-              let isOldRecord = new Date(item[col.key]) < new Date('2025-07-08');
+              let isOldRecord = new Date(item[col.key]) < new Date('2025-07-15');
               tableCol[col.key] = item[col.key] === null ? 'NA' : this.formatMixedDate(item[col.key], isOldRecord);
             } else {
               tableCol[col.key] = item[col.key] === null ? 'NA' : item[col.key];
