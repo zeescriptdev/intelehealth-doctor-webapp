@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit,ViewChild } from '@angular/core';
 import { environment } from "../../../../environments/environment";
 import { ConfigService } from 'src/app/services/config.service';
 import { PageTitleService } from 'src/app/core/page-title/page-title.service';
@@ -6,6 +6,7 @@ import { TranslateService } from '@ngx-translate/core';
 import { getCacheData } from 'src/app/utils/utility-functions';
 import { languages } from 'src/config/constant';
 import { ToastrService } from 'ngx-toastr';
+import { FileUploadComponent } from 'src/app/core/components/file-upload/file-upload.component';
 
 @Component({
   selector: 'app-partner-label',
@@ -13,6 +14,10 @@ import { ToastrService } from 'ngx-toastr';
   styleUrls: ['./partner-label.component.scss']
 })
 export class PartnerLabelComponent implements OnInit{
+
+  @ViewChild(FileUploadComponent, { static: false })
+uploadComponent!: FileUploadComponent;
+
   baseURL = environment.configURL;
   themeConfigURL = `${this.baseURL}/theme_config/updateThemeConfig`;
   uploadImageURL = `${this.baseURL}/theme_config/uploadImage`;
@@ -59,6 +64,9 @@ export class PartnerLabelComponent implements OnInit{
     help_tour_config: ''
   }
 
+    setType: any;
+  pendingDeleteRequest: string;
+
   constructor(
     private pageTitleService: PageTitleService,
     private translateService: TranslateService,
@@ -73,6 +81,15 @@ export class PartnerLabelComponent implements OnInit{
     this.getThemConfigData();
   }
 
+  ngAfterViewInit() {
+  if (this.uploadComponent) {
+    console.log("getting subscriber...");
+    this.uploadComponent.delete$.subscribe(payload => {
+      console.log("payload====",payload);
+      this.pendingDeleteRequest = payload;
+    });
+  }
+}
   getThemConfigData(){
     this.configService.getThemeConfig().subscribe(res=>{
       res.theme_config.forEach(config=>{
@@ -97,10 +114,11 @@ export class PartnerLabelComponent implements OnInit{
     }
   }
 
-  onLogoFileDelete(event,type){
-    if(event.success)
+  onLogoFileDelete(type){
+   
       this.themeConfigData[type] = '';
-   this.updateThemeConfig(type,'');
+       this.setType = type;
+ //  this.updateThemeConfig(type,'');
   }
 
   updateThemeConfig(key,value){
@@ -156,7 +174,11 @@ export class PartnerLabelComponent implements OnInit{
   * @return {void}
   */
   onPublish(): void {
+    console.log("pendingDeleteRequest and type==========",this.pendingDeleteRequest,this.setType);
+     if(this.pendingDeleteRequest=="delete")
+     this.updateThemeConfig(this.setType,'');
     this.configService.publishConfig().subscribe(res => {
+      console.log("res from publish.....",res);
       this.toastr.success("Partner White Labelling has been successfully published", "Publish successfull!");
     });
   }
