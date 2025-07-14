@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit ,AfterViewInit,OnDestroy, ViewChildren, QueryList} from '@angular/core';
 import { environment } from "../../../../environments/environment";
 import { ConfigService } from 'src/app/services/config.service';
 import { PageTitleService } from 'src/app/core/page-title/page-title.service';
@@ -6,13 +6,22 @@ import { TranslateService } from '@ngx-translate/core';
 import { getCacheData } from 'src/app/utils/utility-functions';
 import { languages } from 'src/config/constant';
 import { ToastrService } from 'ngx-toastr';
+import { FileUploadComponent } from 'src/app/core/components/file-upload/file-upload.component';
+import { Subscription } from 'rxjs';
 
 @Component({
   selector: 'app-partner-label',
   templateUrl: './partner-label.component.html',
   styleUrls: ['./partner-label.component.scss']
 })
-export class PartnerLabelComponent implements OnInit{
+export class PartnerLabelComponent implements OnInit,AfterViewInit, OnDestroy{
+
+  @ViewChildren(FileUploadComponent) uploads!: QueryList<FileUploadComponent>;
+  private uploadSubs: Subscription[] = [];
+
+  uploadComponent!: FileUploadComponent;
+
+
   baseURL = environment.configURL;
   themeConfigURL = `${this.baseURL}/theme_config/updateThemeConfig`;
   uploadImageURL = `${this.baseURL}/theme_config/uploadImage`;
@@ -58,6 +67,8 @@ export class PartnerLabelComponent implements OnInit{
     images_with_text: [],
     help_tour_config: ''
   }
+  pendingDeleteRequest: string;
+  setType: any;
 
   constructor(
     private pageTitleService: PageTitleService,
@@ -73,6 +84,10 @@ export class PartnerLabelComponent implements OnInit{
     this.getThemConfigData();
   }
 
+  ngAfterViewInit() {
+    this.uploads.changes.subscribe(() => this.subscribeToDeletes());
+    this.subscribeToDeletes(); // in case uploads exist already
+  }
   getThemConfigData(){
     this.configService.getThemeConfig().subscribe(res=>{
       res.theme_config.forEach(config=>{
@@ -97,10 +112,9 @@ export class PartnerLabelComponent implements OnInit{
     }
   }
 
-  onLogoFileDelete(event,type){
-    if(event.success)
-      this.themeConfigData[type] = '';
-   this.updateThemeConfig(type,'');
+    onLogoFileDelete(type) {
+    this.themeConfigData[type] = "";
+    this.setType = type;
   }
 
   updateThemeConfig(key,value){
@@ -155,10 +169,17 @@ export class PartnerLabelComponent implements OnInit{
   * Publish langauge changes.
   * @return {void}
   */
-  onPublish(): void {
-    this.configService.publishConfig().subscribe(res => {
-      this.toastr.success("Partner White Labelling has been successfully published", "Publish successfull!");
-    });
+  async onPublish(): Promise<void> {
+     if (this.pendingDeleteRequest == "delete")
+      this.updateThemeConfig(this.setType, "");
+    const res = await this.configService.publishConfig();
+    this.toastr.success(
+      "Partner White Labelling has been successfully published",
+      "Publish successfull!"
+    );
+    // this.configService.publishConfig().subscribe(res => {
+    //   this.toastr.success("Partner White Labelling has been successfully published", "Publish successfull!");
+    // });
   }
 
   validateJson(json: string): void {
@@ -176,5 +197,21 @@ export class PartnerLabelComponent implements OnInit{
         this.toastr.success("Help Tour Config updated successfully", "Updated Successfully");
       });
     }
+  }
+
+   private subscribeToDeletes() {
+    this.uploadSubs.forEach((sub) => sub.unsubscribe());
+    this.uploadSubs = [];
+
+    this.uploads.forEach((upload) => {
+      const sub = upload.delete$.subscribe((payload) => {
+        this.pendingDeleteRequest = payload;
+        console.log("Delete payload:", payload);
+      });
+      this.uploadSubs.push(sub);
+    });
+  }
+  ngOnDestroy() {
+    this.uploadSubs.forEach((sub) => sub.unsubscribe());
   }
 }
