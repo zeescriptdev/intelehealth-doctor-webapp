@@ -100,7 +100,7 @@
             </div>
           </li>
             </ul>
-            <div class="form-group mb-0  mt-5" *ngIf="!isMCCUser">
+            <div class="form-group mb-0  mt-5" *ngIf="!isMCCUser && isVisitNoteProvider && !visitEnded">
               <button type="button" class="white-btn mr-3 mt-3 mb-3" (click)="toggleDiagnosis()" data-test-id="btnCancelDiagnosis">
                 {{'Cancel'|translate}}
               </button>
@@ -290,7 +290,7 @@
             </form>
    </div>
   </div>
-  <div class="form-group mb-2" *ngIf="!addMoreMedicine && !isMCCUser">
+  <div class="form-group mb-2" *ngIf="!addMoreMedicine && !isMCCUser && isVisitNoteProvider && !visitEnded">
                   <button type="button" class="white-btn mr-3" (click)="toggleMedicine()" data-test-id="btnCancelMed">
                 {{'Cancel'|translate}}
               </button>
@@ -298,7 +298,7 @@
                 {{'Add'|translate}}
               </button>
   </div>
-   <div class="form-group mb-0" *ngIf="addMoreMedicine && !isMCCUser">
+   <div class="form-group mb-0" *ngIf="addMoreMedicine && !isMCCUser && isVisitNoteProvider && !visitEnded">
               <button type="button" class="add-more-btn" (click)="toggleMedicine()" data-test-id="btnAddMoreMed">
                 <img src="assets/svgs/plus-circle.svg" alt="" />
                 <span class="ml-2">{{'Add more medicine'|translate}}</span>
