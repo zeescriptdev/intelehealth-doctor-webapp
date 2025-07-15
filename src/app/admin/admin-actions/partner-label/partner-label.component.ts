@@ -1,4 +1,4 @@
-import { Component, OnInit,ViewChildren,AfterViewInit,OnDestroy,QueryList} from '@angular/core';
+import { Component, OnInit,ViewChildren,AfterViewInit,QueryList} from '@angular/core';
 import { environment } from "../../../../environments/environment";
 import { ConfigService } from 'src/app/services/config.service';
 import { PageTitleService } from 'src/app/core/page-title/page-title.service';
@@ -7,25 +7,25 @@ import { getCacheData } from 'src/app/utils/utility-functions';
 import { languages } from 'src/config/constant';
 import { ToastrService } from 'ngx-toastr';
 import { FileUploadComponent } from 'src/app/core/components/file-upload/file-upload.component';
-import { Subscription } from 'rxjs';
 
 @Component({
   selector: 'app-partner-label',
   templateUrl: './partner-label.component.html',
   styleUrls: ['./partner-label.component.scss']
 })
-export class PartnerLabelComponent implements OnInit,AfterViewInit, OnDestroy{
+export class PartnerLabelComponent implements OnInit,AfterViewInit{
 
-@ViewChildren(FileUploadComponent) uploads!: QueryList<FileUploadComponent>;
-  private uploadSubs: Subscription[] = [];
-
-  uploadComponent!: FileUploadComponent;
+@ViewChildren(FileUploadComponent) uploadComponents!: QueryList<FileUploadComponent>;
 
   baseURL = environment.configURL;
   themeConfigURL = `${this.baseURL}/theme_config/updateThemeConfig`;
   uploadImageURL = `${this.baseURL}/theme_config/uploadImage`;
   deleteImageURL = `${this.baseURL}/theme_config/deleteImage`;
   isJsonValid: boolean = false;
+
+  setType: any;
+  pendingDeleteLogoRequest: string;
+  pendingDeleteThumbnailRequest: string;
 
   commonUploadImageOptions = { 
     uploadMsg : 'File size (5-50kb), Image size (512x512px), Format (PNG)', 
@@ -67,9 +67,6 @@ export class PartnerLabelComponent implements OnInit,AfterViewInit, OnDestroy{
     help_tour_config: ''
   }
 
-    setType: any;
-  pendingDeleteRequest: string;
-
   constructor(
     private pageTitleService: PageTitleService,
     private translateService: TranslateService,
@@ -83,10 +80,17 @@ export class PartnerLabelComponent implements OnInit,AfterViewInit, OnDestroy{
     this.pageTitleService.setTitle({ title: "Admin Actions", imgUrl: "assets/svgs/admin-actions.svg" });
     this.getThemConfigData();
   }
-
-  ngAfterViewInit() {
- this.uploads.changes.subscribe(() => this.subscribeToDeletes());
-    this.subscribeToDeletes(); // in case uploads exist already
+ngAfterViewInit() {
+   this.uploadComponents.forEach((component: FileUploadComponent) => {
+    component.delete$.subscribe((payload) => {
+      console.log("🗑️ Delete payload:", payload);
+      if (payload === 'logo') {
+        this.pendingDeleteLogoRequest = payload;
+      } else if (payload === 'thumbnail_logo') {
+        this.pendingDeleteThumbnailRequest = payload;
+      }
+    });
+  });
 }
   getThemConfigData(){
     this.configService.getThemeConfig().subscribe(res=>{
@@ -171,19 +175,22 @@ export class PartnerLabelComponent implements OnInit,AfterViewInit, OnDestroy{
   * Publish langauge changes.
   * @return {void}
   */
-  async onPublish(): Promise<void> {
-     if(this.pendingDeleteRequest=="delete"){
-        this.updateThemeConfig(this.setType,'');  
-        const res = await this.configService.publishConfig_logo();
-        this.toastr.success("Partner White Labelling has been successfully published", "Publish successfull!");
-     }
-     else{
-        this.configService.publishConfig().subscribe(res => {
-        this.toastr.success("Partner White Labelling has been successfully published", "Publish successfull!");
-     })
-     }
+onPublish(): void {
+  console.log("value from subscriber==",this.pendingDeleteThumbnailRequest,this.pendingDeleteLogoRequest);
+  
+if (this.pendingDeleteLogoRequest === 'logo' || this.pendingDeleteThumbnailRequest === 'thumbnail_logo') {
+    this.updateThemeConfig(this.setType, '').subscribe({
+      next: () => {
+        this.callPublish();
+      },
+      error: (err) => {
+        this.toastr.error("Failed to update theme config before publish", "Error");
+      }
+    });
+  } else {
+    this.callPublish();
   }
-
+}
   validateJson(json: string): void {
     try {
       this.isJsonValid = Array.isArray(JSON.parse(json));
@@ -192,7 +199,6 @@ export class PartnerLabelComponent implements OnInit,AfterViewInit, OnDestroy{
       return e.message;
     }
   }
-
   saveHelpTourConfig(): void {
     if (this.isJsonValid) {
       this.configService.updateHelpTour(JSON.parse(this.themeConfigData.help_tour_config)).subscribe(res => {
@@ -200,19 +206,14 @@ export class PartnerLabelComponent implements OnInit,AfterViewInit, OnDestroy{
       });
     }
   }
-   private subscribeToDeletes() {
-    this.uploadSubs.forEach(sub => sub.unsubscribe());
-    this.uploadSubs = [];
-
-    this.uploads.forEach(upload => {
-      const sub = upload.delete$.subscribe(payload => {
-        this.pendingDeleteRequest = payload;
-        console.log('Delete payload:', payload);
-      });
-      this.uploadSubs.push(sub);
-    });
-  }
- ngOnDestroy() {
-    this.uploadSubs.forEach(sub => sub.unsubscribe());
-  }
+  callPublish(): void {
+  this.configService.publishConfig().subscribe({
+    next: () => {
+      this.toastr.success("Partner White Labelling has been successfully published", "Publish successful!");
+    },
+    error: (err) => {
+      this.toastr.error(err.error?.message || "Publish failed", "Error");
+    }
+  });
+}
 }

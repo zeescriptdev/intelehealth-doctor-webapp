@@ -51,7 +51,7 @@ export class FileUploadComponent implements OnChanges {
   isUploadFailed = false;
 
   private deleteSubject = new Subject<string>();
- delete$ = this.deleteSubject.asObservable();
+  delete$ = this.deleteSubject.asObservable();
   constructor(private configService: ConfigService, private toastr: ToastrService){
 
   }
@@ -147,9 +147,8 @@ export class FileUploadComponent implements OnChanges {
         this.toastr.error("Unable to remove the file","Remove failed!");
       })
     } else {
-      console.log("inside emittign service.........");
       this.onFileRemove.emit({ success : true , filePath : this.filePath});
-       this.deleteSubject.next("delete");
+     this.deleteSubject.next(this.options.formData.key);
     }
     
   }
