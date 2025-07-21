@@ -1205,7 +1205,7 @@ export class DashboardComponent implements OnInit {
               this.appointmentService.rescheduleAppointment(appointment).subscribe((res: ApiResponseModel) => {
                 const message = res.message;
                 if (res.status) {
-                  this.mindmapService.notifyHwForRescheduleAppointment(appointment)
+                  this.mindmapService.notifyHwForRescheduleAppointment(appointment);
                   this.getAppointments();
                   this.toastr.success("The appointment has been rescheduled successfully!", 'Rescheduling successful!');
                 } else {
@@ -1231,8 +1231,9 @@ export class DashboardComponent implements OnInit {
     }
     this.coreService.openConfirmCancelAppointmentModal(appointment).subscribe((res: boolean) => {
       if (res) {
-        this.toastr.success("The Appointment has been successfully canceled.", 'Canceling successful');
+        this.mindmapService.notifyHwForCancelAppointment(appointment);
         this.getAppointments();
+        this.toastr.success("The Appointment has been successfully canceled.", 'Canceling successful');
       }
     });
   }
