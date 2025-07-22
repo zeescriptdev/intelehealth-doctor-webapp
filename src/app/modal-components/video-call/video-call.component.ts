@@ -6,7 +6,7 @@ import { SocketService } from 'src/app/services/socket.service';
 import { environment } from 'src/environments/environment';
 import * as moment from 'moment';
 import { CoreService } from 'src/app/services/core/core.service';
-import { getCacheData } from 'src/app/utils/utility-functions';
+import { getCacheData, isFeaturePresent } from 'src/app/utils/utility-functions';
 import { Participant, RemoteParticipant, RemoteTrack, RemoteTrackPublication, Track } from 'livekit-client';
 import { WebrtcService } from 'src/app/services/webrtc.service';
 import { doctorDetails, visitTypes } from 'src/config/constant';
@@ -221,16 +221,17 @@ export class VideoCallComponent implements OnInit, OnDestroy {
     this.callConnected = true;
     this.callStartedAt = moment();
     this.socketSvc.emitEvent('call-connected', this.incomingData);
-    await this.webrtcSvc.startRecording({
-      doctorName: this.doctorName,
-      roomId: this.room,
-      visitId: this.data?.visitId,
-      doctorId: this.data?.connectToDrId,
-      chwId: this.nurseId,
-      patientId: this.data?.patientId,
-      nurseName: this.hwName,
-      name: this.provider?.uuid
-    })
+    if(isFeaturePresent('webrtcRecording')) {
+      await this.webrtcSvc.startRecording({
+        doctorName: this.doctorName,
+        roomId: this.room,
+        visitId: this.data?.visitId,
+        doctorId: this.data?.connectToDrId,
+        chwId: this.nurseId,
+        patientId: this.data?.patientId,
+        nurseName: this.hwName,
+        name: this.provider?.uuid
+      })
       .toPromise()
       .then((res: RecordingResponse) => {
         this.recodingStarted = true
@@ -239,7 +240,8 @@ export class VideoCallComponent implements OnInit, OnDestroy {
       .catch(err => {
         console.log("start recoding error", err)
       });
- }
+    }
+  }
 
   /**
   * Returns call connected or not
@@ -477,7 +479,7 @@ export class VideoCallComponent implements OnInit, OnDestroy {
     setTimeout(async () => {
       this.close();
       this.webrtcSvc.room.disconnect(true);
-      if(this.recodingStarted) {
+      if(this.recodingStarted && isFeaturePresent('webrtcRecording')) {
         this.recodingStarted = false;
         await this.webrtcSvc.stopRecording(this.tableId, this.room)
         // await this.webrtcSvc.stopRecording(this.provider?.uuid, this.room, this.nurseId)
