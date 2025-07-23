@@ -25,7 +25,7 @@ export class AppointmentsComponent implements OnInit {
 
   items = ["Appointments"];
   expandedIndex = 0;
-  displayedColumns: string[] = ['name', 'age', 'starts_in', 'location', 'cheif_complaint', 'drName', 'telephone', 'actions'];
+  displayedColumns: string[] = ['name', 'age', 'starts_in', 'location', 'cheif_complaint', 'drName', 'actions'];
   dataSource = new MatTableDataSource<any>();
   baseUrl: string = environment.baseURL;
   isLoaded: boolean = false;
