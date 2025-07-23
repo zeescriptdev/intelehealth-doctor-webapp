@@ -75,6 +75,9 @@ export class ViewVisitPrescriptionComponent implements OnInit, OnDestroy {
   pvsConstant = VISIT_SECTIONS;
 
   sanitizedValue: SafeHtml;
+  recommendation: { uuid: string; value: any; };
+
+  brandName = environment.brandName === 'KCDO';
 
   constructor(
     @Inject(MAT_DIALOG_DATA) public data,
@@ -140,7 +143,7 @@ export class ViewVisitPrescriptionComponent implements OnInit, OnDestroy {
               this.checkIfReferralPresent();
               this.checkIfFollowUpPresent();
               this.checkIfFollowUpInstructionsPresent();
-              this.checkIfDiscussionSummaryPresent()
+              this.checkIfDiscussionSummaryPresent();
             }
             this.getCheckUpReason(visit.encounters);
             this.getVitalObs(visit.encounters);
@@ -332,7 +335,7 @@ export class ViewVisitPrescriptionComponent implements OnInit, OnDestroy {
   * Get medicines for the visit
   * @returns {void}
   */
-  checkIfMedicationPresent() {
+  checkIfMedicationPresent(): void {
     this.medicines = [];
     this.diagnosisService.getObs(this.visit.patient.uuid, conceptIds.conceptMed).subscribe((response: ObsApiResponseModel) => {
       response.results.forEach((obs: ObsModel) => {

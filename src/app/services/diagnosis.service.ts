@@ -59,6 +59,7 @@ export class DiagnosisService {
   * @return {Observable<any>}
   */
   getDiagnosisList(term: string, source = 'SNOMED CT'): Observable<any> {
+    // const url = `${environment.baseURL}/concept?class=${conceptIds.conceptDiagnosisClass}&source=${source}&q=${term}&v=custom:(uuid,name:(name,display),mappings:(display))`;
     const url = `${environment.baseURL}/concept?class=${conceptIds.conceptDiagnosisClass}&q=${term}&v=custom:(uuid,name:(name,display),mappings:(display))`;
     
     return this.http.get(url).pipe(
