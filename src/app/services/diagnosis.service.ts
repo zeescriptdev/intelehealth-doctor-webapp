@@ -58,9 +58,28 @@ export class DiagnosisService {
   * @param {string} term - Search term
   * @return {Observable<any>}
   */
-  getDiagnosisList(term: string, source = 'SNOMED'): Observable<any> {
-    const url = `${environment.baseURL}/concept?class=${conceptIds.conceptDiagnosisClass}&source=${source}&q=${term}&v=custom:(uuid,name:(name,display),mappings:(display))`;
-    return this.http.get(url);
+  getDiagnosisList(term: string, source = 'SNOMED CT'): Observable<any> {
+    // const url = `${environment.baseURL}/concept?class=${conceptIds.conceptDiagnosisClass}&source=${source}&q=${term}&v=custom:(uuid,name:(name,display),mappings:(display))`;
+    const url = `${environment.baseURL}/concept?class=${conceptIds.conceptDiagnosisClass}&q=${term}&v=custom:(uuid,name:(name,display),mappings:(display))`;
+    
+    return this.http.get(url).pipe(
+      map((response: any) => {
+        // Filter concepts based on term and SNOMED CT source
+        const filteredConcepts = response.results.filter(concept => {
+          const name = concept.name?.display?.toLowerCase() || '';
+          const matchesName = name.includes(term.toLowerCase());
+          
+          // Checking SNOMED CT
+          const hasSNOMED = concept.mappings?.some(mapping => 
+            mapping.display?.toLowerCase().includes('snomed ct')
+          );
+          
+          return matchesName && hasSNOMED;
+        });
+        
+        return { results: filteredConcepts };
+      })
+    );
   }
 
   getSnomedDiagnosisList(term: string): Observable<any> {
