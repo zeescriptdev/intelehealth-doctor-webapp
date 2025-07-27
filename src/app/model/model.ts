@@ -693,6 +693,7 @@ export interface PatientVisitSummaryConfigModel {
   dp_dignosis_secondary: boolean
   dp_discussion_summary: boolean
   inprogress_visit_section: boolean
+  diagnosis_snomedct: boolean
 }
 
 export interface PagerdutyList {
