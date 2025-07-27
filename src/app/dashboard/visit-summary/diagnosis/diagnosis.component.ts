@@ -383,7 +383,7 @@ export class DiagnosisComponent implements OnInit, OnDestroy {
 
   searchDiagnosis(val: string): void {
     if (val && val.length >= 3) {
-      this.diagnosisService.getDiagnosisList(val, isFeaturePresent("snomedCtDiagnosis") ? 'SNOMED' : 'ICD10').subscribe({
+      this.diagnosisService.getDiagnosisList(val, this.appConfigService?.patient_visit_summary?.diagnosis_snomedct ? 'SNOMED CT' : 'ICD-10').subscribe({
         next: (response) => {
           if (response.results && response.results.length) {
             const data = [];
@@ -394,7 +394,7 @@ export class DiagnosisComponent implements OnInit, OnDestroy {
             });
             this.diagnosisSubject.next(data);
           } else {
-            if (isFeaturePresent("snomedCtDiagnosis")) {
+            if (this.appConfigService?.patient_visit_summary?.diagnosis_snomedct) {
               this.diagnosisService.getSnomedDiagnosisList(val).subscribe({
                 next: (res) => {
                   if (res && res.result) {
