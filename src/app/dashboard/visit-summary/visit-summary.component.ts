@@ -1206,7 +1206,7 @@ export class VisitSummaryComponent implements OnInit, OnDestroy, AfterViewInit {
   * Start video call with HW/patient
   * @return {void}
   */
-  startCall(): void {
+  startCall(callType:string): void {
     if (this.dialogRef2) {
       this.dialogRef2.close();
       this.isCalling = false;
@@ -1223,7 +1223,8 @@ export class VisitSummaryComponent implements OnInit, OnDestroy, AfterViewInit {
       initiator: 'dr',
       drPersonUuid: this.provider?.person.uuid,
       patientAge: this.patient.person.age,
-      patientGender: this.patient.person.gender
+      patientGender: this.patient.person.gender,
+      callType: callType
     });
 
     this.dialogRef2.afterClosed().subscribe((res) => {
