@@ -154,6 +154,7 @@ export class VisitSummaryComponent implements OnInit, OnDestroy, AfterViewInit {
 
   hasChatEnabled: boolean = false;
   hasVideoEnabled: boolean = false;
+  hasAudioEnabled: boolean = false;
   hasWebRTCEnabled: boolean = false;
   hasVitalsEnabled: boolean = false;
   hasPatientAddressEnabled: boolean = false;
@@ -495,6 +496,7 @@ export class VisitSummaryComponent implements OnInit, OnDestroy, AfterViewInit {
     this.hasWebRTCEnabled = this.appConfigService?.webrtc_section;
     this.hasChatEnabled = this.appConfigService?.webrtc?.chat;
     this.hasVideoEnabled = this.appConfigService?.webrtc?.video_call;
+    this.hasAudioEnabled = this.appConfigService?.webrtc?.audio_call;
     this.hasVitalsEnabled = this.appConfigService?.patient_vitals_section;
     this.hasPatientAddressEnabled = this.appConfigService?.patient_reg_address;
     this.hasPatientOtherEnabled = this.appConfigService?.patient_reg_other;
