@@ -32,9 +32,9 @@ export class DiagnosisService {
   * @param {string} uuid - Observation uuid
   * @return {Observable<any>}
   */
-  deleteObs(uuid): Observable<any> {
+  deleteObs(uuid, purge:boolean=false): Observable<any> {
     if(uuid){
-      const url = `${this.baseURL}/obs/${uuid}`;
+      const url = `${this.baseURL}/obs/${uuid}${purge?'?purge=true':''}`;
       return this.http.delete(url);
     } else {
       return of(false)
