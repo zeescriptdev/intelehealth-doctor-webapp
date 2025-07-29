@@ -59,6 +59,8 @@ export class VideoCallComponent implements OnInit, OnDestroy {
   videoBitrateCheckInterval: any;
   lastVideoBytesSent = 0;
   lastTimestamp = 0;
+  isVideoEnabled: boolean;
+  isAudioEnabled: boolean;
 
   constructor(
     @Inject(MAT_DIALOG_DATA) public data,
@@ -103,6 +105,11 @@ export class VideoCallComponent implements OnInit, OnDestroy {
     } else {
       this.startCall();
     }
+    // set flag for audio/video enable/disable
+  this.isVideoEnabled= this.appConfigService.ai_llm_recording?.ai_video;
+  console.log('AI Video Enabled:', this.isVideoEnabled);
+  this.isAudioEnabled  = this.appConfigService.ai_llm_recording?.ai_audio;
+  console.log("isVideoEnabled", this.isAudioEnabled);
   }
 
   /**
@@ -232,6 +239,7 @@ export class VideoCallComponent implements OnInit, OnDestroy {
       }, 3000);
     }
     this.socketSvc.emitEvent('call-connected', this.incomingData);
+    console.log("is Video Enabled", this.isVideoEnabled);
     if(this.callType === 'video' && isFeaturePresent('webrtcRecording')) {
       await this.webrtcSvc.startRecording({
         doctorName: this.doctorName,
