@@ -54,6 +54,8 @@ export class VideoCallComponent implements OnInit, OnDestroy {
   patientRegFields: string[] = [];
   recodingStarted = false;
   tableId: number;
+  isVideoEnabled: boolean;
+  isAudioEnabled: boolean;
 
   constructor(
     @Inject(MAT_DIALOG_DATA) public data,
@@ -69,7 +71,6 @@ export class VideoCallComponent implements OnInit, OnDestroy {
   async ngOnInit() {
     this.patientRegFields = this.appConfigService.patientRegFields;
     this.room = this.data.patientId;
-
     const patientVisitProvider: EncounterProviderModel = getCacheData(true, visitTypes.PATIENT_VISIT_PROVIDER);
     this.toUser = patientVisitProvider?.provider?.uuid;
     this.hwName = patientVisitProvider?.display?.split(":")?.[0];
@@ -98,7 +99,15 @@ export class VideoCallComponent implements OnInit, OnDestroy {
     } else {
       this.startCall();
     }
+
+      // set flag for audio/video enable/disable
+
+  this.isVideoEnabled= this.appConfigService.ai_llm_recording?.ai_video;
+console.log('AI Video Enabled:', this.isVideoEnabled);
+  this.isAudioEnabled  = this.appConfigService.ai_llm_recording?.ai_audio;
+  console.log("isVideoEnabled", this.isAudioEnabled);
   }
+
 
   /**
   * Getter for visit provider
@@ -221,7 +230,8 @@ export class VideoCallComponent implements OnInit, OnDestroy {
     this.callConnected = true;
     this.callStartedAt = moment();
     this.socketSvc.emitEvent('call-connected', this.incomingData);
-    if(isFeaturePresent('webrtcRecording')) {
+
+    if(this.isVideoEnabled) {
       await this.webrtcSvc.startRecording({
         doctorName: this.doctorName,
         roomId: this.room,

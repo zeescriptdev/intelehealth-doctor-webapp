@@ -222,8 +222,6 @@ export class DiagnosisComponent implements OnInit, OnDestroy {
 
 
     this.diagnosis$ = this.diagnosisSubject.asObservable();
-
-    this.hasAILLMEnabled = this.appConfigService?.ai_llm_section;
     this.referSpecializations = this.appConfigService?.dropdown_values?.['refer specialisation']?.filter((val) => val?.is_enabled);
     this.diagnostics = [...this.appConfigService.patient_diagnostics];
   }
