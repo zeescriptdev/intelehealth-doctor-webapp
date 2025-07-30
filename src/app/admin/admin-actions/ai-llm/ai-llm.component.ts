@@ -24,12 +24,12 @@ export class AiLlmComponent {
   sectionEnabled: boolean = false;
   allSectionData: any = {};
   displayedAILLMColumns: string[] = ["serialNo", "section"];
-  displayedAILLMRecordingColumns: string[] = ["serialNo", "section","status"];
+  displayedAILLMRecordingColumns: string[] = ["serialNo", "section","active"];
 
   tableData = [];
   aiLlmId: number;
   aiLlmfeatures: any = {};
-  aiLlmRecordingfeatures: any = {};
+  aiLlmRecordingfeatures: any ={};
   aiLlmRecordingId: any;
 
   constructor(
@@ -130,9 +130,8 @@ export class AiLlmComponent {
 
   getAILLMRecordingByKey(){
 this.configService.getAILLMRecordingByKey("ai_llm_recording_section").subscribe((res: any) => {
-  console.log("res===", res);
       this.aiLlmRecordingId = res.feature.id;
-      this.aiLlmRecordingfeatures = res.feature;
+      this.aiLlmRecordingfeatures = res.feature ;
     });
   }
 
