@@ -505,7 +505,6 @@ export class VisitSummaryComponent implements OnInit, OnDestroy, AfterViewInit {
     this.hasVitalsEnabled = this.appConfigService?.patient_vitals_section;
     this.hasPatientAddressEnabled = this.appConfigService?.patient_reg_address;
     this.hasPatientOtherEnabled = this.appConfigService?.patient_reg_other;
-    this.hasAILLMEnabled = this.appConfigService?.ai_llm_section;
 
     this.pvsConfigs = this.appConfigService.patient_visit_sections;
     this.isMCCUser = !!this.rolesService.getRole('ORGANIZATIONAL:MCC');
