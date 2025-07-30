@@ -204,7 +204,8 @@ export class VisitSummaryComponent implements OnInit, OnDestroy, AfterViewInit {
         this.ddxCompRef.instance.isVisitNoteProvider = this.isVisitNoteProvider;
         this.ddxCompRef.instance.visitEnded = this.visitEnded;
         this.ddxCompRef.instance.patientInteractionNotesForm = this.patientInteractionNotesForm;
-        
+       this.ddxCompRef.instance.hasAILLMEnabled = this.hasAILLMEnabled;
+
         this.ddxCompRef.instance.diagnosisReceived.subscribe((digData:any)=>{
           if(this.visitNotePresent && !this.visitEnded && this.isVisitNoteProvider && !this.visitCompleted){
             this.SaveAIDiagosisHistory(this.visit,digData);
@@ -405,6 +406,7 @@ export class VisitSummaryComponent implements OnInit, OnDestroy, AfterViewInit {
     this.referSpecializations = this.appConfigService?.dropdown_values?.['refer specialisation']?.filter((val) => val?.is_enabled);
     this.patientVisitSummary = { ...this.appConfigService.patient_visit_summary };
     this.openChatFlag = this.router.getCurrentNavigation()?.extras?.state?.openChat;
+    this.hasAILLMEnabled = this.appConfigService?.ai_llm_section;
 
     this.referSpecialityForm = new FormGroup({
       refer: new FormControl(false, [Validators.required]),
