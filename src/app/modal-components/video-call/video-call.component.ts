@@ -108,10 +108,8 @@ export class VideoCallComponent implements OnInit, OnDestroy {
     }
       // set flag for audio/video enable/disable
 
-  this.isVideoEnabled= this.appConfigService.ai_llm_recording?.ai_video;
+  this.isVideoEnabled= this.appConfigService.ai_llm_recording_section
 console.log('AI Video Enabled:', this.isVideoEnabled);
-  this.isAudioEnabled  = this.appConfigService.ai_llm_recording?.ai_audio;
-  console.log("isVideoEnabled", this.isAudioEnabled);
   }
 
 
@@ -244,7 +242,8 @@ console.log('AI Video Enabled:', this.isVideoEnabled);
     this.socketSvc.emitEvent('call-connected', this.incomingData);
 
     console.log("is Video Enabled", this.isVideoEnabled);
-    if(this.callType === 'video' && isFeaturePresent('webrtcRecording')) {
+    if(this.callType === 'video' && this.isVideoEnabled) {
+      console.log("Starting recording");
       await this.webrtcSvc.startRecording({
         doctorName: this.doctorName,
         roomId: this.room,
