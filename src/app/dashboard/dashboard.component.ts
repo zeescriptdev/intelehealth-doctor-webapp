@@ -243,11 +243,12 @@ export class DashboardComponent implements OnInit {
         label: "Visit Completed",
         key: "visit_completed",
         classList: [
-          "red-pill",
+        "green-pill",          
+        "visit-completed-cell" 
         ],
         formatHtml: (element)=> { 
           return `
-            <img src="assets/svgs/red-pad.svg" alt="Visit Completed" style="margin-right: 8px; vertical-align: middle;">
+            <img src="assets/svgs/green-pad.svg" alt="Visit Completed" style="margin-right: 8px; vertical-align: middle;">
             <span>${element?.completed}</span>
           `
         },
