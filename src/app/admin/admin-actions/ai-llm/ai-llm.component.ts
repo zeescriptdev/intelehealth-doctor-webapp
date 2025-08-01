@@ -123,7 +123,6 @@ export class AiLlmComponent {
    */
   getAILLMRecording(): void {
     this.configService.getAILLMRecording().subscribe((res: any) => {
-      console.log("res1111111111===", res);
       this.aiLlmDataSource2 = new MatTableDataSource(res.aiLlm);
       this.aiLlmDataSource2.paginator = this.aiLlmPaginator2;
     });
@@ -161,7 +160,7 @@ this.configService.getAILLMRecordingByKey("ai_llm_recording_section").subscribe(
     const checked = (event.target as HTMLInputElement).checked;
     this.configService.updateFeatureEnabledStatus(this.aiLlmRecordingId, checked).subscribe(
       (res) => {
-        this.toastr.success("AI LLM Recording have been successfully updated", "Update successful!");
+        this.toastr.success("AI LLM video recording have been successfully updated", "Update successful!");
         this.updateAILLMVideoRecording(1, checked)
       //  this.getAILLMRecording();
       },
