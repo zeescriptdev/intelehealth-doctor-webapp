@@ -160,7 +160,7 @@ this.configService.getAILLMRecordingByKey("ai_llm_recording_section").subscribe(
     const checked = (event.target as HTMLInputElement).checked;
     this.configService.updateFeatureEnabledStatus(this.aiLlmRecordingId, checked).subscribe(
       (res) => {
-        this.toastr.success("AI LLM video recording have been successfully updated", "Update successful!");
+        this.toastr.success("AI video recording have been successfully updated", "Update successful!");
         this.updateAILLMVideoRecording(1, checked)
       //  this.getAILLMRecording();
       },
