@@ -123,6 +123,7 @@ export class AiLlmComponent {
    */
   getAILLMRecording(): void {
     this.configService.getAILLMRecording().subscribe((res: any) => {
+      console.log("res1111111111===", res);
       this.aiLlmDataSource2 = new MatTableDataSource(res.aiLlm);
       this.aiLlmDataSource2.paginator = this.aiLlmPaginator2;
     });
@@ -130,6 +131,8 @@ export class AiLlmComponent {
 
   getAILLMRecordingByKey(){
 this.configService.getAILLMRecordingByKey("ai_llm_recording_section").subscribe((res: any) => {
+        console.log("99999999999===", res);
+
       this.aiLlmRecordingId = res.feature.id;
       this.aiLlmRecordingfeatures = res.feature ;
     });
@@ -154,11 +157,13 @@ this.configService.getAILLMRecordingByKey("ai_llm_recording_section").subscribe(
   /**
    * @return {void}
    */
-  updateAILLMRecordingStatus(status: boolean): void {
-    this.configService.updateFeatureEnabledStatus(this.aiLlmRecordingId, status).subscribe(
+  updateAILLMRecordingStatus(event:Event) {
+    const checked = (event.target as HTMLInputElement).checked;
+    this.configService.updateFeatureEnabledStatus(this.aiLlmRecordingId, checked).subscribe(
       (res) => {
         this.toastr.success("AI LLM Recording have been successfully updated", "Update successful!");
-        this.getAILLMRecording();
+        this.updateAILLMVideoRecording(1, checked)
+      //  this.getAILLMRecording();
       },
       (err) => {
         this.getAILLMRecording();
@@ -169,12 +174,11 @@ this.configService.getAILLMRecordingByKey("ai_llm_recording_section").subscribe(
   /**
    * @return {void}
    */
-  updateAILLMVideoRecording(id,event:Event): void {
-      const newValue = (event.target as HTMLInputElement).checked;
-    this.configService.updateAILLMVideoRecording(id,newValue).subscribe(
+  updateAILLMVideoRecording(id,status): void {
+    this.configService.updateAILLMVideoRecording(id,status).subscribe(
       (res) => {
-        this.toastr.success("AI LLM video Recording have been successfully updated", "Update successful!");
-       // this.getAILLMRecording();
+      //  this.toastr.success("AI LLM video Recording have been successfully updated", "Update successful!");
+        this.getAILLMRecording();
       },
       (err) => {
         this.getAILLMRecording();

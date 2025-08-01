@@ -106,7 +106,7 @@
               <span class="mr-3">{{ "Enable/Disable" | translate }} {{ "Recordings" | translate }}</span>
               <div class="pretty p-switch p-fill light-green light-red">
                 <input type="checkbox" [(ngModel)]="aiLlmRecordingfeatures.is_enabled"
-                  (change)="updateAILLMVideoRecording(1, $event)" />
+                  (change)="updateAILLMRecordingStatus($event)" />
                 <div class="state"><label></label></div>
               </div>
             </div>
