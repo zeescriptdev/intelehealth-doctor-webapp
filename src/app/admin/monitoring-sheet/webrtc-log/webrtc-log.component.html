@@ -16,8 +16,10 @@
                     </th>
                     <td [class]="column.class" mat-cell *matCellDef="let element">
                         <ng-container>
-                            {{ element[column?.key] }}
+                            {{ column?.key === 'start_time' ? element['start_timeD'] :
+                            column?.key === 'end_time' ? element['end_timeD']: element[column?.key] }}
                         </ng-container>
+                        
                     </td>
                 </ng-container>
 
