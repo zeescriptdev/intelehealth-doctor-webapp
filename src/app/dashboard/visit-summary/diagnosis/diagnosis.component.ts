@@ -388,13 +388,13 @@ export class DiagnosisComponent implements OnInit, OnDestroy {
 
   searchDiagnosis(val: string): void {
     if (val && val.length >= 3) {
-      this.diagnosisService.getDiagnosisList(val, this.appConfigService?.patient_visit_summary?.diagnosis_snomedct ? 'SNOMED CT' : 'ICD-10').subscribe({
+      this.diagnosisService.getSnomedCTDiagnosisList(val).subscribe({
         next: (response) => {
-          if (response.results && response.results.length) {
+          if (response.data && response.data.length) {
             const data = [];
-            response.results.forEach((element: { name: any, mappings: any }) => {
+            response.data.forEach((element: { concept_name: any, snomedCTCode: any }) => {
               if (element) {
-                data.push({ name: element?.name?.display, snomedId: element?.mappings?.[0] });
+                data.push({ name: element?.concept_name, snomedCTCode: element?.snomedCTCode });
               }
             });
             this.diagnosisSubject.next(data);
@@ -427,7 +427,7 @@ export class DiagnosisComponent implements OnInit, OnDestroy {
 
   onDiagnosisChange(event: any): void {
     this.diagnosisValidated = true;
-    if (isFeaturePresent("snomedCtDiagnosis")) {
+    if (this.appConfigService?.patient_visit_summary?.diagnosis_snomedct) {
       if (event?.conceptId) {
         this.diagnosisForm.addControl('diagnosisCode', new FormControl(null));
         this.diagnosisForm.addControl('isSnomed', new FormControl(null));
@@ -437,6 +437,12 @@ export class DiagnosisComponent implements OnInit, OnDestroy {
       else if (event?.snomedId) {
         this.diagnosisForm.addControl('diagnosisCode', new FormControl(null));
         this.diagnosisForm.patchValue({ diagnosisCode: event.snomedId?.display.split(': ')[1] });
+      }
+      else if (event.snomedCTCode) {
+        this.diagnosisForm.addControl('diagnosisCode', new FormControl(null));
+        this.diagnosisForm.addControl('isSnomed', new FormControl(null));
+        this.diagnosisForm.patchValue({ diagnosisCode: event.snomedCTCode });
+        this.diagnosisForm.patchValue({ isSnomed: true });
       }
     }
     if (this.selectedDiagnoses.length > 0) {
