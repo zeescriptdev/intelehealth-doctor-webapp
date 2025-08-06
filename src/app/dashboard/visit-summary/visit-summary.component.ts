@@ -1232,7 +1232,7 @@ export class VisitSummaryComponent implements OnInit, OnDestroy, AfterViewInit {
       drPersonUuid: this.provider?.person.uuid,
       patientAge: this.patient.person.age,
       patientGender: this.patient.person.gender,
-      location:this.clinicName
+      location:this.clinicName,
       callType: callType
     });
 
