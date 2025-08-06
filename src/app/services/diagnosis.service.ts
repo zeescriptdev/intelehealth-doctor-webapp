@@ -82,16 +82,15 @@ export class DiagnosisService {
     );
   }
   
+  getSnomedDiagnosisList(term: string): Observable<any> {
+    const url = `${environment.base}/getdiags/${term}`;
+    return this.http.get(url);
+  }
+  
   getSnomedCTDiagnosisList(term: string): Observable<any> {
     const url = `${environment.base}/getd/${term}`;
     return this.http.get(url);
   }
-
-  getSnomedCTDiagnosisList(term: string): Observable<any> {
-    const url = `${environment.base}/getd/${term}`;
-    return this.http.get(url);
-  }
-
   /**
   * Add SNOMED diagnosis
   * @param {string} conceptName - Concept name
