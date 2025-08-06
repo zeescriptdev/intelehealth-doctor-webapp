@@ -375,7 +375,7 @@ export class VisitSummaryComponent implements OnInit, OnDestroy {
               this.checkIfFollowUpPresent();
             }
             this.getAdditionalNote(visit.attributes);
-           // this.getAppointment(visit.uuid);
+            // this.getAppointment(visit.uuid);
             this.getVisitProvider(visit.encounters);
             this.getVitalObs(visit.encounters);
             this.getCheckUpReason(visit.encounters);
@@ -1042,20 +1042,20 @@ export class VisitSummaryComponent implements OnInit, OnDestroy {
     if (val && val.length >= 3) {
       this.diagnosisService.getDiagnosisList(val).subscribe(response => {
         if (response.results.length) {
-                 let diagnosisArray = [];
-                  response.results.forEach((concept: any) => {
-                    if(concept.mappings.length > 0) {
-                    concept.mappings.forEach(maping => {
-                      if (maping.conceptReferenceTerm.display.includes('ICD-10-WHO')) {
-                        diagnosisArray.push(concept.display);
-                      }
-                    });
-                   } else {
-                    if(concept.conceptClass.uuid === conceptIds.conceptDiagnosisClass) {
-                       diagnosisArray.push(concept.display);
-                    }
-                   }
-                  });
+          let diagnosisArray = [];
+          response.results.forEach((concept: any) => {
+            if (concept.mappings.length > 0) {
+              concept.mappings.forEach(maping => {
+                if (maping.conceptReferenceTerm.display.includes('ICD-10-WHO')) {
+                  diagnosisArray.push(concept.display);
+                }
+              });
+            } else {
+              if (concept.conceptClass.uuid === conceptIds.conceptDiagnosisClass) {
+                diagnosisArray.push(concept.display);
+              }
+            }
+          });
           this.diagnosisSubject.next(diagnosisArray);
         } else {
           this.diagnosisSubject.next([]);
@@ -1249,7 +1249,7 @@ export class VisitSummaryComponent implements OnInit, OnDestroy {
         value: insertValue,
         encounter: this.visitNotePresent.uuid
       }).subscribe((response: ObsModel) => {
-        this.medicines.unshift({ uuid: response.uuid, value: insertValue});
+        this.medicines.unshift({ uuid: response.uuid, value: insertValue });
         this.addMedicineForm.reset();
       });
     } else {
@@ -1644,86 +1644,95 @@ export class VisitSummaryComponent implements OnInit, OnDestroy {
     }
     this.coreService.openSharePrescriptionConfirmModal().subscribe((res: boolean) => {
       if (res) {
-        if (this.isVisitNoteProvider) {
-          if (this.provider.attributes.length) {
-            if (navigator.onLine) {
-              this.visitService.getVisitEncounters(this.route.snapshot.paramMap.get('id')).subscribe((visitDetails) => {
-                let visitComplete = visitDetails.encounters.find((visit) => (visit.display.match("Visit Complete") !== null));
-                if (!visitComplete && this.isVisitNoteProvider) {
-                  this.encounterService.postEncounter({
-                    patient: this.visit.patient.uuid,
-                    encounterType: 'bd1fbfaa-f5fb-4ebd-b75c-564506fc309e', // visit complete encounter type uuid
-                    encounterProviders: [
-                      {
-                        provider: this.provider.uuid,
-                        encounterRole: '73bbb069-9781-4afc-a9d1-54b6b2270e03', // Doctor encounter role
-                      },
-                    ],
-                    visit: this.visit.uuid,
-                    encounterDatetime: new Date(Date.now() - 30000),
-                    obs: [
-                      {
-                        concept: '7a9cb7bc-9ab9-4ff0-ae82-7a1bd2cca93e', // Doctor details concept uuid
-                        value: JSON.stringify(this.getDoctorDetails()),
-                      },
-                    ]
-                  }).subscribe((post) => {
-                    this.visitCompleted = true;
-                    this.notifyHwForAvailablePrescription();
+        if (this.provider.attributes.length) {
+          if (navigator.onLine) {
+              this.visitService.fetchVisitDetails(this.route.snapshot.paramMap.get('id')).subscribe((visitDetails) => {
+              let visitComplete = this.visitSummaryService.checkIfEncounterExists(visitDetails.encounters, visitTypes.VISIT_COMPLETE);
+              let visitNote = this.visitSummaryService.checkIfEncounterExists(visitDetails.encounters, visitTypes.VISIT_NOTE);
+              let isSameVisitNoteProvider = false;
+               visitNote?.encounterProviders?.forEach((p: EncounterProviderModel) => {
+                if (p.provider.uuid === this.provider.uuid) {
+                 isSameVisitNoteProvider = true;
+                }
+              });
+              if(!visitNote) {
+               this.coreService.openSharePrescriptionErrorModal({ msg: 'Unable to send the prescription as the visit has already moved to the awaiting state because the 1-hour prescription provision window has passed.', confirmBtnText: 'Go to dashboard' }).subscribe((c: boolean) => {
+                  if (c) {
+                    this.router.navigate(['/dashboard']);
+                  }
+                });
+              } else if (!visitComplete && isSameVisitNoteProvider) {
+                this.encounterService.postEncounter({
+                  patient: this.visit.patient.uuid,
+                  encounterType: 'bd1fbfaa-f5fb-4ebd-b75c-564506fc309e', // visit complete encounter type uuid
+                  encounterProviders: [
+                    {
+                      provider: this.provider.uuid,
+                      encounterRole: '73bbb069-9781-4afc-a9d1-54b6b2270e03', // Doctor encounter role
+                    },
+                  ],
+                  visit: this.visit.uuid,
+                  encounterDatetime: new Date(Date.now() - 30000),
+                  obs: [
+                    {
+                      concept: '7a9cb7bc-9ab9-4ff0-ae82-7a1bd2cca93e', // Doctor details concept uuid
+                      value: JSON.stringify(this.getDoctorDetails()),
+                    },
+                  ]
+                }).subscribe((post) => {
+                  this.visitCompleted = true;
+                  this.notifyHwForAvailablePrescription();
                   //  this.appointmentService.completeAppointment({ visitUuid: this.visit.uuid }).subscribe();
-                    this.linkSvc.shortUrl(`/i/${this.visit.uuid}`).subscribe({
-                      next: (linkSvcRes: ApiResponseModel) => {
-                        const link = linkSvcRes.data.hash;
-                        this.visitService.postAttribute(
-                          this.visit.uuid,
-                          {
-                            attributeType: '1e02db7e-e117-4b16-9a1e-6e583c3994da', /** Visit Attribute Type for Prescription Link */
-                            value: `/i/${link}`,
-                          }).subscribe();
-                        this.coreService.openSharePrescriptionSuccessModal().subscribe((result: string | boolean) => {
-                          if (result === 'view') {
-                            // Open visit summary modal here....
-                            this.coreService.openVisitPrescriptionModal({ uuid: this.visit.uuid });
-                          } else if (result === 'dashboard') {
-                            this.router.navigate(['/dashboard']);
-                          }
-                        });
-                      },
-                      error: (err) => {
-                        this.toastr.error(err.message);
-                        this.coreService.openSharePrescriptionSuccessModal().subscribe((result: string | boolean) => {
-                          if (result === 'view') {
-                            // Open visit summary modal here....
-                            this.coreService.openVisitPrescriptionModal({ uuid: this.visit.uuid });
-                          } else if (result === 'dashboard') {
-                            this.router.navigate(['/dashboard']);
-                          }
-                        });
-                      }
-                    });
+                  this.linkSvc.shortUrl(`/i/${this.visit.uuid}`).subscribe({
+                    next: (linkSvcRes: ApiResponseModel) => {
+                      const link = linkSvcRes.data.hash;
+                      this.visitService.postAttribute(
+                        this.visit.uuid,
+                        {
+                          attributeType: '1e02db7e-e117-4b16-9a1e-6e583c3994da', /** Visit Attribute Type for Prescription Link */
+                          value: `/i/${link}`,
+                        }).subscribe();
+                      this.coreService.openSharePrescriptionSuccessModal().subscribe((result: string | boolean) => {
+                        if (result === 'view') {
+                          // Open visit summary modal here....
+                          this.coreService.openVisitPrescriptionModal({ uuid: this.visit.uuid });
+                        } else if (result === 'dashboard') {
+                          this.router.navigate(['/dashboard']);
+                        }
+                      });
+                    },
+                    error: (err) => {
+                      this.toastr.error(err.message);
+                      this.coreService.openSharePrescriptionSuccessModal().subscribe((result: string | boolean) => {
+                        if (result === 'view') {
+                          // Open visit summary modal here....
+                          this.coreService.openVisitPrescriptionModal({ uuid: this.visit.uuid });
+                        } else if (result === 'dashboard') {
+                          this.router.navigate(['/dashboard']);
+                        }
+                      });
+                    }
                   });
-                } else {
-                  this.toastr.warning("Another doctor is viewing this case", 'Can\'t start the visit');
-                }
-              });
-            } else {
-              this.coreService.openSharePrescriptionErrorModal({ msg: 'Unable to send prescription due to poor network connection. Please try again or come back later', confirmBtnText: 'Try again' }).subscribe((c: boolean) => {
-                if (c) {
-                  // Do nothing
-                }
-              });
-            }
+                });
+              } else {
+                this.coreService.openSharePrescriptionErrorModal({ msg: 'Unable to send prescription since this visit already in progress with another doctor.', confirmBtnText: 'Go to dashboard' }).subscribe((c: boolean) => {
+                  if (c) {
+                    this.router.navigate(['/dashboard']);
+                  }
+                });
+              }
+            });
           } else {
-            this.coreService.openSharePrescriptionErrorModal({ msg: 'Unable to send prescription since your profile is not complete.', confirmBtnText: 'Go to profile' }).subscribe((c: boolean) => {
+            this.coreService.openSharePrescriptionErrorModal({ msg: 'Unable to send prescription due to poor network connection. Please try again or come back later', confirmBtnText: 'Try again' }).subscribe((c: boolean) => {
               if (c) {
-                this.router.navigate(['/dashboard/profile']);
+                // Do nothing
               }
             });
           }
         } else {
-          this.coreService.openSharePrescriptionErrorModal({ msg: 'Unable to send prescription since this visit already in progress with another doctor.', confirmBtnText: 'Go to dashboard' }).subscribe((c: boolean) => {
+          this.coreService.openSharePrescriptionErrorModal({ msg: 'Unable to send prescription since your profile is not complete.', confirmBtnText: 'Go to profile' }).subscribe((c: boolean) => {
             if (c) {
-              this.router.navigate(['/dashboard']);
+              this.router.navigate(['/dashboard/profile']);
             }
           });
         }
