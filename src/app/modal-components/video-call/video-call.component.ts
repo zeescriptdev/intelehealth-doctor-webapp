@@ -54,6 +54,7 @@ export class VideoCallComponent implements OnInit, OnDestroy {
   patientRegFields: string[] = [];
   recodingStarted = false;
   tableId: number;
+  location: string;
 
   callType: string;
   videoBitrateTooLow: boolean = false;
@@ -78,6 +79,7 @@ export class VideoCallComponent implements OnInit, OnDestroy {
   async ngOnInit() {
     this.patientRegFields = this.appConfigService.patientRegFields;
     this.room = this.data.patientId;
+    this.location = this.data.location;
     const patientVisitProvider: EncounterProviderModel = getCacheData(true, visitTypes.PATIENT_VISIT_PROVIDER);
     this.toUser = patientVisitProvider?.provider?.uuid;
     this.hwName = patientVisitProvider?.display?.split(":")?.[0];
@@ -252,7 +254,8 @@ console.log('AI Video Enabled:', this.isVideoEnabled);
         chwId: this.nurseId,
         patientId: this.data?.patientId,
         nurseName: this.hwName,
-        name: this.provider?.uuid
+        name: this.provider?.uuid,
+        location: this.location
       })
       .toPromise()
       .then((res: RecordingResponse) => {
