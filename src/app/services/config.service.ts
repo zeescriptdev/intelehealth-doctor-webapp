@@ -488,4 +488,81 @@ export class ConfigService {
     const url = `${this.baseURL}/home-screen/updateHomeScreenName/${id}`;
     return this.http.put(url, { lang });
   }
+
+  /**
+ * Get AI LLM
+ * @return {Observable<any>}
+ */
+  getAILLM(): Observable<any> {
+    const url = `${this.baseURL}/ai-llm/all`;
+    return this.http.get(url);
+  }  
+
+  /**
+   * Update AI LLM enabled status
+   * @param {boolean} id - id of vital
+   * @param {boolean} is_enabled - enabled status true/false
+   * @return {Observable<any>}
+   */
+  updateAILLMEnabledStatus(id: number, is_enabled: boolean): Observable<any> {
+    const url = `${this.baseURL}/ai-llm/updateIsEnabled/${id}`;
+    return this.http.put(url, { is_enabled });
+  }
+  
+  /**
+   * @returns {Observable<any>}
+   */
+  getAILLMByKey(key: String): Observable<any> {
+    const url = `${this.baseURL}/ai-llm/getByKey/${key}`;
+    return this.http.get(url);
+  }
+
+   /**
+ * Get AI LLM Recording
+ * @return {Observable<any>}
+ */
+  getAILLMRecording(): Observable<any> {
+    const url = `${this.baseURL}/ai-llm-recording/all`;
+    return this.http.get(url);
+  }
+
+    /**
+   * @returns {Observable<any>}
+   */
+  getAILLMRecordingByKey(key: String): Observable<any> {
+    const url = `${this.baseURL}/ai-llm-recording/getByKey/${key}`;
+    return this.http.get(url);
+  }
+/**
+   * Update AI LLM  recording enabled status
+   * @param {boolean} id - id of vital
+   * @param {boolean} is_enabled - enabled status true/false
+   * @return {Observable<any>}
+   */ 
+
+  updateAILLMRecordingEnabledStatus(id: number, is_enabled: boolean): Observable<any> {
+    const url = `${this.baseURL}/ai-llm-recording/updateIsEnabled/${id}`;
+    return this.http.put(url, { is_enabled });
+  } 
+
+  /**
+   * Update feature enabled status
+   * @param {boolean} id - id of vital
+   * @param {boolean} is_enabled - enabled status true/false
+   * @return {Observable<any>}
+   */
+  updateAILLMVideoRecording(id,isVideo: boolean): Observable<any> {
+    const url = `${this.baseURL}/ai-llm-recording/updateIsVideoEnabled/${id}`;
+    return this.http.put(url, { is_enabled: isVideo });
+  }
+  /**
+   * Update feature enabled status
+   * @param {boolean} id - id of vital
+   * @param {boolean} isAudio - enabled status true/false
+   * @return {Observable<any>}
+   */
+  updateAILLMAudioRecording(id: number, isAudio: boolean): Observable<any> {
+    const url = `${this.baseURL}/ai-llm-recording/updateIsAudioEnabled/${id}`;
+    return this.http.put(url, {is_enabled:isAudio });
+  }
 }
