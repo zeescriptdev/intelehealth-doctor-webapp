@@ -460,6 +460,8 @@ export class VideoCallComponent implements OnInit, OnDestroy {
       this.webrtcSvc.room.disconnect(true);
     }, 0);
     this.webrtcSvc.token = '';
+    this.cleanupVideoElement('localVideo');
+    this.cleanupVideoElement('remoteVideo');
     this.webrtcSvc.handleDisconnect();
     if (this.callDuration) {
       this.socketSvc.emitEvent("bye", {
@@ -481,6 +483,13 @@ export class VideoCallComponent implements OnInit, OnDestroy {
     this.close();
   }
 
+  cleanupVideoElement(videoElementId: string) {
+  const videoEl = document.getElementById(videoElementId) as HTMLVideoElement;
+  if (videoEl && videoEl.srcObject instanceof MediaStream) {
+    videoEl.srcObject.getTracks().forEach(track => track.stop());
+    videoEl.srcObject = null;
+  }
+}
   /**
   * Close modal
   * @return {void}
