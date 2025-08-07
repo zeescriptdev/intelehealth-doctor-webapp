@@ -27,14 +27,11 @@ export class AppConfigService {
   public sidebar_menus: { [key: string]: boolean };
   public patient_visit_sections: PatientVisitSection[]
   public dropdown_values: DropdownValuesModel[]
-  public ai_llm_section: boolean;
-  public ai_llm_recording: { [key: string]: boolean };
-  public ai_llm_recording_section:  boolean;
-  
+
   constructor(private http: HttpClient) { }
 
   load(): Promise<any> {
-    const promise = this.http.get(`${this.baseURL}/config/getPublishedConfig?ngsw-bypass=true`)
+    const promise = this.http.get(`${this.baseURL}/config/getPublishedConfig`)
       .toPromise()
       .then((data) => {
         this.setPatientVisitSections(data)

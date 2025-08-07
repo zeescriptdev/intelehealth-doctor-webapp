@@ -26,8 +26,8 @@ export class EncounterService {
   * @param {any} json - Payload for post observattion
   * @return {Observable<any>}
   */
-  postObs(json, ref:boolean=false): Observable<any> {
-    const url = `${this.baseURL}/obs${ref ? '?v=ref':''}`;
+  postObs(json): Observable<any> {
+    const url = `${this.baseURL}/obs`;
     return this.http.post(url, json);
   }
 

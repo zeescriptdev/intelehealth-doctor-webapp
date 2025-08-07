@@ -1,11 +1,11 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { BehaviorSubject, Observable, of } from 'rxjs';
+import { Observable, of } from 'rxjs';
+import { map } from 'rxjs/operators';
 import { environment } from '../../environments/environment';
 import { MatSnackBar } from "@angular/material/snack-bar";
 import { getCacheData, getEncounterProviderUUID } from '../utils/utility-functions';
 import { doctorDetails, conceptIds } from 'src/config/constant';
-import { map } from 'rxjs/operators';
 
 @Injectable({
   providedIn: 'root'
@@ -32,9 +32,9 @@ export class DiagnosisService {
   * @param {string} uuid - Observation uuid
   * @return {Observable<any>}
   */
-  deleteObs(uuid, purge:boolean=false): Observable<any> {
+  deleteObs(uuid): Observable<any> {
     if(uuid){
-      const url = `${this.baseURL}/obs/${uuid}${purge?'?purge=true':''}`;
+      const url = `${this.baseURL}/obs/${uuid}`;
       return this.http.delete(url);
     } else {
       return of(false)
