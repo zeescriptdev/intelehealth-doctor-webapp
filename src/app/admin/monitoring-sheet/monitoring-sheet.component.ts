@@ -97,15 +97,15 @@ export class MonitoringSheetComponent implements OnInit {
             if (["start_time", "end_time"].includes(col.key)) {
               let isOldRecord = new Date(item[col.key]) < new Date('2025-07-15');
               tableCol[col.key] = item[col.key] === null ? 'NA' : item[col.key];
-              col.key === 'start_time' ? tableCol['start_timeD'] =  item[col.key] === null ? 'NA' : this.formatMixedDate(item[col.key], isOldRecord) :
-                tableCol['end_timeD'] =  item[col.key] === null ? 'NA' : this.formatMixedDate(item[col.key], isOldRecord);
+              col.key === 'start_time' ? tableCol['start_timeD'] = item[col.key] === null ? 'NA' : this.formatMixedDate(item[col.key], isOldRecord) :
+                tableCol['end_timeD'] = item[col.key] === null ? 'NA' : this.formatMixedDate(item[col.key], isOldRecord);
             } else {
               tableCol[col.key] = item[col.key] === null ? 'NA' : item[col.key];
             }
           });
           return tableCol;
         });
-         this.callData.sort((a, b) => new Date(b.start_time).getTime() - new Date(a.start_time).getTime());
+        this.callData.sort((a, b) => new Date(b.start_time).getTime() - new Date(a.start_time).getTime());
       },
     });
   }
@@ -115,7 +115,7 @@ export class MonitoringSheetComponent implements OnInit {
     if (!flag) {
       m = m.utc();
     }
-    return m.format('DD MMM, YYYY, hh:mm a');
+    return m.format('DD MMM, YYYY, h:mm a');
 
   }
 
@@ -228,8 +228,17 @@ export class MonitoringSheetComponent implements OnInit {
   }
 
   exportCallData() {
-    const header = Object.keys(this.callData[0]);
-    const csv = this.callData.map((row) =>
+    let newCallData = JSON.parse(JSON.stringify(this.callData));
+    newCallData = newCallData.map(call => {
+      return {
+        ...call,
+        start_time: call.start_timeD,
+        end_time: call.end_timeD
+      };
+    });
+    let arryWithCol = newCallData.map(({ start_timeD, end_timeD, ...rest }) => rest);
+    const header = Object.keys(arryWithCol[0]);
+    const csv = arryWithCol.map((row) =>
       header
         .map((fieldName) => JSON.stringify(row[fieldName]))
         .join(',')
