@@ -75,7 +75,7 @@ export class AppConfigService {
     return fields.indexOf(fieldName) !== -1;
   }
  fetchAllLanguage(): Observable<any> {
-  return this.http.get<any>(`${this.baseURL}/language/getallEnablesdLanguages`);
+  return this.http.get<any>(`${this.baseURL}/language/getallEnabledLanguages`);
 } 
 }
     
