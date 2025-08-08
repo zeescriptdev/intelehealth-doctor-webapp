@@ -123,13 +123,11 @@ ngAfterViewInit() {
  //  this.updateThemeConfig(type,'');
   }
 
-  updateThemeConfig(key,value){
+  updateThemeConfig(key, value) {
     const formData = new FormData();
-    formData.append('key',key);
-    formData.append('value',value);
-    this.configService.uploadImage(this.themeConfigURL,'PUT',formData).subscribe(res=>{
-
-    })
+    formData.append('key', key);
+    formData.append('value', value);
+    return this.configService.uploadImage(this.themeConfigURL, 'PUT', formData);
   }
 
   onColorChange(value:string,key:string){
