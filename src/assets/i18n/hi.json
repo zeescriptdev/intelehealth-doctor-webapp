@@ -4978,7 +4978,29 @@
   "Use this if you wish to seek a second opinion from an external facility.": "यदि आप किसी बाहरी सुविधा से दूसरी राय लेना चाहते हैं तो इसका उपयोग करें।",
   "Review of Imaging": "इमेजिंग की समीक्षा",
   "Review with Reports": "रिपोर्ट्स के साथ समीक्षा",
-  "Reschedule Referral": "रेफरल पुनर्निर्धारित करें"
+  "Reschedule Referral": "रेफरल पुनर्निर्धारित करें",
+  "Today's Appointments": "आज की अपॉइंटमेंट्स",
+  "Upcoming Appointments": "आगामी अपॉइंटमेंट्स",
+  "Pending Visits": "लंबित विज़िट्स",
+  "(Case Summary Completed)": "(मामले का सारांश पूर्ण हुआ)",
+  "Patient ID": "मरीज की आईडी",
+  "Type of Case": "मामले का प्रकार",
+  "Date & Time": "तारीख और समय",
+  "Apply": "लागू करें",
+  "Filter": "फ़िल्टर",
+  "Reset": "रीसेट करें",
+  "Welcome to Help Tour": "सहायता यात्रा में आपका स्वागत है",
+  "Welcome to the Help Tour. This guide will walk you through the main sections of the app.": "सहायता यात्रा में आपका स्वागत है। यह गाइड ऐप के मुख्य अनुभागों से आपको परिचित कराएगा।",
+  "Back": "वापस",
+  "Next": "आगे",
+  "Follow up": "अनुवर्ती",
+  "Case Summary": "मामले का सारांश",
+  "Call Details": "कॉल विवरण",
+  "Call Duration": "कॉल की अवधि",
+  "Diagnosis Details": "निदान विवरण",
+  "Discussion Summary": "चर्चा का सारांश",
+ "Recommendation (including Advice, Medications, Investigations, Referrals, and Follow-up)": "सिफारिश (जिसमें सलाह, दवाएं, जांच, रेफरल और फॉलो-अप शामिल हैं)",
+  "View Prescription": "पर्चा देखें"
 }
 
 
