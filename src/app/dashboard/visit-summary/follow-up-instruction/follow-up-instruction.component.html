@@ -1,29 +1,30 @@
-<mat-expansion-panel [expanded]="true" #panel3 hideToggle>
-    <mat-expansion-panel-header>
-      <mat-panel-title>
-        <div class="intel-accordion-title">
-          <img src="assets/svgs/note.svg" alt="" width="44px" />
-          <h6 class="mb-0 ml-2">{{title|translate}}</h6>
-        </div>
-      </mat-panel-title>
-      <mat-icon>{{ panel3.expanded ? "remove" : "add" }}</mat-icon>
-    </mat-expansion-panel-header>
-    <form
-      *ngIf="!isMCCUser"
-      class="mt-3"
-      [formGroup]="addInstructionForm"
-      (ngSubmit)="addInstructions()"
-    >
-      <div class="form-group">
-        <textarea
-          class="form-control"
-          rows="3"
-          placeholder="{{'Type here'|translate}}"
-          formControlName="instructions"
-          data-test-id="etNote"
-          (keyup)="autoGrowTextZone($event)"
-          [attr.disabled]="(isMCCUser || !isVisitNoteProvider || visitEnded)? 'disabled' : null"
-        ></textarea>
-      </div>
-    </form>
+<mat-expansion-panel [expanded]="true" #panel3 hideToggle data-test-id="expansionPanel">
+  <mat-expansion-panel-header data-test-id="expansionPanelHeader">
+    <mat-panel-title data-test-id="panelTitle">
+    <div class="intel-accordion-title" data-test-id="accordionTitle">
+      <img src="assets/svgs/note.svg" alt="" width="44px" />
+      <h6 class="mb-0 ml-2" data-test-id="panelTitleText">{{title|translate}}</h6>
+    </div>
+    </mat-panel-title>
+    <mat-icon data-test-id="panelIcon">{{ panel3.expanded ? "remove" : "add" }}</mat-icon>
+  </mat-expansion-panel-header>
+  <form
+    *ngIf="!isMCCUser"
+    class="mt-3"
+    [formGroup]="addInstructionForm"
+    (ngSubmit)="addInstructions()"
+    data-test-id="instructionForm"
+  >
+    <div class="form-group" data-test-id="formGroup">
+    <textarea
+      class="form-control"
+      rows="3"
+      placeholder="{{'Type here'|translate}}"
+      formControlName="instructions"
+      data-test-id="etNote"
+      (keyup)="autoGrowTextZone($event)"
+      [attr.disabled]="(isMCCUser || !isVisitNoteProvider || visitEnded)? 'disabled' : null"
+    ></textarea>
+    </div>
+  </form>
   </mat-expansion-panel>
