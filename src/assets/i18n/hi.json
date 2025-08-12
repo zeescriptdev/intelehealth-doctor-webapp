@@ -5000,7 +5000,24 @@
   "Diagnosis Details": "निदान विवरण",
   "Discussion Summary": "चर्चा का सारांश",
  "Recommendation (including Advice, Medications, Investigations, Referrals, and Follow-up)": "सिफारिश (जिसमें सलाह, दवाएं, जांच, रेफरल और फॉलो-अप शामिल हैं)",
-  "View Prescription": "पर्चा देखें"
+  "View Prescription": "पर्चा देखें",
+ "Additional information": "अतिरिक्त जानकारी",
+  "other": "अन्य",
+  "Case Summary Completed": "मामले का सारांश पूर्ण",
+  "Type of Case": "मामले का प्रकार",
+  "Medical History": "चिकित्सा इतिहास",
+  "Presenting Symptoms": "प्रस्तुत लक्षण",
+  "Investigation": "जांच",
+  "Diagnosis": "निदान",
+  "Treatment History": "उपचार का इतिहास",
+  "Medication": "दवा",
+  "Teleconsult Reasons": "टेली परामर्श के कारण",
+  "Close": "बंद करें",
+  "TNM": "टीएनएम",
+  "Download": "डाउनलोड",
+  "Today's Appointment": "आज की नियुक्ति",
+  "patient's complaint": "रोगी की शिकायत",
+  "Prior treatment sought": "पहले लिया गया उपचार"
 }
 
 
