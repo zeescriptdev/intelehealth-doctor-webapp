@@ -1,52 +1,50 @@
 <mat-drawer-container class="sidenav-container" autosize>
   <mat-drawer #drawer class="admin-sidenav" [mode]="_mode" [opened]="_opened">
-  <div class="menu-items-wrapper" [ngClass]="{ 'collapsed' : collapsed }" data-test-id="menu-items-wrapper">
-  <div class="sidenav-logo" data-test-id="sidenav-logo">
-    <div class="sidenav-toggle" data-test-id="sidenav-toggle-wrapper">
-      <button type="button" (click)="collapsed = !collapsed" data-test-id="btnToggleSidenav">
-        <img [src]="getUrl()" alt="">
-      </button>
+    <div class="menu-items-wrapper" [ngClass]="{ 'collapsed' : collapsed }" data-test-id="menu-items-wrapper">
+      <div class="sidenav-logo" data-test-id="sidenav-logo">
+        <div class="sidenav-toggle" data-test-id="sidenav-toggle-wrapper">
+          <button type="button" (click)="collapsed = !collapsed" data-test-id="btnToggleSidenav">
+            <img [src]="getUrl()" alt="">
+          </button>
+        </div>
+        <img *ngIf="!collapsed" src="{{ configPublicUrl + logoImageURL }}" alt="" width="100%"
+          data-test-id="imgFullLogo">
+        <img *ngIf="collapsed" src="{{ configPublicUrl + thumbnailLogoURL }}" alt="" width="100%"
+          data-test-id="imgThumbnailLogo">
+      </div>
+      <ul class="admin-nav" data-test-id="admin-nav-list">
+        <app-sidebar-menu-list (toggleSidebar)="toggleSidebar()" [drUnread]="drUnread" [pvs]="pvs"
+          [menus]="sidebarMenus" [adminUnread]="adminUnread" data-test-id="sidebar-menu-list"></app-sidebar-menu-list>
+        <li class="nav-item" (click)="toggleSidebar()" data-test-id="listItemLogout">
+          <mat-divider class="mb-2"></mat-divider>
+          <a class="nav-item-link" href="javascript:void(0)" (click)="logout()" data-test-id="linkLogout">
+            <img src="assets/svgs/power.svg" alt="">
+            <span>{{ 'Log-out' | translate }}</span>
+          </a>
+        </li>
+      </ul>
     </div>
-    <img *ngIf="!collapsed" src="{{ configPublicUrl + logoImageURL }}" alt="" width="100%" data-test-id="imgFullLogo">
-    <img *ngIf="collapsed" src="{{ configPublicUrl + thumbnailLogoURL }}" alt="" width="100%" data-test-id="imgThumbnailLogo">
-  </div>
-  <ul class="admin-nav" data-test-id="admin-nav-list">
-    <app-sidebar-menu-list 
-      (toggleSidebar)="toggleSidebar()"
-      [drUnread]="drUnread"
-      [pvs]="pvs"
-      [menus]="sidebarMenus"
-      [adminUnread]="adminUnread"
-      data-test-id="sidebar-menu-list"
-    ></app-sidebar-menu-list>
-    <li class="nav-item" (click)="toggleSidebar()" data-test-id="listItemLogout">
-      <mat-divider class="mb-2"></mat-divider>
-      <a class="nav-item-link" href="javascript:void(0)" (click)="logout()" data-test-id="linkLogout">
-        <img src="assets/svgs/power.svg" alt="">
-        <span>{{ 'Log-out' | translate }}</span>
-      </a>
-    </li>
-  </ul>
-</div>
 
   </mat-drawer>
 
   <div class="admin-sidenav-content">
     <div class="header-main">
-      <nav class="navbar navbar-expand-lg navbar-light" aria-label="Header menu">
+      <nav class="navbar navbar-expand-lg navbar-light" aria-label="Header menu" data-test-id="header-main-nav">
         <a class="navbar-brand">
           <button class="mr-2" mat-icon-button (click)="drawer.toggle()" *ngIf="isMobile"
             data-test-id="btnToggleDrawer">
             <mat-icon>menu</mat-icon>
           </button>
-          <div id="searchPatientsSection" class="header-title d-flex justify-content-between align-items-center" *ngIf="header?.title">
+          <div id="searchPatientsSection" class="header-title d-flex justify-content-between align-items-center"
+            *ngIf="header?.title" data-test-id="searchPatientsSection">
             <ng-container *ngIf="header.title != 'Dashboard'">
               <img src="{{header?.imgUrl}}" alt="" width="44px">
-              <h6 class="mb-0 ml-2">{{header?.title | translate}}</h6>
-              <mat-icon *ngIf="header?.info" aria-hidden="false" aria-label="help icon">help_outline</mat-icon>
+              <h6 class="mb-0 ml-2" data-test-id="headerTitle">{{header?.title | translate}}</h6>
+              <mat-icon *ngIf="header?.info" aria-hidden="false" aria-label="help icon"
+                data-test-id="iconHelp">help_outline</mat-icon>
             </ng-container>
-            <ng-container *ngIf="header.title == 'Dashboard'">
-              <form [formGroup]="searchForm">
+            <ng-container *ngIf="header.title == 'Dashboard'" data-test-id="dashboard-search">
+              <form [formGroup]="searchForm" data-test-id="searchForm">
                 <div class="input-group">
                   <input type="text" class="form-control" formControlName="keyword"
                     placeholder="{{'Search patient'| translate}}" aria-label="Username" aria-describedby="basic-addon1"
@@ -65,12 +63,12 @@
               </form>
             </ng-container>
           </div>
-          <nav aria-label="breadcrumb" *ngIf="!header?.title">
+          <nav aria-label="breadcrumb" *ngIf="!header?.title" data-test-id="breadcrumbNav">
             <ol class="breadcrumb">
-              <ng-container *ngFor="let breadcrumb of breadcrumbs;let x=index; let last=last;">
+              <ng-container *ngFor="let breadcrumb of breadcrumbs; let x = index; let last = last;">
                 <li class="breadcrumb-item" *ngIf="!last">
-                  <a [routerLink]="breadcrumb.url" data-test-id="{{'breadcrumb'+x}}">{{ breadcrumb.label |
-                    translate}}</a>
+                  <a [routerLink]="breadcrumb.url" data-test-id="{{'breadcrumb' + x}}">{{ breadcrumb.label | translate
+                    }}</a>
                 </li>
                 <li class="breadcrumb-item" aria-current="page" *ngIf="last">
                   {{ breadcrumb.label | translate }}
@@ -85,118 +83,57 @@
           <mat-icon>keyboard_arrow_down</mat-icon>
         </button>
 
-        <div class="collapse navbar-collapse" id="navbarSupportedContent">
-          <ul class="navbar-nav ml-auto">
+        <div class="collapse navbar-collapse" id="navbarSupportedContent" data-test-id="navbarSupportedContent">
+          <ul class="navbar-nav ml-auto" data-test-id="navbarNavList">
             <li class="nav-item">
-              <div class="d-flex align-items-center justify-content-end">
-                <button mat-button class="help-tour-button mr-1 p-1" (click)="tourSvc.initHelpTour()" *ngxPermissionsExcept="['ORGANIZATIONAL: SYSTEM ADMINISTRATOR']" data-test-id="btnHelpTour">
+              <div class="d-flex align-items-center justify-content-end" data-test-id="userControls">
+                <button mat-button class="help-tour-button mr-1 p-1" (click)="tourSvc.initHelpTour()"
+                  *ngxPermissionsExcept="['ORGANIZATIONAL: SYSTEM ADMINISTRATOR']" data-test-id="btnHelpTour">
                   <img src="assets/svgs/help-tour.svg" alt="Help Tour">
                 </button>
-                <button mat-button class="notification-button mr-1" (click)="openHelpMenu()" *ngxPermissionsExcept="['ORGANIZATIONAL: SYSTEM ADMINISTRATOR']" data-test-id="btnHelpMenu">
-                  <mat-icon>help_outline</mat-icon> <div class="dot" *ngIf="doctorAdminUnread">{{doctorAdminUnread}}</div>
+                <button mat-button class="notification-button mr-1" (click)="openHelpMenu()"
+                  *ngxPermissionsExcept="['ORGANIZATIONAL: SYSTEM ADMINISTRATOR']" data-test-id="btnHelpMenu">
+                  <mat-icon>help_outline</mat-icon>
+                  <div class="dot" *ngIf="doctorAdminUnread" data-test-id="adminUnreadDot">{{ doctorAdminUnread }}</div>
                 </button>
-                <button mat-button [matMenuTriggerFor]="notificationmenu" class="notification-button mr-3" data-test-id="btnNotificationSnooze">
+                <button mat-button [matMenuTriggerFor]="notificationmenu" class="notification-button mr-3"
+                  data-test-id="btnNotificationSnooze">
                   <mat-icon *ngIf="notificationEnabled && !snoozed">notifications_none</mat-icon>
                   <mat-icon *ngIf="notificationEnabled && snoozed">notifications_paused</mat-icon>
                   <mat-icon *ngIf="!notificationEnabled">notifications_off</mat-icon>
                 </button>
                 <mat-menu #notificationmenu="matMenu" class="notification-menu">
-                  <ng-container *ngIf="notificationEnabled && !snoozed">
-                    <button mat-menu-item (click)="snoozeNotification('30m')">{{ "Snooze for 30 Minutes" | translate }}</button>
-                    <button mat-menu-item (click)="snoozeNotification('1h')">{{ "Snooze for 1 Hour" | translate }}</button>
-                    <button mat-menu-item (click)="snoozeNotification('2h')">{{ "Snooze for 2 Hours" | translate }}</button>
-                    <button mat-menu-item (click)="toggleNotification()">{{ "Turn Off" | translate }}</button>
-                  </ng-container>
-                  <ng-container *ngIf="notificationEnabled && snoozed">
-                    <button mat-menu-item (click)="snoozeNotification('off')">{{ "Awake notification" | translate }}</button>
-                    <button mat-menu-item (click)="toggleNotification()">{{ "Turn Off" | translate }}</button>
-                  </ng-container>
-                  <ng-container *ngIf="!notificationEnabled">
-                    <button mat-menu-item (click)="toggleNotification()">{{ "Turn On" | translate }}</button>
-                  </ng-container>
+                  <!-- menu items -->
                 </mat-menu>
                 <div class="user-info-wrap mr-3" routerLink="/dashboard/profile" data-test-id="navProfile">
                   <img class="user-img mr-3" src="{{profilePic}}" alt="">
-                  <h6 class="user-title mb-0">{{'Hello' |translate}}, {{ (user)? user?.person?.display :
-                    ('User'|translate) }} <img src="assets/images/Waving-Hand-Emoji.png" alt="" height="100%"></h6>
+                  <h6 class="user-title mb-0" data-test-id="greetingUser">
+                    {{ 'Hello' | translate }}, {{ (user)? user?.person?.display : ('User' | translate) }}
+                    <img src="assets/images/Waving-Hand-Emoji.png" alt="" height="100%">
+                  </h6>
                 </div>
-                <button mat-icon-button [matMenuTriggerFor]="beforeMenu"
-                  aria-label="Example icon button with a vertical three dot icon" data-test-id="btnProfileDropdown">
+                <button mat-icon-button [matMenuTriggerFor]="beforeMenu" aria-label="Profile menu"
+                  data-test-id="btnProfileDropdown">
                   <mat-icon>more_vert</mat-icon>
                 </button>
-                <mat-menu #beforeMenu="matMenu" xPosition="before" class="profile-dropdown">
-                  <button mat-menu-item (click)="changePassword()" data-test-id="btnChangePasswordMain">{{'Change Password' | translate}}</button>
-                  <button mat-menu-item (click)="selectLanguage()" data-test-id="btnSelectLanguageMain">{{'Change Language' | translate}}</button>
-                  <button mat-menu-item routerLink="/dashboard/profile" data-test-id="btnProfileMain">{{'Profile' | translate}}</button>
+                <mat-menu #beforeMenu="matMenu" xPosition="before" class="profile-dropdown"
+                  data-test-id="profileDropdownMenu">
+                  <button mat-menu-item (click)="changePassword()" data-test-id="btnChangePasswordMain">{{ 'Change
+                    Password' | translate }}</button>
+                  <button mat-menu-item (click)="selectLanguage()" data-test-id="btnSelectLanguageMain">{{ 'Change
+                    Language' | translate }}</button>
+                  <button mat-menu-item routerLink="/dashboard/profile" data-test-id="btnProfileMain">{{ 'Profile' |
+                    translate }}</button>
                 </mat-menu>
               </div>
-            </div>
-          </form>
-        </ng-container>
-      </div>
-      <nav aria-label="breadcrumb" *ngIf="!header?.title" data-test-id="breadcrumbNav">
-        <ol class="breadcrumb">
-          <ng-container *ngFor="let breadcrumb of breadcrumbs; let x = index; let last = last;">
-            <li class="breadcrumb-item" *ngIf="!last">
-              <a [routerLink]="breadcrumb.url" data-test-id="{{'breadcrumb' + x}}">{{ breadcrumb.label | translate }}</a>
             </li>
-            <li class="breadcrumb-item" aria-current="page" *ngIf="last">
-              {{ breadcrumb.label | translate }}
-            </li>
-          </ng-container>
-        </ol>
+          </ul>
+        </div>
       </nav>
-    </a>
-    <button class="navbar-toggler" type="button" mat-icon-button data-toggle="collapse"
-      data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false"
-      aria-label="Toggle navigation" data-test-id="btnToggleNavbar">
-      <mat-icon>keyboard_arrow_down</mat-icon>
-    </button>
-
-    <div class="collapse navbar-collapse" id="navbarSupportedContent" data-test-id="navbarSupportedContent">
-      <ul class="navbar-nav ml-auto" data-test-id="navbarNavList">
-        <li class="nav-item">
-          <div class="d-flex align-items-center justify-content-end" data-test-id="userControls">
-            <button mat-button class="help-tour-button mr-1 p-1" (click)="tourSvc.initHelpTour()"
-              *ngxPermissionsExcept="['ORGANIZATIONAL: SYSTEM ADMINISTRATOR']" data-test-id="btnHelpTour">
-              <img src="assets/svgs/help-tour.svg" alt="Help Tour">
-            </button>
-            <button mat-button class="notification-button mr-1" (click)="openHelpMenu()"
-              *ngxPermissionsExcept="['ORGANIZATIONAL: SYSTEM ADMINISTRATOR']" data-test-id="btnHelpMenu">
-              <mat-icon>help_outline</mat-icon>
-              <div class="dot" *ngIf="doctorAdminUnread" data-test-id="adminUnreadDot">{{ doctorAdminUnread }}</div>
-            </button>
-            <button mat-button [matMenuTriggerFor]="notificationmenu" class="notification-button mr-3" data-test-id="btnNotificationSnooze">
-              <mat-icon *ngIf="notificationEnabled && !snoozed">notifications_none</mat-icon>
-              <mat-icon *ngIf="notificationEnabled && snoozed">notifications_paused</mat-icon>
-              <mat-icon *ngIf="!notificationEnabled">notifications_off</mat-icon>
-            </button>
-            <mat-menu #notificationmenu="matMenu" class="notification-menu">
-              <!-- menu items -->
-            </mat-menu>
-            <div class="user-info-wrap mr-3" routerLink="/dashboard/profile" data-test-id="navProfile">
-              <img class="user-img mr-3" src="{{profilePic}}" alt="">
-              <h6 class="user-title mb-0" data-test-id="greetingUser">
-                {{ 'Hello' | translate }}, {{ (user)? user?.person?.display : ('User' | translate) }}
-                <img src="assets/images/Waving-Hand-Emoji.png" alt="" height="100%">
-              </h6>
-            </div>
-            <button mat-icon-button [matMenuTriggerFor]="beforeMenu" aria-label="Profile menu" data-test-id="btnProfileDropdown">
-              <mat-icon>more_vert</mat-icon>
-            </button>
-            <mat-menu #beforeMenu="matMenu" xPosition="before" class="profile-dropdown" data-test-id="profileDropdownMenu">
-              <button mat-menu-item (click)="changePassword()" data-test-id="btnChangePasswordMain">{{ 'Change Password' | translate }}</button>
-              <button mat-menu-item (click)="selectLanguage()" data-test-id="btnSelectLanguageMain">{{ 'Change Language' | translate }}</button>
-              <button mat-menu-item routerLink="/dashboard/profile" data-test-id="btnProfileMain">{{ 'Profile' | translate }}</button>
-            </mat-menu>
-          </div>
-        </li>
-      </ul>
     </div>
-  </nav>
-</div>
 
-    <div class="main-container" data-test-id="mainContainerRroute" [class.pb-0]="this.routeUrl?.includes('messages')||this.routeUrl?.includes('support')">
+    <div class="main-container" data-test-id="mainContainerRroute"
+      [class.pb-0]="this.routeUrl?.includes('messages')||this.routeUrl?.includes('support')">
       <router-outlet></router-outlet>
       <!-- <div class="help-menu-container d-flex flex-column" *ngIf="routeUrl.includes('/help') && !dialogRef && !dialogRef2">
         <div class="menu-item">
