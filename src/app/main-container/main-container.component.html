@@ -33,31 +33,102 @@
 
   <div class="admin-sidenav-content">
     <div class="header-main">
-  <nav class="navbar navbar-expand-lg navbar-light" aria-label="Header menu" data-test-id="header-main-nav">
-    <a class="navbar-brand">
-      <button class="mr-2" mat-icon-button (click)="drawer.toggle()" *ngIf="isMobile" data-test-id="btnToggleDrawer">
-        <mat-icon>menu</mat-icon>
-      </button>
-      <div id="searchPatientsSection" class="header-title d-flex justify-content-between align-items-center" *ngIf="header?.title" data-test-id="searchPatientsSection">
-        <ng-container *ngIf="header.title != 'Dashboard'">
-          <img src="{{header?.imgUrl}}" alt="" width="44px">
-          <h6 class="mb-0 ml-2" data-test-id="headerTitle">{{header?.title | translate}}</h6>
-          <mat-icon *ngIf="header?.info" aria-hidden="false" aria-label="help icon" data-test-id="iconHelp">help_outline</mat-icon>
-        </ng-container>
-        <ng-container *ngIf="header.title == 'Dashboard'" data-test-id="dashboard-search">
-          <form [formGroup]="searchForm" data-test-id="searchForm">
-            <div class="input-group">
-              <input type="text" class="form-control" formControlName="keyword"
-                placeholder="{{'Search patient'| translate}}" aria-label="Username"
-                aria-describedby="basic-addon1" (keyup.enter)="search()" data-test-id="etSearchPatient">
-              <div class="input-group-append">
-                <span class="input-group-text click p-0" id="basic-addon1" *ngIf="searchForm.value.keyword"
-                  (click)="resetSearch()" data-test-id="spanResetSearchPatient">
-                  <mat-icon class="ml-0" style="line-height: normal;">close</mat-icon>
-                </span>
-                <span class="input-group-text click" id="basic-addon2" (click)="search()" data-test-id="spanSearchPatient">
-                  <img src="assets/svgs/search-icon.svg" alt="" width="20px" height="20px">
-                </span>
+      <nav class="navbar navbar-expand-lg navbar-light" aria-label="Header menu">
+        <a class="navbar-brand">
+          <button class="mr-2" mat-icon-button (click)="drawer.toggle()" *ngIf="isMobile"
+            data-test-id="btnToggleDrawer">
+            <mat-icon>menu</mat-icon>
+          </button>
+          <div id="searchPatientsSection" class="header-title d-flex justify-content-between align-items-center" *ngIf="header?.title">
+            <ng-container *ngIf="header.title != 'Dashboard'">
+              <img src="{{header?.imgUrl}}" alt="" width="44px">
+              <h6 class="mb-0 ml-2">{{header?.title | translate}}</h6>
+              <mat-icon *ngIf="header?.info" aria-hidden="false" aria-label="help icon">help_outline</mat-icon>
+            </ng-container>
+            <ng-container *ngIf="header.title == 'Dashboard'">
+              <form [formGroup]="searchForm">
+                <div class="input-group">
+                  <input type="text" class="form-control" formControlName="keyword"
+                    placeholder="{{'Search patient'| translate}}" aria-label="Username" aria-describedby="basic-addon1"
+                    (keyup.enter)="search()" data-test-id="etSearchPatient">
+                  <div class="input-group-append">
+                    <span class="input-group-text click p-0" id="basic-addon1" *ngIf="searchForm.value.keyword"
+                      (click)="resetSearch()" data-test-id="spanResetSearchPatient">
+                      <mat-icon class="ml-0" style="line-height: normal;">close</mat-icon>
+                    </span>
+                    <span class="input-group-text click" id="basic-addon2" (click)="search()"
+                      data-test-id="spanSearchPatient">
+                      <img src="assets/svgs/search-icon.svg" alt="" width="20px" height="20px">
+                    </span>
+                  </div>
+                </div>
+              </form>
+            </ng-container>
+          </div>
+          <nav aria-label="breadcrumb" *ngIf="!header?.title">
+            <ol class="breadcrumb">
+              <ng-container *ngFor="let breadcrumb of breadcrumbs;let x=index; let last=last;">
+                <li class="breadcrumb-item" *ngIf="!last">
+                  <a [routerLink]="breadcrumb.url" data-test-id="{{'breadcrumb'+x}}">{{ breadcrumb.label |
+                    translate}}</a>
+                </li>
+                <li class="breadcrumb-item" aria-current="page" *ngIf="last">
+                  {{ breadcrumb.label | translate }}
+                </li>
+              </ng-container>
+            </ol>
+          </nav>
+        </a>
+        <button class="navbar-toggler" type="button" mat-icon-button data-toggle="collapse"
+          data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false"
+          aria-label="Toggle navigation" data-test-id="btnToggleNavbar">
+          <mat-icon>keyboard_arrow_down</mat-icon>
+        </button>
+
+        <div class="collapse navbar-collapse" id="navbarSupportedContent">
+          <ul class="navbar-nav ml-auto">
+            <li class="nav-item">
+              <div class="d-flex align-items-center justify-content-end">
+                <button mat-button class="help-tour-button mr-1 p-1" (click)="tourSvc.initHelpTour()" *ngxPermissionsExcept="['ORGANIZATIONAL: SYSTEM ADMINISTRATOR']" data-test-id="btnHelpTour">
+                  <img src="assets/svgs/help-tour.svg" alt="Help Tour">
+                </button>
+                <button mat-button class="notification-button mr-1" (click)="openHelpMenu()" *ngxPermissionsExcept="['ORGANIZATIONAL: SYSTEM ADMINISTRATOR']" data-test-id="btnHelpMenu">
+                  <mat-icon>help_outline</mat-icon> <div class="dot" *ngIf="doctorAdminUnread">{{doctorAdminUnread}}</div>
+                </button>
+                <button mat-button [matMenuTriggerFor]="notificationmenu" class="notification-button mr-3" data-test-id="btnNotificationSnooze">
+                  <mat-icon *ngIf="notificationEnabled && !snoozed">notifications_none</mat-icon>
+                  <mat-icon *ngIf="notificationEnabled && snoozed">notifications_paused</mat-icon>
+                  <mat-icon *ngIf="!notificationEnabled">notifications_off</mat-icon>
+                </button>
+                <mat-menu #notificationmenu="matMenu" class="notification-menu">
+                  <ng-container *ngIf="notificationEnabled && !snoozed">
+                    <button mat-menu-item (click)="snoozeNotification('30m')">{{ "Snooze for 30 Minutes" | translate }}</button>
+                    <button mat-menu-item (click)="snoozeNotification('1h')">{{ "Snooze for 1 Hour" | translate }}</button>
+                    <button mat-menu-item (click)="snoozeNotification('2h')">{{ "Snooze for 2 Hours" | translate }}</button>
+                    <button mat-menu-item (click)="toggleNotification()">{{ "Turn Off" | translate }}</button>
+                  </ng-container>
+                  <ng-container *ngIf="notificationEnabled && snoozed">
+                    <button mat-menu-item (click)="snoozeNotification('off')">{{ "Awake notification" | translate }}</button>
+                    <button mat-menu-item (click)="toggleNotification()">{{ "Turn Off" | translate }}</button>
+                  </ng-container>
+                  <ng-container *ngIf="!notificationEnabled">
+                    <button mat-menu-item (click)="toggleNotification()">{{ "Turn On" | translate }}</button>
+                  </ng-container>
+                </mat-menu>
+                <div class="user-info-wrap mr-3" routerLink="/dashboard/profile" data-test-id="navProfile">
+                  <img class="user-img mr-3" src="{{profilePic}}" alt="">
+                  <h6 class="user-title mb-0">{{'Hello' |translate}}, {{ (user)? user?.person?.display :
+                    ('User'|translate) }} <img src="assets/images/Waving-Hand-Emoji.png" alt="" height="100%"></h6>
+                </div>
+                <button mat-icon-button [matMenuTriggerFor]="beforeMenu"
+                  aria-label="Example icon button with a vertical three dot icon" data-test-id="btnProfileDropdown">
+                  <mat-icon>more_vert</mat-icon>
+                </button>
+                <mat-menu #beforeMenu="matMenu" xPosition="before" class="profile-dropdown">
+                  <button mat-menu-item (click)="changePassword()" data-test-id="btnChangePasswordMain">{{'Change Password' | translate}}</button>
+                  <button mat-menu-item (click)="selectLanguage()" data-test-id="btnSelectLanguageMain">{{'Change Language' | translate}}</button>
+                  <button mat-menu-item routerLink="/dashboard/profile" data-test-id="btnProfileMain">{{'Profile' | translate}}</button>
+                </mat-menu>
               </div>
             </div>
           </form>

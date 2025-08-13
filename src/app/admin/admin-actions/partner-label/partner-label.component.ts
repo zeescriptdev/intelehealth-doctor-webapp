@@ -1,4 +1,4 @@
-import { Component, OnInit ,ViewChildren,AfterViewInit,QueryList} from '@angular/core';
+import { Component, OnInit, ViewChildren, AfterViewInit, QueryList } from '@angular/core';
 import { environment } from "../../../../environments/environment";
 import { ConfigService } from 'src/app/services/config.service';
 import { PageTitleService } from 'src/app/core/page-title/page-title.service';
@@ -7,16 +7,15 @@ import { getCacheData } from 'src/app/utils/utility-functions';
 import { languages } from 'src/config/constant';
 import { ToastrService } from 'ngx-toastr';
 import { FileUploadComponent } from 'src/app/core/components/file-upload/file-upload.component';
-import { Subscription } from 'rxjs';
 
 @Component({
   selector: 'app-partner-label',
   templateUrl: './partner-label.component.html',
   styleUrls: ['./partner-label.component.scss']
 })
-export class PartnerLabelComponent implements OnInit,AfterViewInit{
+export class PartnerLabelComponent implements OnInit, AfterViewInit {
 
-@ViewChildren(FileUploadComponent) uploadComponents!: QueryList<FileUploadComponent>;
+  @ViewChildren(FileUploadComponent) uploadComponents!: QueryList<FileUploadComponent>;
 
   baseURL = environment.configURL;
   themeConfigURL = `${this.baseURL}/theme_config/updateThemeConfig`;
@@ -28,8 +27,8 @@ export class PartnerLabelComponent implements OnInit,AfterViewInit{
   pendingDeleteLogoRequest: string;
   pendingDeleteThumbnailRequest: string;
 
-  commonUploadImageOptions = { 
-    uploadMsg : 'File size (5-50kb), Image size (512x512px), Format (PNG)', 
+  commonUploadImageOptions = {
+    uploadMsg: 'File size (5-50kb), Image size (512x512px), Format (PNG)',
     fileBaseURL: environment.configPublicURL,
     maxSize: 50,
     minSize: 5,
@@ -37,7 +36,7 @@ export class PartnerLabelComponent implements OnInit,AfterViewInit{
   };
 
   logoUploadImageOptions = {
-    formData:{
+    formData: {
       key: 'logo',
       value: ''
     },
@@ -46,7 +45,7 @@ export class PartnerLabelComponent implements OnInit,AfterViewInit{
   }
 
   thumbnailLogoUploadImageOptions = {
-    formData:{
+    formData: {
       key: 'thumbnail_logo',
       value: ''
     },
@@ -54,7 +53,7 @@ export class PartnerLabelComponent implements OnInit,AfterViewInit{
     ...this.commonUploadImageOptions
   }
 
-  slideImageUploadOptions={
+  slideImageUploadOptions = {
     uploadURL: this.uploadImageURL,
     ...this.commonUploadImageOptions
   }
@@ -72,7 +71,7 @@ export class PartnerLabelComponent implements OnInit,AfterViewInit{
     private pageTitleService: PageTitleService,
     private translateService: TranslateService,
     private configService: ConfigService,
-    private toastr: ToastrService){
+    private toastr: ToastrService) {
 
   }
 
@@ -82,116 +81,111 @@ export class PartnerLabelComponent implements OnInit,AfterViewInit{
     this.getThemConfigData();
   }
 
- ngAfterViewInit() {
-   this.uploadComponents.forEach((component: FileUploadComponent) => {
-    component.delete$.subscribe((payload) => {
-      console.log("🗑️ Delete payload:", payload);
-      if (payload === 'logo') {
-        this.pendingDeleteLogoRequest = payload;
-      } else if (payload === 'thumbnail_logo') {
-        this.pendingDeleteThumbnailRequest = payload;
-      }
-    });
-  });
-}
-  getThemConfigData(){
-    this.configService.getThemeConfig().subscribe(res=>{
-      res.theme_config.forEach(config=>{
-        this.themeConfigData[config.key]=config.value;
+  ngAfterViewInit() {
+    this.uploadComponents.forEach((component: FileUploadComponent) => {
+      component.delete$.subscribe((payload) => {
+        if (payload === 'logo') {
+          this.pendingDeleteLogoRequest = payload;
+        } else if (payload === 'thumbnail_logo') {
+          this.pendingDeleteThumbnailRequest = payload;
+        }
       });
-      if(this.themeConfigData.images_with_text.length === 0){
+    });
+  }
+  getThemConfigData() {
+    this.configService.getThemeConfig().subscribe(res => {
+      res.theme_config.forEach(config => {
+        this.themeConfigData[config.key] = config.value;
+      });
+      if (this.themeConfigData.images_with_text.length === 0) {
         this.addSlides();
       }
     });
-    
+
   }
-  
-  onLogoUpload(event){
-    if(event.success){
+
+  onLogoUpload(event) {
+    if (event.success) {
       this.themeConfigData.logo = event.data.value;
     }
   }
 
-  onThumbnailLogoUpload(event){
-    if(event.success){
+  onThumbnailLogoUpload(event) {
+    if (event.success) {
       this.themeConfigData.thumbnail_logo = event.data.value;
     }
   }
 
-    onLogoFileDelete(type) {
+  onLogoFileDelete(type) {
     this.themeConfigData[type] = "";
     this.setType = type;
   }
 
-  updateThemeConfig(key,value){
+  updateThemeConfig(key, value) {
     const formData = new FormData();
-    formData.append('key',key);
-    formData.append('value',value);
-    // this.configService.uploadImage(this.themeConfigURL,'PUT',formData).subscribe(res=>{
-    // })
-     return this.configService.uploadImage(this.themeConfigURL, 'PUT', formData); // return observable
-
+    formData.append('key', key);
+    formData.append('value', value);
+    return this.configService.uploadImage(this.themeConfigURL, 'PUT', formData); // return observable
   }
 
-  onColorChange(value:string,key:string){
+  onColorChange(value: string, key: string) {
     var regex = new RegExp("^#([A-Fa-f0-9]{6})$");
-    if(regex.test(value)){
-      this.updateThemeConfig(key,value);
+    if (regex.test(value)) {
+      this.updateThemeConfig(key, value);
     }
   }
 
-  addSlides(){
-    this.themeConfigData.images_with_text.push({text:"",image:""});
+  addSlides() {
+    this.themeConfigData.images_with_text.push({ text: "", image: "" });
   }
 
-  saveSlides(){
-    this.configService.updateImagesWithText({ data: this.themeConfigData.images_with_text }).subscribe(res=>{
+  saveSlides() {
+    this.configService.updateImagesWithText({ data: this.themeConfigData.images_with_text }).subscribe(res => {
       this.toastr.success("Images & text updated successfully", "Updated Successfully");
-    }, err=>{
+    }, err => {
       this.toastr.error("Images & text update failed", "Updated Failed");
     })
   }
 
-  onSlideUploadImage(event,item){
-    if(event.success){
+  onSlideUploadImage(event, item) {
+    if (event.success) {
       item.image = event.data.image_path;
     }
   }
 
-  onDeleteSlides(index){
+  onDeleteSlides(index) {
     this.themeConfigData.images_with_text.splice(index, 1);
   }
 
-  onSlideImageDelete(event, item){
-    if(event.success){
+  onSlideImageDelete(event, item) {
+    if (event.success) {
       item.image = '';
     }
   }
 
-  validateSildesData(): boolean{
-    return this.themeConfigData.images_with_text.filter(item=>item.image === '').length === 0;
+  validateSildesData(): boolean {
+    return this.themeConfigData.images_with_text.filter(item => item.image === '').length === 0;
   }
 
   /**
   * Publish langauge changes.
   * @return {void}
   */
-onPublish(): void {
-  console.log("value from subscriber==",this.pendingDeleteThumbnailRequest,this.pendingDeleteLogoRequest);
-  
-if (this.pendingDeleteLogoRequest === 'logo' || this.pendingDeleteThumbnailRequest === 'thumbnail_logo') {
-    this.updateThemeConfig(this.setType, '').subscribe({
-      next: () => {
-        this.callPublish();
-      },
-      error: (err) => {
-        this.toastr.error("Failed to update theme config before publish", "Error");
-      }
-    });
-  } else {
-    this.callPublish();
+  onPublish(): void {
+    if (this.pendingDeleteLogoRequest === 'logo' || this.pendingDeleteThumbnailRequest === 'thumbnail_logo') {
+      this.updateThemeConfig(this.setType, '').subscribe({
+        next: () => {
+          this.callPublish();
+        },
+        error: (err) => {
+          this.toastr.error("Failed to update theme config before publish", "Error");
+        }
+      });
+    } else {
+      this.callPublish();
+    }
   }
-}
+
   validateJson(json: string): void {
     try {
       this.isJsonValid = Array.isArray(JSON.parse(json));
@@ -208,14 +202,15 @@ if (this.pendingDeleteLogoRequest === 'logo' || this.pendingDeleteThumbnailReque
       });
     }
   }
+  
   callPublish(): void {
-  this.configService.publishConfig().subscribe({
-    next: () => {
-      this.toastr.success("Partner White Labelling has been successfully published", "Publish successful!");
-    },
-    error: (err) => {
-      this.toastr.error(err.error?.message || "Publish failed", "Error");
-    }
-  });
-}
+    this.configService.publishConfig().subscribe({
+      next: () => {
+        this.toastr.success("Partner White Labelling has been successfully published", "Publish successful!");
+      },
+      error: (err) => {
+        this.toastr.error(err.error?.message || "Publish failed", "Error");
+      }
+    });
+  }
 }

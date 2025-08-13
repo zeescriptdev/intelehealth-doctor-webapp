@@ -1,29 +1,106 @@
 <div class="container-fluid">
   <div class="row">
     <div class="col-md-12 p-0">
-      <div class="container-fluid">
-        <div class="row">
-          <!-- Left Sidebar -->
-          <div class="col-md-4 p-0">
-            <div class="chat-sidebar-wrapper card intel-card chat-list-border-radius">
-              <div class="chat-sidebar-title" data-test-id="lblPatientsTitle">
-                <h6 class="mb-0">{{'Patients'| translate}}</h6>
-                <span data-test-id="lblPatientsSubtitle">({{'Via Community health workers' | translate}})</span>
-              </div>
-
-              <div class="chat-sidebar-body">
-                <!-- Search -->
-                <div class="chat-items-search" data-test-id="conSearchPatients">
-                  <div class="input-group">
-                    <div class="input-group-prepend">
-                      <span class="input-group-text" id="basic-addon1">
+        <div class="container-fluid">
+          <div class="row">
+            <div class="col-md-4 p-0">
+              <div class="chat-sidebar-wrapper card intel-card chat-list-border-radius">
+                <div class="chat-sidebar-title">
+                  <h6 class="mb-0">{{'Patients'| translate}}</h6>
+                  <span>({{'Via Community health workers' | translate}})</span>
+                </div>
+                <div class="chat-sidebar-body">
+                  <div class="chat-items-search">
+                    <div class="input-group">
+                      <div class="input-group-prepend">
+                        <span class="input-group-text" id="basic-addon1">
+                          <img
+                            src="assets/svgs/search-icon.svg"
+                            alt=""
+                            width="20px"
+                            height="20px"
+                          />
+                        </span>
+                      </div>
+                      <input
+                        type="text"
+                        [(ngModel)]="searchValue"
+                        class="form-control"
+                        placeholder="{{'Search by patient name or ID'|translate}}"
+                        aria-label="Username"
+                        aria-describedby="basic-addon1"
+                        data-test-id="etSearchPatientName"
+                      />
+                    </div>
+                  </div>
+                  <ul class="chat-items-list">
+                    <li
+                      [class.selected]="
+                        conversation.id == selectedConversation?.id
+                      "
+                      *ngFor="
+                        let conversation of !searchValue
+                          ? conversations
+                          : filteredConversations
+                      "
+                      (click)="conversationSelected(conversation)"
+                    >
+                      <div class="chat-item-con">
                         <img
-                          src="assets/svgs/search-icon.svg"
+                          src="{{ checkPatientRegField('Profile Photo')  ? conversation.patientPic : ''}}"
                           alt=""
-                          width="20px"
-                          height="20px"
-                          data-test-id="iconSearch"
+
                         />
+                        <div>
+                          <h6>
+                            {{
+                              conversation.patientName
+                                ? (conversation.patientName | titlecase)
+                                : "Unknown" |translate
+                            }}
+                            {{
+                              conversation.openMrsId
+                                ? '('+(conversation.openMrsId | uppercase)+')'
+                                : ""
+                            }}
+                            <span class="badge badge-success" *ngIf="conversation?.count">{{conversation?.count}}</span>
+                          </h6> 
+                          <p>{{ conversation.message }}</p>
+                        </div>
+                      </div>
+                    </li>
+                    <li *ngIf="searchValue && filteredConversations.length == 0">
+                      <div class="text-center p-3">
+                          <p>{{ 'No Record Found' }}</p>
+                      </div>
+                    </li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+            <div class="col-md-8 p-0">
+              <div
+                class="chat-main-con card intel-card chat-border-radius"
+                *ngIf="selectedConversation; else noConversationSelected"
+              >
+                <div class="chat-con-title">
+                  <div class="chat-item-info">
+                    <img src="{{checkPatientRegField('Profile Photo') && selectedConversation.patientPic ? selectedConversation.patientPic : 'assets/svgs/user.svg'}}" alt="" />
+                    <div class="title">
+                      <h6 class="mb-0">
+                        {{
+                          selectedConversation.patientName
+                            ? (selectedConversation.patientName | titlecase)
+                            :  "Unknown" |translate
+                        }}
+                        {{
+                          selectedConversation.openMrsId
+                            ? '('+(selectedConversation.openMrsId | uppercase)+')'
+                            : ""
+                        }}
+                      </h6>
+                      <span>
+                        {{'CHW' |translate}}: {{ selectedConversation?.hwName | titlecase }}
                       </span>
                     </div>
                     <input
