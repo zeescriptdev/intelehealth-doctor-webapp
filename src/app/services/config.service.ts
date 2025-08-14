@@ -493,4 +493,16 @@ export class ConfigService {
     const url = `${this.baseURL}/home-screen/updateHomeScreenName/${id}`;
     return this.http.put(url, { lang });
   }
+
+   /**
+   * Update language enabled status
+   * @param {boolean} id - id of speciality
+   * @param {boolean} is_enabled - enabled status true/false
+   * @return {Observable<any>}
+   */
+  updatePlatform(id: number, platform: string): Observable<any> {
+    console.log("updatePlatform called with id:", id, "and platform:", platform);
+    const url = `${this.baseURL}/language/updatePlatform/${id}`;
+    return this.http.put(url, {platform});
+  }
 }
