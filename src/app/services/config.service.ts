@@ -495,13 +495,11 @@ export class ConfigService {
   }
 
    /**
-   * Update language enabled status
-   * @param {boolean} id - id of speciality
-   * @param {boolean} is_enabled - enabled status true/false
+   * Update language platform mobile/webapp/both
+   * @param {boolean} id - id of language
    * @return {Observable<any>}
    */
   updatePlatform(id: number, platform: string): Observable<any> {
-    console.log("updatePlatform called with id:", id, "and platform:", platform);
     const url = `${this.baseURL}/language/updatePlatform/${id}`;
     return this.http.put(url, {platform});
   }
