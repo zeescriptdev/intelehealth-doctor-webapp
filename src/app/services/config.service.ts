@@ -493,4 +493,14 @@ export class ConfigService {
     const url = `${this.baseURL}/home-screen/updateHomeScreenName/${id}`;
     return this.http.put(url, { lang });
   }
+
+   /**
+   * Update language platform mobile/webapp/both
+   * @param {boolean} id - id of language
+   * @return {Observable<any>}
+   */
+  updatePlatform(id: number, platform: string): Observable<any> {
+    const url = `${this.baseURL}/language/updatePlatform/${id}`;
+    return this.http.put(url, {platform});
+  }
 }
