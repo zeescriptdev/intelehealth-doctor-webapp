@@ -43,8 +43,7 @@
         </div>
 
         <div [ngSwitch]="view" data-test-id="calendarViewSwitch">
-          <mwl-calendar-day-view
-            data-test-id="calendarDayView"
+          <mwl-calendar-day-view data-test-id="calendarDayView"
             class="day-view-con"
             *ngSwitchCase="CalendarView.Day"
             [viewDate]="viewDate"
