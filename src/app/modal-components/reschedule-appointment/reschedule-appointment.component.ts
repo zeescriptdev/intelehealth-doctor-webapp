@@ -107,7 +107,13 @@ export class RescheduleAppointmentComponent implements OnInit {
     if (this.selectedDate && this.selectedSlot) {
       this.close({ date: this.selectedDate, slot: this.selectedSlot });
     } else {
-      this.toastr.warning(this.translate.instant("Please select slot to reschedule."), this.translate.instant("Select Slot"));
+    this.toastr.warning(this.translate.instant("Please select slot to reschedule."), this.translate.instant("Select Slot"));
+      setTimeout(() => {
+      const toastElement = document.querySelector('.toast-warning:last-child');
+      if (toastElement) {
+        toastElement.setAttribute('data-test-id', 'toastSelectSlot');
+      }
+    }, 0);
     }
   }
 
