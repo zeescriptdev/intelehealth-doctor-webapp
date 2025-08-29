@@ -218,6 +218,11 @@ export class VisitSummaryComponent implements OnInit, OnDestroy, AfterViewInit {
           this.changesMade = true;
           if (this.updatedObsData) {
             this.updatedObsData.diagnosis = diagnoses;
+            // Check if any diagnosis is AI-generated
+            const hasAiGeneratedDiagnosis = diagnoses.some(diagnosis => diagnosis.diagnosisAiGenerated);
+            if (hasAiGeneratedDiagnosis) {
+              this.checkChanges(this.updatedObsData);
+            }
           }
         });
 
@@ -2095,10 +2100,16 @@ export class VisitSummaryComponent implements OnInit, OnDestroy, AfterViewInit {
     if (this.appConfigService.patient_visit_summary?.dp_dignosis_secondary && this.diagnosisSecondaryForm.invalid) {
       this.toastr.warning(this.translateService.instant('Enter Diagnosis'), this.translateService.instant('Diagnosis Required'));
       return false;
-    } else if (!this.appConfigService.patient_visit_summary?.dp_dignosis_secondary && this.existingDiagnosis.length === 0 && this.ddxCompRef.instance.existingDiagnosis.length === 0) {
+    } else if (!this.appConfigService.patient_visit_summary?.dp_dignosis_secondary && this.existingDiagnosis.length === 0 && (this.hasAILLMEnabled && (!this.ddxCompRef || (this.ddxCompRef.instance?.existingDiagnosis || []).length === 0))) {
       this.toastr.warning(this.translateService.instant('Diagnosis not added'), this.translateService.instant('Diagnosis Required'));
       return false;
+    } else {
+      if (!this.appConfigService.patient_visit_summary?.dp_dignosis_secondary && this.existingDiagnosis.length === 0) {
+        this.toastr.warning(this.translateService.instant('Diagnosis not added'), this.translateService.instant('Diagnosis Required'));
+        return false;
+      }
     }
+
     if (this.isFeatureAvailable('visitFollowUp') && !this.followUpForm.value.wantFollowUp) {
       this.toastr.warning(this.translateService.instant('Follow-up not added'), this.translateService.instant('Follow-up Required'));
       return false;
@@ -2704,15 +2715,15 @@ export class VisitSummaryComponent implements OnInit, OnDestroy, AfterViewInit {
       if (this.hasAILLMEnabled && this.ddxCompRef?.instance) {
         for (const diagnosis of this.ddxCompRef.instance.existingDiagnosis) {
           if (diagnosis?.uuid) continue;
-          postObsRequests.push(
-            this.encounterService.postObs({
-              concept: conceptIds.conceptDiagnosis,
-              person: this.visit.patient.uuid,
-              obsDatetime: new Date(),
-              value: `${diagnosis.diagnosisCode ? diagnosis.diagnosisCode : 'NA'}::${diagnosis.diagnosisName}:${diagnosis.diagnosisType} & ${diagnosis.diagnosisStatus}`,
-              encounter: this.visitNotePresent.uuid
-            }).pipe(tap((res: ObsModel) => diagnosis.uuid = res.uuid))
-          );
+            postObsRequests.push(
+              this.encounterService.postObs({
+                concept: conceptIds.conceptDiagnosis,
+                person: this.visit.patient.uuid,
+                obsDatetime: new Date(),
+                value: `${diagnosis.diagnosisCode ? diagnosis.diagnosisCode : 'NA'}::${diagnosis.diagnosisName}:${diagnosis.diagnosisType} & ${diagnosis.diagnosisStatus}${diagnosis.from ? ' : ' + diagnosis.from : ''}`,// :AI generated
+                encounter: this.visitNotePresent.uuid
+              }).pipe(tap((res: ObsModel) => diagnosis.uuid = res.uuid))
+            );
           if (diagnosis?.isSnomed && this.appConfigService?.patient_visit_summary?.diagnosis_snomedct) {
             postObsRequests.push(this.diagnosisService.addSnomedDiagnosis(diagnosis.diagnosisName, diagnosis.diagnosisCode))
           }
@@ -2860,7 +2871,7 @@ export class VisitSummaryComponent implements OnInit, OnDestroy, AfterViewInit {
             concept: conceptIds.conceptDiagnosis,
             person: this.visit.patient.uuid,
             obsDatetime: new Date(),
-            value: `${diagnosis.diagnosisCode ? diagnosis.diagnosisCode : 'NA'}::${diagnosis.diagnosisName}:${diagnosis.diagnosisType} & ${diagnosis.diagnosisStatus}`,
+            value: `${diagnosis.diagnosisCode ? diagnosis.diagnosisCode : 'NA'}::${diagnosis.diagnosisName}:${diagnosis.diagnosisType} & ${diagnosis.diagnosisStatus}${diagnosis.diagnosisAiGenerated ? ':' + diagnosis.diagnosisAiGenerated : ''}`,
             encounter: this.visitNotePresent.uuid
           }).pipe(tap((res: ObsModel) => diagnosis.uuid = res.uuid))
         );
@@ -3386,7 +3397,7 @@ export class VisitSummaryComponent implements OnInit, OnDestroy, AfterViewInit {
   }
 
   updateInstructionRemarks(medicine:MedicineModel) {
-    const exists = this.instructionRemarks.some(item => item.name.trim().toLowerCase() === medicine.instructRemark.trim().toLowerCase());
+    const exists = this.instructionRemarks.some(item => item.name?.trim().toLowerCase() === medicine.instructRemark?.trim().toLowerCase());
     if (!exists) {
       const newItem = { id: Date.now(), name: medicine.instructRemark };
       this.visitService.addInstructionRemarks(newItem).subscribe((data: DataItemModel[]) => {
