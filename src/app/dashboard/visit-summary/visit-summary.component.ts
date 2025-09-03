@@ -331,7 +331,7 @@ export class VisitSummaryComponent implements OnInit, OnDestroy, AfterViewInit {
   search = (text$: Observable<string>) => this.mainSearch(text$, this.advicesList);
   search2 = (text$: Observable<string>) => this.mainSearch(text$, this.testsList);
   search3 = (text$: Observable<string>) => this.mainSearch(text$, this.drugNameList.map((val) => val.name));
-  search4 = (text$: Observable<string>) => this.mainSearch(text$, doses.map((val) => val.name));
+  search4 = (text$: Observable<string>) => this.mainSearch(text$, this.strengthList.map((val) => val.name));
   search5 = (text$: Observable<string>) => this.mainSearch(text$, this.daysList.map((val) => val.name));
   search6 = (text$: Observable<string>) => this.mainSearch(text$, this.timingList.map((val) => val.name));
   search7 = (text$: Observable<string>) => this.mainSearch(text$, doses.map((val) => val.name));
@@ -441,11 +441,11 @@ export class VisitSummaryComponent implements OnInit, OnDestroy, AfterViewInit {
 
     this.addMedicineForm = new FormGroup({
       drug: new FormControl(null, [Validators.required]),
-      dose: new FormControl(null, [Validators.required]),
+      strength: new FormControl(null, [Validators.required]),
+      days: new FormControl(null, [Validators.required]),
+      timing: new FormControl(null, [Validators.required]),
       frequency: new FormControl(null),
-      durationNo: new FormControl(null, [Validators.required, Validators.pattern('^[0-9]*$')]),
-      durationUnit: new FormControl(null, [Validators.required]),
-      instructRemark: new FormControl('', [])
+      remark: new FormControl('', [])
     });
 
     this.addStandardMedicineForm = new FormGroup({
@@ -1717,8 +1717,6 @@ export class VisitSummaryComponent implements OnInit, OnDestroy, AfterViewInit {
           if(this.appConfigService.patient_visit_summary?.standard_medication){
             this.standardMedicines.push(this.visitService.formatMedicineDisplay(obs.value, obs.uuid));
           } else {
-            console.log(obs, "ELSE OBS DATA");
-            
             this.medicines.push({
               drug: obs.value?.split(':')[0],
               strength: obs.value?.split(':')[1],
@@ -1745,18 +1743,8 @@ export class VisitSummaryComponent implements OnInit, OnDestroy, AfterViewInit {
     if (this.medicines.find((o: MedicineModel) => o.drug === this.addMedicineForm.value.drug)) {
       this.toastr.warning(this.translateService.instant('Drug already added, please add another drug.'), this.translateService.instant('Already Added'));
       return;
-    }
-    // this.updatedObsData.medication = true;
-    // this.checkChanges(this.updatedObsData);
-
-    this.medicines.push({
-      drug: this.addMedicineForm.value.drug,
-      strength: this.addMedicineForm.value.dose,
-      days: this.addMedicineForm.value.durationNo,
-      timing: this.addMedicineForm.value.durationUnit,
-      remark: this.addMedicineForm.value.instructRemark ?? '',
-      frequency: this.addMedicineForm.value.frequency ?? '',
-    });
+    }    
+    this.medicines.push({ ...this.addMedicineForm.value});
     this.addMedicineForm.reset();
   }
 
@@ -1765,8 +1753,6 @@ export class VisitSummaryComponent implements OnInit, OnDestroy, AfterViewInit {
   * @returns {void}
   */
   addStandardMedicine(): void {
-    console.log(this.addStandardMedicineForm, "Standard Medicine");
-
     if (this.addStandardMedicineForm.invalid) {
       return;
     }
