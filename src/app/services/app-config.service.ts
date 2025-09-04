@@ -1,6 +1,7 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { environment } from "../../environments/environment";
+import { Observable } from 'rxjs';
 import { LanguageModel, PatientRegistrationFieldsConfigModel, VitalModel, SpecializationModel, WebRTCConfigModel, PatientVisitSummaryConfigModel, PatientVisitSection, DropdownValuesModel } from '../model/model';
 
 @Injectable({
@@ -74,6 +75,8 @@ export class AppConfigService {
   public checkPatientRegField(fieldName: any, fields: string | any[]): boolean{
     return fields.indexOf(fieldName) !== -1;
   }
-
+  fetchAllLanguage(): Observable<any> {
+    return this.http.get<any>(`${this.baseURL}/language/getallEnabledLanguages`);
+  } 
 }
     
