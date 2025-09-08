@@ -175,6 +175,18 @@ export class SetupCalendarComponent implements OnInit {
       });
     });
   });
+   this._picker.openedStream.subscribe(() => {
+    setTimeout(() => {
+      const cells = document.querySelectorAll('.mat-calendar-body-cell');
+      cells.forEach(cell => {
+        const label = cell.getAttribute('aria-label'); // e.g. "Mon Sep 08 2025"
+        if (label) {
+          const day = new Date(label).getDate();
+          cell.setAttribute('data-test-id', `day-${day}`);
+        }
+      });
+    });
+  });
 }
   /**
   * Add new month
