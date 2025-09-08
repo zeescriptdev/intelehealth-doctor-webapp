@@ -219,6 +219,21 @@ export class VisitSummaryComponent implements OnInit, OnDestroy, AfterViewInit {
 
         // Subscribe to diagnosis saved event
         this.ddxCompRef.instance.diagnosisSaved.subscribe((diagnoses: any[]) => {
+          const lastDiagnosis = diagnoses[diagnoses.length - 1];
+          if(!lastDiagnosis?.diagnosisCode) {
+          let diagnosisName = lastDiagnosis?.diagnosisName;
+          if (diagnosisName?.includes('/')) {
+            const parts = diagnosisName.split('/');
+            diagnosisName = parts[0]; // Take the first part as name
+            }
+            this.diagnosisService.getAISnomedDiagnosisList(diagnosisName).subscribe({
+                next: (res) => {
+                  if (res && res.result?.conceptId) {
+                   diagnoses[diagnoses.length-1].diagnosisCode = res.result.conceptId;
+                  }
+                }
+              });
+            }
           this.existingDiagnosis = [...diagnoses];
           this.changesMade = true;
           if (this.updatedObsData) {
