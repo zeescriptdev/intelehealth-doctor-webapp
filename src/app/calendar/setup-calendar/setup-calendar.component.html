@@ -45,7 +45,7 @@
 
     <!-- Form -->
     <div class="col-md-9 p-1" data-test-id="calendarFormCol">
-      <form [formGroup]="addSlotsForm" data-test-id="calendarForm">
+      <form [formGroup]="addSlotsForm" data-test-id="calendarForm">....
         <div class="card intel-card" data-test-id="calendarFormCard">
           
           <!-- Month header -->
@@ -258,7 +258,7 @@
                               {{(item.shortName) | translate}},
                             </ng-template>
                             <ng-template ng-option-tmp let-item="item" let-item$="item$" let-index="index">
-                              <div class="pretty p-image p-plain">
+                              <div class="pretty p-image p-plain" [attr.data-test-id]="'day-' + item.name">
                                 <input type="checkbox" [checked]="item$.selected"/>
                                 <div class="state">
                                     <img class="image" src="assets/svgs/checkbox-tick.png" alt="">
