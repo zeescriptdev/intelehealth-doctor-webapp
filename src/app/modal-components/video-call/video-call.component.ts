@@ -55,6 +55,10 @@ export class VideoCallComponent implements OnInit, OnDestroy {
   recodingStarted = false;
   tableId: number;
   location: string;
+  videoBitrateTooLow: boolean = false;
+  videoBitrateCheckInterval: any;
+  lastVideoBytesSent = 0;
+  lastTimestamp = 0;
 
   constructor(
     @Inject(MAT_DIALOG_DATA) public data,
@@ -222,6 +226,9 @@ export class VideoCallComponent implements OnInit, OnDestroy {
   async handleParticipantConnect(): Promise<void> {
     this.callConnected = true;
     this.callStartedAt = moment();
+      this.videoBitrateCheckInterval = setInterval(() => {
+        this.checkLocalVideoBitrate();
+      }, 10000);
     this.socketSvc.emitEvent('call-connected', this.incomingData);
     if(isFeaturePresent('webrtcRecording')) {
       await this.webrtcSvc.startRecording({
@@ -243,6 +250,51 @@ export class VideoCallComponent implements OnInit, OnDestroy {
       .catch(err => {
         console.log("start recoding error", err)
       });
+    }
+  }
+
+  /**
+ * Checks the current local video bitrate from the RTCPeerConnection stats.
+ * If the bitrate drops below a defined threshold (e.g., 600 kbps), 
+ * it automatically turns off local video and shows a warning toast.
+ *
+ * Process:
+ * 1. Fetches WebRTC stats from the peer connection.
+ * 2. Calculates bitrate by comparing current bytesSent against the previous timestamp.
+ * 3. If bitrate is too low, switches video off and warns the user.
+ */
+  async checkLocalVideoBitrate(): Promise<void> {
+    const pc: RTCPeerConnection | undefined = (this.webrtcSvc.room as any)?.engine?.pcManager?.publisher?._pc;
+    const stats = await pc.getStats();
+    stats.forEach((report) => {
+      if (this.lastTimestamp === 0) {
+        this.lastTimestamp = report.timestamp;
+        this.lastVideoBytesSent = report.bytesSent;
+        return;
+      }
+      if (
+        report.type === 'outbound-rtp' &&
+        report.kind === 'video' &&
+        typeof report.bytesSent === 'number' &&
+        typeof report.timestamp === 'number'
+      ) {
+        if (this.lastTimestamp && this.lastVideoBytesSent) {
+          const timeDiffSec = (report.timestamp - this.lastTimestamp) / 1000;
+          const bytesDiff = report.bytesSent - this.lastVideoBytesSent;
+          if (timeDiffSec > 0) {
+            const bitrate = (bytesDiff * 8) / timeDiffSec; // bits per second
+            this.videoBitrateTooLow = bitrate < 600_000; // e.g. < 600 kbps
+          }
+        }
+        this.lastTimestamp = report.timestamp;
+        this.lastVideoBytesSent = report.bytesSent;
+      }
+    });
+    if (this.videoBitrateTooLow && !this._localVideoOff) {
+      this.toastr.warning('Low bandwidth detected. switching to audio call');
+      this._localVideoOff = true;
+    } else {
+      this._localVideoOff = false;
     }
   }
 
