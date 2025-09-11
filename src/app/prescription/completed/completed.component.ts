@@ -18,7 +18,7 @@ export class CompletedComponent implements OnInit, AfterViewInit, OnChanges {
   @Input() completedVisits: CustomVisitModel[] = [];
   @Input() completedVisitsCount: number = 0;
   @ViewChild('completedPaginator') paginator: MatPaginator;
-  @ViewChild('completedMatSort') completedMatSort: MatSort;
+  @ViewChild('completedMatSort', { static: true }) completedMatSort: MatSort;
   offset: number = environment.recordsPerPage;
   recordsFetched: number = environment.recordsPerPage;
   pageEvent: PageEvent;

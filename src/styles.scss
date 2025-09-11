@@ -735,6 +735,27 @@ body.font-lato td {
   }
 }
 
+
+.truncate-cell {
+  max-width: 100px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  cursor: pointer;
+}
+
+.tool-tip  {
+  font-size: 14px;
+  white-space: pre-wrap;
+  background-color: gray !important;
+  color: rgba(255, 255, 255, .9);
+  padding-top: -10spx;
+  max-width: 240px;
+ } 
+ .mat-tooltip-panel {
+  margin: -30px !important;
+}
+
 @media (max-width: 768px) {
   .vc-modal-lg {
     width: 96%;

@@ -16,7 +16,7 @@ export class MonitoringSheetComponent implements OnInit {
   active: number = 1;
   sevikaData: any = [];
   doctorData: any = [];
-  callData: any [];
+  callData: any[];
   allData: any = [];
   filteredData: any = [];
   drDisplayedColumns: string[] = [];
@@ -49,12 +49,14 @@ export class MonitoringSheetComponent implements OnInit {
   callDataColumns: any = [
     { label: "Patient Id", key: "patientId" },
     { label: "Patient Name", key: "patientName" },
+    { label: "State", key: "state" },
+    { label: "Sanch", key: "sanch" },
     { label: "Village", key: "location" },
     { label: "Doctor Name", key: "doctorName" },
     { label: "Sevika Name", key: "sevikaName" },
-    { label: "Start Time", key: "start_time"},
-    { label: "End Time", key: "end_time"},
-    { label: "Call Duration(In second)", key: "call_duration"},
+    { label: "Start Time", key: "start_time" },
+    { label: "End Time", key: "end_time" },
+    { label: "Call Duration(In second)", key: "call_duration" },
     { label: "Call Status", key: "call_status" },
     { label: "Reason for call failure", key: "reason" },
   ];
@@ -88,20 +90,33 @@ export class MonitoringSheetComponent implements OnInit {
   getWebrtcStatus() {
     this.monitorService.geWebrtcStatus().subscribe({
       next: (res: any) => {
-       let data = res?.data?.callData;
-       this.callData = data.map(item => {
-        let tableCol: any = {}
-        this.callDataColumns.forEach(col => {
-          if (["start_time", "end_time"].includes(col.key)) {
-            tableCol[col.key] =  item[col.key] === null ? 'NA' : moment(item[col.key]).format("DD MMM, YYYY h:mm a");
-          } else {
-            tableCol[col.key] = item[col.key] === null ? 'NA' : item[col.key];
-          }
+        let data = res?.data?.callData;
+        this.callData = data.map(item => {
+          let tableCol: any = {}
+          this.callDataColumns.forEach(col => {
+            if (["start_time", "end_time"].includes(col.key)) {
+              let isOldRecord = new Date(item[col.key]) < new Date('2025-07-15');
+              tableCol[col.key] = item[col.key] === null ? 'NA' : item[col.key];
+              col.key === 'start_time' ? tableCol['start_timeD'] = item[col.key] === null ? 'NA' : this.formatMixedDate(item[col.key], isOldRecord) :
+                tableCol['end_timeD'] = item[col.key] === null ? 'NA' : this.formatMixedDate(item[col.key], isOldRecord);
+            } else {
+              tableCol[col.key] = item[col.key] === null ? 'NA' : item[col.key];
+            }
+          });
+          return tableCol;
         });
-        return tableCol;
-       });
+        this.callData.sort((a, b) => new Date(b.start_time).getTime() - new Date(a.start_time).getTime());
       },
     });
+  }
+
+  formatMixedDate(dateStr: string, flag: boolean): string {
+    let m = moment(dateStr);
+    if (!flag) {
+      m = m.utc();
+    }
+    return m.format('DD MMM, YYYY, h:mm a');
+
   }
 
   filterData(userType: string) {
@@ -213,16 +228,25 @@ export class MonitoringSheetComponent implements OnInit {
   }
 
   exportCallData() {
-    const header = Object.keys(this.callData[0]);
-    const csv = this.callData.map((row) =>
+    let newCallData = JSON.parse(JSON.stringify(this.callData));
+    newCallData = newCallData.map(call => {
+      return {
+        ...call,
+        start_time: call.start_timeD,
+        end_time: call.end_timeD
+      };
+    });
+    let arryWithCol = newCallData.map(({ start_timeD, end_timeD, ...rest }) => rest);
+    const header = Object.keys(arryWithCol[0]);
+    const csv = arryWithCol.map((row) =>
       header
         .map((fieldName) => JSON.stringify(row[fieldName]))
         .join(',')
     );
     let headers = [];
     this.callDataColumns.forEach(col => {
-        return header.includes(col.key) ? headers.push(col.label) : null;
-      });
+      return header.includes(col.key) ? headers.push(col.label) : null;
+    });
     csv.unshift(headers.join(','));
     const csvArray = csv.join('\r\n');
 
@@ -231,7 +255,7 @@ export class MonitoringSheetComponent implements OnInit {
     const url = window.URL.createObjectURL(blob);
 
     a.href = url;
-    a.download ='Webrtc Log.csv';
+    a.download = 'Webrtc Log.csv';
     a.click();
     window.URL.revokeObjectURL(url);
     a.remove();

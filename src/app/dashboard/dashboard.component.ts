@@ -170,7 +170,8 @@ export class DashboardComponent implements OnInit {
         for (let i = 0; i < av.data.length; i++) {
           let visit = av.data[i];
           visit.cheif_complaint = this.getCheifComplaint(visit);
-          visit.visit_created = visit?.date_created ? this.getCreatedAt(visit.date_created) : this.getEncounterCreated(visit, visitTypes.ADULTINITIAL);
+          visit.visit_created = visit?.date_created;
+          visit.uploaded_Date = visit?.date_created ? this.getCreatedAt(visit.date_created) : this.getEncounterCreated(visit, visitTypes.FLAGGED)?.created_at;
           visit.age = this.visitService.calculateAge(visit.person.birthdate);
           visit.name = visit.patient_name.given_name + " " + (visit.patient_name?.middle_name ? visit.patient_name?.middle_name+" " : "" )+ " " + visit.patient_name.family_name;
           visit.location = visit?.sanch;
@@ -187,6 +188,7 @@ export class DashboardComponent implements OnInit {
         }
         this.awaitingVisitsCount = av.totalCount;
         this.getFollowUpVisits(newfollowupVisits);
+        this.awaitingVisits.sort((a,b) => new Date(b.date_created) < new Date(a.date_created) ? -1 : 1);
         this.dataSource3.data = [...this.awaitingVisits];
         if (page == 1) {
           this.dataSource3.paginator = this.tempPaginator2;
@@ -246,7 +248,8 @@ export class DashboardComponent implements OnInit {
         for (let i = 0; i < pv.data.length; i++) {
           let visit = pv.data[i];
           visit.cheif_complaint = this.getCheifComplaint(visit);
-          visit.visit_created = visit?.date_created ? this.getCreatedAt(visit.date_created) : this.getEncounterCreated(visit, visitTypes.FLAGGED);
+          visit.visit_created = visit?.date_created;
+          visit.uploaded_Date = visit?.date_created ? this.getCreatedAt(visit.date_created) : this.getEncounterCreated(visit, visitTypes.FLAGGED)?.created_at;
           visit.age = this.visitService.calculateAge(visit.person.birthdate);
           visit.name = visit.patient_name.given_name + " " + (visit.patient_name?.middle_name ? visit.patient_name?.middle_name+" " : "" )+ " " + visit.patient_name.family_name;
           visit.location = visit?.sanch;
@@ -263,6 +266,7 @@ export class DashboardComponent implements OnInit {
         }
         this.priorityVisitsCount = pv.totalCount;
         this.getFollowUpVisits(newfollowupVisits);
+        this.priorityVisits.sort((a,b) => new Date(b.date_created) < new Date(a.date_created) ? -1 : 1);
         this.dataSource2.data = [...this.priorityVisits];
         if (page == 1) {
           this.dataSource2.paginator = this.tempPaginator1;
@@ -321,8 +325,10 @@ export class DashboardComponent implements OnInit {
         for (let i = 0; i < iv.data.length; i++) {
           let visit = iv.data[i];
           visit.cheif_complaint = this.getCheifComplaint(visit);
-          visit.visit_created = visit?.date_created ? this.getCreatedAt(visit.date_created) : this.getEncounterCreated(visit, visitTypes.ADULTINITIAL);
-          visit.prescription_started = this.getEncounterCreated(visit, visitTypes.VISIT_NOTE);
+          visit.visit_created = visit?.date_created ? this.getCreatedAt(visit.date_created) : this.getEncounterCreated(visit, visitTypes.ADULTINITIAL)?.created_at;
+          visit.prescription_startedDate = this.getEncounterCreated(visit, visitTypes.VISIT_NOTE)?.created_at;
+          visit.prescription_started = this.getEncounterCreated(visit, visitTypes.VISIT_NOTE)?.encounterDateTime;
+          console.log("prescription_started", visit.prescription_started,  new Date(visit.prescription_started))
           visit.encounter_provider = this.getEncounterProviderName(visit, visitTypes.VISIT_NOTE);
           visit.age = this.visitService.calculateAge(visit.person.birthdate);
           visit.name = visit.patient_name.given_name + " " + (visit.patient_name?.middle_name ? visit.patient_name?.middle_name+" " : "" )+ " " + visit.patient_name.family_name;
@@ -330,6 +336,7 @@ export class DashboardComponent implements OnInit {
           visit.openMrsId = visit?.patient?.identifier;
           this.inProgressVisits.push(visit);
         }
+        this.inProgressVisits.sort((a,b) => new Date(b.prescription_started) < new Date(a.prescription_started) ? -1 : 1);
         this.dataSource4.data = [...this.inProgressVisits];
         if (page == 1) {
           this.dataSource4.paginator = this.tempPaginator3;
@@ -482,15 +489,16 @@ export class DashboardComponent implements OnInit {
   * @return {string} - Encounter datetime
   */
   getEncounterCreated(visit: CustomVisitModel, encounterName: string) {
-    let created_at = '';
+    let data = { created_at : '', encounterDateTime : ''};
     const encounters = visit.encounters;
     encounters.forEach((encounter: CustomEncounterModel) => {
       const display = encounter.type?.name;
       if (display.match(encounterName) !== null) {
-        created_at = this.getCreatedAt(encounter.encounter_datetime);
+        data.created_at = this.getCreatedAt(encounter.encounter_datetime);
+        data.encounterDateTime = encounter.encounter_datetime;
       }
     });
-    return created_at;
+    return data;
   }
 
   /**
@@ -523,7 +531,7 @@ export class DashboardComponent implements OnInit {
       const display = encounter.type?.name;
       if (display.match(visitTypes.ADULTINITIAL) !== null) {
         const obs = encounter.obs;
-        obs.forEach((currentObs: CustomObsModel) => {
+        for (const currentObs of obs) {
           if (currentObs.concept_id == 163212) {
             const currentComplaint = this.visitService.getData2(currentObs)?.value_text.replace(new RegExp('►', 'g'), '').split('<b>');
             for (let i = 1; i < currentComplaint.length; i++) {
@@ -532,8 +540,9 @@ export class DashboardComponent implements OnInit {
                 recent.push(obs1[0]);
               }
             }
+            break;
           }
-        });
+        }
       }
     });
     return recent;

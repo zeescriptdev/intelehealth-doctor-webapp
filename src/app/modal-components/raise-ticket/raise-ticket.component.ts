@@ -49,7 +49,7 @@ export class RaiseTicketComponent {
     }
 
     const data = {
-      title: `IDA4 - ${this.raiseTicketForm.value.title} <${getCacheData(true,'provider')?.person.display}>`,
+      title: `Ekal Arogya - ${this.raiseTicketForm.value.title} <${getCacheData(true,'provider')?.person.display}>`,
       description: this.raiseTicketForm.value.description,
       priority: this.raiseTicketForm.value.priority
     };

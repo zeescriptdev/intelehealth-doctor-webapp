@@ -23,18 +23,18 @@
             <span>{{'Messages' | translate}}</span>
           </a>
         </li>
-        <li class="nav-item" *ngxPermissionsOnly="['ORGANIZATIONAL: DOCTOR']" (click)="toggleSidebar()" data-test-id="listItemAppointments">
+        <!-- <li class="nav-item" *ngxPermissionsOnly="['ORGANIZATIONAL: DOCTOR']" (click)="toggleSidebar()" data-test-id="listItemAppointments">
           <a class="nav-item-link" routerLink="/appointments" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }" data-test-id="linkAppointments">
             <img src="assets/svgs/menu-video.svg" alt="">
             <span>{{'Appointment' | translate}}</span>
           </a>
-        </li>
+        </li> 
         <li class="nav-item" *ngxPermissionsOnly="['ORGANIZATIONAL: DOCTOR']" (click)="toggleSidebar()" data-test-id="listItemCalendar">
           <a class="nav-item-link" routerLink="/calendar" routerLinkActive="active" data-test-id="linkCalendar">
             <img src="assets/svgs/menu-calendar.svg" alt="">
             <span>{{'Calendar' | translate}}</span>
           </a>
-        </li>
+        </li>-->
         <li class="nav-item" *ngxPermissionsOnly="['ORGANIZATIONAL: DOCTOR']" (click)="toggleSidebar()" data-test-id="listItemPrescription">
           <a class="nav-item-link" routerLink="/prescription" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }" data-test-id="linkPrescription">
             <img src="assets/svgs/menu-treatment.svg" alt="">

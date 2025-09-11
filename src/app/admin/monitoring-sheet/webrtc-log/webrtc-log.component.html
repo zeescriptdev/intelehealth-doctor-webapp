@@ -2,7 +2,7 @@
     <div class="card intel-card">
         <div class="card-header">
             <img class="mr-2" src="assets/svgs/video-frame.svg" alt="" height="44px">
-            <h6 class="mb-0">Doctor Log</h6>
+            <h6 class="mb-0">Webrtc Log</h6>
             <div class="card-header-actions">
                 <button type="button" class="action-btn bg-blue" data-test-id="btnExport" (click)="export()">
                     {{'Export' | translate}}</button>
@@ -16,8 +16,10 @@
                     </th>
                     <td [class]="column.class" mat-cell *matCellDef="let element">
                         <ng-container>
-                            {{ element[column?.key] }}
+                            {{ column?.key === 'start_time' ? element['start_timeD'] :
+                            column?.key === 'end_time' ? element['end_timeD']: element[column?.key] }}
                         </ng-container>
+                        
                     </td>
                 </ng-container>
 
