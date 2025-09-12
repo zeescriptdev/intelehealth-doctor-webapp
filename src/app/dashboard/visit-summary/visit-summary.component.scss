@@ -754,6 +754,78 @@ th.mat-header-cell:last-child {
   display: none;
 }
 
+.instructions-row {
+  display: flex;
+  align-items: stretch;
+  gap: 1rem;
+  textarea {
+    flex: 1 1 50%;
+    resize: vertical;
+  }
+
+  .translation-box {
+    flex: 1 1 50%;
+    background: #e6f9f0;
+    border: 1px solid #ccead8;
+    border-radius: 8px;
+    padding: 0.75rem;
+    position: relative;
+
+    .translation-label {
+      position: absolute;
+      top: -12px;
+      left: 12px;
+      background: #fff;
+      padding: 0 6px;
+      font-size: 0.8rem;
+      font-weight: 500;
+      color: #555;
+    }
+
+    .translation-content {
+      margin-top: 8px;
+      font-size: 0.9rem;
+      color: #333;
+    }
+  }
+}
+
+.box-adjust {
+  width: 50%;
+  min-height: 80px;
+}
+.extra-margin {
+  margin-top: 28px;
+}
+
+textarea[formControlName="advice"].form-control,  
+textarea[formControlName="followUpReason"].form-control {
+  height: 80px;
+  background: #F6F6F6 !important;;
+}
+
+.textarea-wrapper {
+  position: relative;
+  display: inline-block;
+}
+
+.textarea-wrapper textarea {
+  padding-right: 30px; 
+}
+
+.close-btn {
+  position: absolute;
+  top: 6px;
+  right: 8px;
+  border: none;
+  background: transparent;
+  font-size: 18px;
+  font-weight: bold;
+  color: #888;
+  cursor: pointer;
+}
+
+
 @media (max-width: 768px) {
 
   ::ng-deep .visit-summary-tab-group.mat-tab-group {
@@ -851,6 +923,17 @@ th.mat-header-cell:last-child {
 
   .mobile-list {
     display: block;
+  }
+
+  .instructions-row {
+    flex-direction: column;
+
+    .box-adjust {
+      width: 100%;
+    }
+    .extra-margin {
+      margin-top: 0px;
+    }
   }
 }
 
