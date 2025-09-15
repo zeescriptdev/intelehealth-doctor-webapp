@@ -17,7 +17,7 @@
   <ul
     class="chat-item-list"
     style="overflow-x: hidden !important;"
-    data-test-id="chatMessageList"
+    data-test-id="chatMessageListhelp"
   >
     <ng-container *ngFor="let m of messages; let first = first; let i = index">
       <li
@@ -25,14 +25,14 @@
         [class.text-left]="m?.from === 'System Administrator'"
         data-test-id="chatMessageStatus-{{ i }}"
       >
-        <span class="mr-1">{{ m.createdAt | amDateFormat : "LT" }}</span>
+        <span class="mr-1" data-test-id="doctorSentMsg-{{i}}">{{ m.createdAt | amDateFormat : "LT" }}</span>
         <ng-container *ngIf="first && m?.from === user?.uuid">
           <ng-container *ngIf="m.isRead">
             <img
               src="assets/svgs/read-status.svg"
               alt="read"
               width="12px"
-              data-test-id="msgReadStatusIcon"
+              data-test-id="msgReadStatusIcon-{{i}}"
             />
             {{ 'Read' | translate }}
           </ng-container>
@@ -41,7 +41,7 @@
               src="assets/svgs/sent-status.svg"
               alt="sent"
               width="12px"
-              data-test-id="msgSentStatusIcon"
+              data-test-id="msgSentStatusIcon-{{i}}"
             />
             {{ 'Sent' | translate }}
           </ng-container>
@@ -53,7 +53,7 @@
         [class.left]="m.from == user.uuid"
         data-test-id="chatMessageText-{{ i }}"
       >
-        {{ m.message }}
+      <span data-test-id="chatMessageText-{{ i }}">{{ m.message }}</span>  
       </li>
     </ng-container>
   </ul>
