@@ -1364,7 +1364,7 @@
                       <textarea formControlName="note" class="form-control" rows="2" placeholder="{{'Add instructions'|translate}}"
                         data-test-id="etAI"></textarea>
                     </div>
-                    <app-translation-box class="box-adjust" [label]="'Review the instructions translated in Marathi'"
+                    <app-translation-box class="box-adjust" [hwStateData]="hwStateData"
                       [translatedText]="'Add instructions'" [tabType]="'instructions'" (confirm)="confirmTranslation()">
                     </app-translation-box>
                   </div>
@@ -1416,21 +1416,30 @@
                     <span class="ml-2">{{'Add more advice'|translate}}</span>
                   </button>
                 </div>
-                <form class="mt-3" [formGroup]="addAdviceForm" (ngSubmit)="addAdvice()" *ngIf="!addMoreAdvice">
+                <form [formGroup]="addAdviceForm" (ngSubmit)="addAdvice()" *ngIf="!addMoreAdvice">
                   <div class="instructions-row">
                     <div class="form-group" class="box-adjust">
-                      <label for="note"><b>{{'Advice'|translate}}</b></label>
-                      <textarea type="text" height="80px" class="form-control" formControlName="advice" placeholder="{{'Add advice'|translate}}"
-                        [ngbTypeahead]="search" data-test-id="etAdvice"></textarea>
+                     <div class="input-wrapper1">
+                        <label [hidden]="adviceInput.value" for="advice"> {{ 'Add advice' | translate }} </label>
+                        <input 
+                          #adviceInput
+                          id="advice"
+                          type="text"
+                          class="form-control top-strict"
+                          formControlName="advice"
+                          [ngbTypeahead]="search"
+                          data-test-id="etAdvice"
+                        />
+                      </div>
                     </div>
-                    <app-translation-box class="box-adjust extra-margin" [label]="'Review the advice translated in Marathi'"
-                      [translatedText]="'Add advice'" [tabType]="'advice'" (confirm)="confirmTranslation()">
+                    <app-translation-box class="box-adjust extra-margin" [hwStateData]="hwStateData"
+                      [translatedText]="advice" [tabType]="'advice'" (confirm)="confirmTranslation()">
                     </app-translation-box>
                   </div>
-                  <div class="form-group mt-3">
+                  <div class="form-group">
                     <button type="button" class="white-btn mr-2" (click)="toggleAdvice()"
                       data-test-id="btnCancelAdvice">
-                      {{'Cancel'|translate}}
+                      {{'Clear'|translate}}
                     </button>
                     <button type="submit" class="gray-btn" [disabled]="addAdviceForm.invalid"
                       data-test-id="btnSubmitAdvice">
@@ -1750,7 +1759,7 @@
                                    <img src="assets/svgs/clear.svg" alt="" />
                               </button>
                             </div>
-                            <app-translation-box class="box-adjust" [label]="'Review the reason translated in Marathi'"
+                            <app-translation-box class="box-adjust" [hwStateData]="hwStateData"
                               [translatedText]="'Add reason'" [tabType]="'reason'" (confirm)="confirmTranslation()">
                             </app-translation-box>
                           </div>

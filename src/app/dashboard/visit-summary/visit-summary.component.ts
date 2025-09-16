@@ -27,7 +27,7 @@ import { TranslationService } from 'src/app/services/translation.service';
 import { deleteCacheData, getCacheData, setCacheData } from 'src/app/utils/utility-functions';
 import {
   doctorDetails, languages, visitTypes, facility, specialization, refer_specialization, refer_prioritie, strength, days, timing, PICK_FORMATS,
-  conceptIds, remark, routes, form
+  conceptIds, remark, routes, form, stateLanguages
 } from 'src/config/constant';
 import { VisitSummaryHelperService } from 'src/app/services/visit-summary-helper.service';
 import { ApiResponseModel, DataItemModel, DiagnosisModel, DocImagesModel, EncounterModel, EncounterProviderModel, MedicineModel, ObsApiResponseModel, ObsModel, PatientHistoryModel, PatientIdentifierModel, PatientModel, PersonAttributeModel, ProviderAttributeModel, ProviderModel, RecentVisitsApiResponseModel, ReferralModel, TestModel, VisitAttributeModel, VisitModel } from 'src/app/model/model';
@@ -62,6 +62,8 @@ export class VisitSummaryComponent implements OnInit, OnDestroy {
   providerName: string;
   hwPhoneNo: string;
   clinicName: string;
+  hwStateData: Object;
+  advice:string = 'Add advice';
   vitalObs: ObsModel[] = [];
   cheifComplaints: string[] = [];
   checkUpReasonData: PatientHistoryModel[] = [];
@@ -1336,7 +1338,8 @@ export class VisitSummaryComponent implements OnInit, OnDestroy {
   * @returns {void}
   */
   toggleAdvice() {
-    this.addMoreAdvice = !this.addMoreAdvice;
+    //this.addMoreAdvice = !this.addMoreAdvice;
+    this.advice = 'Add advice';
     this.addAdviceForm.reset();
   }
 
@@ -1370,6 +1373,10 @@ export class VisitSummaryComponent implements OnInit, OnDestroy {
       this.toastr.warning(this.translateService.instant('Advice already added, please add another advice.'), this.translateService.instant('Already Added'));
       return;
     }
+    this.advice = this.addAdviceForm.value.advice;
+  }
+
+  saveAdvice() {
     if (this.isVisitNoteProvider) {
       this.encounterService.postObs({
         concept: conceptIds.conceptAdvice,
@@ -1873,6 +1880,7 @@ export class VisitSummaryComponent implements OnInit, OnDestroy {
    */
   getLocationAndSetSanch() {
     this.visitService.getLocations().subscribe((res: any) => {
+      this.getStateByVillage(this.clinicName, res);
       const state = res.states.find(state => state?.name === this.patient?.person.preferredAddress.stateProvince);
       if (state) {
         let districtName = '-', sanchName = '-';
@@ -1942,5 +1950,36 @@ export class VisitSummaryComponent implements OnInit, OnDestroy {
       code = '#FF0000'
     }
     return code;
+  }
+
+  /**
+ * Finds the state name for a given village.
+ *
+ * @param villageName - The name of the village to search for
+ * @param locations   - The hierarchical location array (states → districts → [optional sanch] → villages)
+ * @returns The state name if the village is found, otherwise null
+ */
+  getStateByVillage(villageName: string, locations) {
+    let hwState: string;
+    for (const state of locations?.states) {
+      if (this.searchInDistricts(villageName, state.districts)) {
+        hwState = state.name;
+      }
+    }
+    this.hwStateData = stateLanguages?.find((v: any) => v.state === hwState);
+  }
+
+  searchInDistricts(villageName: string, districts: any[]): boolean {
+    return districts?.some(district => {
+      // ✅ Case 1: Villages directly under district
+      if (district.villages?.some((v: any) => v.name === villageName)) {
+        return true;
+      }
+
+      // ✅ Case 2: Villages inside sanch
+      return district.sanchs?.some(sanch =>
+        sanch.villages?.some((v: any) => v.name === villageName)
+      );
+    });
   }
 }

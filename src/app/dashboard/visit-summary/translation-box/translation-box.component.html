@@ -1,15 +1,14 @@
 <div class="pwa-margin-top translation-wrapper">
   <!-- Floating Label (outside the green box but pinned to top-left) -->
   <label class="translation-label">
-    <span class="important-text"> {{ label.substring(0, label.lastIndexOf(' ')) }}
-    <b>{{ label.substring(label.lastIndexOf(' ') + 1) }}</b></span>
+    <span class="important-text"> Review the {{tabType}} translated in
+      <b>{{ hwStateData?.language }}</b></span>
   </label>
 
   <!-- Green Box -->
-  <!-- Green Box -->
-  <div class="translation-box">
+  <div *ngIf="tabResponses[tabType]; else loading" class="translation-box">
     <div class="translation-content">
-      <span>{{ translatedText }}</span>
+      <span> {{ tabResponses[tabType]?.translated_text }}</span>
     </div>
 
     <!-- Button Group pinned bottom-right -->
@@ -26,3 +25,7 @@
     </div>
   </div>
 </div>
+
+<ng-template #loading>
+  <p>Loading {{ tabType }} data...</p>
+</ng-template>

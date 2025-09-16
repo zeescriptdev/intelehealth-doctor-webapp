@@ -306,6 +306,27 @@ export class VisitService {
      return this.http.post(url, json)
   }
 
+  getTranslatedText(textToTranslate: string, targetLang:string, tabType: string): Observable<any> {
+    let url = `${environment.sarvamURL}`;
+    let headers: HttpHeaders = new HttpHeaders();
+    headers = headers.append('api-subscription-key', environment.sarvamSubscriptionKey).append('content-type', 'application/json');
+    return this.http.post(url, this.buildRequestBody(textToTranslate, targetLang, tabType), { headers })
+  }
+
+  // A reusable function to build translation request body
+  buildRequestBody(input: string, targetLang: string, tabType: string) {
+    return {
+      input: input,
+      source_language_code: "en-IN",
+      target_language_code: targetLang,
+      mode: "formal",
+      model: "sarvam-translate:v1",
+      numerals_format: "native",
+      speaker_gender: "Female",
+      enable_preprocessing: true,
+      tabType: tabType
+    };
+  }
   /**
    * Get followup date for a given encounter type
    * @param  visit - Visit

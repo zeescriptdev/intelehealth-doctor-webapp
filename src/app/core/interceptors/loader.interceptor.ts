@@ -24,7 +24,8 @@ export class LoaderInterceptor implements HttpInterceptor {
         '/bs',
         '/vlrv',
         '/lcrep',
-        '/attribute'
+        '/attribute',
+        '/translate'
     ];
 
     const shouldSkip = excludedPatterns.some(pattern =>

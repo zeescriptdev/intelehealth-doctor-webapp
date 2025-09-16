@@ -74,7 +74,9 @@ const environmentFileContent = `
     vapidPublicKey: '${process.env.VAPID_PUBLIC_KEY}',
     authGatwayURL: '${process.env.AUTH_GATE_WAY_URL}',
     showCaptcha: false,
-    recordsPerPage: 25
+    recordsPerPage: 25,
+    sarvamURL:'${process.env.SARVAM_URL}',
+    sarvamSubscriptionKey:'${process.env.SARVAM_SUBSCRIPTION_KEY}'
   };
 `;
 

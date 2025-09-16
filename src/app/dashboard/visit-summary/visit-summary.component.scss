@@ -413,6 +413,7 @@
   }
 
   .blue-btn {
+    width: 130px;
     background: var(--color-darkBlue);
     border-radius: 8px;
     font-size: 18px;
@@ -422,6 +423,7 @@
   }
 
   .white-btn {
+    width: 130px;
     background: var(--color-white);
     border-radius: 8px;
     font-size: 18px;
@@ -433,6 +435,7 @@
   }
 
   .gray-btn {
+    width: 130px;
     background: var(--color-lightGray);
     border-radius: 8px;
     font-size: 18px;
@@ -825,7 +828,30 @@ textarea[formControlName="followUpReason"].form-control {
   cursor: pointer;
 }
 
+.input-wrapper1 {
+  position: relative;
+  margin: 28px 0;
+}
 
+.input-wrapper1 label {
+  position: absolute;
+  top: 17px;       /* float above the input */
+  left: 17px;      /* align with input padding */
+  pointer-events: none; /* so click goes to input */
+  font-size: 16px;
+  color: #919192;
+}
+
+.input-wrapper1 input {
+  height: 80px;
+}
+
+.top-strict {
+  height: 80px;
+  padding-top: 8px;    /* SAME as label top offset */
+  padding-left: 12px;  /* align with label */
+  box-sizing: border-box;
+}
 @media (max-width: 768px) {
 
   ::ng-deep .visit-summary-tab-group.mat-tab-group {
