@@ -48,7 +48,7 @@
             </div>
             <div class="call-duration-container">
               <div class="call-duration" [class.d-none]="_minimized">
-                <span [ngClass]="{ 'fontColor': !_remoteVideoOff }" style="font-size: 16px; font-weight: 500;">Call ends in</span>
+                <!-- <span [ngClass]="{ 'fontColor': !_remoteVideoOff }" style="font-size: 16px; font-weight: 500;">Call ends in</span> -->
                 <span *ngIf="callDuration" class="pill">{{
                   callDuration
                 }}</span>
