@@ -6,21 +6,21 @@
   </label>
 
   <!-- Green Box -->
-  <div *ngIf="tabResponses[tabType]; else loading" class="translation-box">
+  <div *ngIf="tabResponses[tabType]; else loading" class="translation-box" >
     <div class="translation-content">
       <span> {{ tabResponses[tabType]?.translated_text }}</span>
     </div>
-
+   
     <!-- Button Group pinned bottom-right -->
     <div class="button-group">
-      <button type="button" class="reject-btn" (click)="onReject()" data-test-id="btnOnReject">
-        <img src="assets/svgs/reject.svg" alt="" />
+      <button type="submit" class="reject-btn" *ngIf="shouldShowReject()" (click)="onReject()" data-test-id="btnOnReject">
+        <img src="assets/svgs/reject.svg" alt=""/>
       </button>
-      <button type="button" class="approve-btn" (click)="onApprove()" data-test-id="btnOnApprove">
-        <img src="assets/svgs/approve.svg" alt="" />
-      </button>
-      <button type="button" class="retry-btn" (click)="onRetry()" data-test-id="btnOnRetry">
-        <img src="assets/svgs/retry.svg" alt="" />
+      <button type="submit" class="approve-btn" *ngIf="shouldShowApprove()"  (click)="onApprove()" data-test-id="btnOnApprove"
+      [ngClass]= "isApproveDisabled() ? 'approve-disabled' : 'approve-active'">
+   </button>
+      <button type="button" class="retry-btn"  *ngIf="shouldShowRetry()" (click)="onRetry()" data-test-id="btnOnRetry">
+        <img src="assets/svgs/retry.svg" alt=""/>
       </button>
     </div>
   </div>

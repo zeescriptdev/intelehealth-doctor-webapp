@@ -1329,7 +1329,7 @@
                 </div>
               </form>
 
-              <h6 class="list-header mt-3 mb-2">{{'Additional instructions'|translate}}</h6>
+              <h6 class="list-header mt-2 mb-2">{{'Additional instructions'|translate}}</h6>
               <ng-container *ngIf="additionalInstructions.length">
                 <ul class="items-list">
                   <li *ngFor="let ai of additionalInstructions; let i = index">
@@ -1365,7 +1365,8 @@
                         data-test-id="etAI"></textarea>
                     </div>
                     <app-translation-box class="box-adjust" [hwStateData]="hwStateData"
-                      [translatedText]="'Add instructions'" [tabType]="'instructions'" (confirm)="confirmTranslation()">
+                      [translatedText]="instructions" [tabType]="'instructions'" [clickedFromParent]="instructions !=='Add instructions' ? true : false"
+                       (action)="handleAction($event)">
                     </app-translation-box>
                   </div>
               
@@ -1373,7 +1374,7 @@
                     <button type="button" class="white-btn mr-2" (click)="toggleAdditionalInstruction()" data-test-id="btnCancelAI">
                       {{'Cancel'|translate}}
                     </button>
-                    <button type="submit" class="gray-btn" [disabled]="addAdditionalInstructionForm.invalid"
+                    <button type="submit" class="gray-btn" [disabled]="addAdditionalInstructionForm.invalid || instructions !=='Add instructions'"
                       data-test-id="btnSubmitAI">
                       {{'Save'|translate}}
                     </button>
@@ -1433,15 +1434,16 @@
                       </div>
                     </div>
                     <app-translation-box class="box-adjust extra-margin" [hwStateData]="hwStateData"
-                      [translatedText]="advice" [tabType]="'advice'" (confirm)="confirmTranslation()">
+                      [translatedText]="advice" [tabType]="'advice'" [clickedFromParent]="advice !=='Add advice' ? true : false"
+                       (action)="handleAction($event)">
                     </app-translation-box>
                   </div>
-                  <div class="form-group">
+                  <div class="form-group mt-3">
                     <button type="button" class="white-btn mr-2" (click)="toggleAdvice()"
                       data-test-id="btnCancelAdvice">
                       {{'Clear'|translate}}
                     </button>
-                    <button type="submit" class="gray-btn" [disabled]="addAdviceForm.invalid"
+                    <button type="submit" class="gray-btn" [disabled]="addAdviceForm.invalid || advice !=='Add advice'"
                       data-test-id="btnSubmitAdvice">
                       {{'Add advice'|translate}}
                     </button>
@@ -1688,7 +1690,7 @@
                 <mat-icon>{{ panel8.expanded ? "remove" : "add" }}</mat-icon>
               </mat-expansion-panel-header>
 
-              <form [formGroup]="followUpForm" (ngSubmit)="saveFollowUp()" *ngIf="!followUpForm.value.present">
+              <form [formGroup]="followUpForm" (ngSubmit)="addFollowUp()" *ngIf="!followUpForm.value.present">
                 <ul class="items-list">
                   <li>
                     <div class="row">
@@ -1753,33 +1755,33 @@
                         <div class="col-sm-9">
                           <div class="instructions-row">
                             <div class="textarea-wrapper box-adjust">
-                              <textarea type="text" class="form-control" placeholder="{{'Add reason'|translate}}"
+                              <textarea type="text" class="form-control" placeholder="{{'Enter reason'|translate}}"
                                 formControlName="followUpReason" data-test-id="etFollowUpReason"></textarea>
-                              <button type="button" class="close-btn" (click)="onCloseTextarea()">
+                              <button type="button" class="close-btn" (click)="onClearReason()">
                                    <img src="assets/svgs/clear.svg" alt="" />
                               </button>
                             </div>
                             <app-translation-box class="box-adjust" [hwStateData]="hwStateData"
-                              [translatedText]="'Add reason'" [tabType]="'reason'" (confirm)="confirmTranslation()">
+                              [translatedText]="reason" [tabType]="'reason'"
+                              [clickedFromParent]="reason !=='Enter reason' ? true : false"
+                             (action)="handleAction($event)">
                             </app-translation-box>
                           </div>
-                      
+                        <div class="form-group mb-0 mt-3" *ngIf="
+                                            isVisitNoteProvider && !visitEnded && !visitCompleted && 
+                                            !followUpForm.value.present &&
+                                            followUpForm.value.wantFollowUp == 'Yes'|| followUpForm.value.wantFollowUp == 'Да'
+                                          ">
+                          <button type="submit" class="gray-btn" [disabled]="followUpForm.invalid" data-test-id="btnSubmitFollowUp">
+                            {{'Save'|translate}}
+                          </button>
                         </div>
-                      </div>
-                    </li>
-                  </ng-container>
-                </ul>
-                <div class="form-group mb-0 mt-3" *ngIf="
-                    isVisitNoteProvider && !visitEnded && !visitCompleted && 
-                    !followUpForm.value.present &&
-                    followUpForm.value.wantFollowUp == 'Yes'|| followUpForm.value.wantFollowUp == 'Да'
-                  ">
-                  <button type="submit" class="gray-btn" [disabled]="followUpForm.invalid"
-                    data-test-id="btnSubmitFollowUp">
-                    {{'Save'|translate}}
-                  </button>
-                </div>
-              </form>
+                        </div>
+                        </div>
+                        </li>
+                        </ng-container>
+                        </ul>
+                        </form>
 
               <div class="table-responsive" *ngIf="followUpForm.value.present">
                 <table class="table" aria-describedby="">

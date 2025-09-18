@@ -51,6 +51,23 @@
   right: 10px;
   display: flex;
 }
+.disbled {
+  pointer-events: none;
+  color: gray;
+}
+
+.approve-active {
+  width: 29px;
+  height: 29px;
+  background-image: url('../../../../assets/svgs/approve.svg');
+}
+
+.approve-disabled {
+  width: 29px;
+  height: 29px;
+  pointer-events: none;
+  background-image: url('../../../../assets/svgs/disable-approve.svg');
+}
 
 @media (max-width: 768px) {
     .pwa-margin-top {

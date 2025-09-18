@@ -63,7 +63,9 @@ export class VisitSummaryComponent implements OnInit, OnDestroy {
   hwPhoneNo: string;
   clinicName: string;
   hwStateData: Object;
-  advice:string = 'Add advice';
+  instructions: string = 'Add instructions';
+  advice: string = 'Add advice';
+  reason: string = 'Enter reason';
   vitalObs: ObsModel[] = [];
   cheifComplaints: string[] = [];
   checkUpReasonData: PatientHistoryModel[] = [];
@@ -141,7 +143,6 @@ export class VisitSummaryComponent implements OnInit, OnDestroy {
 
   openChatFlag: boolean = false;
   collapsed: boolean = true;
-
   mainSearch = (text$: Observable<string>, list: string[]) =>
     text$.pipe(
       debounceTime(200),
@@ -1199,6 +1200,7 @@ export class VisitSummaryComponent implements OnInit, OnDestroy {
   */
   toggleAdditionalInstruction() {
     this.addMoreAdditionalInstruction = !this.addMoreAdditionalInstruction;
+    this.instructions = 'Add instructions';
     this.addAdditionalInstructionForm.reset();
   }
 
@@ -1271,6 +1273,10 @@ export class VisitSummaryComponent implements OnInit, OnDestroy {
       this.toastr.warning(this.translateService.instant('Additional instruction already added, please add another instruction.'), this.translateService.instant('Already Added'));
       return;
     }
+    this.instructions = this.addAdditionalInstructionForm.value.note;
+  }
+
+  saveAdditionalInstructions() {
     if (this.isVisitNoteProvider) {
       this.encounterService.postObs({
         concept: conceptIds.conceptMed,
@@ -1594,7 +1600,7 @@ export class VisitSummaryComponent implements OnInit, OnDestroy {
   * Save followup
   * @returns {void}
   */
-  saveFollowUp() {
+  addFollowUp() {
     let body = {
       concept: conceptIds.conceptFollow,
       person: this.visit.patient.uuid,
@@ -1611,6 +1617,15 @@ export class VisitSummaryComponent implements OnInit, OnDestroy {
       body.value = (this.followUpForm.value.followUpReason) ?
         `${moment(this.followUpForm.value.followUpDate).format('YYYY-MM-DD')}, Time: ${this.followUpForm.value.followUpTime}, Remark: ${this.followUpForm.value.followUpReason}` : `${moment(this.followUpForm.value.followUpDate).format('YYYY-MM-DD')}, Time: ${this.followUpForm.value.followUpTime}`;
     }
+    if (this.followUpForm.value.followUpReason) {
+      this.reason = this.followUpForm.value.followUpReason;
+    } else {
+      this.saveFollowUp(body);
+    }
+
+  }
+
+  saveFollowUp(body: { concept: string; person: string; obsDatetime: Date; value: string; encounter: string; }) {
     if (this.isVisitNoteProvider) {
       this.encounterService.postObs(body).subscribe((res: ObsModel) => {
         if (res) {
@@ -1653,17 +1668,17 @@ export class VisitSummaryComponent implements OnInit, OnDestroy {
       if (res) {
         if (this.provider.attributes.length) {
           if (navigator.onLine) {
-              this.visitService.fetchVisitDetails(this.route.snapshot.paramMap.get('id')).subscribe((visitDetails) => {
+            this.visitService.fetchVisitDetails(this.route.snapshot.paramMap.get('id')).subscribe((visitDetails) => {
               let visitComplete = this.visitSummaryService.checkIfEncounterExists(visitDetails.encounters, visitTypes.VISIT_COMPLETE);
               let visitNote = this.visitSummaryService.checkIfEncounterExists(visitDetails.encounters, visitTypes.VISIT_NOTE);
               let isSameVisitNoteProvider = false;
-               visitNote?.encounterProviders?.forEach((p: EncounterProviderModel) => {
+              visitNote?.encounterProviders?.forEach((p: EncounterProviderModel) => {
                 if (p.provider.uuid === this.provider.uuid) {
-                 isSameVisitNoteProvider = true;
+                  isSameVisitNoteProvider = true;
                 }
               });
-              if(!visitNote) {
-               this.coreService.openSharePrescriptionErrorModal({ msg: 'Unable to send the prescription as the visit has already moved to the awaiting state because the 1-hour prescription provision window has passed.', confirmBtnText: 'Go to dashboard' }).subscribe((c: boolean) => {
+              if (!visitNote) {
+                this.coreService.openSharePrescriptionErrorModal({ msg: 'Unable to send the prescription as the visit has already moved to the awaiting state because the 1-hour prescription provision window has passed.', confirmBtnText: 'Go to dashboard' }).subscribe((c: boolean) => {
                   if (c) {
                     this.router.navigate(['/dashboard']);
                   }
@@ -1981,5 +1996,38 @@ export class VisitSummaryComponent implements OnInit, OnDestroy {
         sanch.villages?.some((v: any) => v.name === villageName)
       );
     });
+  }
+
+  handleAction(event: { tabType: string; action: string }) {
+    switch (event.tabType) {
+      case 'instructions':
+        if (event.action === 'approve') {
+          console.log('instructions approved');
+        } else {
+          console.log('instructions rejected');
+        }
+        break;
+
+      case 'advice':
+        if (event.action === 'approve') {
+          console.log('Advice approved');
+        } else {
+          console.log('Advice rejected');
+        }
+        break;
+
+      case 'reason':
+        if (event.action === 'approve') {
+          console.log('reason approved');
+        } else {
+          console.log('reason rejected');
+        }
+        break;
+    }
+  }
+
+  onClearReason() {
+    this.reason !== 'Enter reason';
+    this.followUpForm.get('followUpReason')?.reset();
   }
 }

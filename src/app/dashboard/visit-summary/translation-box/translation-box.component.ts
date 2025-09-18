@@ -1,51 +1,159 @@
-import { Component, EventEmitter, Input, OnChanges, Output, SimpleChanges } from '@angular/core';
+import {
+  Component,
+  EventEmitter,
+  Input,
+  OnChanges,
+  Output,
+  SimpleChanges,
+  ViewEncapsulation,
+} from '@angular/core';
 import { VisitService } from 'src/app/services/visit.service';
+
+interface TabButtonState {
+  showApprove: boolean;
+  isApproveDisabled: boolean;
+  showReject: boolean;
+  showRetry: boolean;
+}
 
 @Component({
   selector: 'app-translation-box',
   templateUrl: './translation-box.component.html',
-  styleUrls: ['./translation-box.component.scss']
+  styleUrls: ['./translation-box.component.scss'],
+  encapsulation: ViewEncapsulation.ShadowDom,
 })
 export class TranslationBoxComponent implements OnChanges {
-
-  /** Text to display in label */
-  @Input() hwStateData: { state: '', language: '', language_code: '' };
-  //  @Input() label: string = 'Review the advice translated';
-
-  /** Translated text to show */
+  @Input() hwStateData: { state: ''; language: ''; language_code: '' };
   @Input() translatedText: string = '';
-
-  /** Tab type (optional) if you want to customize based on section */
   @Input() tabType: string = '';
+  @Input() clickedFromParent!: boolean;
 
-  /** Emits event when user confirms translation */
-  @Output() confirm = new EventEmitter<void>();
+  @Output() action = new EventEmitter<{ tabType: string; action: string }>();
 
-  translatedAdvice: string;
-  translatedInstruction: string;
-  translatedReason: string;
-  tabResponses: { [key: string]: any } = {}; // cache responses by tabType
+  // track states per tab
+  tabButtonStates: Record<string, TabButtonState> = {};
 
-  constructor(private visitService: VisitService) { }
+  tabResponses: { [key: string]: any } = {};
+  lastTranslatedValues: { [key: string]: string } = {};
+  pendingTranslatedText: string | null = null;
+  defaultText = ['Add instructions','Add advice','Enter reason'];
+
+  constructor(private visitService: VisitService) {}
+
   ngOnChanges(changes: SimpleChanges): void {
-    if (changes['translatedText'] || (this.hwStateData && this.tabType)) {
-        this.callApiForTab(this.tabType);
+    if (
+      changes['translatedText'] &&
+      changes['translatedText'].currentValue !==
+        changes['translatedText'].previousValue
+    ) {
+      const newValue = changes['translatedText'].currentValue;
+      if (this.hwStateData?.language_code && this.tabType) {
+        if (this.lastTranslatedValues[this.tabType] !== newValue) {
+          this.lastTranslatedValues[this.tabType] = newValue;
+          this.callApiForTab(this.tabType);
+        }
+      } else {
+        this.pendingTranslatedText = newValue;
+      }
     }
-    console.log("hwStateData", this.translatedAdvice);
-    console.log("hwStateData", this.translatedInstruction);
+
+    if (
+      changes['hwStateData'] &&
+      this.hwStateData?.language_code &&
+      this.tabType
+    ) {
+      if (this.pendingTranslatedText) {
+        if (
+          this.lastTranslatedValues[this.tabType] !==
+          this.pendingTranslatedText
+        ) {
+          this.lastTranslatedValues[this.tabType] = this.pendingTranslatedText;
+          this.callApiForTab(this.tabType);
+        }
+        this.pendingTranslatedText = null;
+      }
+    }
+
+    if (changes['clickedFromParent'] && this.tabType) {
+      this.ensureTabState(this.tabType);
+      // disable approve initially
+      this.tabButtonStates[this.tabType].isApproveDisabled = true;
+    }
   }
 
-  onConfirm() {
-    this.confirm.emit();
+  private ensureTabState(tabType: string) {
+    if (!this.tabButtonStates[tabType]) {
+      this.tabButtonStates[tabType] = {
+        showApprove: true,
+        isApproveDisabled: true,
+        showReject: false,
+        showRetry: false,
+      };
+    }
   }
 
   callApiForTab(tabType: string) {
-    this.visitService.getTranslatedText(this.translatedText, this.hwStateData?.language_code, this.tabType).subscribe({
-      next: (res) => {
-        this.tabResponses[tabType] = res; // store response by tabType
-      },
-      error: (err) => console.error(`Error for ${tabType}:`, err)
-    });
-    console.log('this.tabRes', this.tabResponses)
+    this.ensureTabState(tabType);
+
+    this.visitService
+      .getTranslatedText(
+        this.translatedText,
+        this.hwStateData?.language_code,
+        tabType
+      )
+      .subscribe({
+        next: (res) => {
+          this.tabResponses[tabType] = res;
+          // ✅ Success → Approve + Reject (only if clickedFromParent is true)
+          this.tabButtonStates[tabType] = {
+            showApprove: true,
+            isApproveDisabled: this.defaultText.includes(this.translatedText) ? true : false,
+            showReject: this.clickedFromParent ?? false,
+            showRetry: false, // hide retry on success
+          };
+        },
+        error: (err) => {
+          console.error(`Error for ${tabType}:`, err);
+          // ❌ Failure → Retry only
+          this.tabButtonStates[tabType] = {
+            showApprove: false,
+            isApproveDisabled: true,
+            showReject: false,
+            showRetry: true,
+          };
+        },
+      });
+  }
+
+  onApprove() {
+    this.action.emit({ tabType: this.tabType, action: 'approve' });
+  }
+
+  onReject() {
+     this.action.emit({ tabType: this.tabType, action: 'reject' });
+  }
+
+  onRetry() {
+    if (this.tabType) {
+   //   this.callApiForTab(this.tabType);
+      this.action.emit({ tabType: this.tabType, action: 'retry' });
+    }
+  }
+
+  // helpers for template
+  shouldShowApprove(): boolean {
+    return this.tabButtonStates[this.tabType]?.showApprove ?? true;
+  }
+
+  isApproveDisabled(): boolean {
+    return this.tabButtonStates[this.tabType]?.isApproveDisabled ?? true;
+  }
+
+  shouldShowReject(): boolean {
+    return this.tabButtonStates[this.tabType]?.showReject ?? false;
+  }
+
+  shouldShowRetry(): boolean {
+    return this.tabButtonStates[this.tabType]?.showRetry ?? false;
   }
 }
