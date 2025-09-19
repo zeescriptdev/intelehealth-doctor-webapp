@@ -1417,24 +1417,22 @@
                     <span class="ml-2">{{'Add more advice'|translate}}</span>
                   </button>
                 </div>
-                <form [formGroup]="addAdviceForm" (ngSubmit)="addAdvice()" *ngIf="!addMoreAdvice">
+                <form [formGroup]="addAdviceForm" *ngIf="!addMoreAdvice">
                   <div class="instructions-row">
                     <div class="form-group" class="box-adjust">
-                     <div class="input-wrapper1">
-                        <label [hidden]="adviceInput.value" for="advice"> {{ 'Add advice' | translate }} </label>
-                        <input 
-                          #adviceInput
-                          id="advice"
-                          type="text"
-                          class="form-control top-strict"
-                          formControlName="advice"
-                          [ngbTypeahead]="search"
-                          data-test-id="etAdvice"
-                        />
-                      </div>
+                    <div class="input-wrapper1">
+                      <label [hidden]="adviceInput.value" for="advice"> {{ 'Add advice' | translate }} </label>
+                      <input #adviceInput id="advice" type="text" class="form-control top-strict" formControlName="advice"
+                        [ngbTypeahead]="search" data-test-id="etAdvice" />
+                      <button type="button" class="approve-btn" *ngIf="isAdviceRejected" (click)="onApprove('advice')" data-test-id="btnOnApprove"
+                        [ngClass]="!disableApproveBtn ? 'approve-active' : 'approve-disabled'">
+                      </button>
                     </div>
+                      <small class="red-color pl-3" *ngIf="isAdviceRejected && !disableApproveBtn">
+                          <img src="assets/svgs/trans-error.svg" alt=""/> Please update manually the required text.</small>
+                    </div> 
                     <app-translation-box class="box-adjust extra-margin" [hwStateData]="hwStateData"
-                      [translatedText]="advice" [tabType]="'advice'" [clickedFromParent]="advice !=='Add advice' ? true : false"
+                      [translatedText]="advice" [tabType]="'advice'" [clickedFromParent]="addAdviceForm.valid"
                        (action)="handleAction($event)">
                     </app-translation-box>
                   </div>
@@ -1443,7 +1441,7 @@
                       data-test-id="btnCancelAdvice">
                       {{'Clear'|translate}}
                     </button>
-                    <button type="submit" class="gray-btn" [disabled]="addAdviceForm.invalid || advice !=='Add advice'"
+                    <button type="button" class="gray-btn" (click)="addAdvice()" [disabled]="addAdviceForm.invalid || disableAddAdvice"
                       data-test-id="btnSubmitAdvice">
                       {{'Add advice'|translate}}
                     </button>

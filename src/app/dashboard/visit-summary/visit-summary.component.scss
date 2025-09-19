@@ -814,6 +814,7 @@ textarea[formControlName="followUpReason"].form-control {
 
 .textarea-wrapper textarea {
   padding-right: 30px; 
+  resize: none;
 }
 
 .close-btn {
@@ -830,7 +831,31 @@ textarea[formControlName="followUpReason"].form-control {
 
 .input-wrapper1 {
   position: relative;
-  margin: 28px 0 16px;
+  margin: 28px 0 0px;
+}
+
+.approve-btn {
+  position: absolute;
+  bottom: 8px; 
+  right: 8px;
+  background: transparent;
+  border: none;
+  color: #555;
+  font-size: 18px;
+  cursor: pointer;
+}
+
+.approve-active {
+  width: 29px;
+  height: 29px;
+  background-image: url('../../../assets/svgs/approve.svg');
+}
+
+.approve-disabled {
+  width: 29px;
+  height: 29px;
+  pointer-events: none;
+  background-image: url('../../../assets/svgs/disable-approve.svg');
 }
 
 .input-wrapper1 label {

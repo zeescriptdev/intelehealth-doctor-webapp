@@ -1,23 +1,23 @@
-
 .translation-wrapper {
   position: relative;
-  display: inline-block; /* keeps label tied to box width */
+  display: inline-block;
+  /* keeps label tied to box width */
   width: 100%;
 }
 
 /* Label floats above top-left */
 .translation-label {
-    position: absolute;
-    top: -24px;
-    left: 10px;
-    background: #EBFCF6;
-    border: 1px solid #C7EBF5;
-    border-radius: 7px;
-    border-bottom: none;
-    padding: 5px 8px 0 8px;
-    font-weight: 400;
-    font-size: 12px;
-    color: #727272;
+  position: absolute;
+  top: -24px;
+  left: 10px;
+  background: #EBFCF6;
+  border: 1px solid #C7EBF5;
+  border-radius: 7px;
+  border-bottom: none;
+  padding: 5px 8px 0 8px;
+  font-weight: 400;
+  font-size: 12px;
+  color: #727272;
 }
 
 /* Green box */
@@ -25,19 +25,43 @@
   background: #EBFCF6;
   border: 0.77px solid #C7EBF5;
   border-radius: 8px;
-  min-height: 80px;  
+  min-height: 80px;
 }
 
 .translation-content {
   font-size: 16px;
   padding-left: 17px;
   padding-top: 17px;
-  padding-bottom: 10px;
-  color: #4FA459A1;
-
+  //padding-bottom: 10px;
+  word-wrap: break-word;
 }
 
-.approve-btn, .reject-btn, .retry-btn {
+.green {
+  color: #4FA459A1;
+}
+
+.gray {
+  color: #A9A9A9;
+}
+
+.translatedTextarea {
+  width: 100%;
+  border: none;
+  outline: none;
+  background: transparent;
+  /* let parent background show */
+  resize: none;
+  /* 🔹 disable resize handle */
+  overflow: hidden;
+  /* 🔹 hides any scrollbars */
+  color: #4FA459A1;
+  word-wrap: break-word;
+  font-size: 16px;
+}
+
+.approve-btn,
+.reject-btn,
+.retry-btn {
   background: transparent;
   border: none;
   color: #555;
@@ -47,10 +71,11 @@
 
 .button-group {
   position: absolute;
-  bottom: 10px;
+  bottom: 8px;
   right: 10px;
   display: flex;
 }
+
 .disbled {
   pointer-events: none;
   color: gray;
@@ -69,8 +94,34 @@
   background-image: url('../../../../assets/svgs/disable-approve.svg');
 }
 
+.red-color {
+  color: #FF475D;
+  padding-left: 15px;
+}
+
+.circle-loader {
+  width: 18px;
+  height: 18px;
+  border: 5px dotted lightgray;
+  border-radius: 50%;
+  border-top-color: transparent;
+  animation: spin 1s linear infinite;
+  margin: auto;
+  /* center inside parent */
+}
+
+@keyframes spin {
+  0% {
+    transform: rotate(0deg);
+  }
+
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
 @media (max-width: 768px) {
-    .pwa-margin-top {
-      margin-top: 14px;
+  .pwa-margin-top {
+    margin-top: 14px;
   }
 }
