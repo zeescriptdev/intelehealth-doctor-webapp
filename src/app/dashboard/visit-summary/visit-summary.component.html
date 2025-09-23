@@ -901,7 +901,8 @@
                             <img src="assets/svgs/whatsapp-green.svg" alt="" />
                           </a>
                         </div>
-                        <span class="text-muted">{{'Click here to connect with the patient via sevika'|translate}}</span>
+                        <span class="text-muted">{{'Click here to connect with the patient via
+                          sevika'|translate}}</span>
                       </div>
                       <ng-template #noContactDetails>
                         <div class="col-sm-9 d-flex align-items-center">
@@ -957,8 +958,8 @@
                         <td>{{ patientInteractionForm.value.spoken }}</td>
                         <td class="pr-0">
                           <button type="button" mat-icon-button class="float-right"
-                            *ngIf="isVisitNoteProvider && !visitEnded && !visitCompleted" (click)="deletePatientInteraction()"
-                            data-test-id="btnDeletePatientInteraction">
+                            *ngIf="isVisitNoteProvider && !visitEnded && !visitCompleted"
+                            (click)="deletePatientInteraction()" data-test-id="btnDeletePatientInteraction">
                             <img src="assets/svgs/delete-icon.svg" alt="" />
                           </button>
                         </td>
@@ -997,7 +998,8 @@
                         <td>{{ d.diagnosisType }}</td>
                         <td>{{ d.diagnosisStatus }}</td>
                         <td class="pr-0">
-                          <button mat-icon-button class="float-right" *ngIf="isVisitNoteProvider && !visitEnded && !visitCompleted"
+                          <button mat-icon-button class="float-right"
+                            *ngIf="isVisitNoteProvider && !visitEnded && !visitCompleted"
                             (click)="deleteDiagnosis(i, d.uuid)"
                             data-test-id="{{'btnDeleteDiagnosisVisitSummary' + i}}">
                             <img src="assets/svgs/delete-icon.svg" alt="" />
@@ -1110,7 +1112,8 @@
                 <li *ngFor="let n of notes; let i = index">
                   <div class="d-flex justify-content-between align-items-center">
                     <span>{{ n.value }}</span>
-                    <button mat-icon-button (click)="deleteNote(i, n.uuid)" *ngIf="isVisitNoteProvider && !visitEnded && !visitCompleted"
+                    <button mat-icon-button (click)="deleteNote(i, n.uuid)"
+                      *ngIf="isVisitNoteProvider && !visitEnded && !visitCompleted"
                       data-test-id="{{'btnDeleteNoteVisitSummary'+i}}">
                       <img src="assets/svgs/delete-icon.svg" alt="" />
                     </button>
@@ -1169,7 +1172,8 @@
                         <div class="d-flex justify-content-between">
                           <span>{{ m.value }}</span>
                           <button mat-icon-button (click)="deleteMedicine(i, m.uuid)"
-                            data-test-id="btnDeleteMedVisitSummary" *ngIf="isVisitNoteProvider && !visitEnded && !visitCompleted">
+                            data-test-id="btnDeleteMedVisitSummary"
+                            *ngIf="isVisitNoteProvider && !visitEnded && !visitCompleted">
                             <img src="assets/svgs/delete-icon.svg" alt="" />
                           </button>
                         </div>
@@ -1312,16 +1316,17 @@
                         <input formControlName="remark" type="text" class="form-control"
                           placeholder="{{'Remark'|translate}}" [ngbTypeahead]="search7" data-test-id="etRemark" />
                       </div>
-                      <div *ngIf="isVisitNoteProvider && !visitEnded && !visitCompleted" class="form-group mb-0 mt-2 float-right">
+                      <div *ngIf="isVisitNoteProvider && !visitEnded && !visitCompleted"
+                        class="form-group mb-0 mt-2 float-right">
                         <span *ngIf="!addMoreMedicine">
                           <button type="button" class="white-btn mr-2" (click)="toggleMedicine()"
-                          data-test-id="btnCancelMed">
-                          {{'Cancel'|translate}}
-                        </button>
-                        <button type="submit" class="gray-btn" [disabled]="addMedicineForm.invalid"
-                          data-test-id="btnSubmitMed">
-                          {{'Add'|translate}}
-                        </button>
+                            data-test-id="btnCancelMed">
+                            {{'Cancel'|translate}}
+                          </button>
+                          <button type="submit" class="gray-btn" [disabled]="addMedicineForm.invalid"
+                            data-test-id="btnSubmitMed">
+                            {{'Add'|translate}}
+                          </button>
                         </span>
                       </div>
                     </div>
@@ -1336,8 +1341,7 @@
                     <div class="d-flex justify-content-between">
                       <span>{{ ai.value }}</span>
                       <button mat-icon-button *ngIf="isVisitNoteProvider && !visitEnded && !visitCompleted"
-                        (click)="deleteAdditionalInstruction(i, ai.uuid)"
-                        data-test-id="btnDeleteAIVisitSummary">
+                        (click)="deleteAdditionalInstruction(i, ai.uuid)" data-test-id="btnDeleteAIVisitSummary">
                         <img src="assets/svgs/delete-icon.svg" alt="" />
                       </button>
                     </div>
@@ -1352,29 +1356,38 @@
               </ng-template>
               <ng-container *ngIf="isVisitNoteProvider && !visitEnded && !visitCompleted">
                 <div class="form-group" *ngIf="addMoreAdditionalInstruction">
-                  <button type="button" class="add-more-btn" (click)="toggleAdditionalInstruction()" data-test-id="btnAddMoreAI">
+                  <button type="button" class="add-more-btn" (click)="toggleAdditionalInstruction()"
+                    data-test-id="btnAddMoreAI">
                     <img src="assets/svgs/plus-circle.svg" alt="" />
                     <span class="ml-2">{{'Add more instructions'|translate}}</span>
                   </button>
                 </div>
-                <form [formGroup]="addAdditionalInstructionForm" (ngSubmit)="addAdditionalInstruction()"
-                  *ngIf="!addMoreAdditionalInstruction">
+                <form class="extra-margin" [formGroup]="addAdditionalInstructionForm"
+                  (ngSubmit)="addAdditionalInstruction()" *ngIf="!addMoreAdditionalInstruction">
                   <div class="instructions-row">
-                    <div class="form-group" class="box-adjust">
-                      <textarea formControlName="note" class="form-control" rows="2" placeholder="{{'Add instructions'|translate}}"
-                        data-test-id="etAI"></textarea>
+                    <div class="form-group" class="box-adjust textarea-wrapper">
+                      <textarea formControlName="note" class="form-control"
+                        placeholder="{{'Add instructions'|translate}}" data-test-id="etAI"></textarea>
+                      <button type="button" class="apr-btn1" *ngIf="isInstructionRejected"
+                        (click)="onApprove('instructions')" data-test-id="btnOnApprove"
+                        [ngClass]="!disableInstructionBtn ? 'approve-active' : 'approve-disabled'"></button>
+                      <small class="red-color pl-3" *ngIf="isInstructionRejected && !disableInstructionBtn">
+                        <img src="assets/svgs/trans-error.svg" alt="" /> Please update manually the required
+                        text.</small>
                     </div>
-                    <app-translation-box class="box-adjust" [hwStateData]="hwStateData"
-                      [translatedText]="instructions" [tabType]="'instructions'" [clickedFromParent]="instructions !=='Add instructions' ? true : false"
-                       (action)="handleAction($event)">
+                    <app-translation-box class="box-adjust" [hwStateData]="hwStateData" [translatedText]="instructions"
+                      [tabType]="'instructions'" [clickedFromParent]="addAdditionalInstructionForm.valid"
+                      (action)="handleAction($event)">
                     </app-translation-box>
                   </div>
-              
+
                   <div class="form-group mt-3">
-                    <button type="button" class="white-btn mr-2" (click)="toggleAdditionalInstruction()" data-test-id="btnCancelAI">
+                    <button type="button" class="white-btn mr-2" (click)="toggleAdditionalInstruction()"
+                      data-test-id="btnCancelAI">
                       {{'Cancel'|translate}}
                     </button>
-                    <button type="submit" class="gray-btn" [disabled]="addAdditionalInstructionForm.invalid || instructions !=='Add instructions'"
+                    <button type="submit" class="gray-btn"
+                      [disabled]="addAdditionalInstructionForm.invalid || disableAddInstruction || isInstructionRejected"
                       data-test-id="btnSubmitAI">
                       {{'Save'|translate}}
                     </button>
@@ -1399,7 +1412,8 @@
                   <div class="d-flex justify-content-between">
                     <span>{{ ad.value }}</span>
                     <button mat-icon-button (click)="deleteAdvice(i, ad.uuid)"
-                      data-test-id="{{'btnDeleteAdviceVisitSummary'+i}}" *ngIf="isVisitNoteProvider && !visitEnded && !visitCompleted">
+                      data-test-id="{{'btnDeleteAdviceVisitSummary'+i}}"
+                      *ngIf="isVisitNoteProvider && !visitEnded && !visitCompleted">
                       <img src="assets/svgs/delete-icon.svg" alt="" />
                     </button>
                   </div>
@@ -1417,23 +1431,25 @@
                     <span class="ml-2">{{'Add more advice'|translate}}</span>
                   </button>
                 </div>
-                <form [formGroup]="addAdviceForm" *ngIf="!addMoreAdvice">
+                <form [formGroup]="addAdviceForm" class="mt-2" *ngIf="!addMoreAdvice">
                   <div class="instructions-row">
                     <div class="form-group" class="box-adjust">
-                    <div class="input-wrapper1">
-                      <label [hidden]="adviceInput.value" for="advice"> {{ 'Add advice' | translate }} </label>
-                      <input #adviceInput id="advice" type="text" class="form-control top-strict" formControlName="advice"
-                        [ngbTypeahead]="search" data-test-id="etAdvice" />
-                      <button type="button" class="approve-btn" *ngIf="isAdviceRejected" (click)="onApprove('advice')" data-test-id="btnOnApprove"
-                        [ngClass]="!disableApproveBtn ? 'approve-active' : 'approve-disabled'">
-                      </button>
-                    </div>
+                      <div class="input-wrapper1">
+                        <label [hidden]="adviceInput.value" for="advice"> {{ 'Add advice' | translate }} </label>
+                        <input #adviceInput id="advice" type="text" class="form-control top-strict"
+                          formControlName="advice" [ngbTypeahead]="search" data-test-id="etAdvice" />
+                        <button type="button" class="approve-btn" *ngIf="isAdviceRejected" (click)="onApprove('advice')"
+                          data-test-id="btnOnApprove"
+                          [ngClass]="!disableApproveBtn ? 'approve-active' : 'approve-disabled'">
+                        </button>
+                      </div>
                       <small class="red-color pl-3" *ngIf="isAdviceRejected && !disableApproveBtn">
-                          <img src="assets/svgs/trans-error.svg" alt=""/> Please update manually the required text.</small>
-                    </div> 
+                        <img src="assets/svgs/trans-error.svg" alt="" /> Please update manually the required
+                        text.</small>
+                    </div>
                     <app-translation-box class="box-adjust extra-margin" [hwStateData]="hwStateData"
                       [translatedText]="advice" [tabType]="'advice'" [clickedFromParent]="addAdviceForm.valid"
-                       (action)="handleAction($event)">
+                      (action)="handleAction($event)">
                     </app-translation-box>
                   </div>
                   <div class="form-group mt-3">
@@ -1441,7 +1457,8 @@
                       data-test-id="btnCancelAdvice">
                       {{'Clear'|translate}}
                     </button>
-                    <button type="button" class="gray-btn" (click)="addAdvice()" [disabled]="addAdviceForm.invalid || disableAddAdvice"
+                    <button type="button" class="gray-btn" (click)="addAdvice()"
+                      [disabled]="addAdviceForm.invalid || disableAddAdvice || isAdviceRejected"
                       data-test-id="btnSubmitAdvice">
                       {{'Add advice'|translate}}
                     </button>
@@ -1466,7 +1483,8 @@
                   <div class="d-flex justify-content-between">
                     <span>{{ t.value }}</span>
                     <button mat-icon-button (click)="deleteTest(i, t.uuid)"
-                      data-test-id="{{'btnDeleteTestVisitSummary'+i}}" *ngIf="isVisitNoteProvider && !visitEnded && !visitCompleted">
+                      data-test-id="{{'btnDeleteTestVisitSummary'+i}}"
+                      *ngIf="isVisitNoteProvider && !visitEnded && !visitCompleted">
                       <img src="assets/svgs/delete-icon.svg" alt="" />
                     </button>
                   </div>
@@ -1703,7 +1721,7 @@
                           </div>
                         </div>
                         <div class="pretty p-default p-round">
-                          <input type="radio" value="{{'No' | translate}}" (change)="saveFollowUp()"
+                          <input type="radio" value="{{'No' | translate}}" (change)="addFollowUp()"
                             formControlName="wantFollowUp" data-test-id="radioFollowUpNo" />
                           <div class="state p-success">
                             <label>{{'No'|translate}}</label>
@@ -1756,30 +1774,39 @@
                               <textarea type="text" class="form-control" placeholder="{{'Enter reason'|translate}}"
                                 formControlName="followUpReason" data-test-id="etFollowUpReason"></textarea>
                               <button type="button" class="close-btn" (click)="onClearReason()">
-                                   <img src="assets/svgs/clear.svg" alt="" />
+                                <img src="assets/svgs/clear.svg" alt="" />
                               </button>
+                              <button type="button" class="apr-btn" *ngIf="isReasonRejected"
+                                (click)="onApprove('reason')" data-test-id="btnOnApprove"
+                                [ngClass]="!disableReasonBtn ? 'approve-active' : 'approve-disabled'">
+                              </button>
+                              <small class="red-color pl-3" *ngIf="isReasonRejected && !disableReasonBtn">
+                                <img src="assets/svgs/trans-error.svg" alt="" /> Please update manually the required
+                                text.</small>
                             </div>
                             <app-translation-box class="box-adjust" [hwStateData]="hwStateData"
                               [translatedText]="reason" [tabType]="'reason'"
                               [clickedFromParent]="reason !=='Enter reason' ? true : false"
-                             (action)="handleAction($event)">
+                              (action)="handleAction($event)">
                             </app-translation-box>
                           </div>
-                        <div class="form-group mb-0 mt-3" *ngIf="
+                          <div class="form-group mb-0 mt-3" *ngIf="
                                             isVisitNoteProvider && !visitEnded && !visitCompleted && 
                                             !followUpForm.value.present &&
                                             followUpForm.value.wantFollowUp == 'Yes'|| followUpForm.value.wantFollowUp == 'Да'
                                           ">
-                          <button type="submit" class="gray-btn" [disabled]="followUpForm.invalid" data-test-id="btnSubmitFollowUp">
-                            {{'Save'|translate}}
-                          </button>
+                            <button type="submit" class="gray-btn"
+                              [disabled]="followUpForm.invalid || disableAddReason || isReasonRejected"
+                              data-test-id="btnSubmitFollowUp">
+                              {{'Save'|translate}}
+                            </button>
+                          </div>
                         </div>
-                        </div>
-                        </div>
-                        </li>
-                        </ng-container>
-                        </ul>
-                        </form>
+                      </div>
+                    </li>
+                  </ng-container>
+                </ul>
+              </form>
 
               <div class="table-responsive" *ngIf="followUpForm.value.present">
                 <table class="table" aria-describedby="">
@@ -1801,7 +1828,8 @@
                       <td>{{ (followUpForm.value.followUpReason) ? followUpForm.value.followUpReason : '-' }}</td>
                       <td class="pr-0">
                         <button type="button" class="float-right" mat-icon-button (click)="deleteFollowUp()"
-                          data-test-id="btnDeleteFollowUp" *ngIf="isVisitNoteProvider && !visitEnded && !visitCompleted">
+                          data-test-id="btnDeleteFollowUp"
+                          *ngIf="isVisitNoteProvider && !visitEnded && !visitCompleted">
                           <img src="assets/svgs/delete-icon.svg" alt="" />
                         </button>
                       </td>

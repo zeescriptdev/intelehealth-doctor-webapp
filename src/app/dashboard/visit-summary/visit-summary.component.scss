@@ -191,7 +191,7 @@
 .items-list {
   font-family: DM Sans;
   font-size: 16px;
-  padding: 24px 0px 0px 24px;
+  padding: 10px 0px 0px 24px;
   margin-bottom: 0px;
 
   li {
@@ -473,7 +473,7 @@
 }
 
 textarea.form-control {
-  height: fit-content;
+  height: 80px;
 }
 
 .form-control:focus {
@@ -761,9 +761,10 @@ th.mat-header-cell:last-child {
   display: flex;
   align-items: stretch;
   gap: 1rem;
+
   textarea {
     flex: 1 1 50%;
-    resize: vertical;
+    resize: none;
   }
 
   .translation-box {
@@ -797,14 +798,16 @@ th.mat-header-cell:last-child {
   width: 50%;
   min-height: 80px;
 }
+
 .extra-margin {
   margin-top: 28px;
 }
 
-textarea[formControlName="advice"].form-control,  
+textarea[formControlName="advice"].form-control,
 textarea[formControlName="followUpReason"].form-control {
   height: 80px;
-  background: #F6F6F6 !important;;
+  background: #F6F6F6 !important;
+  ;
 }
 
 .textarea-wrapper {
@@ -813,7 +816,7 @@ textarea[formControlName="followUpReason"].form-control {
 }
 
 .textarea-wrapper textarea {
-  padding-right: 30px; 
+  padding-right: 30px;
   resize: none;
 }
 
@@ -829,6 +832,36 @@ textarea[formControlName="followUpReason"].form-control {
   cursor: pointer;
 }
 
+.apr-btn {
+  position: absolute;
+  top: 43px;
+  right: 8px;
+  border: none;
+  background: transparent;
+  font-size: 18px;
+  font-weight: bold;
+  color: #888;
+  cursor: pointer;
+}
+
+.textarea-wrapper {
+  position: relative; // make this the anchor
+  display: inline-block;
+  width: 50%; // so it expands with panel
+}
+
+.apr-btn1 {
+  right: 10px;
+  bottom: 32px;
+  position: absolute;
+  border: none;
+  background: transparent;
+  font-size: 18px;
+  font-weight: bold;
+  color: #888;
+  cursor: pointer;
+}
+
 .input-wrapper1 {
   position: relative;
   margin: 28px 0 0px;
@@ -836,7 +869,7 @@ textarea[formControlName="followUpReason"].form-control {
 
 .approve-btn {
   position: absolute;
-  bottom: 8px; 
+  bottom: 8px;
   right: 8px;
   background: transparent;
   border: none;
@@ -860,9 +893,12 @@ textarea[formControlName="followUpReason"].form-control {
 
 .input-wrapper1 label {
   position: absolute;
-  top: 17px;       /* float above the input */
-  left: 17px;      /* align with input padding */
-  pointer-events: none; /* so click goes to input */
+  top: 17px;
+  /* float above the input */
+  left: 17px;
+  /* align with input padding */
+  pointer-events: none;
+  /* so click goes to input */
   font-size: 16px;
   color: #919192;
 }
@@ -873,10 +909,13 @@ textarea[formControlName="followUpReason"].form-control {
 
 .top-strict {
   height: 80px;
-  padding-top: 8px;    /* SAME as label top offset */
-  padding-left: 12px;  /* align with label */
+  padding-top: 8px;
+  /* SAME as label top offset */
+  padding-left: 12px;
+  /* align with label */
   box-sizing: border-box;
 }
+
 @media (max-width: 768px) {
 
   ::ng-deep .visit-summary-tab-group.mat-tab-group {
@@ -982,6 +1021,7 @@ textarea[formControlName="followUpReason"].form-control {
     .box-adjust {
       width: 100%;
     }
+
     .extra-margin {
       margin-top: 0px;
     }
