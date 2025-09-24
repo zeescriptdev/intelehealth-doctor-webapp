@@ -181,21 +181,21 @@
             [tooltipTemplate]="tooltipTemplate" [tooltipAppendToBody]="tooltipAppendToBody"
             [tooltipDelay]="tooltipDelay" (mwlClick)="eventClicked.emit({ sourceEvent: $event })"
             (mwlKeydownEnter)="eventClicked.emit({ sourceEvent: $event })" tabindex="0" role="application"
-            [attr.aria-label]="{ event: weekEvent.tempEvent || weekEvent.event, locale: locale }| calendarA11y: 'eventDescription'">
+            [attr.aria-label]="{ event: weekEvent.tempEvent || weekEvent.event, locale: locale }| calendarA11y: 'eventDescription'"  data-test-id="calEventContainer">
             <div class="event-con" data-test-id="mwlCalWeekView">
-              <h6 class="mb-0">{{((weekEvent.tempEvent || weekEvent.event).title) | translate}}</h6>
-              <p class="mb-0">{{(weekEvent.tempEvent || weekEvent.event).start|date:'h:mm'}} {{(weekEvent.tempEvent ||
+              <h6 class="mb-0" data-test-id="eventTitle">{{((weekEvent.tempEvent || weekEvent.event).title) | translate}}</h6>
+              <p class="mb-0"  data-test-id="eventTime">{{(weekEvent.tempEvent || weekEvent.event).start|date:'h:mm'}} {{(weekEvent.tempEvent ||
                 weekEvent.event).start|date:'a'|lowercase|translate}} -
                 {{(weekEvent.tempEvent || weekEvent.event).end|date:'h:mm'}}{{(weekEvent.tempEvent ||
                 weekEvent.event).end|date:'a'|lowercase|translate}}</p>
-              <div class="con-item">
+              <div class="con-item" data-test-id="patientContainer">
                 <img class="mr-1"
                   src="{{ checkPatientRegField('Profile Photo') ? baseUrl + '/personimage/' + (weekEvent.tempEvent || weekEvent.event).meta.patientId : '' }}"
-                  alt="">
-                <div class="con-info">
-                  <h6 class="mb-0">{{(weekEvent.tempEvent ||
+                  alt="" data-test-id="patientImage">
+                <div class="con-info" data-test-id="patientInfo">
+                  <h6 class="mb-0" data-test-id="patientName">{{(weekEvent.tempEvent ||
                     weekEvent.event).meta?.patientName|noValue:('NA'|translate)}}</h6>
-                  <h6 class="mb-0">({{((weekEvent.tempEvent || weekEvent.event).meta?.patientGender)|translate
+                  <h6 class="mb-0" data-test-id="patientGenderAge">({{((weekEvent.tempEvent || weekEvent.event).meta?.patientGender)|translate
                     |noValue:('NA'|translate)}}, {{(weekEvent.tempEvent ||
                     weekEvent.event).meta?.patientAge|noValue:'0'}})</h6>
                 </div>

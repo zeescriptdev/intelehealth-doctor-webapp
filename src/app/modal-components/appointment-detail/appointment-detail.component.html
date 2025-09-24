@@ -45,11 +45,11 @@
         <div class="col-md-12 p-0 mt-3" data-test-id="appointmentInfoSection">
           <div class="appointment-info-con">
             <div class="info-row" data-test-id="rowBookedOn">
-              <div class="info-label">{{'Booked on'|translate}}</div>
+              <div class="info-label" data-test-id="booked_on_label">{{'Booked on'|translate}}</div>
               <div class="info-con" data-test-id="bookedOn">{{data?.meta.createdAt|date:'dd MMM, yyyy'}}</div>
             </div>
             <div class="info-row" data-test-id="rowAppointmentOn">
-              <div class="info-label">{{'Appointment on'|translate}}</div>
+              <div class="info-label" data-test-id="appointment_on_label">{{'Appointment on'|translate}}</div>
               <div class="info-con">
                 <div data-test-id="appointmentDateTime">
                   {{data?.start|date:'dd MMM, yyyy'}},
@@ -57,7 +57,7 @@
                   {{data?.end|date:'h:mm'}} {{data?.end|date:'a'|lowercase|translate}}
                 </div>
                 <div class="text-important" data-test-id="appointmentExtraInfo">
-                  <ng-container *ngIf="data?.meta.visit_status != 'Completed' && data?.meta.visit_status != 'Ended'">
+                  <ng-container *ngIf="data?.meta.visit_status != 'Completed' && data?.meta.visit_status != 'Ended'" >
                     {{data?.meta.starts_in}}
                   </ng-container>
                   <ng-container *ngIf="data?.meta.visit_status == 'Completed' || data?.meta.visit_status == 'Ended'">
@@ -67,11 +67,11 @@
               </div>
             </div>
             <div class="info-row" data-test-id="rowChiefComplaint">
-              <div class="info-label">{{'Chief Complaint'|translate}}</div>
+              <div class="info-label" data-test-id="cheif_complaint_label">{{'Chief Complaint'|translate}}</div>
               <div class="info-con" data-test-id="chiefComplaint">{{data?.meta.cheif_complaint}}</div>
             </div>
             <div class="info-row" *ngxPermissionsOnly="['ORGANIZATIONAL:MCC']" data-test-id="rowDoctor">
-              <div class="info-label">{{'Doctor'|translate}}</div>
+              <div class="info-label" data-test-id="doctor_label">{{'Doctor'|translate}}</div>
               <div class="info-con" data-test-id="doctorName">{{data?.meta.drName}}</div>
             </div>
           </div>
@@ -81,7 +81,7 @@
         <div class="col-md-12 p-0 mt-3" data-test-id="bookedBySection">
           <div class="appointment-info-con">
             <div class="info-row" data-test-id="rowBookedBy">
-              <div class="info-label">{{'Booked by'|translate}}</div>
+              <div class="info-label" data-test-id="bookedBy_label">{{'Booked by'|translate}}</div>
               <div class="info-con" *ngIf="data?.meta.hwName" data-test-id="bookedBy">
                 {{data?.meta.hwName}}
                 <a href="tel:{{data?.meta.hwPhoneNo }}" data-test-id="linkCallBookedBy">
@@ -112,7 +112,7 @@
             </ng-container>
 
             <ng-container
-              *ngIf="data?.title == 'Follow-up visit' && (data?.meta.visit_status == 'Awaiting'||data?.meta.visit_status == 'Priority'||data?.meta.visit_status == 'In-progress')">
+              *ngIf="data?.title == 'Follow-up visit' && (data?.meta.visit_status == 'Awaiting'||data?.meta.visit_status == 'Priority'||data?.meta.visit_status == 'In-progress')" data-test-id="containerFollowUpAction">
               <button class="confirm-btn" type="button" (click)="close('view')" data-test-id="btnProvideAppDetail">
                 {{'Provide Prescription'|translate}}
               </button>
