@@ -66,9 +66,12 @@ export class VisitSummaryComponent implements OnInit, OnDestroy {
   instructions: string = 'Add instructions';
   advice: string = 'Add advice';
   reason: string = 'Enter reason';
-  isAdviceRejected: boolean;
-  isInstructionRejected: boolean;
-  isReasonRejected: boolean;
+  isAdviceRejected: boolean = false;
+  isInstructionRejected: boolean = false;
+  isReasonRejected: boolean = false;
+  approvAdviceMsg: boolean = false;
+  approvInstructionMsg: boolean = false;
+  approvReasonMsg: boolean = false;
   disableApproveBtn: boolean;
   disableInstructionBtn: boolean;
   disableReasonBtn: boolean;
@@ -1297,6 +1300,7 @@ export class VisitSummaryComponent implements OnInit, OnDestroy {
       return;
     }
     this.disableAddInstruction = true;
+    this.isInstructionRejected = false;
     this.instructions = this.addAdditionalInstructionForm.value.note;
   }
 
@@ -1407,6 +1411,7 @@ export class VisitSummaryComponent implements OnInit, OnDestroy {
       return;
     }
     this.disableAddAdvice = true;
+     this.isAdviceRejected = false;
     this.advice = this.addAdviceForm.value.advice;
   }
 
@@ -1648,6 +1653,7 @@ export class VisitSummaryComponent implements OnInit, OnDestroy {
     }
     if (this.followUpForm.value.followUpReason) {
       this.disableAddReason = true;
+       this.isReasonRejected = false;
       this.reason = this.followUpForm.value.followUpReason;
     } else {
       this.saveFollowUp(body);
@@ -1702,9 +1708,27 @@ export class VisitSummaryComponent implements OnInit, OnDestroy {
       this.toastr.warning(this.translateService.instant('Diagnosis not added'), this.translateService.instant('Diagnosis Required'));
       return false;
     }
-    if (!this.followUpForm.value.present) {
-      this.toastr.warning(this.translateService.instant('Follow-up not added'), this.translateService.instant('Follow-up Required'));
+    
+    if (this.instructions !== 'Add instructions' && this.isInstructionRejected === false) {
+      this.approvInstructionMsg = true;
+      this.toastr.warning(this.translateService.instant('Additional instruction is not approved'), this.translateService.instant('Approval Required'));
       return false;
+    }
+    if (this.advice !== 'Add advice' && !this.isAdviceRejected) {
+      this.approvAdviceMsg = true;
+      this.toastr.warning(this.translateService.instant('Advice is not approved'), this.translateService.instant('Approval Required'));
+      return false;
+    }
+
+    if (!this.followUpForm.value.present) {
+      if (this.reason !== 'Enter reason' && this.isReasonRejected === false) {
+        this.approvReasonMsg = true;
+        this.toastr.warning(this.translateService.instant('Follow-up reason is not approved'), this.translateService.instant('Approval Required'));
+        return false;
+      } else {
+        this.toastr.warning(this.translateService.instant('Follow-up not added'), this.translateService.instant('Follow-up Required'));
+        return false;
+      }
     }
     this.coreService.openSharePrescriptionConfirmModal().subscribe((res: boolean) => {
       if (res) {
@@ -2046,7 +2070,7 @@ export class VisitSummaryComponent implements OnInit, OnDestroy {
         if (event.action === 'approve') {
           let instructionsValue = this.getTranslationValue(this.addAdditionalInstructionForm.value.note, event?.approvedText);
           this.saveAdditionalInstructions(instructionsValue);
-          this.isInstructionRejected = false;
+           this.approvInstructionMsg = false;
         } else {
           this.isInstructionRejected = true;
         }
@@ -2056,7 +2080,7 @@ export class VisitSummaryComponent implements OnInit, OnDestroy {
         if (event.action === 'approve') {
           let adviceValue = this.getTranslationValue(this.addAdviceForm.value.advice, event?.approvedText);
           this.saveAdvice(adviceValue);
-          this.isAdviceRejected = false;
+           this.approvAdviceMsg = false;
         } else {
           this.isAdviceRejected = true;
         }
@@ -2067,7 +2091,7 @@ export class VisitSummaryComponent implements OnInit, OnDestroy {
           let reasonValue = this.getTranslationValue(this.followUpForm.value.followUpReason, event?.approvedText);
           this.saveFollowUpTranslation(reasonValue);
           this.followUpForm.patchValue({ followUpReason: reasonValue });
-          this.isReasonRejected = false;
+          this.approvReasonMsg = false;
         } else {
           this.isReasonRejected = true;
         }
@@ -2082,14 +2106,17 @@ export class VisitSummaryComponent implements OnInit, OnDestroy {
   onApprove(tabType: string) {
     switch (tabType) {
       case 'instructions':
+        this.isInstructionRejected = false;
         this.disableInstructionBtn = true;
         break;
 
       case 'advice':
+        this.isAdviceRejected = false;
         this.disableApproveBtn = true;
         break;
 
       case 'reason':
+        this.isReasonRejected = false;
         this.disableReasonBtn = true;
         break;
     }

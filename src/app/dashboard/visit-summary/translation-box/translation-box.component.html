@@ -6,8 +6,8 @@
   </label>
 
   <!-- Green Box -->
-  <div *ngIf="tabResponses[tabType]; else loading" class="translation-box">
-    <div class="translation-content">
+  <div class="translation-box">
+    <div class="translation-content" *ngIf="!isLoading && tabResponses[tabType]; else loading">
       <span *ngIf="!tabButtonStates[tabType].isRejected">
         <span *ngIf="changeDefaultTextToEnglish" class="gray">{{ showDefaultEnglishText }}</span>
         <span *ngIf="!changeDefaultTextToEnglish" class="green">{{ tabResponses[tabType]?.translated_text}}</span>
@@ -36,6 +36,8 @@
   to try again.</small>
 <small class="red-color" *ngIf="showError && shouldShowApprove()">
   <img src="assets/svgs/trans-error.svg" alt="" /> Please update manually the required translation.</small>
+<small class="red-color" *ngIf="tabButtonStates[tabType].isTranslationApr">
+  <img src="assets/svgs/trans-error.svg" alt="" /> Please approve to move ahead.</small>
 
 <ng-template #loading>
   <div class="circle-loader"></div>

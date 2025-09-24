@@ -106,8 +106,8 @@
   border-radius: 50%;
   border-top-color: transparent;
   animation: spin 1s linear infinite;
-  margin: auto;
-  /* center inside parent */
+  margin: 22px auto 0 auto;
+  display: block;     
 }
 
 @keyframes spin {

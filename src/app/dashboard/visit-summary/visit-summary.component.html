@@ -1376,8 +1376,8 @@
                         text.</small>
                     </div>
                     <app-translation-box class="box-adjust" [hwStateData]="hwStateData" [translatedText]="instructions"
-                      [tabType]="'instructions'" [clickedFromParent]="addAdditionalInstructionForm.valid"
-                      (action)="handleAction($event)">
+                      [tabType]="'instructions'" [clickedFromParent]="addAdditionalInstructionForm.valid" 
+                      [isTranslationApr]="approvInstructionMsg" (action)="handleAction($event)">
                     </app-translation-box>
                   </div>
 
@@ -1449,7 +1449,7 @@
                     </div>
                     <app-translation-box class="box-adjust extra-margin" [hwStateData]="hwStateData"
                       [translatedText]="advice" [tabType]="'advice'" [clickedFromParent]="addAdviceForm.valid"
-                      (action)="handleAction($event)">
+                      [isTranslationApr]="approvAdviceMsg" (action)="handleAction($event)">
                     </app-translation-box>
                   </div>
                   <div class="form-group mt-3">
@@ -1787,7 +1787,7 @@
                             <app-translation-box class="box-adjust" [hwStateData]="hwStateData"
                               [translatedText]="reason" [tabType]="'reason'"
                               [clickedFromParent]="reason !=='Enter reason' ? true : false"
-                              (action)="handleAction($event)">
+                              [isTranslationApr]="approvReasonMsg" (action)="handleAction($event)">
                             </app-translation-box>
                           </div>
                           <div class="form-group mb-0 mt-3" *ngIf="
@@ -1849,8 +1849,8 @@
           *ngIf="visitNotePresent && isVisitNoteProvider && !visitCompleted" data-test-id="btnViewPrescription">
           {{'Preview prescription'|translate}}
         </button>
-
-        <button type="button" class="blue-btn mb-2" (click)="sharePrescription()"
+ 
+    <button type="button" class="blue-btn mb-2" (click)="sharePrescription()"
           *ngIf="visitNotePresent && !visitEnded && isVisitNoteProvider" [disabled]="visitCompleted"
           data-test-id="btnSharePrescription">
           {{'Share'|translate }} {{'prescription'|translate}}

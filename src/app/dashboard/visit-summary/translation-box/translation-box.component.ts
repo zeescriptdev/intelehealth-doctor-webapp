@@ -15,6 +15,8 @@ interface TabButtonState {
   showReject: boolean;
   showRetry: boolean;
   isRejected:boolean;
+  isTranslationApr:boolean;
+  clickCount:number;
 }
 
 @Component({
@@ -28,6 +30,7 @@ export class TranslationBoxComponent implements OnChanges {
   @Input() translatedText: string = '';
   @Input() tabType: string = '';
   @Input() clickedFromParent!: boolean;
+  @Input() isTranslationApr:boolean;
 
   @Output() action = new EventEmitter<{ tabType: string; action: string, approvedText?:string }>();
 
@@ -41,8 +44,7 @@ export class TranslationBoxComponent implements OnChanges {
   showError:boolean= false;
   showDefaultEnglishText="Regional translated content will be shown here."
   changeDefaultTextToEnglish: boolean = false;
-  maxClickCount = 3;
-  clickCount = 0;
+  maxClickCount = 2;
   isLoading = false;
 
   constructor(private visitService: VisitService) {}
@@ -85,6 +87,19 @@ export class TranslationBoxComponent implements OnChanges {
       changes['clickedFromParent']?.currentValue ? this.changeDefaultTextToEnglish = true: this.changeDefaultTextToEnglish= false;
       this.ensureTabState(this.tabType);
     }
+
+    if (changes['isTranslationApr'] && changes['isTranslationApr']?.currentValue && this.tabType) {
+     this.tabButtonStates[this.tabType] = {
+        showApprove: true,
+        isApproveDisabled: false,
+        showReject: false,
+        showRetry: false,
+        isRejected:false,
+        isTranslationApr:true,
+        clickCount:0
+      };
+    this.showError = false;
+    }
   }
 
   private ensureTabState(tabType: string) {
@@ -95,6 +110,8 @@ export class TranslationBoxComponent implements OnChanges {
         showReject: false,
         showRetry: false,
         isRejected:false,
+        isTranslationApr:false,
+        clickCount:0
       };
     }
   }
@@ -119,7 +136,9 @@ export class TranslationBoxComponent implements OnChanges {
             isApproveDisabled: this.defaultText.includes(this.translatedText) ? true : false,
             showReject: this.clickedFromParent ?? false,
             showRetry: false, // hide retry on success
-            isRejected:false
+            isRejected:false,
+            isTranslationApr:false,
+            clickCount:this.tabButtonStates[this.tabType].clickCount
           };
           this.isLoading = false;
         },
@@ -130,7 +149,9 @@ export class TranslationBoxComponent implements OnChanges {
             isApproveDisabled: true,
             showReject: false,
             showRetry: true,
-            isRejected:false
+            isRejected:false,
+            isTranslationApr:false,
+            clickCount:this.tabButtonStates[this.tabType].clickCount
           };
           this.showError = true;
           this.isLoading = false;
@@ -148,7 +169,9 @@ export class TranslationBoxComponent implements OnChanges {
             isApproveDisabled: true,
             showReject: false,
             showRetry: false,
-            isRejected:false
+            isRejected:false,
+            isTranslationApr:false,
+            clickCount:0
       };
   }
 
@@ -160,23 +183,19 @@ export class TranslationBoxComponent implements OnChanges {
             isApproveDisabled: false,
             showReject: false,
             showRetry: false,
-            isRejected:true
+            isRejected:true,
+            isTranslationApr:false,
+            clickCount:0
       };
   }
 
   onRetry() {
-    if (this.clickCount < this.maxClickCount && this.tabType) {
-      this.clickCount++;
+    if (this.tabButtonStates[this.tabType].clickCount <= this.maxClickCount && this.tabType) {
+      this.tabButtonStates[this.tabType].clickCount++;
       this.callApiForTab(this.tabType);
-      this.action.emit({ tabType: this.tabType, action: 'retry' });
     } else {
-      this.tabButtonStates[this.tabType] = {
-            showApprove: true,
-            isApproveDisabled: false,
-            showReject: false,
-            showRetry: false,
-            isRejected:false
-      };
+      this.isLoading = false;
+      this.onReject();
     }
   }
 
