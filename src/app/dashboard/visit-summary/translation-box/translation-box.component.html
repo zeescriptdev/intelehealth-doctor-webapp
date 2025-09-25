@@ -7,14 +7,22 @@
 
   <!-- Green Box -->
   <div class="translation-box">
-    <div class="translation-content" *ngIf="!isLoading && tabResponses[tabType]; else loading">
-      <span *ngIf="!tabButtonStates[tabType].isRejected">
-        <span *ngIf="changeDefaultTextToEnglish" class="gray">{{ showDefaultEnglishText }}</span>
-        <span *ngIf="!changeDefaultTextToEnglish" class="green">{{ tabResponses[tabType]?.translated_text}}</span>
-      </span>
-      <textarea *ngIf="tabButtonStates[tabType].isRejected" [(ngModel)]="tabResponses[tabType].translated_text"
-        class="form-control translatedTextarea">
-    </textarea>
+    <div class="translation-content">
+      <div *ngIf="isLoading; else dataTemplate">
+      <ng-template #loading>
+        <div class="circle-loader"></div>
+      </ng-template>
+       <ng-container *ngTemplateOutlet="loading"></ng-container>
+      </div>
+      <ng-template #dataTemplate>
+        <span *ngIf="!tabButtonStates[tabType].isRejected">
+          <span *ngIf="changeDefaultTextToEnglish" class="gray">{{ showDefaultEnglishText }}</span>
+          <span *ngIf="!changeDefaultTextToEnglish" class="green">{{ tabResponses[tabType]?.translated_text}}</span>
+        </span>
+        <textarea *ngIf="tabButtonStates[tabType].isRejected" [(ngModel)]="tabResponses[tabType].translated_text"
+          class="form-control translatedTextarea">
+        </textarea>
+      </ng-template>
     </div>
 
     <!-- Button Group pinned bottom-right -->
@@ -39,6 +47,4 @@
 <small class="red-color" *ngIf="tabButtonStates[tabType].isTranslationApr">
   <img src="assets/svgs/trans-error.svg" alt="" /> Please approve to move ahead.</small>
 
-<ng-template #loading>
-  <div class="circle-loader"></div>
-</ng-template>
+

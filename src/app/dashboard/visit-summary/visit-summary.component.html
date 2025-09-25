@@ -1377,7 +1377,7 @@
                     </div>
                     <app-translation-box class="box-adjust" [hwStateData]="hwStateData" [translatedText]="instructions"
                       [tabType]="'instructions'" [clickedFromParent]="addAdditionalInstructionForm.valid" 
-                      [isTranslationApr]="approvInstructionMsg" (action)="handleAction($event)">
+                      [isTranslationApr]="approvInstructionMsg" [isTextApproved]="disableInstructionBtn" (action)="handleAction($event)">
                     </app-translation-box>
                   </div>
 
@@ -1449,7 +1449,7 @@
                     </div>
                     <app-translation-box class="box-adjust extra-margin" [hwStateData]="hwStateData"
                       [translatedText]="advice" [tabType]="'advice'" [clickedFromParent]="addAdviceForm.valid"
-                      [isTranslationApr]="approvAdviceMsg" (action)="handleAction($event)">
+                      [isTranslationApr]="approvAdviceMsg" [isTextApproved]="disableApproveBtn" (action)="handleAction($event)">
                     </app-translation-box>
                   </div>
                   <div class="form-group mt-3">
@@ -1787,7 +1787,7 @@
                             <app-translation-box class="box-adjust" [hwStateData]="hwStateData"
                               [translatedText]="reason" [tabType]="'reason'"
                               [clickedFromParent]="reason !=='Enter reason' ? true : false"
-                              [isTranslationApr]="approvReasonMsg" (action)="handleAction($event)">
+                              [isTranslationApr]="approvReasonMsg" [isTextApproved]="disableReasonBtn" (action)="handleAction($event)">
                             </app-translation-box>
                           </div>
                           <div class="form-group mb-0 mt-3" *ngIf="

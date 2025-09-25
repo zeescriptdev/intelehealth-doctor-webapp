@@ -1411,7 +1411,7 @@ export class VisitSummaryComponent implements OnInit, OnDestroy {
       return;
     }
     this.disableAddAdvice = true;
-     this.isAdviceRejected = false;
+    this.isAdviceRejected = false;
     this.advice = this.addAdviceForm.value.advice;
   }
 
@@ -2070,8 +2070,10 @@ export class VisitSummaryComponent implements OnInit, OnDestroy {
         if (event.action === 'approve') {
           let instructionsValue = this.getTranslationValue(this.addAdditionalInstructionForm.value.note, event?.approvedText);
           this.saveAdditionalInstructions(instructionsValue);
+           this.isInstructionRejected = false;
            this.approvInstructionMsg = false;
         } else {
+          this.disableInstructionBtn = false;
           this.isInstructionRejected = true;
         }
         break;
@@ -2080,8 +2082,10 @@ export class VisitSummaryComponent implements OnInit, OnDestroy {
         if (event.action === 'approve') {
           let adviceValue = this.getTranslationValue(this.addAdviceForm.value.advice, event?.approvedText);
           this.saveAdvice(adviceValue);
-           this.approvAdviceMsg = false;
+          this.isAdviceRejected = false;
+          this.approvAdviceMsg = false;
         } else {
+          this.disableApproveBtn = false;
           this.isAdviceRejected = true;
         }
         break;
@@ -2091,8 +2095,10 @@ export class VisitSummaryComponent implements OnInit, OnDestroy {
           let reasonValue = this.getTranslationValue(this.followUpForm.value.followUpReason, event?.approvedText);
           this.saveFollowUpTranslation(reasonValue);
           this.followUpForm.patchValue({ followUpReason: reasonValue });
+          this.isReasonRejected = false;
           this.approvReasonMsg = false;
         } else {
+          this.disableReasonBtn = false;
           this.isReasonRejected = true;
         }
         break;

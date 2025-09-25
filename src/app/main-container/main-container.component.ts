@@ -88,6 +88,12 @@ export class MainContainerComponent implements OnInit, AfterContentChecked, OnDe
       this.header = val;
     });
 
+      // Check initial route for visit summary
+    this.routeUrl = this.router.url;
+    if (this.routeUrl.includes('/visit-summary/')) {
+      this.collapsed = true;
+    }
+    
     this.breakpointObserver.observe(['(max-width: 768px)']).subscribe((result: BreakpointState) => {
       if (result.matches) {
         this.isMobile = true;

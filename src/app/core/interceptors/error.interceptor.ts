@@ -27,6 +27,11 @@ export class ErrorInterceptor implements HttpInterceptor {
       if (error == 'OK') {
         return throwError(error);
       }
+
+      if ([500].indexOf(err.status) != -1 && request.url.includes('translate')) {
+      return
+      }
+      
       this.toastr.error(error);
       return throwError(error);
     }))

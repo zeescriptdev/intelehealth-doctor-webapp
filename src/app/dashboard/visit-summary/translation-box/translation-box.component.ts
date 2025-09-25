@@ -31,6 +31,7 @@ export class TranslationBoxComponent implements OnChanges {
   @Input() tabType: string = '';
   @Input() clickedFromParent!: boolean;
   @Input() isTranslationApr:boolean;
+  @Input() isTextApproved:boolean;
 
   @Output() action = new EventEmitter<{ tabType: string; action: string, approvedText?:string }>();
 
@@ -86,6 +87,19 @@ export class TranslationBoxComponent implements OnChanges {
     if (changes['clickedFromParent'] && this.tabType) {
       changes['clickedFromParent']?.currentValue ? this.changeDefaultTextToEnglish = true: this.changeDefaultTextToEnglish= false;
       this.ensureTabState(this.tabType);
+    }
+
+    if (changes['isTextApproved'] && changes['isTextApproved']?.currentValue && this.tabType) {
+     this.tabButtonStates[this.tabType] = {
+        showApprove: true,
+        isApproveDisabled: false,
+        showReject: false,
+        showRetry: false,
+        isRejected:true,
+        isTranslationApr:false,
+        clickCount:0
+      };
+    this.showError = false;
     }
 
     if (changes['isTranslationApr'] && changes['isTranslationApr']?.currentValue && this.tabType) {
@@ -180,7 +194,7 @@ export class TranslationBoxComponent implements OnChanges {
       this.showError = true;
       this.tabButtonStates[this.tabType] = {
             showApprove: true,
-            isApproveDisabled: false,
+            isApproveDisabled: true,
             showReject: false,
             showRetry: false,
             isRejected:true,
@@ -192,10 +206,20 @@ export class TranslationBoxComponent implements OnChanges {
   onRetry() {
     if (this.tabButtonStates[this.tabType].clickCount <= this.maxClickCount && this.tabType) {
       this.tabButtonStates[this.tabType].clickCount++;
+      this.tabResponses[this.tabType].translated_text = this.showDefaultEnglishText;
       this.callApiForTab(this.tabType);
     } else {
-      this.isLoading = false;
-      this.onReject();
+      this.showError = true;
+      this.action.emit({ tabType: this.tabType, action: 'reject' });
+      this.tabButtonStates[this.tabType] = {
+            showApprove: true,
+            isApproveDisabled: false,
+            showReject: false,
+            showRetry: false,
+            isRejected:true,
+            isTranslationApr:false,
+            clickCount:0
+      };
     }
   }
 

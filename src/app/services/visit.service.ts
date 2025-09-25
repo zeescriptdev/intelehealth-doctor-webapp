@@ -307,23 +307,14 @@ export class VisitService {
   }
 
   getTranslatedText(textToTranslate: string, targetLang:string, tabType: string): Observable<any> {
-    let url = `${environment.sarvamURL}`;
-    let headers: HttpHeaders = new HttpHeaders();
-    headers = headers.append('api-subscription-key', environment.sarvamSubscriptionKey).append('content-type', 'application/json');
-    return this.http.post(url, this.buildRequestBody(textToTranslate, targetLang, tabType), { headers })
+    return this.http.post(`${this.baseURLMindmap}/mindmap/translate`, this.buildRequestBody(textToTranslate, targetLang, tabType))
   }
 
   // A reusable function to build translation request body
   buildRequestBody(input: string, targetLang: string, tabType: string) {
     return {
-      input: input,
-      source_language_code: "en-IN",
-      target_language_code: targetLang,
-      mode: "formal",
-      model: "sarvam-translate:v1",
-      numerals_format: "native",
-      speaker_gender: "Female",
-      enable_preprocessing: true,
+      textToTranslate: input,
+      targetLang:targetLang,
       tabType: tabType
     };
   }
