@@ -294,4 +294,8 @@ export class WebrtcService {
   noop() {
     console.log('Not Implemented.')
   }
+
+  autoStartRecording(payload){
+     return this.http.post(`${environment.webrtcTokenServerUrl}api/autoStartRecording`, payload);
+  }
 }
