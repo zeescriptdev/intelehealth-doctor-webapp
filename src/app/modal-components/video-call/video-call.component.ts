@@ -165,6 +165,7 @@ export class VideoCallComponent implements OnInit, OnDestroy {
         this.toastr.show('Failed to generate a video call token.', null, { timeOut: 1000 });
       });
     }
+    console.log("this.webrtcSvc.token",this.webrtcSvc.token);
     if (!this.webrtcSvc.token) return;
     this.webrtcSvc.createRoomAndConnectCall({
       localElement: this.localVideoRef,
@@ -193,7 +194,7 @@ export class VideoCallComponent implements OnInit, OnDestroy {
   * @return {void}
   */
   onHWIncomingCallConnect() {
-    this.connecting = false;
+setTimeout(() => this.connecting = false);
     this.callStartedAt = moment();
     this.socketSvc.emitEvent('call-connected', this.incomingData);
   }
@@ -260,40 +261,40 @@ export class VideoCallComponent implements OnInit, OnDestroy {
     }
     this.socketSvc.emitEvent('call-connected', this.incomingData);
     this.analytics.logEvent('call-connected', 'engagement', 'call_button', 1, this.buildAnalyticsEventPayload());
-    // if (this.callType === 'video' && isFeaturePresent('webrtcRecording')) {
-    //   await this.webrtcSvc.startRecording({
-    //     doctorName: this.doctorName,
-    //     roomId: this.room,
-    //     visitId: this.data?.visitId,
-    //     doctorId: this.data?.connectToDrId,
-    //     chwId: this.nurseId,
-    //     patientId: this.data?.patientId,
-    //     nurseName: this.hwName,
-    //     name: this.provider?.uuid,
-    //     location: this.location
-    //   })
-    //     .toPromise()
-    //     .then((res: RecordingResponse) => {
-    //       this.recodingStarted = true
-    //       this.tableId = res.recordingId
-    //       this.analytics.logEvent('call-recoding-started', 'engagement', 'call_button', 1, this.buildAnalyticsEventPayload());
-    //     })
-    //     .catch(err => {
-    //       this.analytics.logEvent('call-recoding-error', 'engagement', 'call_button', 1, {
-    //         doctorUserId: this.data?.connectToDrId,
-    //         doctorName: this.doctorName,
-    //         patientOpenMrsId: this.data.patientOpenMrsId,
-    //         hwName: getCacheData(true, visitTypes.PATIENT_VISIT_PROVIDER)?.display?.split(":")?.[0],
-    //         hwId: getCacheData(true, visitTypes.PATIENT_VISIT_PROVIDER) && getCacheData(true, visitTypes.PATIENT_VISIT_PROVIDER)?.provider ? getCacheData(true, visitTypes.PATIENT_VISIT_PROVIDER).provider?.uuid : null,
-    //         visitId: this.data?.visitId,
-    //         location: this.location,
-    //         callType: this.callType,
-    //         callDuration: this.callDuration,
-    //         error: err
-    //       });
-    //       console.log("start recoding error", err)
-    //     });
-    // }
+    if (this.callType === 'video' && isFeaturePresent('webrtcRecording')) {
+      await this.webrtcSvc.startRecording({
+        doctorName: this.doctorName,
+        roomId: this.room,
+        visitId: this.data?.visitId,
+        doctorId: this.data?.connectToDrId,
+        chwId: this.nurseId,
+        patientId: this.data?.patientId,
+        nurseName: this.hwName,
+        name: this.provider?.uuid,
+        location: this.location
+      })
+        .toPromise()
+        .then((res: RecordingResponse) => {
+          this.recodingStarted = true
+          this.tableId = res.recordingId
+          this.analytics.logEvent('call-recoding-started', 'engagement', 'call_button', 1, this.buildAnalyticsEventPayload());
+        })
+        .catch(err => {
+          this.analytics.logEvent('call-recoding-error', 'engagement', 'call_button', 1, {
+            doctorUserId: this.data?.connectToDrId,
+            doctorName: this.doctorName,
+            patientOpenMrsId: this.data.patientOpenMrsId,
+            hwName: getCacheData(true, visitTypes.PATIENT_VISIT_PROVIDER)?.display?.split(":")?.[0],
+            hwId: getCacheData(true, visitTypes.PATIENT_VISIT_PROVIDER) && getCacheData(true, visitTypes.PATIENT_VISIT_PROVIDER)?.provider ? getCacheData(true, visitTypes.PATIENT_VISIT_PROVIDER).provider?.uuid : null,
+            visitId: this.data?.visitId,
+            location: this.location,
+            callType: this.callType,
+            callDuration: this.callDuration,
+            error: err
+          });
+          console.log("start recoding error", err)
+        });
+    }
   }
 
   /**
