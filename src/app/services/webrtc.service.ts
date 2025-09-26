@@ -296,6 +296,7 @@ export class WebrtcService {
   }
 
   autoStartRecording(payload){
+    console.log("calling api...");
      return this.http.post(`${environment.webrtcTokenServerUrl}api/autoStartRecording`, payload);
   }
 }
