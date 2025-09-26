@@ -268,7 +268,14 @@ export class VideoCallComponent implements OnInit, OnDestroy {
         nurseName: this.hwName,
         name: this.provider?.uuid,
         location: this.location
-      });  
+      })
+      .toPromise()
+      .then((res: RecordingResponse) => {
+        console.log("getting response from backend");
+        this.recodingStarted = true
+        this.tableId = res.recordingId
+        this.analytics.logEvent('call-recoding-started', 'engagement', 'call_button', 1,  this.buildAnalyticsEventPayload());
+      })
     }
     catch(error)
     {
