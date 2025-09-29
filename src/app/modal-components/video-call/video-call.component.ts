@@ -256,31 +256,6 @@ export class VideoCallComponent implements OnInit, OnDestroy {
     }
     this.socketSvc.emitEvent('call-connected', this.incomingData);
     this.analytics.logEvent('call-connected', 'engagement', 'call_button', 1,  this.buildAnalyticsEventPayload());
-    try {
-      console.log("calling auto start recording....");
-       await this.webrtcSvc.autoStartRecording({
-        doctorName: this.doctorName,
-        roomId: this.room,
-        visitId: this.data?.visitId,
-        doctorId: this.data?.connectToDrId,
-        chwId: this.nurseId,
-        patientId: this.data?.patientId,
-        nurseName: this.hwName,
-        name: this.provider?.uuid,
-        location: this.location
-      })
-      .toPromise()
-      .then((res: RecordingResponse) => {
-        console.log("getting response from backend");
-        this.recodingStarted = true
-        this.tableId = res.recordingId
-        this.analytics.logEvent('call-recoding-started', 'engagement', 'call_button', 1,  this.buildAnalyticsEventPayload());
-      })
-    }
-    catch(error)
-    {
-      console.error('Auto-recording API error:', error);
-    }
     // if(this.callType === 'video' && this.isVideoRecordingEnabled) {
     //   await this.webrtcSvc.startRecording({
     //     doctorName: this.doctorName,
