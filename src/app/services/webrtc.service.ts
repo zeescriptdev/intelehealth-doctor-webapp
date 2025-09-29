@@ -296,7 +296,8 @@ export class WebrtcService {
   }
 
   autoStartRecording(payload){
-    console.log("calling api...");
+    console.log("calling auto egress recording api...");
      return this.http.post(`${environment.webrtcTokenServerUrl}api/autoStartRecording`, payload);
   }
+
 }
