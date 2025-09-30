@@ -138,7 +138,7 @@ export class DashboardComponent implements OnInit {
       this.getPriorityVisits(1);
      // this.getInProgressVisits(1);
     }
-
+    console.log("check log");
     this.socket.initSocket(true);
   }
 
