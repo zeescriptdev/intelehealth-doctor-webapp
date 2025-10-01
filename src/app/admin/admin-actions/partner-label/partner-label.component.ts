@@ -1,4 +1,5 @@
-import { Component, OnInit,ViewChildren,AfterViewInit,QueryList} from '@angular/core';
+
+import { Component, OnInit, ViewChildren, AfterViewInit,QueryList} from '@angular/core';
 import { environment } from "../../../../environments/environment";
 import { ConfigService } from 'src/app/services/config.service';
 import { PageTitleService } from 'src/app/core/page-title/page-title.service';
@@ -80,18 +81,19 @@ export class PartnerLabelComponent implements OnInit,AfterViewInit{
     this.pageTitleService.setTitle({ title: "Admin Actions", imgUrl: "assets/svgs/admin-actions.svg" });
     this.getThemConfigData();
   }
-ngAfterViewInit() {
-   this.uploadComponents.forEach((component: FileUploadComponent) => {
-    component.delete$.subscribe((payload) => {
-      console.log("🗑️ Delete payload:", payload);
-      if (payload === 'logo') {
-        this.pendingDeleteLogoRequest = payload;
-      } else if (payload === 'thumbnail_logo') {
-        this.pendingDeleteThumbnailRequest = payload;
-      }
+
+  ngAfterViewInit() {
+    this.uploadComponents.forEach((component: FileUploadComponent) => {
+      component.delete$.subscribe((payload) => {
+        console.log("🗑️ Delete payload:", payload);
+        if (payload === 'logo') {
+          this.pendingDeleteLogoRequest = payload;
+        } else if (payload === 'thumbnail_logo') {
+          this.pendingDeleteThumbnailRequest = payload;
+        }
+      });
     });
-  });
-}
+  }
   getThemConfigData(){
     this.configService.getThemeConfig().subscribe(res=>{
       res.theme_config.forEach(config=>{
@@ -117,9 +119,8 @@ ngAfterViewInit() {
   }
 
   onLogoFileDelete(type){
-   
-      this.themeConfigData[type] = '';
-       this.setType = type;
+    this.themeConfigData[type] = '';
+    this.setType = type;
  //  this.updateThemeConfig(type,'');
   }
 
@@ -173,20 +174,20 @@ ngAfterViewInit() {
   * Publish langauge changes.
   * @return {void}
   */
-onPublish(): void {
-  console.log("value from subscriber==",this.pendingDeleteThumbnailRequest,this.pendingDeleteLogoRequest);
-  
-if (this.pendingDeleteLogoRequest === 'logo' || this.pendingDeleteThumbnailRequest === 'thumbnail_logo') {
-    this.updateThemeConfig(this.setType, '').subscribe({
-      next: () => {
-        this.callPublish();
-      },
-      error: (err) => {
-        this.toastr.error("Failed to update theme config before publish", "Error");
-      }
-    });
-  } else {
-    this.callPublish();
+  onPublish(): void {
+    console.log("value from subscriber==",this.pendingDeleteThumbnailRequest,this.pendingDeleteLogoRequest);
+    if (this.pendingDeleteLogoRequest === 'logo' || this.pendingDeleteThumbnailRequest === 'thumbnail_logo') {
+      this.updateThemeConfig(this.setType, '').subscribe({
+        next: () => {
+          this.callPublish();
+        },
+        error: (err) => {
+          this.toastr.error("Failed to update theme config before publish", "Error");
+        }
+      });
+    } else {
+      this.callPublish();
+    }
   }
 }
   validateJson(json: string): void {
@@ -205,13 +206,13 @@ if (this.pendingDeleteLogoRequest === 'logo' || this.pendingDeleteThumbnailReque
     }
   }
   callPublish(): void {
-  this.configService.publishConfig().subscribe({
-    next: () => {
-      this.toastr.success("Partner White Labelling has been successfully published", "Publish successful!");
-    },
-    error: (err) => {
-      this.toastr.error(err.error?.message || "Publish failed", "Error");
-    }
-  });
-}
+    this.configService.publishConfig().subscribe({
+      next: () => {
+        this.toastr.success("Partner White Labelling has been successfully published", "Publish successful!");
+      },
+      error: (err) => {
+        this.toastr.error(err.error?.message || "Publish failed", "Error");
+      }
+    });
+  }
 }
