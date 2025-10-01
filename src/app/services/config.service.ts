@@ -494,7 +494,6 @@ export class ConfigService {
     const url = `${this.baseURL}/home-screen/updateHomeScreenName/${id}`;
     return this.http.put(url, { lang });
   }
-
   /**
  * Get AI LLM
  * @return {Observable<any>}

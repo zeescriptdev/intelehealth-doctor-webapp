@@ -516,6 +516,7 @@ export interface MedicineModel {
   remark?: string,
   frequency?: string,
   uuid?: string,
+
 }
 
 export interface StandardMedicineModel {

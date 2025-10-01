@@ -1,3 +1,4 @@
+
 import { Component, OnInit, ViewChildren, AfterViewInit,QueryList} from '@angular/core';
 import { environment } from "../../../../environments/environment";
 import { ConfigService } from 'src/app/services/config.service';
@@ -93,7 +94,6 @@ export class PartnerLabelComponent implements OnInit,AfterViewInit{
       });
     });
   }
-
   getThemConfigData(){
     this.configService.getThemeConfig().subscribe(res=>{
       res.theme_config.forEach(config=>{
@@ -189,7 +189,7 @@ export class PartnerLabelComponent implements OnInit,AfterViewInit{
       this.callPublish();
     }
   }
-
+}
   validateJson(json: string): void {
     try {
       this.isJsonValid = Array.isArray(JSON.parse(json));
@@ -198,7 +198,6 @@ export class PartnerLabelComponent implements OnInit,AfterViewInit{
       return e.message;
     }
   }
-
   saveHelpTourConfig(): void {
     if (this.isJsonValid) {
       this.configService.updateHelpTour(JSON.parse(this.themeConfigData.help_tour_config)).subscribe(res => {

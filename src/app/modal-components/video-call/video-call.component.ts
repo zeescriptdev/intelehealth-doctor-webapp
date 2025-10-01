@@ -47,6 +47,7 @@ export class VideoCallComponent implements OnInit, OnDestroy {
   isAttachment = false;
   callStartedAt = null;
   changeDetForDuration: any = null;
+  callDurationDisplay = '00:00';
   defaultImage = 'assets/images/img-icon.jpeg';
   pdfDefaultImage = 'assets/images/pdf-icon.png';
   activeSpeakerIds: any = [];
@@ -57,6 +58,18 @@ export class VideoCallComponent implements OnInit, OnDestroy {
   recodingStarted = false;
   tableId: number;
   location: string;
+  videoBitrateTooLow: boolean = false;
+  videoBitrateCheckInterval: any;
+  lastVideoBytesSent = 0;
+  lastTimestamp = 0;
+
+  callType: string;
+  videoBitrateTooLow: boolean = false;
+  videoBitrateCheckInterval: any;
+  lastVideoBytesSent = 0;
+  lastTimestamp = 0;
+
+  // isVideoRecordingEnabled: boolean;
 
   callType: string;
   videoBitrateTooLow: boolean = false;
@@ -95,9 +108,11 @@ export class VideoCallComponent implements OnInit, OnDestroy {
       this.getMessages();
     }
     /**
-     * Don't remove this, required change detection for duration
+     * Update call duration every second
      */
-    this.changeDetForDuration = setInterval(() => { }, 1000);
+    this.changeDetForDuration = setInterval(() => {
+      this.updateCallDuration();
+    }, 1000);
     if (this.initiator === 'hw') {
       this.connecting = true;
       this.webrtcSvc.token = this.data.token;
@@ -111,7 +126,9 @@ export class VideoCallComponent implements OnInit, OnDestroy {
       this.startCall();
     }
     // set flag for audio/video enable/disable
+
     this.isVideoRecordingEnabled = this.appConfigService.ai_llm_recording_section
+
   }
 
   /**
@@ -146,6 +163,7 @@ export class VideoCallComponent implements OnInit, OnDestroy {
   async startCall() {
     if (!this.webrtcSvc.token) {
       await this.webrtcSvc.getToken(this.provider?.uuid, this.room, this.nurseId).toPromise().catch(err => {
+
         this.analytics.logEvent('generate-token_failed', 'engagement', 'call_button', 1,  {
         doctorUserId: this.data?.connectToDrId,
         doctorName: this.doctorName,
@@ -158,9 +176,11 @@ export class VideoCallComponent implements OnInit, OnDestroy {
         callDuration: this.callDuration,
         error: err
       });
+
         this.toastr.show('Failed to generate a video call token.', null, { timeOut: 1000 });
       });
     }
+    console.log("this.webrtcSvc.token",this.webrtcSvc.token);
     if (!this.webrtcSvc.token) return;
     this.webrtcSvc.createRoomAndConnectCall({
       localElement: this.localVideoRef,
@@ -189,7 +209,7 @@ export class VideoCallComponent implements OnInit, OnDestroy {
   * @return {void}
   */
   onHWIncomingCallConnect() {
-    this.connecting = false;
+setTimeout(() => this.connecting = false);
     this.callStartedAt = moment();
     this.socketSvc.emitEvent('call-connected', this.incomingData);
   }
@@ -224,6 +244,7 @@ export class VideoCallComponent implements OnInit, OnDestroy {
       callType : this.callType
     };
     this.analytics.logEvent('on-call-connect', 'engagement', 'call_button', 1,  this.buildAnalyticsEventPayload());
+
     this.socketSvc.emitEvent("call", this.socketSvc.incomingCallData);
 
     /**
@@ -236,6 +257,7 @@ export class VideoCallComponent implements OnInit, OnDestroy {
       this.socketSvc.emitEvent('call_time_up', this.nurseId);
       this.analytics.logEvent('call_time_up', 'engagement', 'call_button', 1,  this.buildAnalyticsEventPayload());
         this.endCallInRoom();
+
         this.toastr.info("Health worker not available to pick the call, please try again later.", null, { timeOut: 3000 });
       }
     }, ringingTimeout);
@@ -248,6 +270,7 @@ export class VideoCallComponent implements OnInit, OnDestroy {
   async handleParticipantConnect(): Promise<void> {
     this.callConnected = true;
     this.callStartedAt = moment();
+
     if(this.callType === 'audio') {
       this._localVideoOff = true;
         this.videoBitrateCheckInterval = setInterval(() => {
@@ -487,12 +510,14 @@ export class VideoCallComponent implements OnInit, OnDestroy {
         this.endCallInRoom();
         this.toastr.info("Call rejected by Health Worker", null, { timeOut: 2000 });
         this.analytics.logEvent('hw_call_reject', 'engagement', 'call_button', 1,  this.buildAnalyticsEventPayload());
+
       }
     });
 
     this.socketSvc.onEvent("bye").subscribe((data: any) => {
       if (data === 'app') {
         this.toastr.info("Call ended from Health Worker end.", null, { timeOut: 2000 });
+
          this.analytics.logEvent('hw_ended_call', 'engagement', 'call_button', 1,  this.buildAnalyticsEventPayload());
       }
     });
@@ -573,7 +598,7 @@ export class VideoCallComponent implements OnInit, OnDestroy {
     setTimeout(async () => {
       this.close();
       this.webrtcSvc.room.disconnect(true);
-      if(this.recodingStarted && isFeaturePresent('webrtcRecording')) {
+      if (this.recodingStarted && isFeaturePresent('webrtcRecording')) {
         this.recodingStarted = false;
         await this.webrtcSvc.stopRecording(this.tableId, this.room)
           .toPromise()
@@ -602,7 +627,9 @@ export class VideoCallComponent implements OnInit, OnDestroy {
     this.cleanupVideoElement('localVideo');
     this.cleanupVideoElement('remoteVideo');
     this.webrtcSvc.handleDisconnect();
+
     if (this.callDuration) {
+
       this.socketSvc.emitEvent("bye", {
         ...this.incomingData,
         nurseId: this.nurseId,
@@ -611,16 +638,19 @@ export class VideoCallComponent implements OnInit, OnDestroy {
       });
        this.analytics.logEvent('bye_by_dr', 'engagement', 'end_call_button', 1, this.buildAnalyticsEventPayload());
     } else if(this.endCall) {
+
       this.socketSvc.emitEvent("cancel_dr", {
         ...this.incomingData,
         nurseId: this.nurseId,
         webapp: true,
         initiator: this.initiator,
       });
+
     this.analytics.logEvent('cancel_by_dr', 'engagement', 'end_call_button', 1,  this.buildAnalyticsEventPayload());
     } else if (this.callDuration === "" && !this.endCall && (flag === 'call_time_up')) {
       this.socketSvc.emitEvent('call_time_up', this.nurseId);
       this.analytics.logEvent('call_time_up', 'engagement', 'call_button', 1,  this.buildAnalyticsEventPayload());
+
     }
     clearInterval(this.videoBitrateCheckInterval);
     this.lastVideoBytesSent = 0;
@@ -654,7 +684,9 @@ export class VideoCallComponent implements OnInit, OnDestroy {
 
     const event = this._localAudioMute ? 'audioOff' : 'audioOn';
     this.socketSvc.emitEvent(event, { fromWebapp: true });
+
     this.analytics.logEvent('toggle_audio', 'engagement', 'audio_button', 1,  this.buildAnalyticsEventPayload());
+
   }
 
   /**
@@ -665,7 +697,9 @@ export class VideoCallComponent implements OnInit, OnDestroy {
     this._localVideoOff = this.webrtcSvc.toggleVideo();
     const event = this._localVideoOff ? 'videoOff' : 'videoOn';
     this.socketSvc.emitEvent(event, { fromWebapp: true });
+
     this.analytics.logEvent('toggle_video', 'engagement', 'video_button', 1,  this.buildAnalyticsEventPayload());
+
   }
 
   /**
@@ -685,6 +719,7 @@ export class VideoCallComponent implements OnInit, OnDestroy {
       this.dialogRef.updatePosition(null);
     }
     this.analytics.logEvent('toggle_window', 'engagement', 'window_button', 1, this.buildAnalyticsEventPayload());
+
   }
 
   /**
@@ -692,10 +727,7 @@ export class VideoCallComponent implements OnInit, OnDestroy {
   * @return {string} - Call duration
   */
   get callDuration() {
-    if (!this.callStartedAt) return '00:00';
-    const duration = moment.duration(moment().diff(this.callStartedAt));
-    const [h, m, s] = [duration.hours(), duration.minutes(), duration.seconds()].map(n => String(n).padStart(2, '0'));
-    return h !== '00' ? `${h}:${m}:${s}` : `${m}:${s}`;
+    return this.callDurationDisplay;
   }
 
   /**
@@ -738,16 +770,17 @@ export class VideoCallComponent implements OnInit, OnDestroy {
     this.webrtcSvc.token = '';
   }
 
-  checkPatientRegField(fieldName: string): boolean{
+  checkPatientRegField(fieldName: string): boolean {
     return this.patientRegFields.indexOf(fieldName) !== -1;
   }
-  
+
   setDefaultImage(event: Event) {
     const imgElement = event.target as HTMLImageElement;
     imgElement.src = 'assets/svgs/dr-user.svg';
   }
 
   buildAnalyticsEventPayload() {
+
   const providerData = getCacheData(true, visitTypes.PATIENT_VISIT_PROVIDER);
 
   return {
@@ -763,4 +796,5 @@ export class VideoCallComponent implements OnInit, OnDestroy {
     callDuration: this.callDuration
   };
 }
+
 }

@@ -352,7 +352,9 @@ export class VisitSummaryComponent implements OnInit, OnDestroy, AfterViewInit {
   search6 = (text$: Observable<string>) => this.mainSearch(text$, this.timingList.map((val) => val.name));
   search7 = (text$: Observable<string>) => this.mainSearch(text$, doses.map((val) => val.name));
   search8 = (text$: Observable<string>) => this.mainSearch(text$, this.durationUnitList.map((val) => val.name));
+
   search9 = (text$: Observable<string>) => this.searchInstructionRemark(text$);
+
 
   // Add this property to the component class
   obsData = {
@@ -1555,10 +1557,10 @@ export class VisitSummaryComponent implements OnInit, OnDestroy, AfterViewInit {
   }
 
   /**
-  * Search disgnosis for a given value
-  * @param {string} val - search value
-  * @returns {void}
-  */
+   * Search diagnosis for a given value
+   * @param {string} val - search value
+   * @returns {void}
+   */
   searchDiagnosis(val: string): void {
     if (val && val.length >= 3) {
       this.diagnosisService.getSnomedCTDiagnosisList(val).subscribe({
@@ -3008,8 +3010,6 @@ export class VisitSummaryComponent implements OnInit, OnDestroy, AfterViewInit {
           }).pipe(tap((res:ObsModel)=>test.uuid=res.uuid)));
         } 
       }
-    }
-
     // Diagnosis - only save new diagnoses
     if (this.changedFields.includes('diagnosis') && !this.appConfigService.patient_visit_summary?.dp_dignosis_secondary) {
       for (const diagnosis of this.existingDiagnosis) {
@@ -3027,8 +3027,6 @@ export class VisitSummaryComponent implements OnInit, OnDestroy, AfterViewInit {
           postObsRequests.push(this.diagnosisService.addSnomedDiagnosis(diagnosis.diagnosisName, diagnosis.diagnosisCode))
         }
       }
-    }
-
     // Referrals - only save new referrals
     if (this.changedFields.includes('addReferral') && !this.appConfigService.patient_visit_summary?.dp_referral_secondary) {
       for (const referral of this.referrals) {
@@ -3043,8 +3041,6 @@ export class VisitSummaryComponent implements OnInit, OnDestroy, AfterViewInit {
           }).pipe(tap((res: ObsModel) => referral.uuid = res.uuid))
         );
       }
-    }
-
     // Notes - only save new notes
     if (this.changedFields.includes('notes') && this.notesRef) {
       for (const note of this.notesRef.notes) {
@@ -3059,7 +3055,6 @@ export class VisitSummaryComponent implements OnInit, OnDestroy, AfterViewInit {
           }).pipe(tap((res: ObsModel) => note.uuid = res.uuid))
         );
       }
-    }
 
     // Family History Notes - only save new notes
     if (this.changedFields.includes('familyHistoryNote') && this.familyHistoryNoteRef) {
@@ -3074,8 +3069,8 @@ export class VisitSummaryComponent implements OnInit, OnDestroy, AfterViewInit {
             encounter: this.visitNotePresent.uuid
           }).pipe(tap((res: ObsModel) => note.uuid = res.uuid))
         );
+
       }
-    }
 
     // Past Medical History Notes - only save new notes
     if (this.changedFields.includes('pastMedicalHistoryNote') && this.pastMedicalHistoryNoteRef) {
@@ -3090,8 +3085,8 @@ export class VisitSummaryComponent implements OnInit, OnDestroy, AfterViewInit {
             encounter: this.visitNotePresent.uuid
           }).pipe(tap((res: ObsModel) => note.uuid = res.uuid))
         );
+
       }
-    }
     }
 
     return postObsRequests.length > 0 ? forkJoin(postObsRequests) : of(null);
@@ -3529,11 +3524,11 @@ export class VisitSummaryComponent implements OnInit, OnDestroy, AfterViewInit {
     return null;
   }
 
-  getPhoneNumber(): string{
-    if(["NAS"].includes(environment.brandName)){
-      return this.hwPhoneNo;
-    } else {
+  getPhoneNumber(getPatientNo: boolean = false): string{
+    if(["KCDO"].includes(environment.brandName) || getPatientNo){
       return this.getPersonAttributeValue('Telephone Number') != "NA" ? this.getPersonAttributeValue('Telephone Number') : "";
+    } else {
+      return this.hwPhoneNo;
     } 
   }
 
