@@ -527,6 +527,16 @@ export interface StandardMedicineModel {
   uuid?: string
 }
 
+export interface StandardMedicineModel {
+  drug?: string,
+  dose?: string,
+  durationNo?: string,
+  durationUnit?: string,
+  instructRemark?: string,
+  frequency?: string,
+  uuid?: string
+}
+
 export interface PatientHistoryModel {
   title?: string,
   data?: KeyValueModel[]

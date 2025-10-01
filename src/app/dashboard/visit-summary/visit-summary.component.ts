@@ -33,12 +33,14 @@ import { AppConfigService } from 'src/app/services/app-config.service';
 import { checkIsEnabled, VISIT_SECTIONS } from 'src/app/utils/visit-sections';
 import { NgSelectComponent } from '@ng-select/ng-select';
 import { NgxRolesService } from 'ngx-permissions';
+// import diagnostics from '../../core/data/diagnostics';
 import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
 import { FollowUpInstructionComponent } from './follow-up-instruction/follow-up-instruction.component';
 import { NotesComponent } from './notes/notes.component';
 import durationUnitList from 'src/app/core/data/durationUnitList';
 import instructionRemarks from 'src/app/core/data/instructionRemarks';
 import { keepOnlyPairedEvents } from 'src/app/utils/paired-events';
+import { AnalyticsService } from 'src/app/services/analytics.service';
 
 class PickDateAdapter extends NativeDateAdapter {
   format(date: Date, displayFormat: Object): string {
@@ -303,7 +305,8 @@ export class VisitSummaryComponent implements OnInit, OnDestroy, AfterViewInit {
     private mindmapService: MindmapService,
     public appConfigService: AppConfigService,
     private rolesService: NgxRolesService,
-    private sanitizer: DomSanitizer) {
+    private sanitizer: DomSanitizer,
+    private analytics: AnalyticsService) {
     Object.keys(this.appConfigService.patient_registration).forEach(obj => {
       this.patientRegFields.push(...this.appConfigService.patient_registration[obj].filter((e: { is_enabled: any; }) => e.is_enabled).map((e: { name: any; }) => e.name));
     });
@@ -339,6 +342,15 @@ export class VisitSummaryComponent implements OnInit, OnDestroy, AfterViewInit {
       timing: new FormControl(null, [Validators.required]),
       frequency: new FormControl(null),
       remark: new FormControl('', [])
+    });
+
+    this.addStandardMedicineForm = new FormGroup({
+      drug: new FormControl(null, [Validators.required]),
+      dose: new FormControl(null, [Validators.required]),
+      frequency: new FormControl(null),
+      durationNo: new FormControl(null, [Validators.required, Validators.pattern('^[0-9]*$')]),
+      durationUnit: new FormControl(null, [Validators.required]),
+      instructRemark: new FormControl('', [])
     });
 
     this.addStandardMedicineForm = new FormGroup({
@@ -1133,12 +1145,23 @@ export class VisitSummaryComponent implements OnInit, OnDestroy, AfterViewInit {
   * Start video call with HW/patient
   * @return {void}
   */
-  startCall(): void {
+  startCall(callType:string): void {
     if (this.dialogRef2) {
       this.dialogRef2.close();
       this.isCalling = false;
       return;
     }
+    this.analytics.logEvent('start_call', 'engagement', 'call_button', 1, {
+      doctorUserId: this.visitSummaryService.userId,
+      doctorName: getCacheData(true, doctorDetails.USER)?.person?.display,
+      patientOpenMrsId: this.getPatientIdentifier('OpenMRS ID'),
+      hwName : getCacheData(true, visitTypes.PATIENT_VISIT_PROVIDER)?.display?.split(":")?.[0],
+      hwId : getCacheData(true, visitTypes.PATIENT_VISIT_PROVIDER) && getCacheData(true, visitTypes.PATIENT_VISIT_PROVIDER)?.provider ? getCacheData(true, visitTypes.PATIENT_VISIT_PROVIDER).provider?.uuid : null,
+      visitId: this.visit.uuid,
+      location:this.clinicName,
+      callType: callType
+    });
+    
     this.isCalling = true;
     this.dialogRef2 = this.coreService.openVideoCallModal({
       patientId: this.visit.patient.uuid,
@@ -1151,7 +1174,8 @@ export class VisitSummaryComponent implements OnInit, OnDestroy, AfterViewInit {
       drPersonUuid: this.provider?.person.uuid,
       patientAge: this.patient.person.age,
       patientGender: this.patient.person.gender,
-      location:this.clinicName
+      location:this.clinicName,
+      callType: callType
     });
 
     this.dialogRef2.afterClosed().subscribe((res) => {
@@ -1647,7 +1671,11 @@ export class VisitSummaryComponent implements OnInit, OnDestroy, AfterViewInit {
   */
   deleteMedicine(index: number, uuid: string): void {
     this.diagnosisService.deleteObs(uuid).subscribe(() => {
-      this.medicines.splice(index, 1);
+      if(this.appConfigService?.patient_visit_summary?.standard_medication){
+        this.standardMedicines.splice(index, 1);
+      } else {
+       this.medicines.splice(index, 1);
+      }
     });
   }
 
@@ -2029,6 +2057,7 @@ export class VisitSummaryComponent implements OnInit, OnDestroy, AfterViewInit {
       this.toastr.warning(this.translateService.instant('Diagnosis not added'), this.translateService.instant('Diagnosis Required'));
       return false;
     }
+    console.log('this.followUpForm.value: ', this.followUpForm.value);
     if (this.isFeatureAvailable('visitFollowUp') && !this.followUpForm.value.present) {
       this.toastr.warning(this.translateService.instant('Follow-up not added'), this.translateService.instant('Follow-up Required'));
       return false;
@@ -2564,6 +2593,7 @@ export class VisitSummaryComponent implements OnInit, OnDestroy, AfterViewInit {
       // Handle medicines
       for (const medicine of this.medicines) {
         if (medicine?.uuid) continue;
+
         postObsRequests.push(
           this.encounterService.postObs({
             concept: conceptIds.conceptMed,
