@@ -1680,6 +1680,18 @@ export class VisitSummaryComponent implements OnInit, OnDestroy, AfterViewInit {
   }
 
   /**
+  * Delete standard medicine for a given index and uuid
+  * @param {number} index - Index
+  * @param {string} uuid - Standard Medicine obs uuid
+  * @returns {void}
+  */
+  deleteStandardMedicine(index: number, uuid: string): void {
+    this.diagnosisService.deleteObs(uuid).subscribe(() => {
+      this.standardMedicines.splice(index, 1);
+    });
+  }
+
+  /**
   * Get advices list
   * @returns {void}
   */
@@ -3084,7 +3096,7 @@ export class VisitSummaryComponent implements OnInit, OnDestroy, AfterViewInit {
       
       this.formSubscriptions.push(
         this.addStandardMedicineForm.valueChanges.subscribe(() => {
-          const newValue = [...this.medicines];
+          const newValue = [...this.standardMedicines];
           if (JSON.stringify(newValue) !== JSON.stringify(this.obsData.addStandardMedicine)) {
             this.updatedObsData.addStandardMedicine = newValue;
             this.checkChanges(this.updatedObsData);

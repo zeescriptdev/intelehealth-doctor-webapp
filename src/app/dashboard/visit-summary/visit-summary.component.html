@@ -1709,7 +1709,7 @@
                                   mat-icon-button
                                   class="float-right"
                                   *ngIf="!isMCCUser && isVisitNoteProvider && !visitEnded"
-                                  (click)="deleteMedicine(i, m.uuid)"
+                                  (click)="deleteStandardMedicine(i, m.uuid)"
                                   data-test-id="{{'btnDeleteMedVisitSummary'+i}}"
                                 >
                                   <img src="assets/svgs/delete-icon.svg" alt="" />
