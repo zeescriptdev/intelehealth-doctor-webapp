@@ -155,7 +155,7 @@ export class VisitSummaryComponent implements OnInit, OnDestroy, AfterViewInit {
   pvsConstant = VISIT_SECTIONS;
 
   hasChatEnabled: boolean = false;
-  hasVideoEnabled: boolean = false;
+  hasVideoEnabled: boolean = false; 
   hasWebRTCEnabled: boolean = false;
   hasVitalsEnabled: boolean = false;
   hasPatientAddressEnabled: boolean = false;
