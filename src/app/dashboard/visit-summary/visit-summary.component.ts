@@ -1100,7 +1100,7 @@ export class VisitSummaryComponent implements OnInit, OnDestroy, AfterViewInit {
     this.encounterService.postEncounter(json).subscribe((response) => {
       if (response) {
         this.router.navigate(['/dashboard']);
-        this.toastr.success(this.translateService.instant('Visit has been re-assigned to the another speciality doctor successfully.'), this.translateService.instant('Visit Re-assigned!'));
+        this.coreService.showToast('success','Visit has been re-assigned to the another speciality doctor successfully.','Visit Re-assigned!','visit-reassigned-toast');
       }
     });
   }
