@@ -659,9 +659,9 @@ export class CoreService {
     this.toastr,
     this.translateService.instant(messageKey),
     this.translateService.instant(titleKey)
-  );
+  ); 
 
-  toast.onShown.subscribe(() => {
+  toast.onShown.subscribe(() => { 
     const toastClass = type === "success" ? "toast-success" : type === "error" ? "toast-error" : "toast-warning";
     const toastElement = document.querySelector(
       `.${toastClass}:last-child`
