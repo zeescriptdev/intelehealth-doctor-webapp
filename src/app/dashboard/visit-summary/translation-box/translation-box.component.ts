@@ -3,10 +3,14 @@ import {
   EventEmitter,
   Input,
   OnChanges,
+  OnInit,
   Output,
   SimpleChanges,
   ViewEncapsulation,
 } from '@angular/core';
+import { ActivatedRoute } from '@angular/router';
+import { conceptIds,doctorDetails } from 'src/config/constant';
+import { getCacheData } from 'src/app/utils/utility-functions';
 import { VisitService } from 'src/app/services/visit.service';
 
 interface TabButtonState {
@@ -25,7 +29,7 @@ interface TabButtonState {
   styleUrls: ['./translation-box.component.scss'],
   encapsulation: ViewEncapsulation.ShadowDom,
 })
-export class TranslationBoxComponent implements OnChanges {
+export class TranslationBoxComponent implements OnInit, OnChanges {
   @Input() hwStateData: { state: ''; language: ''; language_code: '' };
   @Input() translatedText: string = '';
   @Input() tabType: string = '';
@@ -47,8 +51,13 @@ export class TranslationBoxComponent implements OnChanges {
   changeDefaultTextToEnglish: boolean = false;
   maxClickCount = 2;
   isLoading = false;
+  visitUuid:string;
 
-  constructor(private visitService: VisitService) {}
+  constructor(private visitService: VisitService, private route: ActivatedRoute) {}
+
+  ngOnInit(): void {
+     this.visitUuid = this.route.snapshot.paramMap.get('id');
+  }
 
   ngOnChanges(changes: SimpleChanges): void {
     if (
@@ -201,6 +210,12 @@ export class TranslationBoxComponent implements OnChanges {
             isTranslationApr:false,
             clickCount:0
       };
+      this.visitService
+      .saveTranslatedData(
+       this.buildRequestBody(this.tabType)
+      ).subscribe({
+        next: () => {
+        }});
   }
 
   onRetry() {
@@ -208,6 +223,12 @@ export class TranslationBoxComponent implements OnChanges {
       this.tabButtonStates[this.tabType].clickCount++;
       this.tabResponses[this.tabType].translated_text = this.showDefaultEnglishText;
       this.callApiForTab(this.tabType);
+      this.visitService
+      .saveTranslatedData(
+       this.buildRequestBody(this.tabType, this.tabButtonStates[this.tabType].clickCount)
+      ).subscribe({
+        next: () => {
+        }});
     } else {
       this.showError = true;
       this.action.emit({ tabType: this.tabType, action: 'reject' });
@@ -238,5 +259,17 @@ export class TranslationBoxComponent implements OnChanges {
 
   shouldShowRetry(): boolean {
     return this.tabButtonStates[this.tabType]?.showRetry ?? false;
+  }
+
+  buildRequestBody(tabType: string, clickCount?:number) {
+    return {
+    visitId: this.visitUuid,
+    conceptId: tabType === 'advice' ? conceptIds.conceptAdvice : tabType === 'instructions'? conceptIds.conceptMed : conceptIds.conceptFollow,
+    is_rejected: clickCount ? false: true,
+    rejected_en_text: clickCount ? 'NA' : this.translatedText,
+    rejected_regional_text: clickCount ? 'NA' : this.tabResponses[this.tabType]?.translated_text,
+    created_by: getCacheData(true, doctorDetails.USER)?.uuid,
+     ...(clickCount && { api_failure_retry_counts: clickCount })
+    }
   }
 }

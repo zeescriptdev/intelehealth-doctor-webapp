@@ -7,7 +7,7 @@
 
   <!-- Green Box -->
   <div class="translation-box">
-    <div class="translation-content" [class.extra-padding]="tabType === 'advice'">
+    <div class="translation-content low-width" [class.extra-padding]="tabType === 'advice'">
       <div *ngIf="isLoading; else dataTemplate">
       <ng-template #loading>
         <div class="circle-loader"></div>

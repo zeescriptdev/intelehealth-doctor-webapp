@@ -562,10 +562,14 @@ textarea.form-control {
   opacity: 0.5;
 }
 
+.fTable {
+  table-layout: fixed;
+}
+
 .table th,
 .table td {
   vertical-align: middle;
-  white-space: nowrap;
+  white-space: break-spaces;
 }
 
 .tableBorder {

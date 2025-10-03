@@ -310,6 +310,10 @@ export class VisitService {
     return this.http.post(`${this.baseURLMindmap}/mindmap/translate`, this.buildRequestBody(textToTranslate, targetLang, tabType))
   }
 
+  saveTranslatedData(body: any) {
+   return this.http.post(`${this.baseURLMindmap}/mindmap/saveTranslation`, body)
+  }
+  
   // A reusable function to build translation request body
   buildRequestBody(input: string, targetLang: string, tabType: string) {
     return {

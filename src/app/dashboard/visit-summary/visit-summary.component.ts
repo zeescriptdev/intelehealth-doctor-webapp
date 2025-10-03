@@ -2131,5 +2131,6 @@ export class VisitSummaryComponent implements OnInit, OnDestroy {
   onClearReason() {
     this.reason = 'Enter reason';
     this.followUpForm.get('followUpReason')?.reset();
+    this.isReasonRejected = false;
   }
 }
