@@ -641,24 +641,35 @@ export class CoreService {
    * add toast data-test-id attribute
    * @return {void}
    */
-  showToast(type: "success" | "error", messageKey: string,titleKey: string,testId?: string ) {
-    const toastFn =
-      type === "success" ? this.toastr.success : this.toastr.error;
+ showToast(
+  type: "success" | "error" | "warning", 
+  messageKey: string,
+  titleKey: string,
+  testId?: string
+) {
+  let toastFn;
 
-    const toast = toastFn.call(
-      this.toastr,
-      this.translateService.instant(messageKey),
-      this.translateService.instant(titleKey)
-    );
-
-    toast.onShown.subscribe(() => {
-      const toastClass = type === "success" ? "toast-success" : "toast-error";
-      const toastElement = document.querySelector(
-        `.${toastClass}:last-child`
-      ) as HTMLElement;
-      if (toastElement) {
-        toastElement.setAttribute("data-test-id", testId || `${type}-toast`);
-      }
-    });
+  switch(type) {
+    case "success": toastFn = this.toastr.success; break;
+    case "error": toastFn = this.toastr.error; break;
+    case "warning": toastFn = this.toastr.warning; break;
   }
+
+  const toast = toastFn.call(
+    this.toastr,
+    this.translateService.instant(messageKey),
+    this.translateService.instant(titleKey)
+  );
+
+  toast.onShown.subscribe(() => {
+    const toastClass = type === "success" ? "toast-success" : type === "error" ? "toast-error" : "toast-warning";
+    const toastElement = document.querySelector(
+      `.${toastClass}:last-child`
+    ) as HTMLElement;
+    if (toastElement) {
+      toastElement.setAttribute("data-test-id", testId || `${type}-toast`);
+    }
+  });
+}
+
 }

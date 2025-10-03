@@ -1049,11 +1049,12 @@ export class VisitSummaryComponent implements OnInit, OnDestroy, AfterViewInit {
   */
   referSpecialist(): void {
     if (this.referSpecialityForm.invalid) {
-      this.toastr.warning(this.translateService.instant('Please select specialization'), this.translateService.instant('Invalid!'));
+      this.coreService.showToast("warning", 'Please select specialization', 'Invalid!', 'warning-select-specialization-toast');
+
       return;
     }
     if (this.visitNotePresent) {
-      this.toastr.warning(this.translateService.instant('Can\'t refer, visit note already exists for this visit!'), this.translateService.instant('Can\'t refer'));
+     this.coreService.showToast("warning", 'Can\'t refer, visit note already exists for this visit!', 'Can\'t refer', 'warning-visit-note-exists-toast');
       return;
     }
     this.coreService.openConfirmationDialog({ confirmationMsg: 'Are you sure to re-assign this visit to another doctor?', cancelBtnText: 'Cancel', confirmBtnText: 'Confirm' })
@@ -1472,7 +1473,7 @@ export class VisitSummaryComponent implements OnInit, OnDestroy, AfterViewInit {
       return; 
     }
     if (this.existingDiagnosis.find(o => o.diagnosisName.toLocaleLowerCase() === this.diagnosisForm.value.diagnosisName.toLocaleLowerCase())) {
-      this.toastr.warning(this.translateService.instant('Diagnosis Already Exist'), this.translateService.instant('Duplicate Diagnosis'));
+    this.coreService.showToast("warning", 'Diagnosis Already Exist','Duplicate Diagnosis','warning-toast');
       return;
     }
 
@@ -1592,7 +1593,7 @@ export class VisitSummaryComponent implements OnInit, OnDestroy, AfterViewInit {
       return;
     }
     if (this.medicines.find((o: MedicineModel) => o.drug === this.addMedicineForm.value.drug)) {
-      this.toastr.warning(this.translateService.instant('Drug already added, please add another drug.'), this.translateService.instant('Already Added'));
+      this.coreService.showToast("warning", 'Drug already added, please add another drug.','Already Added','warning-toast');
       return;
     }    
     this.medicines.push({ ...this.addMedicineForm.value});
@@ -1608,7 +1609,7 @@ export class VisitSummaryComponent implements OnInit, OnDestroy, AfterViewInit {
       return;
     }
     if (this.standardMedicines.find((o: StandardMedicineModel) => o.drug === this.addStandardMedicineForm.value.drug)) {
-      this.toastr.warning(this.translateService.instant('Drug already added, please add another drug.'), this.translateService.instant('Already Added'));
+      this.coreService.showToast("warning",'Drug already added, please add another drug.','Already Added','addmedicine-warning-toast');
       return;
     }    
     this.standardMedicines.push({ ...this.addStandardMedicineForm.value});
@@ -1716,7 +1717,8 @@ export class VisitSummaryComponent implements OnInit, OnDestroy, AfterViewInit {
       return;
     }
     if (this.advices.find((o: ObsModel) => o.value === this.addAdviceForm.value.advice)) {
-      this.toastr.warning(this.translateService.instant('Advice already added, please add another advice.'), this.translateService.instant('Already Added'));
+    this.coreService.showToast("warning", 'Advice already added, please add another advice.', 'Already Added', 'add-advice-warning-toast');
+
       return;
     }
     this.advices.push({value: this.addAdviceForm.value.advice });
@@ -1807,7 +1809,8 @@ export class VisitSummaryComponent implements OnInit, OnDestroy, AfterViewInit {
       return;
     }
     if (this.tests.find((o: TestModel) => o.value === this.addTestForm.value.test)) {
-      this.toastr.warning(this.translateService.instant('Test already added, please add another test.'), this.translateService.instant('Already Added'));
+      this.coreService.showToast("warning", 'Test already added, please add another test.', 'Already Added', 'warning-test-toast');
+
       return;
     }
     this.tests.push({value: this.addTestForm.value.test });
@@ -1903,7 +1906,7 @@ export class VisitSummaryComponent implements OnInit, OnDestroy, AfterViewInit {
       return;
     }
     if (this.referrals.find((o: ReferralModel) => o.speciality === this.addReferralForm.value.speciality)) {
-      this.toastr.warning(this.translateService.instant('Referral already added, please add another referral.'), this.translateService.instant('Already Added'));
+    this.coreService.showToast("warning", 'Referral already added, please add another referral.', 'Already Added', 'warning-referral-toast');
       return;
     }
 
@@ -2012,14 +2015,14 @@ export class VisitSummaryComponent implements OnInit, OnDestroy, AfterViewInit {
   */
   sharePrescription(): boolean {
     if (this.isFeatureAvailable('dp_diagnosis_secondary') && this.diagnosisSecondaryForm.invalid){
-      this.toastr.warning(this.translateService.instant('Enter Diagnosis'), this.translateService.instant('Diagnosis Required'));
+    this.coreService.showToast("warning", 'Enter Diagnosis', 'Diagnosis Required', 'warning-diagnosis-toast');
       return false;
     } else if (!this.isFeatureAvailable('dp_diagnosis_secondary') && this.existingDiagnosis.length === 0 ) {
-      this.toastr.warning(this.translateService.instant('Diagnosis not added'), this.translateService.instant('Diagnosis Required'));
+     this.coreService.showToast("warning", 'Diagnosis not added', 'Diagnosis Required', 'warning-diagnosis-not-added-toast');
       return false;
     }
     if (this.isFeatureAvailable('visitFollowUp') && !this.followUpForm.value.present) {
-      this.toastr.warning(this.translateService.instant('Follow-up not added'), this.translateService.instant('Follow-up Required'));
+   this.coreService.showToast("warning", 'Follow-up not added', 'Follow-up Required', 'warning-followup-not-added-toast');
       return false;
     }
     this.changedFields = [];
@@ -2080,7 +2083,7 @@ export class VisitSummaryComponent implements OnInit, OnDestroy, AfterViewInit {
                           });
                         },
                         error: (err) => {
-                          this.toastr.error(err.message);
+                        this.coreService.showToast("error",err.message,"Error","error-share-prescription-toast");
                           this.coreService.openSharePrescriptionSuccessModal().subscribe((result: string | boolean) => {
                             if (result === 'view') {
                               // Open visit summary modal here....
@@ -2910,11 +2913,12 @@ export class VisitSummaryComponent implements OnInit, OnDestroy, AfterViewInit {
         // Reinitialize form tracking
         this.trackFormChanges();
         
-        this.toastr.success(this.translateService.instant('Changes saved successfully'), this.translateService.instant('Success'));
+       this.coreService.showToast("success", 'Changes saved successfully', 'Success', 'success-changes-saved-toast');
+
       },
       error: (error) => {
         console.error('Error saving observations', error);
-        this.toastr.error(this.translateService.instant('Error saving changes'), this.translateService.instant('Error'));
+      this.coreService.showToast("error", 'Error saving changes', 'Error', 'error-saving-changes-toast');
       }
     });
   }
