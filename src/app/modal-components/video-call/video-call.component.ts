@@ -62,21 +62,8 @@ export class VideoCallComponent implements OnInit, OnDestroy {
   videoBitrateCheckInterval: any;
   lastVideoBytesSent = 0;
   lastTimestamp = 0;
-
-  callType: string;
-  videoBitrateTooLow: boolean = false;
-  videoBitrateCheckInterval: any;
-  lastVideoBytesSent = 0;
-  lastTimestamp = 0;
-
   // isVideoRecordingEnabled: boolean;
-
   callType: string;
-  videoBitrateTooLow: boolean = false;
-  videoBitrateCheckInterval: any;
-  lastVideoBytesSent = 0;
-  lastTimestamp = 0;
-
   isVideoRecordingEnabled: boolean;
 
   constructor(
@@ -730,6 +717,19 @@ setTimeout(() => this.connecting = false);
     return this.callDurationDisplay;
   }
 
+    /**
+ * Update call duration display
+ * @return {void}
+ */
+  updateCallDuration() {
+    if (!this.callStartedAt) {
+      this.callDurationDisplay = '00:00';
+      return;
+    }
+    const duration = moment.duration(moment().diff(this.callStartedAt));
+    const [h, m, s] = [duration.hours(), duration.minutes(), duration.seconds()].map(n => String(n).padStart(2, '0'));
+    this.callDurationDisplay = h !== '00' ? `${h}:${m}:${s}` : `${m}:${s}`;
+  }
   /**
   * Check if attachement is pdf
   * @return {boolean} - True if pdf else false
