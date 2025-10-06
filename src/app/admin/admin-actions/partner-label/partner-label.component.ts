@@ -189,7 +189,7 @@ export class PartnerLabelComponent implements OnInit,AfterViewInit{
       this.callPublish();
     }
   }
-}
+
   validateJson(json: string): void {
     try {
       this.isJsonValid = Array.isArray(JSON.parse(json));
