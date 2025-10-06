@@ -1076,23 +1076,27 @@
                   <form [formGroup]="diagnosisForm" (ngSubmit)="saveDiagnosis()" *ngIf="!addMoreDiagnosis"
                     data-test-id="formDiagnosis">
                     <ul class="items-list" data-test-id="ulDiagnosisInputs">
-                      <li data-test-id="liSelectDiagnosis">
-                        <div class="row">
-                          <label for="select-diagnosis" class="col-sm-3 col-form-label"
-                            data-test-id="labelSelectDiagnosis">
-                            {{ 'Select diagnosis' | translate }}*
-                          </label>
-                          <div class="col-sm-3" data-test-id="divSelectDiagnosisControl">
-                            <ng-select appendTo=".visit-summary-tab-group" class="visit-select custom"
-                              formControlName="diagnosisName" (search)="onKeyUp($event)"
-                              (change)="onDiagnosisChange($event)" [items]="diagnosis$ | async" bindLabel="name"
-                              bindValue="name" [clearable]="true" [searchable]="true"
-                              placeholder="{{ 'Select diagnosis' | translate }}" [addTag]="false"
-                              data-test-id="selectDiagnosisName">
-                            </ng-select>
-                          </div>
-                        </div>
-                      </li>
+                  <li data-test-id="liSelectDiagnosis">
+                    <div class="row">
+                      <label for="select-diagnosis" class="col-sm-3 col-form-label" data-test-id="labelSelectDiagnosis">
+                        {{ 'Select diagnosis' | translate }}*
+                      </label>
+                      <div class="col-sm-3" data-test-id="divSelectDiagnosisControl">
+                        <ng-select appendTo=".visit-summary-tab-group" class="visit-select custom" formControlName="diagnosisName"
+                          (search)="onKeyUp($event)" (change)="onDiagnosisChange($event)" [items]="diagnosis$ | async" bindLabel="name"
+                          bindValue="name" [clearable]="true" [searchable]="true" placeholder="{{ 'Select diagnosis' | translate }}"
+                          [addTag]="false" data-test-id="selectDiagnosisName">
+                          <!-- Custom option template -->
+                          <ng-template ng-option-tmp let-item="item" let-index="index">
+                            <div [attr.data-test-id]="'optionDiagnosis'+index">
+                              {{ item.name }}
+                            </div>
+                          </ng-template>
+                        </ng-select>
+                      </div>
+                    </div>
+                  </li>
+
 
                       <li data-test-id="liDiagnosisType">
                         <div class="row">
