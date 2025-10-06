@@ -1038,16 +1038,16 @@
                     </thead>
                     <tbody data-test-id="tbodyDiagnosisEntries">
                       <ng-container *ngIf="existingDiagnosis.length">
-                        <tr *ngFor="let d of existingDiagnosis; let i = index" data-test-id="trDiagnosisEntry{{i}}">
-                          <td data-test-id="tdDiagnosisName{{i}}">{{ d.diagnosisName }}</td>
-                          <td data-test-id="tdDiagnosisType{{i}}">{{ d.diagnosisType }}</td>
-                          <td data-test-id="tdDiagnosisStatus{{i}}">{{ d.diagnosisStatus }}</td>
-                          <td class="pr-0" data-test-id="tdDiagnosisActions{{i}}">
+                        <tr *ngFor="let d of existingDiagnosis; let i = index"  [attr.data-test-id]="'trDiagnosisEntry' + i">
+                         <td [attr.data-test-id]="'tdDiagnosisName' + i">{{ d.diagnosisName }}</td>
+                        <td [attr.data-test-id]="'tdDiagnosisType' + i">{{ d.diagnosisType }}</td>
+                        <td [attr.data-test-id]="'tdDiagnosisStatus' + i">{{ d.diagnosisStatus }}</td>
+                          <td class="pr-0" [attr.data-test-id]="'tdDiagnosisActions'+i">
                             <button mat-icon-button class="float-right"
                               *ngIf="!isMCCUser && isVisitNoteProvider && !visitEnded"
                               (click)="deleteDiagnosis(i, d.uuid)"
                               [attr.data-test-id]="'btnDeleteDiagnosisVisitSummary' + i">
-                              <img src="assets/svgs/delete-icon.svg" alt="" data-test-id="imgDeleteDiagnosis{{i}}" />
+                              <img src="assets/svgs/delete-icon.svg" alt=""  [attr.data-test-id]="'imgDeleteDiagnosis'+i" />
                             </button>
                           </td>
                         </tr>
@@ -1360,7 +1360,6 @@
 
                 <!-- Add Medicine Form -->
                 <form [formGroup]="addMedicineForm" (ngSubmit)="addMedicine()" class="mt-3"
-                  *ngIf="(!brandName && !appConfigService?.patient_visit_summary?.standard_medication)"
                   data-test-id="formAddMedicine">
                   <div class="table-responsive medication-con">
                     <table class="table" aria-describedby="">
@@ -1529,28 +1528,29 @@
                       </tr>
                     </thead>
                     <tbody>
-                      <ng-container *ngIf="referrals.length; else noReferrals">
-                        <tr *ngFor="let r of referrals; let i = index" data-test-id="rowReferral{{i}}">
-                          <td data-test-id="tdReferralSpeciality{{i}}">{{ (r.speciality) | translate }}</td>
-                          <td *ngIf="isFeatureAvailable('referralFacility', true)"
-                            data-test-id="tdReferralFacility{{i}}">
-                            {{ (r.facility) | translate }}
-                          </td>
-                          <td *ngIf="isFeatureAvailable('priorityOfReferral', true)"
-                            data-test-id="tdReferralPriority{{i}}">
-                            {{ (r.priority) | translate }}
-                          </td>
-                          <td data-test-id="tdReferralReason{{i}}">{{ r.reason }}</td>
-                          <td class="pr-0">
-                            <button type="button" class="float-right" mat-icon-button
-                              (click)="deleteReferral(i, r.uuid)" data-test-id="btnDeleteReferralVisitSummary{{i}}"
-                              *ngIf="!isMCCUser && isVisitNoteProvider && !visitEnded">
-                              <img src="assets/svgs/delete-icon.svg" alt="" data-test-id="imgDeleteReferral{{i}}" />
-                            </button>
-                          </td>
-                        </tr>
-                      </ng-container>
-
+                  <ng-container *ngIf="referrals.length; else noReferrals">
+                    <tr *ngFor="let r of referrals; let i = index" [attr.data-test-id]="'rowReferral' + i">
+                      <td [attr.data-test-id]="'tdReferralSpeciality' + i">{{ r.speciality | translate }}</td>
+                  
+                      <td *ngIf="isFeatureAvailable('referralFacility', true)" [attr.data-test-id]="'tdReferralFacility' + i">
+                        {{ r.facility | translate }}
+                      </td>
+                  
+                      <td *ngIf="isFeatureAvailable('priorityOfReferral', true)" [attr.data-test-id]="'tdReferralPriority' + i">
+                        {{ r.priority | translate }}
+                      </td>
+                  
+                      <td [attr.data-test-id]="'tdReferralReason' + i">{{ r.reason }}</td>
+                  
+                      <td class="pr-0">
+                        <button type="button" class="float-right" mat-icon-button (click)="deleteReferral(i, r.uuid)"
+                          *ngIf="!isMCCUser && isVisitNoteProvider && !visitEnded"
+                          [attr.data-test-id]="'btnDeleteReferralVisitSummary' + i">
+                          <img src="assets/svgs/delete-icon.svg" alt="" [attr.data-test-id]="'imgDeleteReferral' + i" />
+                        </button>
+                      </td>
+                    </tr>
+                  </ng-container>
                       <ng-template #noReferrals>
                         <tr *ngIf="isMCCUser" data-test-id="rowNoReferral">
                           <td colspan="6" class="text-center font-weight-bold">

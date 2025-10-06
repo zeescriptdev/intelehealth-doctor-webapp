@@ -20,7 +20,7 @@
           *ngIf="isVisitNoteProvider && !visitEnded"
           data-test-id="{{'btnDeleteNoteVisitSummary'+i}}"
         >
-          <img src="assets/svgs/delete-icon.svg" alt="" data-test-id="imgDeleteIcon"/>
+          <img src="assets/svgs/delete-icon.svg" alt="" [attr.data-test-id]="'imgDeleteIcon'+i"/>
         </button>
       </div>
     </li>
