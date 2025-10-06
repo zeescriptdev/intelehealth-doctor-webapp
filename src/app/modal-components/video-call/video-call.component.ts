@@ -69,6 +69,10 @@ export class VideoCallComponent implements OnInit, OnDestroy {
   cameraIssue: boolean = false;
   microphoneIssue: boolean = false;
 
+  networkQuality: 'excellent' | 'good' | 'fair' | 'poor' = 'good';
+  networkBars: number = 3;
+  private hasShownPoorToast: boolean = false;
+
   private callDurationStr: string = '00:00';
 
   constructor(
@@ -80,7 +84,7 @@ export class VideoCallComponent implements OnInit, OnDestroy {
     private toastr: ToastrService,
     private webrtcSvc: WebrtcService,
     private appConfigService: AppConfigService,
-     private analytics: AnalyticsService
+    private analytics: AnalyticsService
   ) { }
 
   async ngOnInit() {
@@ -313,12 +317,17 @@ export class VideoCallComponent implements OnInit, OnDestroy {
   async handleParticipantConnect(): Promise<void> {
     this.callConnected = true;
     this.callStartedAt = moment();
-    if(this.callType === 'audio') {
-      this._localVideoOff = true;
-        this.videoBitrateCheckInterval = setInterval(() => {
-        this.checkLocalVideoBitrate();
-      }, 3000);
+    if (this.callType === 'audio') {
+      // this._localVideoOff = true;
+      this._localVideoOff = this.webrtcSvc.toggleVideo();
+      const event = this._localVideoOff ? 'videoOff' : 'videoOn';
+      this.socketSvc.emitEvent(event, { fromWebapp: true });
     }
+    this.checkLocalVideoBitrate();
+    this.videoBitrateCheckInterval = setInterval(() => {
+      this.checkLocalVideoBitrate();
+    }, 3000);
+
     this.socketSvc.emitEvent('call-connected', this.incomingData);
     this.analytics.logEvent('call-connected', 'engagement', 'call_button', 1,  this.buildAnalyticsEventPayload());
     if(this.callType === 'video' && this.isVideoRecordingEnabled) {
@@ -589,42 +598,73 @@ export class VideoCallComponent implements OnInit, OnDestroy {
 
 
   async checkLocalVideoBitrate(): Promise<void> {
-  const pc: RTCPeerConnection | undefined = (this.webrtcSvc.room as any)?.engine?.pcManager?.publisher?._pc;
+    const pc: RTCPeerConnection | undefined = (this.webrtcSvc.room as any)?.engine?.pcManager?.publisher?._pc;
+    if (!pc) return;
 
-  const stats = await pc.getStats();
+    const stats = await pc.getStats();
+    let bitrate = 0;
+    let packetLoss = 0;
 
-  stats.forEach((report) => {
-    if (this.lastTimestamp === 0) {
-    this.lastTimestamp = report.timestamp;
-    this.lastVideoBytesSent = report.bytesSent;
-    return;
-    }
-    if (
-      report.type === 'outbound-rtp' &&
-      report.kind === 'video' &&
-      typeof report.bytesSent === 'number' &&
-      typeof report.timestamp === 'number'
-    ) {
-      if (this.lastTimestamp && this.lastVideoBytesSent) {
-        const timeDiffSec = (report.timestamp - this.lastTimestamp) / 1000;
-        const bytesDiff = report.bytesSent - this.lastVideoBytesSent;
-        if (timeDiffSec > 0) {
-        const bitrate = (bytesDiff * 8) / timeDiffSec; // bits per second
-        console.log('Video bitrate (bps):', bitrate);
-
-        this.videoBitrateTooLow = bitrate < 600_000; // e.g. < 200 kbps
-        }
+    stats.forEach((report) => {
+      if (this.lastTimestamp === 0) {
+        this.lastTimestamp = report.timestamp;
+        this.lastVideoBytesSent = report.bytesSent;
+        return;
       }
-      this.lastTimestamp = report.timestamp;
-      this.lastVideoBytesSent = report.bytesSent;
-    }
-  });
+      
+      if (report.type === 'outbound-rtp' && report.kind === 'video' && typeof report.bytesSent === 'number' && typeof report.timestamp === 'number') {
+        if (this.lastTimestamp && this.lastVideoBytesSent) {
+          const timeDiffSec = (report.timestamp - this.lastTimestamp) / 1000;
+          const bytesDiff = report.bytesSent - this.lastVideoBytesSent;
+          if (timeDiffSec > 0) {
+            bitrate = (bytesDiff * 8) / timeDiffSec; // bits per second
+            console.log('Video bitrate (bps):', bitrate);
+          }
+        }
+        this.lastTimestamp = report.timestamp;
+        this.lastVideoBytesSent = report.bytesSent;
+      }
+      
+      if (report.type === 'outbound-rtp' && report.packetsLost !== undefined) {
+        packetLoss = report.packetsLost;
+      }
+    });
 
-  if(this.videoBitrateTooLow) {
-     this.toastr.warning('Low bandwidth detected. Continuing with the audio call');
-     this._localVideoOff = true;
+    this.updateNetworkQuality(bitrate, packetLoss);
+    
+    this.videoBitrateTooLow = bitrate < 200_000; // 200 kbps threshold
+    if (this.videoBitrateTooLow && this.networkQuality === 'poor') {
+      if (!this.hasShownPoorToast) {
+        this.hasShownPoorToast = true;
+        this._localVideoOff = this.webrtcSvc.toggleVideo();
+        const event = this._localVideoOff ? 'videoOff' : 'videoOn';
+        this.socketSvc.emitEvent(event, { fromWebapp: true });
+        this.toastr.warning('Low bandwidth detected. Continuing with the audio call');
+      }
+    }
   }
-}
+
+  private updateNetworkQuality(bitrate: number, packetLoss: number): void {
+    if (bitrate > 1000000 && packetLoss < 0.01) {
+      this.networkQuality = 'excellent';
+      this.networkBars = 4;
+      console.log(bitrate, this.networkQuality);
+    } else if (bitrate > 500000 && packetLoss < 0.03) {
+      this.networkQuality = 'good';
+      this.networkBars = 3;
+      console.log(bitrate, this.networkQuality);
+    } else if (bitrate > 200000 && packetLoss < 0.05) {
+      this.networkQuality = 'fair';
+      this.networkBars = 2;
+      console.log(bitrate, this.networkQuality);
+    } else {
+       if (bitrate > 0) {
+        this.networkQuality = 'poor';
+        this.networkBars = 1;
+        console.log(bitrate, this.networkQuality);
+      }
+    }
+  }
 
   setFlag() {
     this.endCall = true;
