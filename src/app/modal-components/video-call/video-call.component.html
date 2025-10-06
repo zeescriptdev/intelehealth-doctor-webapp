@@ -80,6 +80,7 @@
                   }}"
                   alt=""
                 />
+                <span class="ctrl-indicator" *ngIf="microphoneIssue" title="Microphone issue">!</span>
               </button>
               <button
                [class.d-none]="_minimized"
@@ -97,6 +98,7 @@
                   }}"
                   alt=""
                 />
+                <span class="ctrl-indicator" *ngIf="cameraIssue" title="Camera issue">!</span>
               </button>
             </div>
               <button

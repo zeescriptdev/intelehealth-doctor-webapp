@@ -66,6 +66,11 @@ export class VideoCallComponent implements OnInit, OnDestroy {
 
   isVideoRecordingEnabled: boolean;
 
+  cameraIssue: boolean = false;
+  microphoneIssue: boolean = false;
+
+  private callDurationStr: string = '00:00';
+
   constructor(
     @Inject(MAT_DIALOG_DATA) public data,
     private dialogRef: MatDialogRef<VideoCallComponent>,
@@ -94,10 +99,14 @@ export class VideoCallComponent implements OnInit, OnDestroy {
     if (this.data.patientId && this.data.visitId) {
       this.getMessages();
     }
-    /**
-     * Don't remove this, required change detection for duration
-     */
-    this.changeDetForDuration = setInterval(() => { }, 1000);
+    // Update duration every second to avoid computed getter changing during check
+    this.changeDetForDuration = setInterval(() => {
+      if (this.callStartedAt) {
+        const duration = moment.duration(moment().diff(this.callStartedAt));
+        const [h, m, s] = [duration.hours(), duration.minutes(), duration.seconds()].map(n => String(n).padStart(2, '0'));
+        this.callDurationStr = h !== '00' ? `${h}:${m}:${s}` : `${m}:${s}`;
+      }
+    }, 1000);
     if (this.initiator === 'hw') {
       this.connecting = true;
       this.webrtcSvc.token = this.data.token;
@@ -172,7 +181,63 @@ export class VideoCallComponent implements OnInit, OnDestroy {
       handleTrackUnmuted: this.handleTrackUnmuted.bind(this),
       handleParticipantDisconnected: this.handleParticipantDisconnected.bind(this),
       handleParticipantConnect: this.handleParticipantConnect.bind(this),
+      handleMediaError: this.handleMediaDeviceError.bind(this),
     });
+  }
+
+  /**
+  * Show meaningful error when camera/mic isn't available or permission denied
+  */
+  private handleMediaDeviceError(err: any) {
+    const source = err?.source || 'device';
+    const rawError = err?.error || err;
+    const errorName = rawError?.name || rawError?.code;
+    const errorMessage = rawError?.message || rawError?.toString?.();
+
+    const deviceLabel = source === 'camera' ? 'Camera' : source === 'microphone' ? 'Microphone' : 'Media device';
+
+    // Map common getUserMedia errors to actionable, device-specific toasts
+    let title = `${deviceLabel} error`;
+    let userMsg = `Unable to access ${deviceLabel.toLowerCase()}.`;
+
+    if (errorName === 'NotAllowedError' || errorName === 'SecurityError') {
+      title = `${deviceLabel} access blocked`;
+      userMsg = `Permission denied for ${deviceLabel.toLowerCase()}. Allow access in your browser site settings and retry.`;
+    } else if (errorName === 'NotFoundError' || errorName === 'DevicesNotFoundError' || errorMessage?.includes('Requested device not found')) {
+      title = `${deviceLabel} not found`;
+      userMsg = `No ${deviceLabel.toLowerCase()} detected. Connect a ${deviceLabel.toLowerCase()} and try again.`;
+    } else if (errorName === 'NotReadableError' || errorName === 'TrackStartError') {
+      title = `${deviceLabel} in use`;
+      userMsg = `Your ${deviceLabel.toLowerCase()} is being used by another application. Close it and try again.`;
+    } else if (errorName === 'OverconstrainedError') {
+      title = `${deviceLabel} constraints not satisfied`;
+      userMsg = `The selected ${deviceLabel.toLowerCase()} doesn't meet the required settings. Choose a different device or reset to defaults.`;
+    }
+
+    this.analytics.logEvent('media-device-error', 'engagement', 'call_button', 1, {
+      doctorUserId: this.data?.connectToDrId,
+      doctorName: this.doctorName,
+      patientOpenMrsId: this.data?.patientOpenMrsId,
+      hwName: getCacheData(true, visitTypes.PATIENT_VISIT_PROVIDER)?.display?.split(":")?.[0],
+      hwId: getCacheData(true, visitTypes.PATIENT_VISIT_PROVIDER)?.provider?.uuid,
+      visitId: this.data?.visitId,
+      location: this.location,
+      callType: this.callType,
+      source,
+      errorName,
+      errorMessage
+    });
+
+    this.toastr.error(userMsg, title, { timeOut: 5000 });
+
+    // Set indicator flags for UI badges
+    if (source === 'camera') {
+      this.cameraIssue = true;
+      this._localVideoOff = true;
+    } else if (source === 'microphone') {
+      this.microphoneIssue = true;
+      this._localAudioMute = true;
+    }
   }
 
   /**
@@ -655,6 +720,12 @@ export class VideoCallComponent implements OnInit, OnDestroy {
     const event = this._localAudioMute ? 'audioOff' : 'audioOn';
     this.socketSvc.emitEvent(event, { fromWebapp: true });
     this.analytics.logEvent('toggle_audio', 'engagement', 'audio_button', 1,  this.buildAnalyticsEventPayload());
+
+    // Clear mic issue indicator when enabling mic succeeds
+    if (this.microphoneIssue) {
+      this._localAudioMute = true;
+      this.handleMediaDeviceError({ source: 'microphone', error: { name: 'NotAllowedError' } });
+    }
   }
 
   /**
@@ -666,6 +737,12 @@ export class VideoCallComponent implements OnInit, OnDestroy {
     const event = this._localVideoOff ? 'videoOff' : 'videoOn';
     this.socketSvc.emitEvent(event, { fromWebapp: true });
     this.analytics.logEvent('toggle_video', 'engagement', 'video_button', 1,  this.buildAnalyticsEventPayload());
+
+    // Clear camera issue indicator when enabling camera succeeds
+    if (this.cameraIssue) {
+      this._localVideoOff = true;
+      this.handleMediaDeviceError({ source: 'camera', error: { name: 'NotAllowedError' } });
+    }
   }
 
   /**
@@ -692,10 +769,7 @@ export class VideoCallComponent implements OnInit, OnDestroy {
   * @return {string} - Call duration
   */
   get callDuration() {
-    if (!this.callStartedAt) return '00:00';
-    const duration = moment.duration(moment().diff(this.callStartedAt));
-    const [h, m, s] = [duration.hours(), duration.minutes(), duration.seconds()].map(n => String(n).padStart(2, '0'));
-    return h !== '00' ? `${h}:${m}:${s}` : `${m}:${s}`;
+    return this.callDurationStr;
   }
 
   /**
@@ -748,19 +822,19 @@ export class VideoCallComponent implements OnInit, OnDestroy {
   }
 
   buildAnalyticsEventPayload() {
-  const providerData = getCacheData(true, visitTypes.PATIENT_VISIT_PROVIDER);
+    const providerData = getCacheData(true, visitTypes.PATIENT_VISIT_PROVIDER);
 
-  return {
-    doctorUserId: this.data?.connectToDrId,
-    doctorName: this.doctorName,
-    patientOpenMrsId: this.data?.patientOpenMrsId,
-    hwName: providerData?.display?.split(":")?.[0] || null,
-    hwId: providerData?.provider?.uuid || null,
-    visitId: this.data?.visitId,
-    location: this.location,
-    callType: this.callType,
-    recordingId: this.tableId,
-    callDuration: this.callDuration
-  };
-}
+    return {
+      doctorUserId: this.data?.connectToDrId,
+      doctorName: this.doctorName,
+      patientOpenMrsId: this.data?.patientOpenMrsId,
+      hwName: providerData?.display?.split(":")?.[0] || null,
+      hwId: providerData?.provider?.uuid || null,
+      visitId: this.data?.visitId,
+      location: this.location,
+      callType: this.callType,
+      recordingId: this.tableId,
+      callDuration: this.callDuration
+    };
+  }
 }
