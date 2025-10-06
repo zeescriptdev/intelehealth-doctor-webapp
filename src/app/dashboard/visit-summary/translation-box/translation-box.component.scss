@@ -36,10 +36,6 @@
   word-wrap: break-word;
 }
 
-.extra-padding {
- padding-top: 25px;
-}
-
 .low-width {
   width: 80%;
   max-height: 55px;
@@ -138,7 +134,7 @@
 
 @media (max-width: 768px) {
   .pwa-margin-top {
-    margin-top: 14px;
+    margin-top: 30px;
   }
 
 .low-width {

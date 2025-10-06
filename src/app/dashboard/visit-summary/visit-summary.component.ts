@@ -155,6 +155,11 @@ export class VisitSummaryComponent implements OnInit, OnDestroy {
 
   openChatFlag: boolean = false;
   collapsed: boolean = true;
+
+  summaryText: string = '';
+  filteredSuggestions: string[] = [];
+  selectedIndex: number = 0;
+
   mainSearch = (text$: Observable<string>, list: string[]) =>
     text$.pipe(
       debounceTime(200),
@@ -1227,6 +1232,7 @@ export class VisitSummaryComponent implements OnInit, OnDestroy {
     this.instructions = 'Add instructions';
     this.disableAddInstruction = false;
     this.isInstructionRejected = false;
+    this.disableInstructionBtn = false;
     this.addAdditionalInstructionForm.reset();
   }
 
@@ -1316,6 +1322,7 @@ export class VisitSummaryComponent implements OnInit, OnDestroy {
         this.additionalInstructions.unshift({ uuid: response.uuid, value: instructionsValue });
         this.addAdditionalInstructionForm.reset();
         this.instructions = 'Add instructions';
+        this.disableInstructionBtn = false;
       });
     } else {
       this.toastr.warning("Another doctor is viewing this case");
@@ -1427,6 +1434,7 @@ export class VisitSummaryComponent implements OnInit, OnDestroy {
         this.advices.unshift({ uuid: response.uuid, value: advice });
         this.addAdviceForm.reset();
         this.advice = 'Add advice';
+        this.disableApproveBtn = false;
       });
     } else {
       this.toastr.warning("Another doctor is viewing this case");
@@ -1667,6 +1675,7 @@ export class VisitSummaryComponent implements OnInit, OnDestroy {
         if (res) {
           this.followUpForm.patchValue({ present: true, uuid: res.uuid });
         }
+        this.disableReasonBtn = false;
       });
     } else {
       this.toastr.warning("Another doctor is viewing this case");
@@ -2132,5 +2141,56 @@ export class VisitSummaryComponent implements OnInit, OnDestroy {
     this.reason = 'Enter reason';
     this.followUpForm.get('followUpReason')?.reset();
     this.isReasonRejected = false;
+  }
+
+    onTextChange(event: any) {
+    const cursorPos = event.target.selectionStart;
+    const textBeforeCursor = this.summaryText.substring(0, cursorPos);
+    const lastWordMatch = textBeforeCursor.match(/(\S+)$/);
+    const lastWord = lastWordMatch ? lastWordMatch[0] : '';
+
+    if (lastWord.length > 0) {
+      this.filteredSuggestions = this.advicesList.filter(s =>
+        s.toLowerCase().startsWith(lastWord.toLowerCase())
+      );
+    } else {
+      this.filteredSuggestions = [];
+    }
+    this.selectedIndex = 0;
+  }
+
+  onKeyDown(event: KeyboardEvent) {
+    if (this.filteredSuggestions.length === 0) return;
+
+    if (event.key === 'ArrowDown') {
+      event.preventDefault();
+      this.selectedIndex = (this.selectedIndex + 1) % this.filteredSuggestions.length;
+    } else if (event.key === 'ArrowUp') {
+      event.preventDefault();
+      this.selectedIndex =
+        (this.selectedIndex - 1 + this.filteredSuggestions.length) %
+        this.filteredSuggestions.length;
+    } else if (event.key === 'Enter') {
+      event.preventDefault();
+      this.selectSuggestion(this.filteredSuggestions[this.selectedIndex]);
+    }
+  }
+
+  selectSuggestion(suggestion: string) {
+    const cursorPos = (document.getElementById('summary') as HTMLTextAreaElement).selectionStart;
+    const textBeforeCursor = this.summaryText.substring(0, cursorPos);
+    const textAfterCursor = this.summaryText.substring(cursorPos);
+
+    // Replace last word with selected suggestion
+    const newTextBeforeCursor = textBeforeCursor.replace(/(\S+)$/, suggestion + ' ');
+    this.summaryText = newTextBeforeCursor + textAfterCursor;
+
+    // Move cursor to after inserted suggestion
+    setTimeout(() => {
+      const textarea = document.getElementById('summary') as HTMLTextAreaElement;
+      textarea.selectionStart = textarea.selectionEnd = newTextBeforeCursor.length;
+    }, 0);
+
+    this.filteredSuggestions = [];
   }
 }

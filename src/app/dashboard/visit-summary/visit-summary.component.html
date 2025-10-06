@@ -1368,9 +1368,9 @@
                     <div class="form-group" class="box-adjust textarea-wrapper">
                       <textarea formControlName="note" class="form-control"
                         placeholder="{{'Add instructions'|translate}}" data-test-id="etAI"></textarea>
-                      <button type="button" class="apr-btn1" *ngIf="isInstructionRejected"
+                      <button type="button" class="apr-btn" *ngIf="isInstructionRejected || disableInstructionBtn"
                         (click)="onApprove('instructions')" data-test-id="btnOnApprove"
-                        [ngClass]="!disableInstructionBtn ? 'approve-active' : 'approve-disabled'"></button>
+                        [ngClass]="!disableInstructionBtn ? 'approve-active' : 'approve-disabled'" [disabled]="disableInstructionBtn"></button>
                       <small class="red-color pl-3" *ngIf="isInstructionRejected && !disableInstructionBtn">
                         <img src="assets/svgs/trans-error.svg" alt="" /> Please update manually the required
                         text.</small>
@@ -1433,16 +1433,21 @@
                 </div>
                 <form [formGroup]="addAdviceForm" class="mt-2" *ngIf="!addMoreAdvice">
                   <div class="instructions-row">
-                    <div class="form-group" class="box-adjust">
-                      <div class="input-wrapper1">
-                        <label [hidden]="adviceInput.value" for="advice"> {{ 'Add advice' | translate }} </label>
-                        <input #adviceInput id="advice" type="text" class="form-control top-strict"
-                          formControlName="advice" [ngbTypeahead]="search" data-test-id="etAdvice" />
-                        <button type="button" class="approve-btn" *ngIf="isAdviceRejected" (click)="onApprove('advice')"
-                          data-test-id="btnOnApprove"
-                          [ngClass]="!disableApproveBtn ? 'approve-active' : 'approve-disabled'">
-                        </button>
-                      </div>
+                    <div class="form-group" class="top-strict textarea-wrapper box-adjust">
+                      <textarea id="summary" class="form-control"
+                            formControlName="advice" [(ngModel)]="summaryText" (input)="onTextChange($event)" (keydown)="onKeyDown($event)"
+                            rows="5" placeholder="Add advice">
+                      </textarea>
+                    <button type="button" class="apr-btn-top apr-btn" *ngIf="isAdviceRejected || disableApproveBtn"
+                      (click)="onApprove('advice')" data-test-id="btnOnApprove"
+                      [ngClass]="!disableApproveBtn ? 'approve-active' : 'approve-disabled'" [disabled]="disableApproveBtn">
+                    </button>              <!-- Dropdown suggestions -->
+                          <div *ngIf="filteredSuggestions.length > 0" class="dropdown-suggestions">
+                            <div *ngFor="let suggestion of filteredSuggestions; let i = index" [class.active]="i === selectedIndex"
+                              (click)="selectSuggestion(suggestion)">
+                              {{ suggestion }}
+                            </div>
+                          </div>
                       <small class="red-color pl-3" *ngIf="isAdviceRejected && !disableApproveBtn">
                         <img src="assets/svgs/trans-error.svg" alt="" /> Please update manually the required
                         text.</small>
@@ -1776,9 +1781,9 @@
                               <button type="button" class="close-btn" (click)="onClearReason()">
                                 <img src="assets/svgs/clear.svg" alt="" />
                               </button>
-                              <button type="button" class="apr-btn" *ngIf="isReasonRejected"
+                              <button type="button" class="apr-btn" *ngIf="isReasonRejected || disableReasonBtn"
                                 (click)="onApprove('reason')" data-test-id="btnOnApprove"
-                                [ngClass]="!disableReasonBtn ? 'approve-active' : 'approve-disabled'">
+                                [ngClass]="!disableReasonBtn ? 'approve-active' : 'approve-disabled'" [disabled]="disableReasonBtn">
                               </button>
                               <small class="red-color pl-3" *ngIf="isReasonRejected && !disableReasonBtn">
                                 <img src="assets/svgs/trans-error.svg" alt="" /> Please update manually the required
