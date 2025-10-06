@@ -1083,13 +1083,18 @@
                             {{ 'Select diagnosis' | translate }}*
                           </label>
                           <div class="col-sm-3" data-test-id="divSelectDiagnosisControl">
-                            <ng-select appendTo=".visit-summary-tab-group" class="visit-select custom"
-                              formControlName="diagnosisName" (search)="onKeyUp($event)"
-                              (change)="onDiagnosisChange($event)" [items]="diagnosis$ | async" bindLabel="name"
-                              bindValue="name" [clearable]="true" [searchable]="true"
-                              placeholder="{{ 'Select diagnosis' | translate }}" [addTag]="false"
-                              data-test-id="selectDiagnosisName">
-                            </ng-select>
+                          <ng-select appendTo=".visit-summary-tab-group" class="visit-select custom" formControlName="diagnosisName"
+                            (search)="onKeyUp($event)" (change)="onDiagnosisChange($event)" [items]="diagnosis$ | async" bindLabel="name"
+                            bindValue="name" [clearable]="true" [searchable]="true" placeholder="{{ 'Select diagnosis' | translate }}"
+                            [addTag]="false" data-test-id="selectDiagnosisName">
+                            <ng-template ng-label-tmp let-item="item">
+                              <span class="diagnosis-selected-label" [attr.data-test-id]="item.name">
+                                {{ item.name }}
+                              </span>
+                            </ng-template>
+                          
+                          </ng-select>
+
                           </div>
                         </div>
                       </li>
@@ -1262,7 +1267,7 @@
               <ul class="items-list" *ngIf="advices.length else noAdvices" data-test-id="ulAdviceList">
                 <li *ngFor="let ad of advices; let i = index" [attr.data-test-id]="'liAdviceItem' + i">
                   <div class="d-flex justify-content-between" data-test-id="divAdviceItemContent{{i}}">
-                <span [attr.data-test-id]="'spanAdviceValue' + i">{{ ad.value }}</span>  
+                <span [attr.data-test-id]="'spanAdviceValue-' + i">{{ ad.value }}</span>   
                      <button mat-icon-button (click)="deleteAdvice(i, ad.uuid)"
                       *ngIf="!isMCCUser && isVisitNoteProvider && !visitEnded"
                       [attr.data-test-id]="'btnDeleteAdviceVisitSummary' + i">
