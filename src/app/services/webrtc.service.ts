@@ -101,15 +101,11 @@ export class WebrtcService {
           width: 355,
           height: 793,
         },
-        frameRate: 15, // Reduced frame rate for better performance
       },
       audioCaptureDefaults: {
         echoCancellation: true,
         autoGainControl: true,
         noiseSuppression: true,
-        // Optimize audio quality
-        sampleRate: 48000,
-        channelCount: 1, // Mono for better bandwidth usage
       }
     });
 
@@ -282,7 +278,6 @@ export class WebrtcService {
 
     connectOpts.rtcConfig = {
       iceTransportPolicy: 'relay',
-      iceCandidatePoolSize: 10, // Optimize ICE gathering for faster connection
       iceServers: [
         {
           "username": "dc2d2894d5a9023620c467b0e71cfa6a35457e6679785ed6ae9856fe5bdfa269",

@@ -175,7 +175,7 @@ export class VideoCallComponent implements OnInit, OnDestroy {
       });
     }
     if (!this.webrtcSvc.token) return;
-    this.webrtcSvc.createRoomAndConnectCall({
+    await this.webrtcSvc.createRoomAndConnectCall({
       localElement: this.localVideoRef,
       remoteElement: this.remoteVideoRef,
       handleDisconnect: this.endCallInRoom.bind(this),
@@ -633,7 +633,7 @@ export class VideoCallComponent implements OnInit, OnDestroy {
     this.updateNetworkQuality(bitrate, packetLoss);
     
     this.videoBitrateTooLow = bitrate < 200_000; // 200 kbps threshold
-    if (this.videoBitrateTooLow && this.networkQuality === 'poor') {
+    if (this.videoBitrateTooLow && this.networkQuality === 'poor' && this.callType === 'video') {
       if (!this.hasShownPoorToast) {
         this.hasShownPoorToast = true;
         this._localVideoOff = this.webrtcSvc.toggleVideo();
@@ -648,22 +648,19 @@ export class VideoCallComponent implements OnInit, OnDestroy {
     if (bitrate > 1000000 && packetLoss < 0.01) {
       this.networkQuality = 'excellent';
       this.networkBars = 4;
-      console.log(bitrate, this.networkQuality);
     } else if (bitrate > 500000 && packetLoss < 0.03) {
       this.networkQuality = 'good';
       this.networkBars = 3;
-      console.log(bitrate, this.networkQuality);
     } else if (bitrate > 200000 && packetLoss < 0.05) {
       this.networkQuality = 'fair';
       this.networkBars = 2;
-      console.log(bitrate, this.networkQuality);
     } else {
-       if (bitrate > 0) {
+      if (bitrate > 0) {
         this.networkQuality = 'poor';
         this.networkBars = 1;
-        console.log(bitrate, this.networkQuality);
       }
     }
+    console.log(`Network quality: ${this.networkQuality}, Bars: ${this.networkBars}`);
   }
 
   setFlag() {
