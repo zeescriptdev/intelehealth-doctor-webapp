@@ -113,6 +113,7 @@ export class MindmapService {
         slotDateTime: appointment?.slotJsDate
       }
     }
+    console.log("payload for notification:",payload);
     this.notifyApp(hwUuid, payload).subscribe();
   }
   /**
@@ -135,8 +136,7 @@ export class MindmapService {
         slotDateTime: appointment?.slotJsDate
       }
     }
-    console.log("payload===",payload);
-    
+    console.log("payload===",payload);    
     this.notifyApp(hwUuid, payload).subscribe();
   }
 }

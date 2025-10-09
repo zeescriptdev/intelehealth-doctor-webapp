@@ -158,8 +158,7 @@ export class VisitSummaryComponent implements OnInit, OnDestroy, AfterViewInit {
   pvsConstant = VISIT_SECTIONS;
 
   hasChatEnabled: boolean = false;
-  hasVideoEnabled: boolean = false;
-  hasAudioEnabled: boolean = false;
+  hasVideoEnabled: boolean = false; 
   hasWebRTCEnabled: boolean = false;
   hasVitalsEnabled: boolean = false;
   hasPatientAddressEnabled: boolean = false;
@@ -352,9 +351,7 @@ export class VisitSummaryComponent implements OnInit, OnDestroy, AfterViewInit {
   search6 = (text$: Observable<string>) => this.mainSearch(text$, this.timingList.map((val) => val.name));
   search7 = (text$: Observable<string>) => this.mainSearch(text$, doses.map((val) => val.name));
   search8 = (text$: Observable<string>) => this.mainSearch(text$, this.durationUnitList.map((val) => val.name));
-
-  search9 = (text$: Observable<string>) => this.searchInstructionRemark(text$);
-
+  search9 = (text$: Observable<string>) => this.mainSearch(text$, instructionRemarks.map((val) => val.name));
 
   // Add this property to the component class
   obsData = {
@@ -545,7 +542,6 @@ export class VisitSummaryComponent implements OnInit, OnDestroy, AfterViewInit {
     this.hasWebRTCEnabled = this.appConfigService?.webrtc_section;
     this.hasChatEnabled = this.appConfigService?.webrtc?.chat;
     this.hasVideoEnabled = this.appConfigService?.webrtc?.video_call;
-    this.hasAudioEnabled = this.appConfigService?.webrtc?.audio_call;
     this.hasVitalsEnabled = this.appConfigService?.patient_vitals_section;
     this.hasPatientAddressEnabled = this.appConfigService?.patient_reg_address;
     this.hasPatientOtherEnabled = this.appConfigService?.patient_reg_other;
@@ -554,15 +550,16 @@ export class VisitSummaryComponent implements OnInit, OnDestroy, AfterViewInit {
     if(!this.appConfigService.patient_diagnostics_section) {
       this.appConfigService.patient_visit_sections = this.appConfigService.patient_visit_sections.filter((e: PatientVisitSection) => e.key !== 'diagnostics');
     }
-    this.pvsConfigs = this.appConfigService.patient_visit_sections;
+    this.pvsConfigs = this.appConfigService.patient_visit_sections.filter(obj=>!["share_prescription","share_patient_visit_summary"].includes(obj.key));
     this.isMCCUser = !!this.rolesService.getRole('ORGANIZATIONAL:MCC');
   }
 
   ngAfterViewInit(): void {
     this.formControlValueChanges();
-    this.trackFormChanges();
+    
     setTimeout(()=>{
       if(this.visitNoteDiv) autoGrowAllTextAreaZone(this.visitNoteDiv.nativeElement.querySelectorAll('textarea'));
+      this.trackFormChanges();
     },2000)
   }
 
@@ -1184,11 +1181,12 @@ export class VisitSummaryComponent implements OnInit, OnDestroy, AfterViewInit {
   */
   referSpecialist(): void {
     if (this.referSpecialityForm.invalid) {
-      this.toastr.warning(this.translateService.instant('Please select specialization'), this.translateService.instant('Invalid!'));
+      this.coreService.showToast("warning", 'Please select specialization', 'Invalid!', 'warning-select-specialization-toast');
+
       return;
     }
     if (this.visitNotePresent) {
-      this.toastr.warning(this.translateService.instant('Can\'t refer, visit note already exists for this visit!'), this.translateService.instant('Can\'t refer'));
+     this.coreService.showToast("warning", 'Can\'t refer, visit note already exists for this visit!', 'Can\'t refer', 'warning-visit-note-exists-toast');
       return;
     }
     this.coreService.openConfirmationDialog({ confirmationMsg: 'Are you sure to re-assign this visit to another doctor?', cancelBtnText: 'Cancel', confirmBtnText: 'Confirm' })
@@ -1235,7 +1233,7 @@ export class VisitSummaryComponent implements OnInit, OnDestroy, AfterViewInit {
     this.encounterService.postEncounter(json).subscribe((response) => {
       if (response) {
         this.router.navigate(['/dashboard']);
-        this.toastr.success(this.translateService.instant('Visit has been re-assigned to the another speciality doctor successfully.'), this.translateService.instant('Visit Re-assigned!'));
+        this.coreService.showToast('success','Visit has been re-assigned to the another speciality doctor successfully.','Visit Re-assigned!','visit-reassigned-toast');
       }
     });
   }
@@ -1298,8 +1296,7 @@ export class VisitSummaryComponent implements OnInit, OnDestroy, AfterViewInit {
       drPersonUuid: this.provider?.person.uuid,
       patientAge: this.patient.person.age,
       patientGender: this.patient.person.gender,
-      location:this.clinicName,
-      callType: callType
+      location:this.clinicName
     });
 
     this.dialogRef2.afterClosed().subscribe((res) => {
@@ -1649,7 +1646,7 @@ export class VisitSummaryComponent implements OnInit, OnDestroy, AfterViewInit {
       return; 
     }
     if (this.existingDiagnosis.find(o => o.diagnosisName.toLocaleLowerCase() === this.diagnosisForm.value.diagnosisName.toLocaleLowerCase())) {
-      this.toastr.warning(this.translateService.instant('Diagnosis Already Exist'), this.translateService.instant('Duplicate Diagnosis'));
+    this.coreService.showToast("warning", 'Diagnosis Already Exist','Duplicate Diagnosis','warning-toast');
       return;
     }
 
@@ -1704,7 +1701,9 @@ export class VisitSummaryComponent implements OnInit, OnDestroy, AfterViewInit {
       }
       else if (event.snomedCTCode) {
         this.diagnosisForm.addControl('diagnosisCode', new FormControl(null));
+        this.diagnosisForm.addControl('isSnomed', new FormControl(null));
         this.diagnosisForm.patchValue({ diagnosisCode: event.snomedCTCode });
+        this.diagnosisForm.patchValue({ isSnomed: true });
       }
     }
   }
@@ -1771,7 +1770,7 @@ export class VisitSummaryComponent implements OnInit, OnDestroy, AfterViewInit {
       return;
     }
     if (this.medicines.find((o: MedicineModel) => o.drug === this.addMedicineForm.value.drug)) {
-      this.toastr.warning(this.translateService.instant('Drug already added, please add another drug.'), this.translateService.instant('Already Added'));
+      this.coreService.showToast("warning", 'Drug already added, please add another drug.','Already Added','warning-toast');
       return;
     }    
     this.medicines.push({ ...this.addMedicineForm.value});
@@ -1787,7 +1786,7 @@ export class VisitSummaryComponent implements OnInit, OnDestroy, AfterViewInit {
       return;
     }
     if (this.standardMedicines.find((o: StandardMedicineModel) => o.drug === this.addStandardMedicineForm.value.drug)) {
-      this.toastr.warning(this.translateService.instant('Drug already added, please add another drug.'), this.translateService.instant('Already Added'));
+      this.coreService.showToast("warning",'Drug already added, please add another drug.','Already Added','addmedicine-warning-toast');
       return;
     }    
     this.standardMedicines.push({ ...this.addStandardMedicineForm.value});
@@ -1899,7 +1898,8 @@ export class VisitSummaryComponent implements OnInit, OnDestroy, AfterViewInit {
       return;
     }
     if (this.advices.find((o: ObsModel) => o.value === this.addAdviceForm.value.advice)) {
-      this.toastr.warning(this.translateService.instant('Advice already added, please add another advice.'), this.translateService.instant('Already Added'));
+    this.coreService.showToast("warning", 'Advice already added, please add another advice.', 'Already Added', 'add-advice-warning-toast');
+
       return;
     }
     this.advices.push({ value: this.addAdviceForm.value.advice });
@@ -1993,7 +1993,8 @@ export class VisitSummaryComponent implements OnInit, OnDestroy, AfterViewInit {
       return;
     }
     if (this.tests.find((o: TestModel) => o.value === this.addTestForm.value.test)) {
-      this.toastr.warning(this.translateService.instant('Test already added, please add another test.'), this.translateService.instant('Already Added'));
+      this.coreService.showToast("warning", 'Test already added, please add another test.', 'Already Added', 'warning-test-toast');
+
       return;
     }
     this.tests.push({value: this.addTestForm.value.test });
@@ -2075,7 +2076,7 @@ export class VisitSummaryComponent implements OnInit, OnDestroy, AfterViewInit {
       return;
     }
     if (this.referrals.find((o: ReferralModel) => o.speciality === this.addReferralForm.value.speciality)) {
-      this.toastr.warning(this.translateService.instant('Referral already added, please add another referral.'), this.translateService.instant('Already Added'));
+    this.coreService.showToast("warning", 'Referral already added, please add another referral.', 'Already Added', 'warning-referral-toast');
       return;
     }
 
@@ -2151,52 +2152,24 @@ export class VisitSummaryComponent implements OnInit, OnDestroy, AfterViewInit {
 
   /**
   * Save followup
-  * @returns {Observable<any>}
+  * @returns void
   */
-  saveFollowUp(): Observable<any> {
+  saveFollowUp() {
+    let value = 'No';
     if (this.followUpForm.value.wantFollowUp === 'Yes') {
-      const value = `${moment(this.followUpForm.value.followUpDate).format('YYYY-MM-DD')},Time:${this.followUpForm.value.followUpTime},Remark:${this.followUpForm.value.followUpReason}${this.isFeatureAvailable('followUpType') ? ',Type:' + (this.followUpForm.value.followUpType) : ''}`;
-      
-      if (this.followUpForm.value.uuid) {
-        return this.encounterService.updateObs(this.followUpForm.value.uuid, { value });
-      } else {
+      value = `${moment(this.followUpForm.value.followUpDate ?? new Date()).format('YYYY-MM-DD')},Time:${this.followUpForm.value.followUpTime ?? 'NA'},Remark:${this.followUpForm.value.followUpReason || 'NA'},Type:${this.followUpForm.value.followUpType || 'NA'}`;
+    }
+    if (this.followUpForm.value.uuid) {
+      this.encounterService.updateObs(this.followUpForm.value.uuid, { value }).pipe(tap((response: ObsModel) => this.followUpForm.patchValue({ present: true}))).subscribe();
+    } else {
         this.encounterService.postObs({
           concept: conceptIds.conceptFollow,
           person: this.visit.patient.uuid,
           obsDatetime: new Date(),
           value: value,
           encounter: this.visitNotePresent.uuid
-        }).subscribe ( (res) => {
-            this.followUpForm.patchValue({
-            present: true,
-            wantFollowUp: 'Yes',
-            followUpDate : this.followUpForm.value.followUpDate,
-            followUpTime : this.followUpForm.value.followUpTime,
-            followUpReason : this.followUpForm.value.followUpReason,
-            uuid: res.uuid,
-            followUpType : this.isFeatureAvailable('followUpType') ? this.followUpForm.value.followUpType : null
-          });
-        });
-      }
-    } else {
-      this.encounterService.postObs({
-        concept: conceptIds.conceptFollow,
-        person: this.visit.patient.uuid,
-        obsDatetime: new Date(),
-        value: this.followUpForm.value.wantFollowUp,
-        encounter: this.visitNotePresent.uuid
-      }).subscribe ( (res) => {
-         this.followUpForm.patchValue({
-            present: true,
-            wantFollowUp: 'No',
-            followUpDate : null,
-            followUpTime : null,
-            followUpReason :null,
-            uuid: res.uuid,
-            followUpType : null
-          });
-      });
-    }
+        }).pipe(tap((response: ObsModel) => this.followUpForm.patchValue({ present: true}))).subscribe();
+     }
   }
 
   /**
@@ -2215,21 +2188,15 @@ export class VisitSummaryComponent implements OnInit, OnDestroy, AfterViewInit {
   * @returns {boolean}
   */
   sharePrescription(): boolean {
-    if (this.appConfigService.patient_visit_summary?.dp_dignosis_secondary && this.diagnosisSecondaryForm.invalid) {
-      this.toastr.warning(this.translateService.instant('Enter Diagnosis'), this.translateService.instant('Diagnosis Required'));
+    if (this.isFeatureAvailable('dp_diagnosis_secondary') && this.diagnosisSecondaryForm.invalid){
+    this.coreService.showToast("warning", 'Enter Diagnosis', 'Diagnosis Required', 'warning-diagnosis-toast');
       return false;
-    } else if (!this.appConfigService.patient_visit_summary?.dp_dignosis_secondary && this.existingDiagnosis.length === 0 && (this.hasAILLMEnabled && (!this.ddxCompRef || (this.ddxCompRef.instance?.existingDiagnosis || []).length === 0))) {
-      this.toastr.warning(this.translateService.instant('Diagnosis not added'), this.translateService.instant('Diagnosis Required'));
+    } else if (!this.isFeatureAvailable('dp_diagnosis_secondary') && this.existingDiagnosis.length === 0 ) {
+     this.coreService.showToast("warning", 'Diagnosis not added', 'Diagnosis Required', 'warning-diagnosis-not-added-toast');
       return false;
-    } else {
-      if (!this.appConfigService.patient_visit_summary?.dp_dignosis_secondary && this.existingDiagnosis.length === 0) {
-        this.toastr.warning(this.translateService.instant('Diagnosis not added'), this.translateService.instant('Diagnosis Required'));
-        return false;
-      }
     }
-
-    if (this.isFeatureAvailable('visitFollowUp') && !this.followUpForm.value.wantFollowUp) {
-      this.toastr.warning(this.translateService.instant('Follow-up not added'), this.translateService.instant('Follow-up Required'));
+    if (this.isFeatureAvailable('visitFollowUp') && !this.followUpForm.value.present) {
+   this.coreService.showToast("warning", 'Follow-up not added', 'Follow-up Required', 'warning-followup-not-added-toast');
       return false;
     }
     this.changedFields = [];
@@ -2262,7 +2229,9 @@ export class VisitSummaryComponent implements OnInit, OnDestroy, AfterViewInit {
                       ]
                     }).subscribe((post) => {
                       this.visitCompleted = true;
-                      this.notifyHwForAvailablePrescription();
+                      const followUpDate = `${this.followUpForm.value.followUpDate},Time:${this.followUpForm.value.followUpTime}`;
+
+                      this.notifyHwForAvailablePrescription("","",followUpDate);
                       this.appointmentService.completeAppointment({ visitUuid: this.visit.uuid }).subscribe();
 
                       if (this.appConfigService.abha_section) {
@@ -2288,7 +2257,7 @@ export class VisitSummaryComponent implements OnInit, OnDestroy, AfterViewInit {
                           });
                         },
                         error: (err) => {
-                          this.toastr.error(err.message);
+                        this.coreService.showToast("error",err.message,"Error","error-share-prescription-toast");
                           this.coreService.openSharePrescriptionSuccessModal().subscribe((result: string | boolean) => {
                             if (result === 'view') {
                               // Open visit summary modal here....
@@ -2456,8 +2425,9 @@ export class VisitSummaryComponent implements OnInit, OnDestroy, AfterViewInit {
   * Send notification to health worker for available prescription
   * @returns {void}
   */
-  notifyHwForAvailablePrescription(title = null, type = null): void {
+  notifyHwForAvailablePrescription(title = null, type = null,followupDatetime = null): void {
     const hwUuid = getCacheData(true, visitTypes.PATIENT_VISIT_PROVIDER)?.provider?.uuid;
+    
     const openMRSID = this.getPatientIdentifier("OpenMRS ID");
     const payload = {
       title: title || `Prescription available for ${this.visit?.patient?.person?.display || 'Patient'}`,
@@ -2470,9 +2440,10 @@ export class VisitSummaryComponent implements OnInit, OnDestroy, AfterViewInit {
         patientUuid: this.patient.uuid,
         patientOpenMrsId: openMRSID,
         visitUuid: this.visit.uuid,
-        followupDatetime: this.followUpDatetime
+        followupDatetime: followupDatetime
       }
     }
+    console.log("payload from web app==",payload);
     this.mindmapService.notifyApp(hwUuid, payload).subscribe();
   }
 
@@ -3121,11 +3092,12 @@ export class VisitSummaryComponent implements OnInit, OnDestroy, AfterViewInit {
         // Reinitialize form tracking
         this.trackFormChanges();
         
-        this.toastr.success(this.translateService.instant('Changes saved successfully'), this.translateService.instant('Success'));
+       this.coreService.showToast("success", 'Changes saved successfully', 'Success', 'success-changes-saved-toast');
+
       },
       error: (error) => {
         console.error('Error saving observations', error);
-        this.toastr.error(this.translateService.instant('Error saving changes'), this.translateService.instant('Error'));
+      this.coreService.showToast("error", 'Error saving changes', 'Error', 'error-saving-changes-toast');
       }
     });
   }
@@ -3175,18 +3147,6 @@ export class VisitSummaryComponent implements OnInit, OnDestroy, AfterViewInit {
             this.updatedObsData.patientInteractionComment = newValue;
             this.checkChanges(this.updatedObsData);
           }
-        })
-      );
-    }
-
-    // Track follow-up form
-    if (this.followUpForm) {
-      this.obsData.followUp = false;
-      
-      this.formSubscriptions.push(
-        this.followUpForm.valueChanges.subscribe(() => {
-          this.updatedObsData.followUp = true;
-          this.checkChanges(this.updatedObsData);
         })
       );
     }
@@ -3270,7 +3230,7 @@ export class VisitSummaryComponent implements OnInit, OnDestroy, AfterViewInit {
       
       this.formSubscriptions.push(
         this.addStandardMedicineForm.valueChanges.subscribe(() => {
-          const newValue = [...this.standardMedicines];
+          const newValue = [...this.medicines];
           if (JSON.stringify(newValue) !== JSON.stringify(this.obsData.addStandardMedicine)) {
             this.updatedObsData.addStandardMedicine = newValue;
             this.checkChanges(this.updatedObsData);
@@ -3497,6 +3457,15 @@ export class VisitSummaryComponent implements OnInit, OnDestroy, AfterViewInit {
     console.log(event)
   }
 
+  onKeyPress(event: KeyboardEvent): boolean {
+    const charCode = event.which ? event.which : event.keyCode;
+    // Allow only numbers (0-9), backspace (8), and delete (46)
+    if (charCode > 31 && (charCode < 48 || charCode > 57) && charCode !== 8 && charCode !== 46) {
+      event.preventDefault();
+      return false;
+    }
+    return true;
+  }
 
   onCallStatusClick(value: string): void{
     if(this.patientCallStatusForm.get('callStatus').value === value){
@@ -3512,17 +3481,6 @@ export class VisitSummaryComponent implements OnInit, OnDestroy, AfterViewInit {
       return this.hwPhoneNo;
     } 
   }
-
-  onKeyPress(event: KeyboardEvent): boolean {
-    const charCode = event.which ? event.which : event.keyCode;
-    // Allow only numbers (0-9), backspace (8), and delete (46)
-    if (charCode > 31 && (charCode < 48 || charCode > 57) && charCode !== 8 && charCode !== 46) {
-      event.preventDefault();
-      return false;
-    }
-    return true;
-  }
-
   get visitDemarcation() {
     return this.visitService.getDemarcation(this.visit?.encounters);
   }
