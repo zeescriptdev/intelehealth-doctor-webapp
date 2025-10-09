@@ -57,6 +57,7 @@ import {DragDropModule} from '@angular/cdk/drag-drop';
 import { PatientDetailsComponent } from './admin-actions/patient-details/patient-details.component';
 import { PatientVisitDropdownComponent } from './admin-actions/patient-visit-dropdown/patient-visit-dropdown.component';
 import { HomeScreenComponent } from './admin-actions/home-screen/home-screen.component';
+import { WebrtcLogComponent } from './reports/webrtc-log/webrtc-log.component';
 
 
 // AoT requires an exported function for factories
@@ -196,7 +197,8 @@ const routes: Routes = [
     PatientVisitSectionsComponent,
     PatientDetailsComponent,
     PatientVisitDropdownComponent,
-    HomeScreenComponent
+    HomeScreenComponent,
+    WebrtcLogComponent
   ],
   imports: [
     CommonModule,
