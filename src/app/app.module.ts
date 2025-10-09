@@ -132,9 +132,10 @@ registerLocaleData(localeEn);
     NgxUiLoaderHttpModule.forRoot({
       showForeground: true,
       exclude: [
-        `${environment.mindmapURL}/messages/`,
-        `${environment.mindmapURL}/support/`,
-        `${environment.mindmapURL}/auth/validateProviderAttribute`,
+        `${environment.mindmapURL}/api/messages/`,
+        `${environment.mindmapURL}/api/support/`,
+        `${environment.mindmapURL}/api/auth/validateProviderAttribute`,
+        `${environment.baseURL}/pl/`,
         `${environment.webrtcTokenServerUrl}api/getToken`,
         `${environment.base}/pl/`,
         `${environment.base}/ddx`,

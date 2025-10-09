@@ -82,6 +82,7 @@ export class VideoCallComponent implements OnInit, OnDestroy {
     this.patientRegFields = this.appConfigService.patientRegFields;
     this.room = this.data.patientId;
     this.location = this.data.location;
+
     const patientVisitProvider: EncounterProviderModel = getCacheData(true, visitTypes.PATIENT_VISIT_PROVIDER);
     this.toUser = patientVisitProvider?.provider?.uuid;
     this.hwName = patientVisitProvider?.display?.split(":")?.[0];
@@ -266,40 +267,40 @@ setTimeout(() => this.connecting = false);
     }
     this.socketSvc.emitEvent('call-connected', this.incomingData);
     this.analytics.logEvent('call-connected', 'engagement', 'call_button', 1,  this.buildAnalyticsEventPayload());
-    // if(this.callType === 'video' && this.isVideoRecordingEnabled) {
-    //   await this.webrtcSvc.startRecording({
-    //     doctorName: this.doctorName,
-    //     roomId: this.room,
-    //     visitId: this.data?.visitId,
-    //     doctorId: this.data?.connectToDrId,
-    //     chwId: this.nurseId,
-    //     patientId: this.data?.patientId,
-    //     nurseName: this.hwName,
-    //     name: this.provider?.uuid,
-    //     location: this.location
-    //   })
-    //   .toPromise()
-    //   .then((res: RecordingResponse) => {
-    //     this.recodingStarted = true
-    //     this.tableId = res.recordingId
-    //     this.analytics.logEvent('call-recoding-started', 'engagement', 'call_button', 1,  this.buildAnalyticsEventPayload());
-    //   })
-    //   .catch(err => {
-    //   this.analytics.logEvent('call-recoding-error', 'engagement', 'call_button', 1, {
-    //     doctorUserId: this.data?.connectToDrId,
-    //     doctorName: this.doctorName,
-    //     patientOpenMrsId: this.data.patientOpenMrsId,
-    //     hwName : getCacheData(true, visitTypes.PATIENT_VISIT_PROVIDER)?.display?.split(":")?.[0],
-    //     hwId : getCacheData(true, visitTypes.PATIENT_VISIT_PROVIDER) && getCacheData(true, visitTypes.PATIENT_VISIT_PROVIDER)?.provider ? getCacheData(true, visitTypes.PATIENT_VISIT_PROVIDER).provider?.uuid : null,
-    //     visitId: this.data?.visitId,
-    //     location:this.location,
-    //     callType: this.callType,
-    //     callDuration: this.callDuration,
-    //     error: err
-    //   });
-    //   console.log("start recoding error", err)
-    //   });
-    // }
+    if(this.callType === 'video' && this.isVideoRecordingEnabled) {
+      await this.webrtcSvc.startRecording({
+        doctorName: this.doctorName,
+        roomId: this.room,
+        visitId: this.data?.visitId,
+        doctorId: this.data?.connectToDrId,
+        chwId: this.nurseId,
+        patientId: this.data?.patientId,
+        nurseName: this.hwName,
+        name: this.provider?.uuid,
+        location: this.location
+      })
+      .toPromise()
+      .then((res: RecordingResponse) => {
+        this.recodingStarted = true
+        this.tableId = res.recordingId
+        this.analytics.logEvent('call-recoding-started', 'engagement', 'call_button', 1,  this.buildAnalyticsEventPayload());
+      })
+      .catch(err => {
+      this.analytics.logEvent('call-recoding-error', 'engagement', 'call_button', 1, {
+        doctorUserId: this.data?.connectToDrId,
+        doctorName: this.doctorName,
+        patientOpenMrsId: this.data.patientOpenMrsId,
+        hwName : getCacheData(true, visitTypes.PATIENT_VISIT_PROVIDER)?.display?.split(":")?.[0],
+        hwId : getCacheData(true, visitTypes.PATIENT_VISIT_PROVIDER) && getCacheData(true, visitTypes.PATIENT_VISIT_PROVIDER)?.provider ? getCacheData(true, visitTypes.PATIENT_VISIT_PROVIDER).provider?.uuid : null,
+        visitId: this.data?.visitId,
+        location:this.location,
+        callType: this.callType,
+        callDuration: this.callDuration,
+        error: err
+      });
+      console.log("start recoding error", err)
+      });
+    }
   }
 
   /**
@@ -585,7 +586,7 @@ setTimeout(() => this.connecting = false);
     setTimeout(async () => {
       this.close();
       this.webrtcSvc.room.disconnect(true);
-      if (this.recodingStarted && isFeaturePresent('webrtcRecording')) {
+      if(this.recodingStarted && isFeaturePresent('webrtcRecording')) {
         this.recodingStarted = false;
         await this.webrtcSvc.stopRecording(this.tableId, this.room)
           .toPromise()
