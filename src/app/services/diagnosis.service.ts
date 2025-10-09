@@ -80,30 +80,8 @@ export class DiagnosisService {
         return { results: filteredConcepts };
       })
     );
-  getDiagnosisList(term: string, source: string): Observable<any> {
-    // const url = `${environment.baseURL}/concept?class=${conceptIds.conceptDiagnosisClass}&source=${source}&q=${term}&v=custom:(uuid,name:(name,display),mappings:(display))`;
-    const url = `${environment.baseURL}/concept?class=${conceptIds.conceptDiagnosisClass}&v=custom:(uuid,name:(name,display),mappings:(display,conceptReferenceTerm))`;
-    
-    return this.http.get(url).pipe(
-      map((response: any) => {
-        // Filter concepts based on term and source
-        const filteredConcepts = response.results.filter(concept => {
-          
-          const hasSNOMED = concept.mappings?.some(mapping => 
-            mapping.display?.toLowerCase().includes(source.toLowerCase())
-          );
-
-          const name = concept.name?.display?.toLowerCase().trim() || '';
-          const matchesName = name.includes(term.toLowerCase().trim());
-
-          return hasSNOMED && matchesName;
-        });
-        
-        return { results: filteredConcepts };
-      })
-    );
   }
-  
+
   
   getSnomedDiagnosisList(term: string): Observable<any> {
     const url = `${environment.base}/getdiags/${term}`;
