@@ -3368,4 +3368,17 @@ export class VisitSummaryComponent implements OnInit, OnDestroy, AfterViewInit {
       });
     }
   }
+
+  onNotesChanged(newNotes: ObsModel[]) {
+    this.updatedObsData.notes = [...newNotes];
+    this.checkChanges(this.updatedObsData);
+  }
+  onFamilyHistoryNotesChanged(newNotes: ObsModel[]) {
+    this.updatedObsData.familyHistoryNote = [...newNotes];
+    this.checkChanges(this.updatedObsData);
+  }
+  onPastMedicalHistoryNotesChanged(newNotes: ObsModel[]) {
+    this.updatedObsData.pastMedicalHistoryNote = [...newNotes];
+    this.checkChanges(this.updatedObsData);
+  }
 }

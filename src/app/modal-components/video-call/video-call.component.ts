@@ -64,10 +64,6 @@ export class VideoCallComponent implements OnInit, OnDestroy {
   lastTimestamp = 0;
 
   callType: string;
-  videoBitrateTooLow: boolean = false;
-  videoBitrateCheckInterval: any;
-  lastVideoBytesSent = 0;
-  lastTimestamp = 0;
 
   // isVideoRecordingEnabled: boolean;
 
@@ -311,40 +307,6 @@ setTimeout(() => this.connecting = false);
  * 2. Calculates bitrate by comparing current bytesSent against the previous timestamp.
  * 3. If bitrate is too low, switches video off and warns the user.
  */
-  async checkLocalVideoBitrate(): Promise<void> {
-    const pc: RTCPeerConnection | undefined = (this.webrtcSvc.room as any)?.engine?.pcManager?.publisher?._pc;
-    const stats = await pc.getStats();
-    stats.forEach((report) => {
-      if (this.lastTimestamp === 0) {
-        this.lastTimestamp = report.timestamp;
-        this.lastVideoBytesSent = report.bytesSent;
-        return;
-      }
-      if (
-        report.type === 'outbound-rtp' &&
-        report.kind === 'video' &&
-        typeof report.bytesSent === 'number' &&
-        typeof report.timestamp === 'number'
-      ) {
-        if (this.lastTimestamp && this.lastVideoBytesSent) {
-          const timeDiffSec = (report.timestamp - this.lastTimestamp) / 1000;
-          const bytesDiff = report.bytesSent - this.lastVideoBytesSent;
-          if (timeDiffSec > 0) {
-            const bitrate = (bytesDiff * 8) / timeDiffSec; // bits per second
-            this.videoBitrateTooLow = bitrate < 600_000; // e.g. < 600 kbps
-          }
-        }
-        this.lastTimestamp = report.timestamp;
-        this.lastVideoBytesSent = report.bytesSent;
-      }
-    });
-    if (this.videoBitrateTooLow && !this._localVideoOff) {
-      this.toastr.warning('Low bandwidth detected. switching to audio call');
-      this._localVideoOff = true;
-    } else {
-      this._localVideoOff = false;
-    }
-  }
 
   /**
   * Returns call connected or not
