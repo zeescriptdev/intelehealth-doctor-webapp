@@ -261,9 +261,6 @@ setTimeout(() => this.connecting = false);
 
     if(this.callType === 'audio') {
       this._localVideoOff = true;
-      //   this.videoBitrateCheckInterval = setInterval(() => {
-      //   this.checkLocalVideoBitrate();
-      // }, 3000); // removed block and added outside if block 
     }
      this.videoBitrateCheckInterval = setInterval(() => {
         this.checkLocalVideoBitrate();
