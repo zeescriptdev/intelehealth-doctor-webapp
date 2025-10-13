@@ -261,10 +261,11 @@ setTimeout(() => this.connecting = false);
 
     if(this.callType === 'audio') {
       this._localVideoOff = true;
-        this.videoBitrateCheckInterval = setInterval(() => {
+    }
+     this.videoBitrateCheckInterval = setInterval(() => {
         this.checkLocalVideoBitrate();
       }, 3000);
-    }
+
     this.socketSvc.emitEvent('call-connected', this.incomingData);
     this.analytics.logEvent('call-connected', 'engagement', 'call_button', 1,  this.buildAnalyticsEventPayload());
     if(this.callType === 'video' && this.isVideoRecordingEnabled) {
