@@ -63,6 +63,8 @@ export class VideoCallComponent implements OnInit, OnDestroy {
   videoBitrateCheckInterval: any;
   lastVideoBytesSent = 0;
   lastTimestamp = 0;
+  lastAudioBytesSent = 0;
+  lastAudioTimestamp = 0;
 
   isVideoRecordingEnabled: boolean;
 
@@ -323,10 +325,21 @@ export class VideoCallComponent implements OnInit, OnDestroy {
       const event = this._localVideoOff ? 'videoOff' : 'videoOn';
       this.socketSvc.emitEvent(event, { fromWebapp: true });
     }
-    this.checkLocalVideoBitrate();
-    this.videoBitrateCheckInterval = setInterval(() => {
+    if (this.callType === 'video' && !this._localVideoOff) {
       this.checkLocalVideoBitrate();
-    }, 3000);
+      this.videoBitrateCheckInterval = setInterval(() => {
+        if (!this._localVideoOff) {
+          this.checkLocalVideoBitrate();
+        } else {
+          this.checkLocalAudioBitrate();
+        }
+      }, 3000);
+    } else {
+      this.checkLocalAudioBitrate();
+      this.videoBitrateCheckInterval = setInterval(() => {
+        this.checkLocalAudioBitrate();
+      }, 3000);
+    }
 
     this.socketSvc.emitEvent('call-connected', this.incomingData);
     this.analytics.logEvent('call-connected', 'engagement', 'call_button', 1,  this.buildAnalyticsEventPayload());
@@ -644,23 +657,75 @@ export class VideoCallComponent implements OnInit, OnDestroy {
     }
   }
 
-  private updateNetworkQuality(bitrate: number, packetLoss: number): void {
-    if (bitrate > 1000000 && packetLoss < 0.01) {
-      this.networkQuality = 'excellent';
-      this.networkBars = 4;
-    } else if (bitrate > 500000 && packetLoss < 0.03) {
-      this.networkQuality = 'good';
-      this.networkBars = 3;
-    } else if (bitrate > 200000 && packetLoss < 0.05) {
-      this.networkQuality = 'fair';
-      this.networkBars = 2;
-    } else {
-      if (bitrate > 0) {
-        this.networkQuality = 'poor';
-        this.networkBars = 1;
+  async checkLocalAudioBitrate(): Promise<void> {
+    const pc: RTCPeerConnection | undefined = (this.webrtcSvc.room as any)?.engine?.pcManager?.publisher?._pc;
+    if (!pc) return;
+
+    const stats = await pc.getStats();
+    let audioBitrate = 0;
+    let audioPacketLoss = 0;
+    let audioJitter = 0;
+
+    stats.forEach((report) => {
+      if (report.type === 'outbound-rtp' && report.kind === 'audio' && typeof report.bytesSent === 'number' && typeof report.timestamp === 'number') {
+        if (this.lastAudioTimestamp === 0) {
+          this.lastAudioTimestamp = report.timestamp;
+          this.lastAudioBytesSent = report.bytesSent;
+          return;
+        }
+        const timeDiffSec = (report.timestamp - this.lastAudioTimestamp) / 1000;
+        const bytesDiff = report.bytesSent - this.lastAudioBytesSent;
+        if (timeDiffSec > 0) {
+          audioBitrate = (bytesDiff * 8) / timeDiffSec; // bits per second
+        }
+        this.lastAudioTimestamp = report.timestamp;
+        this.lastAudioBytesSent = report.bytesSent;
       }
+      if (report.type === 'outbound-rtp' && report.kind === 'audio' && report.packetsLost !== undefined) {
+        audioPacketLoss = report.packetsLost;
+      }
+      if (report.type === 'remote-inbound-rtp' && report.kind === 'audio' && report.jitter !== undefined) {
+        audioJitter = report.jitter;
+      }
+    });
+
+    let quality: 'excellent' | 'good' | 'fair' | 'poor';
+    let bars = 4;
+    if (audioBitrate !== 0) {
+      if (audioBitrate > 16000 && audioJitter < 0.03) {
+        quality = 'excellent'; bars = 4;
+      } else if (audioBitrate > 7000 && audioJitter < 0.05) {
+        quality = 'good'; bars = 3;
+      } else if (audioBitrate > 3000 && audioJitter < 0.07) {
+        quality = 'fair'; bars = 2;
+      } else {
+        quality = 'poor'; bars = 1;
+      }
+      this.networkQuality = quality as any;
+      this.networkBars = bars;
     }
-    console.log(`Network quality: ${this.networkQuality}, Bars: ${this.networkBars}`);
+    console.log(`Audio Network: bitrate=${audioBitrate}, packetLoss=${audioPacketLoss}, jitter=${audioJitter} -> networkQuality=${this.networkQuality}, bars=${this.networkBars}`);
+  }
+
+  private updateNetworkQuality(bitrate: number, packetLoss: number): void {
+    if (bitrate !== 0) {
+      if (bitrate > 1000000 && packetLoss < 0.01) {
+        this.networkQuality = 'excellent';
+        this.networkBars = 4;
+      } else if (bitrate > 500000 && packetLoss < 0.03) {
+        this.networkQuality = 'good';
+        this.networkBars = 3;
+      } else if (bitrate > 200000 && packetLoss < 0.05) {
+        this.networkQuality = 'fair';
+        this.networkBars = 2;
+      } else {
+        if (bitrate > 0) {
+          this.networkQuality = 'poor';
+          this.networkBars = 1;
+        }
+      }
+      console.log(`Network quality: ${this.networkQuality}, Bars: ${this.networkBars}, bitrate=${bitrate}, packetLoss=${packetLoss}`);
+    }
   }
 
   setFlag() {
@@ -727,6 +792,8 @@ export class VideoCallComponent implements OnInit, OnDestroy {
     clearInterval(this.videoBitrateCheckInterval);
     this.lastVideoBytesSent = 0;
     this.lastTimestamp = 0;
+    this.lastAudioBytesSent = 0;
+    this.lastAudioTimestamp = 0;
     this.close();
   }
 
