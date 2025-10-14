@@ -9,6 +9,7 @@ import { visitTypes } from "src/config/constant";
 })
 export class VisitService {
 
+
   private baseURL = environment.baseURL;
   private baseURLMindmap = environment.mindmapURL;
   private baseURLAbha = environment.abhaURL;
@@ -120,7 +121,18 @@ export class VisitService {
     const url = `${this.baseURL}/visit/${visitId}/attribute`;
     return this.http.post(url, json);
   }
-
+  getDemarcation(enc) {
+    let isFollowUp = false;
+    const adlIntl = enc?.find?.(e => [e?.type?.name, e?.encounterType?.display].includes(visitTypes.ADULTINITIAL));
+    if (Array.isArray(adlIntl?.obs)) {
+      adlIntl?.obs.forEach(obs => {
+        const val = obs?.value_text || obs?.value;
+        if (!isFollowUp)
+          isFollowUp = val?.toLowerCase?.()?.includes?.("follow up");
+      });
+    }
+    return isFollowUp ? visitTypes.FOLLOW_UP : visitTypes.NEW;
+  }
   /**
   * Update visit attribute
   * @param {string} visitId - Visit uuid
@@ -280,19 +292,6 @@ export class VisitService {
     return this.http.post(url, json);
   }
 
-  getDemarcation(enc) {
-    let isFollowUp = false;
-    const adlIntl = enc?.find?.(e => [e?.type?.name, e?.encounterType?.display].includes(visitTypes.ADULTINITIAL));
-    if (Array.isArray(adlIntl?.obs)) {
-      adlIntl?.obs.forEach(obs => {
-        const val = obs?.value_text || obs?.value;
-        if (!isFollowUp)
-          isFollowUp = val?.toLowerCase?.()?.includes?.("follow up");
-      });
-    }
-    return isFollowUp ? visitTypes.FOLLOW_UP : visitTypes.NEW;
-  }
-  
   formatMedicineDisplay(medicine: string, uuid?: string): object {
     const splitMed = medicine?.split?.(':');
     let med: any = {

@@ -69,7 +69,6 @@ export class ConfigService {
    const url = `${this.baseURL}/config/publish`;
     return this.http.post(url, null);
   }
-
   publishConfig(): Observable<any> {
     const url = `${this.baseURL}/config/publish`;
     return this.http.post(url, null);
@@ -494,7 +493,6 @@ export class ConfigService {
     const url = `${this.baseURL}/home-screen/updateHomeScreenName/${id}`;
     return this.http.put(url, { lang });
   }
-
   /**
  * Get AI LLM
  * @return {Observable<any>}

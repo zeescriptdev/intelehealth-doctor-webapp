@@ -278,7 +278,9 @@ export class ViewVisitPrescriptionComponent implements OnInit, OnDestroy {
     this.diagnosisService.getObs(this.visit.patient.uuid, conceptIds.conceptDiagnosis).subscribe((response: ObsApiResponseModel) => {
       response.results.forEach((obs: ObsModel) => {
         if (obs.encounter.visit.uuid === this.visit.uuid) {
+
           if(this.appConfigService.patient_visit_summary?.dp_dignosis_secondary){
+
             this.dignosisSecondary = obsParse(obs.value)
           } else {
             if (obs?.uuid)
@@ -896,6 +898,7 @@ export class ViewVisitPrescriptionComponent implements OnInit, OnDestroy {
                 {
                   colSpan: 4,
                   alignment: 'right',
+
                   stack: isValidSign
                   ? [
                       { image: `${this.signature.value}`, width: 100, height: 100, margin: [0, 5, 0, 5] },
@@ -908,6 +911,7 @@ export class ViewVisitPrescriptionComponent implements OnInit, OnDestroy {
                       { text: `${this.consultedDoctor?.typeOfProfession}` },
                       { text: `Registration No. ${this.consultedDoctor?.registrationNumber}` }
                     ]
+
                 },
                 '',
                 '',
@@ -1411,8 +1415,8 @@ export class ViewVisitPrescriptionComponent implements OnInit, OnDestroy {
   }
 
   renderReferralSectionPDF() {
-    const referralFacility = isFeaturePresent('referralFacility', true)
-    const priorityOfReferral = isFeaturePresent('priorityOfReferral', true)
+    const referralFacility = this.isFeatureAvailable('referralFacility', true)
+    const priorityOfReferral = this.isFeatureAvailable('priorityOfReferral', true)
 
     if (this.appConfigService.patient_visit_summary?.dp_referral_secondary) {
       return {

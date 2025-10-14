@@ -18,6 +18,7 @@
                 <div class="row">
                     <div class="col-md-6">
                         <span><b>{{'Upload Logo' | translate}}</b></span>
+                        <!-- <app-file-upload [options]="logoUploadImageOptions" [filePath]="themeConfigData.logo" (onFileupload)="onLogoUpload($event)" (onFileRemove)="onLogoFileDelete('logo')"></app-file-upload> -->
                         <app-file-upload [options]="logoUploadImageOptions" [filePath]="themeConfigData.logo" (onFileupload)="onLogoUpload($event)" (onFileRemove)="onLogoFileDelete('logo')"></app-file-upload>
                     </div>
                     <div class="col-md-6">

@@ -12,6 +12,7 @@ export class AppComponent implements OnInit {
   primaryColor: string = '#2E1E91';
   secondaryColor: string = '#1B163A';
 
+       
   constructor(public translate: TranslateService, private appConfigService: AppConfigService,
     private router: Router, private analytics: AnalyticsService
   ) {
