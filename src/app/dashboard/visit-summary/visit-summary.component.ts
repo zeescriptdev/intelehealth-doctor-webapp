@@ -2,6 +2,7 @@ import { Component, OnDestroy, OnInit, ViewChild, AfterViewInit, ElementRef, Vie
 import { ActivatedRoute, Router } from '@angular/router';
 import { PageTitleService } from 'src/app/core/page-title/page-title.service';
 import { VisitService } from 'src/app/services/visit.service';
+import { ProviderService } from 'src/app/services/provider.service';
 import { environment } from 'src/environments/environment';
 import * as moment from 'moment';
 import { AppointmentService } from 'src/app/services/appointment.service';
@@ -426,7 +427,8 @@ export class VisitSummaryComponent implements OnInit, OnDestroy, AfterViewInit {
     public appConfigService: AppConfigService,
     private rolesService: NgxRolesService,
     private sanitizer: DomSanitizer,
-    private analytics: AnalyticsService) {
+    private analytics: AnalyticsService,
+    private providerService: ProviderService) {
     Object.keys(this.appConfigService.patient_registration).forEach(obj => {
       this.patientRegFields.push(...this.appConfigService.patient_registration[obj].filter((e: { is_enabled: any; }) => e.is_enabled).map((e: { name: any; }) => e.name));
     });
@@ -1339,11 +1341,6 @@ export class VisitSummaryComponent implements OnInit, OnDestroy, AfterViewInit {
       return;
     }
 
-    if (!environment.kaleyraApiKey) {
-      this.toastr.error('Kaleyra API key is not configured');
-      return;
-    }
-
     // Get current doctor's phone number
     const doctorPhoneNumber = this.getCurrentDoctorPhoneNumber();
     if (!doctorPhoneNumber) {
@@ -1354,36 +1351,16 @@ export class VisitSummaryComponent implements OnInit, OnDestroy, AfterViewInit {
     // Show loading state
     this.toastr.info('Initiating Kaleyra call...');
 
-    // Prepare form data for Kaleyra API
-    const formData = new FormData();
-    formData.append('method', 'dial.click2call');
-    formData.append('format', 'json');
-    formData.append('caller', environment.doctorPhoneNumber ? environment.doctorPhoneNumber : doctorPhoneNumber); // Dr Avdhut Kulkarni's number
-    formData.append('receiver', this.hwPhoneNo);
-    formData.append('custom', this.visit.uuid);
-    formData.append('retry', '0');
-
-    // Make API call to Kaleyra
-    fetch('https://api-voice.kaleyra.com/v1/', {
-      method: 'POST',
-      headers: {
-        'x-api-key': environment.kaleyraApiKey
+    const caller = environment.doctorPhoneNumber ? environment.doctorPhoneNumber : doctorPhoneNumber;
+    this.providerService.kaleyraClick2Call(caller, this.hwPhoneNo, this.visit.uuid, '0').subscribe({
+      next: (data) => {
+        console.log('Kaleyra call initiated successfully:', data);
+        this.toastr.success('Kaleyra call initiated successfully. You will be connected to the health worker.');
       },
-      body: formData
-    })
-    .then(response => {
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
+      error: (error) => {
+        console.error('Error initiating Kaleyra call:', error);
+        this.toastr.error('Failed to initiate Kaleyra call. Please try again.');
       }
-      return response.json();
-    })
-    .then(data => {
-      console.log('Kaleyra call initiated successfully:', data);
-      this.toastr.success(`Kaleyra call initiated successfully. You will be connected to the health worker.`);
-    })
-    .catch(error => {
-      console.error('Error initiating Kaleyra call:', error);
-      this.toastr.error('Failed to initiate Kaleyra call. Please try again.');
     });
   }
 
