@@ -559,9 +559,7 @@ setTimeout(() => this.connecting = false);
         const bytesDiff = report.bytesSent - this.lastVideoBytesSent;
         if (timeDiffSec > 0) {
         const bitrate = (bytesDiff * 8) / timeDiffSec; // bits per second
-        console.log('Video bitrate (bps):', bitrate);
-
-        this.videoBitrateTooLow = bitrate < 600_000; // e.g. < 200 kbps
+        this.videoBitrateTooLow = bitrate < 600_000; // e.g. < 600 kbps
         }
       }
       this.lastTimestamp = report.timestamp;
@@ -569,9 +567,11 @@ setTimeout(() => this.connecting = false);
     }
   });
 
-  if(this.videoBitrateTooLow) {
-     this.toastr.warning('Low bandwidth detected. Continuing with the audio call');
-     this._localVideoOff = true;
+ if (this.videoBitrateTooLow && !this._localVideoOff) {
+      this.toastr.warning('Low bandwidth detected. switching to audio call');
+      this._localVideoOff = true;
+    } else {
+      this._localVideoOff = false;
   }
 }
 
