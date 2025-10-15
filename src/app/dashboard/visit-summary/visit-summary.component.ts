@@ -1306,6 +1306,88 @@ export class VisitSummaryComponent implements OnInit, OnDestroy, AfterViewInit {
   }
 
   /**
+  * Get current doctor's phone number from provider attributes
+  * @return {string} - Doctor's phone number or empty string if not found
+  */
+  getCurrentDoctorPhoneNumber(): string {
+    if (!this.provider || !this.provider.attributes) {
+      return '';
+    }
+    
+    let doctorPhoneNumber = '';
+    this.provider.attributes.forEach((attribute) => {
+      if (attribute.display.match(doctorDetails.PHONE_NUMBER) != null) {
+        doctorPhoneNumber = attribute.value;
+      }
+    });
+    
+    return doctorPhoneNumber;
+  }
+
+  /**
+  * Start Kaleyra call with HW/patient
+  * @return {void}
+  */
+  startKaleyraCall(): void {
+    if (!this.hwPhoneNo) {
+      this.toastr.error('Health worker phone number is not available');
+      return;
+    }
+
+    if (!this.visit?.uuid) {
+      this.toastr.error('Visit ID is not available');
+      return;
+    }
+
+    if (!environment.kaleyraApiKey) {
+      this.toastr.error('Kaleyra API key is not configured');
+      return;
+    }
+
+    // Get current doctor's phone number
+    const doctorPhoneNumber = this.getCurrentDoctorPhoneNumber();
+    if (!doctorPhoneNumber) {
+      this.toastr.error('Doctor phone number is not available. Please update your profile with a valid phone number.');
+      return;
+    }
+
+    // Show loading state
+    this.toastr.info('Initiating Kaleyra call...');
+
+    // Prepare form data for Kaleyra API
+    const formData = new FormData();
+    formData.append('method', 'dial.click2call');
+    formData.append('format', 'json');
+    formData.append('caller', environment.doctorPhoneNumber ? environment.doctorPhoneNumber : doctorPhoneNumber); // Dr Avdhut Kulkarni's number
+    formData.append('receiver', this.hwPhoneNo);
+    formData.append('custom', this.visit.uuid);
+    formData.append('retry', '0');
+
+    // Make API call to Kaleyra
+    fetch('https://api-voice.kaleyra.com/v1/', {
+      method: 'POST',
+      headers: {
+        'x-api-key': environment.kaleyraApiKey
+      },
+      body: formData
+    })
+    .then(response => {
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      return response.json();
+    })
+    .then(data => {
+      console.log('Kaleyra call initiated successfully:', data);
+      this.toastr.success(`Kaleyra call initiated successfully. You will be connected to the health worker.`);
+    })
+    .catch(error => {
+      console.error('Error initiating Kaleyra call:', error);
+      this.toastr.error('Failed to initiate Kaleyra call. Please try again.');
+    });
+  }
+
+  /**
   * Check how old the date is from now
   * @param {string} data - Date in string format
   * @return {string} - Returns how old the date is from now

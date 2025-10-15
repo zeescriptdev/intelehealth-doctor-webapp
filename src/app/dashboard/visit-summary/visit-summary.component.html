@@ -891,9 +891,9 @@
                     <label class="col-sm-3 col-form-label" data-test-id="labelConnectWithPatient">
                       {{ 'Connect with patient' | translate }}
                     </label>
-                    <div class="col-sm-9 d-flex align-items-center" *ngIf="this.getPhoneNumber() else noContactDetails"
+                    <div class="col-sm-9 align-items-center" *ngIf="this.getPhoneNumber() else noContactDetails"
                       data-test-id="divContactActions">
-                      <div class="d-flex" data-test-id="divContactIcons">
+                      <div class="d-flex align-items-center mb-3" data-test-id="divContactIcons">
                         <a href="tel:{{ this.getPhoneNumber() }}" target="_blank" class="icon-btn m-0 mr-2"
                           data-test-id="linkPatientPhone" *ngIf="!brandName">
                           <img src="assets/svgs/phone-green.svg" alt="" data-test-id="imgPhoneIcon" />
@@ -902,10 +902,25 @@
                           data-test-id="linkPatientWhatsApp" (click)="startWhatsAppCall()">
                           <img src="assets/svgs/whatsapp-green.svg" alt="" data-test-id="imgWhatsAppIcon" />
                         </a>
+                        <span class="text-muted" data-test-id="spanConnectPrompt">
+                          {{ 'Click here to connect with the patient' | translate }}
+                        </span>
                       </div>
-                      <span class="text-muted" data-test-id="spanConnectPrompt">
-                        {{ 'Click here to connect with the patient' | translate }}
-                      </span>
+                      <div class="d-flex align-items-center">
+                        <button
+                          type="button"
+                          class="icon-btn m-0 mr-2 kaleyra-call-btn"
+                          data-test-id="btnKaleyraCall"
+                          (click)="startKaleyraCall()"
+                          [disabled]="!hwPhoneNo" 
+                          *ngIf="!isMCCUser"
+                        >
+                          <img src="assets/svgs/phone-green.svg" alt="Kaleyra Call" />
+                        </button>
+                          <span class="text-muted" data-test-id="spanConnectPrompt">
+                            {{ 'Call via Kaleyra - Connect to Health Worker' | translate }}
+                          </span>
+                      </div>
                     </div>
                     <ng-template #noContactDetails>
                       <div class="col-sm-9 d-flex align-items-center" data-test-id="divNoContactDetails">

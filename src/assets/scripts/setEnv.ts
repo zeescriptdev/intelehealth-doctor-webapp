@@ -83,6 +83,8 @@ const environmentFileContent = `
     brandName: '${process.env.BRAND_NAME}',
     featureList: ${process.env.FEATURES_LIST},
     gaMeasurementId: '${process.env.GAMEASUREMENTID}'
+    kaleyraApiKey: '${process.env.KALEYRA_API_KEY}',
+    doctorPhoneNumber: '${process.env.DOCTOR_PHONE_NUMBER}'
   };
 `;
 
