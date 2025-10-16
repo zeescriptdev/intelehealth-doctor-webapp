@@ -12,10 +12,12 @@ import {
   RoomConnectOptions,
   RoomEvent,
   Track,
+  ConnectionQuality,
   VideoPresets43,
   setLogLevel
 } from 'livekit-client';
 import { map } from 'rxjs/operators';
+import { BehaviorSubject, Subject } from 'rxjs';
 import { getCacheData } from '../utils/utility-functions';
 
 @Injectable({
@@ -31,6 +33,14 @@ export class WebrtcService {
   private localElement: ElementRef | string | any;
   private remoteElement: ElementRef | string | any;
   public visitHolderId: null;
+
+  // Connection state streams for UI/components to subscribe
+  public isReconnecting$ = new BehaviorSubject<boolean>(false);
+  public signalReconnecting$ = new Subject<void>();
+  // Synchronous flag for quick checks in components
+  public isCurrentlyReconnecting: boolean = false;
+  // Connection quality streams
+  public localConnectionQuality$ = new BehaviorSubject<ConnectionQuality | null>(null);
 
   constructor(
     private http: HttpClient,
@@ -140,7 +150,29 @@ export class WebrtcService {
       .on(RoomEvent.ParticipantDisconnected, handleParticipantDisconnected)
       .on(RoomEvent.ParticipantConnected, handleParticipantConnect)
       .on(RoomEvent.TrackMuted, handleTrackMuted)
-      .on(RoomEvent.TrackUnmuted, handleTrackUnmuted);
+      .on(RoomEvent.TrackUnmuted, handleTrackUnmuted)
+      // Reconnection-related events
+      .on(RoomEvent.SignalReconnecting, () => {
+        console.info("Signal (websocket) is reconnecting");
+        this.signalReconnecting$.next();
+      })
+      .on(RoomEvent.Reconnecting, () => {
+        console.warn("⚠️ Reconnecting...");
+        this.isCurrentlyReconnecting = true;
+        this.isReconnecting$.next(true);
+      })
+      .on(RoomEvent.Reconnected, () => {
+        console.log("🔄 Reconnected!");    
+        this.isCurrentlyReconnecting = false;
+        this.isReconnecting$.next(false);
+      })
+      .on(RoomEvent.ConnectionQualityChanged, (quality: ConnectionQuality, participant: Participant) => {
+        // Emit per-participant quality updates for UI consumption
+        if ((participant as any)?.isLocal) {
+          this.localConnectionQuality$.next(quality);
+          console.log(quality, " : localConnectionQuality");
+        }
+      });
 
     await this.room.connect(this.url, this.token);
   }

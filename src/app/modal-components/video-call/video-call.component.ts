@@ -1,4 +1,4 @@
-import { Component, Inject, OnInit, OnDestroy, ViewChild } from '@angular/core';
+import { Component, Inject, OnInit, OnDestroy, ViewChild, NgZone } from '@angular/core';
 import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
 import { ToastrService } from 'ngx-toastr';
 import { ChatService } from 'src/app/services/chat.service';
@@ -7,7 +7,7 @@ import { environment } from 'src/environments/environment';
 import * as moment from 'moment';
 import { CoreService } from 'src/app/services/core/core.service';
 import { getCacheData, isFeaturePresent } from 'src/app/utils/utility-functions';
-import { Participant, RemoteParticipant, RemoteTrack, RemoteTrackPublication, Track } from 'livekit-client';
+import { Participant, RemoteParticipant, RemoteTrack, RemoteTrackPublication, Track, ConnectionQuality } from 'livekit-client';
 import { WebrtcService } from 'src/app/services/webrtc.service';
 import { doctorDetails, visitTypes } from 'src/config/constant';
 import { ApiResponseModel, EncounterProviderModel, MessageModel, RecordingResponse } from 'src/app/model/model';
@@ -69,11 +69,17 @@ export class VideoCallComponent implements OnInit, OnDestroy {
   cameraIssue: boolean = false;
   microphoneIssue: boolean = false;
 
-  networkQuality: 'excellent' | 'good' | 'fair' | 'poor' = 'good';
-  networkBars: number = 3;
   private hasShownPoorToast: boolean = false;
+  private hasShownReconnectToast: boolean = false;
 
   private callDurationStr: string = '00:00';
+  
+  // Reconnection state management
+  public isReconnecting: boolean = false;
+  private reconnectionSubscriptions: any[] = [];
+
+  // Connection quality state
+  public localConnectionQuality: ConnectionQuality | null = null;
 
   constructor(
     @Inject(MAT_DIALOG_DATA) public data,
@@ -84,7 +90,8 @@ export class VideoCallComponent implements OnInit, OnDestroy {
     private toastr: ToastrService,
     private webrtcSvc: WebrtcService,
     private appConfigService: AppConfigService,
-    private analytics: AnalyticsService
+    private analytics: AnalyticsService,
+    private ngZone: NgZone
   ) { }
 
   async ngOnInit() {
@@ -125,6 +132,12 @@ export class VideoCallComponent implements OnInit, OnDestroy {
     }
     // set flag for audio/video enable/disable
     this.isVideoRecordingEnabled = this.appConfigService.ai_llm_recording_section
+
+    // Subscribe to connection quality updates
+    const localQualitySub = this.webrtcSvc.localConnectionQuality$.subscribe((q) => {
+      this.localConnectionQuality = q;
+    });
+    this.reconnectionSubscriptions.push(localQualitySub, localQualitySub);
   }
 
   /**
@@ -175,6 +188,9 @@ export class VideoCallComponent implements OnInit, OnDestroy {
       });
     }
     if (!this.webrtcSvc.token) return;
+    // Attach reconnection handlers BEFORE creating the room to catch early events
+    this.attachRoomReconnectionHandlers();
+    
     this.webrtcSvc.createRoomAndConnectCall({
       localElement: this.localVideoRef,
       remoteElement: this.remoteVideoRef,
@@ -322,11 +338,10 @@ export class VideoCallComponent implements OnInit, OnDestroy {
       this._localVideoOff = this.webrtcSvc.toggleVideo();
       const event = this._localVideoOff ? 'videoOff' : 'videoOn';
       this.socketSvc.emitEvent(event, { fromWebapp: true });
+        this.videoBitrateCheckInterval = setInterval(() => {
+        this.checkLocalVideoBitrate();
+      }, 3000);
     }
-    this.checkLocalVideoBitrate();
-    this.videoBitrateCheckInterval = setInterval(() => {
-      this.checkLocalVideoBitrate();
-    }, 3000);
 
     this.socketSvc.emitEvent('call-connected', this.incomingData);
     this.analytics.logEvent('call-connected', 'engagement', 'call_button', 1,  this.buildAnalyticsEventPayload());
@@ -409,6 +424,29 @@ export class VideoCallComponent implements OnInit, OnDestroy {
   }
 
   /**
+   * Map LiveKit ConnectionQuality to a 0-4 level for UI bars
+   */
+  networkQualityClass(q: ConnectionQuality) {
+    switch (q) {
+      case ConnectionQuality.Excellent: return 'quality--excellent';
+      case ConnectionQuality.Good: return 'quality--good';
+      case ConnectionQuality.Poor: return 'quality--poor';
+      case ConnectionQuality.Lost: return 'quality--poor';
+      default: return '';
+    }
+  }
+
+  qualityLevel(q: ConnectionQuality): number {
+    switch (q) {
+      case ConnectionQuality.Excellent: return 4;
+      case ConnectionQuality.Good: return 3;
+      case ConnectionQuality.Poor: return 1;
+      case ConnectionQuality.Lost: return 0;
+      default: return 0;
+    }
+  }
+
+  /**
   * Handle track unsubscribed callback
   * @param {RemoteTrack} track - Track
   * @param {RemoteTrackPublication} publication - Publication
@@ -462,7 +500,10 @@ export class VideoCallComponent implements OnInit, OnDestroy {
   * @return {void}
   */
   handleParticipantDisconnected() {
-    this.toastr.info("Call ended from Health Worker's end.", null, { timeOut: 2000 });
+    // Suppress transient disconnect toast during reconnect attempts
+    if (!this.webrtcSvc.isCurrentlyReconnecting) {
+      this.toastr.info("Call ended from Health Worker's end.", null, { timeOut: 2000 });
+    }
     this.callConnected = false;
     this.socketSvc.incomingCallData = null;
     this.endCallInRoom();
@@ -602,8 +643,6 @@ export class VideoCallComponent implements OnInit, OnDestroy {
     if (!pc) return;
 
     const stats = await pc.getStats();
-    let bitrate = 0;
-    let packetLoss = 0;
 
     stats.forEach((report) => {
       if (this.lastTimestamp === 0) {
@@ -617,53 +656,61 @@ export class VideoCallComponent implements OnInit, OnDestroy {
           const timeDiffSec = (report.timestamp - this.lastTimestamp) / 1000;
           const bytesDiff = report.bytesSent - this.lastVideoBytesSent;
           if (timeDiffSec > 0) {
-            bitrate = (bytesDiff * 8) / timeDiffSec; // bits per second
-            console.log('Video bitrate (bps):', bitrate);
+          const bitrate = (bytesDiff * 8) / timeDiffSec; // bits per second
+          console.log('Video bitrate (bps):', bitrate);
+
+          this.videoBitrateTooLow = bitrate < 600_000; // e.g. < 200 kbps
           }
         }
         this.lastTimestamp = report.timestamp;
         this.lastVideoBytesSent = report.bytesSent;
       }
-      
-      if (report.type === 'outbound-rtp' && report.packetsLost !== undefined) {
-        packetLoss = report.packetsLost;
-      }
-    });
 
-    this.updateNetworkQuality(bitrate, packetLoss);
-    
-    this.videoBitrateTooLow = bitrate < 200_000; // 200 kbps threshold
-    if (this.videoBitrateTooLow && this.networkQuality === 'poor') {
+    });
+    if (this.videoBitrateTooLow) {
       if (!this.hasShownPoorToast) {
-        this.hasShownPoorToast = true;
-        this._localVideoOff = this.webrtcSvc.toggleVideo();
-        const event = this._localVideoOff ? 'videoOff' : 'videoOn';
-        this.socketSvc.emitEvent(event, { fromWebapp: true });
         this.toastr.warning('Low bandwidth detected. Continuing with the audio call');
+        this.hasShownPoorToast = true;
       }
     }
   }
 
-  private updateNetworkQuality(bitrate: number, packetLoss: number): void {
-    if (bitrate > 1000000 && packetLoss < 0.01) {
-      this.networkQuality = 'excellent';
-      this.networkBars = 4;
-      console.log(bitrate, this.networkQuality);
-    } else if (bitrate > 500000 && packetLoss < 0.03) {
-      this.networkQuality = 'good';
-      this.networkBars = 3;
-      console.log(bitrate, this.networkQuality);
-    } else if (bitrate > 200000 && packetLoss < 0.05) {
-      this.networkQuality = 'fair';
-      this.networkBars = 2;
-      console.log(bitrate, this.networkQuality);
-    } else {
-       if (bitrate > 0) {
-        this.networkQuality = 'poor';
-        this.networkBars = 1;
-        console.log(bitrate, this.networkQuality);
-      }
-    }
+  /**
+  * Attach LiveKit room reconnection handlers to update UI and logic
+  * @return {void}
+  */
+  private attachRoomReconnectionHandlers(): void {    
+    const signalReconnectingSub = this.webrtcSvc.signalReconnecting$.subscribe(() => {
+      // Update UI immediately for signal reconnection
+      this.ngZone.run(() => {
+        this.isReconnecting = true;
+      });
+    });
+
+    const isReconnectingSub = this.webrtcSvc.isReconnecting$.subscribe((isReconnecting) => {
+      console.log('Reconnection state changed:', isReconnecting);
+      this.ngZone.run(() => {
+        this.isReconnecting = isReconnecting;        
+        if (isReconnecting) {
+          if (!this.hasShownReconnectToast) {
+            this.toastr.warning('Network issue detected. Reconnecting...', 'Connection Lost', { 
+              timeOut: 3000
+            });
+            this.hasShownReconnectToast = true;
+          }
+        } 
+        // else {
+        //   // Reset toast flag and show success message
+        //   // this.hasShownReconnectToast = false;
+        //   // this.toastr.success('Connection restored successfully!', 'Reconnected', { 
+        //   //   timeOut: 2000
+        //   // });
+        // }
+      });
+    });
+
+    // Store subscriptions for cleanup
+    this.reconnectionSubscriptions.push(signalReconnectingSub, isReconnectingSub);
   }
 
   setFlag() {
@@ -848,6 +895,11 @@ export class VideoCallComponent implements OnInit, OnDestroy {
   ngOnDestroy(): void {
     this.socketSvc.incoming = false;
     clearInterval(this.changeDetForDuration);
+    
+    // Clean up reconnection subscriptions
+    this.reconnectionSubscriptions.forEach(sub => sub.unsubscribe());
+    this.reconnectionSubscriptions = [];
+    
     this.webrtcSvc.disconnect();
     this.webrtcSvc.token = '';
   }
