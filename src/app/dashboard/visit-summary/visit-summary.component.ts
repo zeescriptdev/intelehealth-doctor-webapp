@@ -1352,8 +1352,8 @@ export class VisitSummaryComponent implements OnInit, OnDestroy, AfterViewInit {
     // Show loading state
     this.toastr.info('Initiating Kaleyra call...');
 
-    const caller = environment.doctorPhoneNumber ? environment.doctorPhoneNumber : doctorPhoneNumber;
-    this.providerService.kaleyraClick2Call(caller, this.hwPhoneNo, this.visit.uuid, '0').subscribe({
+    const caller = doctorPhoneNumber ? doctorPhoneNumber : environment.doctorPhoneNumber;
+    this.providerService.kaleyraClick2Call(caller, this.hwPhoneNo, this.visit.uuid, '0', this.visitNotePresent.uuid, this.visit?.patient?.uuid).subscribe({
       next: (data) => {
         console.log('Kaleyra call initiated successfully:', data);
         this.toastr.success('Kaleyra call initiated successfully. You will be connected to the health worker.');
