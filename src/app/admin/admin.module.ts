@@ -51,13 +51,12 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { PatientDiagnosticsComponent } from './admin-actions/patient-diagnostics/patient-diagnostics.component';
 import { MenuConfigComponent } from './admin-actions/menu-config/menu-config.component';
 import { PatientVisitSectionsComponent } from './admin-actions/patient-visit-sections/patient-visit-sections.component';
-
-
-import {DragDropModule} from '@angular/cdk/drag-drop';
+import { DragDropModule } from '@angular/cdk/drag-drop';
 import { PatientDetailsComponent } from './admin-actions/patient-details/patient-details.component';
 import { PatientVisitDropdownComponent } from './admin-actions/patient-visit-dropdown/patient-visit-dropdown.component';
 import { HomeScreenComponent } from './admin-actions/home-screen/home-screen.component';
 import { WebrtcLogComponent } from './reports/webrtc-log/webrtc-log.component';
+import { AiLlmComponent } from './admin-actions/ai-llm/ai-llm.component';
 
 
 // AoT requires an exported function for factories
@@ -160,6 +159,10 @@ const routes: Routes = [
             component: HomeScreenComponent
           },
           {
+            path: 'ai-llm',
+            component: AiLlmComponent
+          },
+          {
             path: '',
             component: AdminActionsComponent
           }
@@ -198,7 +201,8 @@ const routes: Routes = [
     PatientDetailsComponent,
     PatientVisitDropdownComponent,
     HomeScreenComponent,
-    WebrtcLogComponent
+    WebrtcLogComponent,
+    AiLlmComponent
   ],
   imports: [
     CommonModule,

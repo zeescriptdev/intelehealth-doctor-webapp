@@ -76,7 +76,7 @@ export class DashboardComponent implements OnInit {
     },
     tableColumns: [
       {
-        label: "Patient",
+        label: "Name",
         key: "patient_name",
         formatHtml: (element)=> { 
           return `
@@ -148,7 +148,7 @@ export class DashboardComponent implements OnInit {
     },
     tableColumns: [
       {
-        label: "Patient",
+        label: "Name",
         key: "patient_name",
         formatHtml: (element)=> { 
           return `
@@ -214,7 +214,7 @@ export class DashboardComponent implements OnInit {
         // },
       },
       {
-        label: "Patient",
+        label: "Name",
         key: "patient_name",
         formatHtml: (element)=> { 
           return `
@@ -243,11 +243,12 @@ export class DashboardComponent implements OnInit {
         label: "Visit Completed",
         key: "visit_completed",
         classList: [
-          "red-pill",
+        "green-pill",          
+        "visit-completed-cell" 
         ],
         formatHtml: (element)=> { 
           return `
-            <img src="assets/svgs/red-pad.svg" alt="Visit Completed" style="margin-right: 8px; vertical-align: middle;">
+            <img src="assets/svgs/green-pad.svg" alt="Visit Completed" style="margin-right: 8px; vertical-align: middle;">
             <span>${element?.completed}</span>
           `
         },
@@ -343,13 +344,13 @@ export class DashboardComponent implements OnInit {
           `
         },
       },
-      {
-        label: "Age",
-        key: "age",
-        // formatHtml: (element)=> { 
-        //   return `<span>${element?.patientAge} ${'y'}</span>`
-        // },
-      },
+      // {
+      //   label: "Age",
+      //   key: "age",
+      //   // formatHtml: (element)=> { 
+      //   //   return `<span>${element?.patientAge} ${'y'}</span>`
+      //   // },
+      // },
       {
         label: "Starts in",
         key: "starts_in",
@@ -379,13 +380,13 @@ export class DashboardComponent implements OnInit {
       //   label: "Doctor",
       //   key: "drName",
       // },
-      {
-        label: "Contact",
-        key: "telephone",
-        formatHtml: () => {
-          return ""; // Do not return the telephone number
-        }
-      },
+      // {
+      //   label: "Contact",
+      //   key: "telephone",
+      //   formatHtml: () => {
+      //     return ""; // Do not return the telephone number
+      //   }
+      // },
       {
         label: "Actions",
         key: "actions",
@@ -452,13 +453,17 @@ export class DashboardComponent implements OnInit {
         //   return `<span>${element?.person?.age} ${'y'}</span>`
         // },
       },
-      // {
-      //   label: "Location",
-      //   key: "location",
-      //   // formatHtml: (element)=> { 
-      //   //   return `<span>${element?.location?.name}</span>`
-      //   // },
-      // },
+      {
+        label: "Location",
+        key: "location",
+        // formatHtml: (element)=> { 
+        //   return `<span>${element?.location?.name}</span>`
+        // },
+      },
+      {
+        label: "Chief Complaint",
+        key: "cheif_complaint",
+      },
       {
         label: "Prescription Started",
         key: "prescription_started",
@@ -611,31 +616,6 @@ export class DashboardComponent implements OnInit {
         this.displayedColumns3 = this.displayedColumns3.filter(col=>(col!=='patient_type'));
       }
 
-      if(environment.brandName === 'NAS'){
-        this.pluginConfigObsAppointment.tableColumns = this.pluginConfigObsAppointment.tableColumns.filter(col=>col.key !== 'TMH_patient_id');
-        this.pluginConfigObsPriority.tableColumns = this.pluginConfigObsPriority.tableColumns.filter(col=>col.key !== 'TMH_patient_id');
-        this.pluginConfigObsAwaiting.tableColumns = this.pluginConfigObsAwaiting.tableColumns.filter(col=>col.key !== 'TMH_patient_id');
-        this.pluginConfigObsInProgress.tableColumns = this.pluginConfigObsInProgress.tableColumns.filter(col=>col.key !== 'TMH_patient_id');
-        this.pluginConfigObsCompleted.tableColumns = this.pluginConfigObsCompleted.tableColumns.filter(col=>col.key !== 'TMH_patient_id');
-        this.pluginConfigObsFollowUp.tableColumns = this.pluginConfigObsFollowUp.tableColumns.filter(col=>col.key !== 'TMH_patient_id');
-        
-        const patientIdColumn = {
-          label: "Patient ID",
-          key: "patient_id",
-          formatHtml: (element)=> `<span>${element?.patient?.identifier ? element?.patient?.identifier : ''}</span>`,
-        };
-        
-        this.pluginConfigObsAppointment.tableColumns.unshift({
-          ...patientIdColumn,
-          formatHtml: (element)=> `<span>${element?.openMrsId ? element?.openMrsId : ''}</span>`
-        });
-        this.pluginConfigObsPriority.tableColumns.unshift(patientIdColumn);
-        this.pluginConfigObsAwaiting.tableColumns.unshift(patientIdColumn);
-        this.pluginConfigObsInProgress.tableColumns.unshift(patientIdColumn);
-        this.pluginConfigObsCompleted.tableColumns.unshift(patientIdColumn);
-        this.pluginConfigObsFollowUp.tableColumns.unshift(patientIdColumn);
-      }
-
       if(environment.brandName === 'KCDO'){
         this.pluginConfigObsAppointment.tableColumns = this.pluginConfigObsAppointment.tableColumns.filter(col=>!['age','telephone','starts_in'].includes(col.key));
         this.pluginConfigObsAppointment.pageSizeOptions = [10];
@@ -661,6 +641,29 @@ export class DashboardComponent implements OnInit {
           }
         });
         this.pluginConfigObsAppointment.tableHeader = "Today's Appointment"
+      } else {
+        this.pluginConfigObsAppointment.tableColumns = this.pluginConfigObsAppointment.tableColumns.filter(col=>col.key !== 'TMH_patient_id');
+        this.pluginConfigObsPriority.tableColumns = this.pluginConfigObsPriority.tableColumns.filter(col=>col.key !== 'TMH_patient_id');
+        this.pluginConfigObsAwaiting.tableColumns = this.pluginConfigObsAwaiting.tableColumns.filter(col=>col.key !== 'TMH_patient_id');
+        this.pluginConfigObsInProgress.tableColumns = this.pluginConfigObsInProgress.tableColumns.filter(col=>col.key !== 'TMH_patient_id');
+        this.pluginConfigObsCompleted.tableColumns = this.pluginConfigObsCompleted.tableColumns.filter(col=>col.key !== 'TMH_patient_id');
+        this.pluginConfigObsFollowUp.tableColumns = this.pluginConfigObsFollowUp.tableColumns.filter(col=>col.key !== 'TMH_patient_id');
+        
+        const patientIdColumn = {
+          label: "Patient ID",
+          key: "patient_id",
+          formatHtml: (element)=> `<span>${element?.patient?.identifier ? element?.patient?.identifier : ''}</span>`,
+        };
+        
+        this.pluginConfigObsAppointment.tableColumns.unshift({
+          ...patientIdColumn,
+          formatHtml: (element)=> `<span>${element?.openMrsId ? element?.openMrsId : ''}</span>`
+        });
+        this.pluginConfigObsPriority.tableColumns.unshift(patientIdColumn);
+        this.pluginConfigObsAwaiting.tableColumns.unshift(patientIdColumn);
+        this.pluginConfigObsInProgress.tableColumns.unshift(patientIdColumn);
+        this.pluginConfigObsCompleted.tableColumns.unshift(patientIdColumn);
+        this.pluginConfigObsFollowUp.tableColumns.unshift(patientIdColumn);
       }
 
       this.brandName = environment.brandName;
@@ -831,7 +834,7 @@ export class DashboardComponent implements OnInit {
           visit.cheif_complaint = this.getCheifComplaint(visit);
           visit.visit_created = visit?.date_created ? this.getCreatedAt(visit.date_created.replace('Z','+0530')) : this.getEncounterCreated(visit, visitTypes.ADULTINITIAL);
           visit.person.age = this.calculateAge(visit.person.birthdate);
-          visit.patient_type = this.getDemarcation(visit?.encounters);
+          visit.patient_type = this.visitService.getDemarcation(visit?.encounters);
           this.awaitingVisits.push(visit);
         }
         this.dataSource3.data = [...this.awaitingVisits];
@@ -844,18 +847,6 @@ export class DashboardComponent implements OnInit {
         }
       }
     });
-  }
-
-  getDemarcation(enc) {
-    let isFollowUp = false;
-    const adlIntl = enc?.find?.(e => e?.type?.name === visitTypes.ADULTINITIAL);
-    if (Array.isArray(adlIntl?.obs)) {
-      adlIntl?.obs.forEach(obs => {
-        if (!isFollowUp)
-          isFollowUp = obs?.value_text?.toLowerCase?.()?.includes?.("follow up");
-      });
-    }
-    return isFollowUp ? visitTypes.FOLLOW_UP : visitTypes.NEW;
   }
 
   /**
@@ -1203,7 +1194,7 @@ export class DashboardComponent implements OnInit {
               this.appointmentService.rescheduleAppointment(appointment).subscribe((res: ApiResponseModel) => {
                 const message = res.message;
                 if (res.status) {
-                  this.mindmapService.notifyHwForRescheduleAppointment(appointment)
+                  this.mindmapService.notifyHwForRescheduleAppointment(appointment);
                   this.getAppointments();
                   this.toastr.success("The appointment has been rescheduled successfully!", 'Rescheduling successful!');
                 } else {
@@ -1229,8 +1220,9 @@ export class DashboardComponent implements OnInit {
     }
     this.coreService.openConfirmCancelAppointmentModal(appointment).subscribe((res: boolean) => {
       if (res) {
-        this.toastr.success("The Appointment has been successfully canceled.", 'Canceling successful');
+        this.mindmapService.notifyHwForCancelAppointment(appointment);
         this.getAppointments();
+        this.toastr.success("The Appointment has been successfully canceled.", 'Canceling successful');
       }
     });
   }

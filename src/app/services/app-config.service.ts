@@ -26,14 +26,15 @@ export class AppConfigService {
   public patient_reg_address: boolean;
   public abha_section: boolean;
   public sidebar_menus: { [key: string]: boolean };
-  public patient_visit_sections: PatientVisitSection[];
-  public patient_diagnostics_section: boolean;
+  public patient_visit_sections: PatientVisitSection[]
   public dropdown_values: DropdownValuesModel[]
-
+  public patient_diagnostics_section: boolean;
+  public ai_llm_section: boolean;
+  public ai_llm_recording_section:  boolean;
   constructor(private http: HttpClient) { }
 
   load(): Promise<any> {
-    const promise = this.http.get(`${this.baseURL}/config/getPublishedConfig`)
+    const promise = this.http.get(`${this.baseURL}/config/getPublishedConfig?ngsw-bypass=true`)
       .toPromise()
       .then((data) => {
         this.setPatientVisitSections(data)
@@ -75,8 +76,8 @@ export class AppConfigService {
   public checkPatientRegField(fieldName: any, fields: string | any[]): boolean{
     return fields.indexOf(fieldName) !== -1;
   }
- fetchAllLanguage(): Observable<any> {
-  return this.http.get<any>(`${this.baseURL}/language/getallEnabledLanguages`);
-} 
+  fetchAllLanguage(): Observable<any> {
+    return this.http.get<any>(`${this.baseURL}/language/getallEnabledLanguages`);
+  } 
 }
     
