@@ -34,6 +34,7 @@ import { OpenChatComponent } from './open-chat/open-chat.component';
 import { MatMenuModule } from '@angular/material/menu';
 import { MatCheckboxModule } from '@angular/material/checkbox';
 import { MatSortModule } from '@angular/material/sort';
+import { TranslationBoxComponent } from './visit-summary/translation-box/translation-box.component';
 
 // AoT requires an exported function for factories
 export function HttpLoaderFactory(httpClient: HttpClient) {
@@ -48,7 +49,8 @@ export function HttpLoaderFactory(httpClient: HttpClient) {
     VisitSummaryComponent,
     ChangePasswordComponent,
     HwProfileComponent,
-    OpenChatComponent
+    OpenChatComponent,
+    TranslationBoxComponent
   ],
   imports: [
     CommonModule,

@@ -560,3 +560,21 @@ export const conceptIds = {
 export const WEBRTC = {
   CHAT_TEXT_LIMIT: 1000
 }
+
+export const stateLanguages = [
+  { state: "Assam", language: "Assamese", language_code:"as-IN"},
+  { state: "West Bengal", language: "Bengali", language_code:"bn-IN"},
+  { state: "Gujarat", language: "Gujarati", language_code:"gu-IN"},
+  { state: "Jharkhand", language: "Hindi", language_code:"hi-IN"},
+  { state: "Madhya Pradesh", language: "Hindi", language_code:"hi-IN"},
+  { state: "Uttar Pradesh", language: "Hindi", language_code:"hi-IN"},
+  { state: "Rajasthan", language: "Hindi", language_code:"hi-IN" },
+  { state: "Bihar", language: "Hindi", language_code:"hi-IN"},
+  { state: "Jammu & Kashmir", language: "Hindi", language_code:"hi-IN"},
+  { state: "Chhattisgarh", language: "Hindi", language_code:"hi-IN"},
+  { state: "Karnataka", language: "Kannada", language_code:"kn-IN"},
+  { state: "Maharashtra", language: "Marathi", language_code:"mr-IN"},
+  { state: "Odisha", language: "Odiya", language_code:"od-IN"},
+  { state: "Tamil Nadu", language: "Tamil", language_code:"ta-IN"},
+  { state: "Telangana", language: "Telugu", language_code:"te-IN"}
+];

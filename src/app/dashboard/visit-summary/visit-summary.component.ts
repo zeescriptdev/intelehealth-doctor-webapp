@@ -27,7 +27,7 @@ import { TranslationService } from 'src/app/services/translation.service';
 import { deleteCacheData, getCacheData, setCacheData } from 'src/app/utils/utility-functions';
 import {
   doctorDetails, languages, visitTypes, facility, specialization, refer_specialization, refer_prioritie, strength, days, timing, PICK_FORMATS,
-  conceptIds, remark, routes, form
+  conceptIds, remark, routes, form, stateLanguages
 } from 'src/config/constant';
 import { VisitSummaryHelperService } from 'src/app/services/visit-summary-helper.service';
 import { ApiResponseModel, DataItemModel, DiagnosisModel, DocImagesModel, EncounterModel, EncounterProviderModel, MedicineModel, ObsApiResponseModel, ObsModel, PatientHistoryModel, PatientIdentifierModel, PatientModel, PersonAttributeModel, ProviderAttributeModel, ProviderModel, RecentVisitsApiResponseModel, ReferralModel, TestModel, VisitAttributeModel, VisitModel } from 'src/app/model/model';
@@ -62,6 +62,22 @@ export class VisitSummaryComponent implements OnInit, OnDestroy {
   providerName: string;
   hwPhoneNo: string;
   clinicName: string;
+  hwStateData: Object;
+  instructions: string = 'Add instructions';
+  advice: string = 'Add advice';
+  reason: string = 'Enter reason';
+  isAdviceRejected: boolean = false;
+  isInstructionRejected: boolean = false;
+  isReasonRejected: boolean = false;
+  approvAdviceMsg: boolean = false;
+  approvInstructionMsg: boolean = false;
+  approvReasonMsg: boolean = false;
+  disableApproveBtn: boolean;
+  disableInstructionBtn: boolean;
+  disableReasonBtn: boolean;
+  disableAddAdvice = false;
+  disableAddInstruction = false;
+  disableAddReason = false;
   vitalObs: ObsModel[] = [];
   cheifComplaints: string[] = [];
   checkUpReasonData: PatientHistoryModel[] = [];
@@ -139,6 +155,10 @@ export class VisitSummaryComponent implements OnInit, OnDestroy {
 
   openChatFlag: boolean = false;
   collapsed: boolean = true;
+
+  summaryText: string = '';
+  filteredSuggestions: string[] = [];
+  selectedIndex: number = 0;
 
   mainSearch = (text$: Observable<string>, list: string[]) =>
     text$.pipe(
@@ -328,6 +348,18 @@ export class VisitSummaryComponent implements OnInit, OnDestroy {
       } else {
         this.timeList = [];
       }
+    });
+
+    this.addAdviceForm.get('advice')?.valueChanges.subscribe(() => {
+      this.disableAddAdvice = false;
+    });
+
+    this.addAdditionalInstructionForm.get('note')?.valueChanges.subscribe(() => {
+      this.disableAddInstruction = false;
+    });
+
+    this.followUpForm.get('followUpReason')?.valueChanges.subscribe(() => {
+      this.disableAddReason = false;
     });
   }
 
@@ -1197,6 +1229,10 @@ export class VisitSummaryComponent implements OnInit, OnDestroy {
   */
   toggleAdditionalInstruction() {
     this.addMoreAdditionalInstruction = !this.addMoreAdditionalInstruction;
+    this.instructions = 'Add instructions';
+    this.disableAddInstruction = false;
+    this.isInstructionRejected = false;
+    this.disableInstructionBtn = false;
     this.addAdditionalInstructionForm.reset();
   }
 
@@ -1265,20 +1301,28 @@ export class VisitSummaryComponent implements OnInit, OnDestroy {
     if (this.addAdditionalInstructionForm.invalid) {
       return;
     }
-    if (this.additionalInstructions.find((o: ObsModel) => o.value === this.addAdditionalInstructionForm.value.note)) {
+    if (this.additionalInstructions.find((o: ObsModel) => o.value.includes(this.addAdditionalInstructionForm.value.note))) {
       this.toastr.warning(this.translateService.instant('Additional instruction already added, please add another instruction.'), this.translateService.instant('Already Added'));
       return;
     }
+    this.disableAddInstruction = true;
+    this.isInstructionRejected = false;
+    this.instructions = this.addAdditionalInstructionForm.value.note;
+  }
+
+  saveAdditionalInstructions(instructionsValue) {
     if (this.isVisitNoteProvider) {
       this.encounterService.postObs({
         concept: conceptIds.conceptMed,
         person: this.visit.patient.uuid,
         obsDatetime: new Date(),
-        value: this.addAdditionalInstructionForm.value.note,
+        value: instructionsValue,
         encounter: this.visitNotePresent.uuid
       }).subscribe((response: ObsModel) => {
-        this.additionalInstructions.unshift({ uuid: response.uuid, value: this.addAdditionalInstructionForm.value.note });
+        this.additionalInstructions.unshift({ uuid: response.uuid, value: instructionsValue });
         this.addAdditionalInstructionForm.reset();
+        this.instructions = 'Add instructions';
+        this.disableInstructionBtn = false;
       });
     } else {
       this.toastr.warning("Another doctor is viewing this case");
@@ -1336,7 +1380,10 @@ export class VisitSummaryComponent implements OnInit, OnDestroy {
   * @returns {void}
   */
   toggleAdvice() {
-    this.addMoreAdvice = !this.addMoreAdvice;
+    //this.addMoreAdvice = !this.addMoreAdvice;
+    this.advice = 'Add advice';
+    this.isAdviceRejected = false;
+    this.disableApproveBtn = false
     this.addAdviceForm.reset();
   }
 
@@ -1366,20 +1413,28 @@ export class VisitSummaryComponent implements OnInit, OnDestroy {
     if (this.addAdviceForm.invalid) {
       return;
     }
-    if (this.advices.find((o: ObsModel) => o.value === this.addAdviceForm.value.advice)) {
+    if (this.advices.find((o: ObsModel) => o.value.includes(this.addAdviceForm.value.advice))) {
       this.toastr.warning(this.translateService.instant('Advice already added, please add another advice.'), this.translateService.instant('Already Added'));
       return;
     }
+    this.disableAddAdvice = true;
+    this.isAdviceRejected = false;
+    this.advice = this.addAdviceForm.value.advice;
+  }
+
+  saveAdvice(advice: string) {
     if (this.isVisitNoteProvider) {
       this.encounterService.postObs({
         concept: conceptIds.conceptAdvice,
         person: this.visit.patient.uuid,
         obsDatetime: new Date(),
-        value: this.addAdviceForm.value.advice,
+        value: advice,
         encounter: this.visitNotePresent.uuid,
       }).subscribe((response: ObsModel) => {
-        this.advices.unshift({ uuid: response.uuid, value: this.addAdviceForm.value.advice });
+        this.advices.unshift({ uuid: response.uuid, value: advice });
         this.addAdviceForm.reset();
+        this.advice = 'Add advice';
+        this.disableApproveBtn = false;
       });
     } else {
       this.toastr.warning("Another doctor is viewing this case");
@@ -1587,7 +1642,7 @@ export class VisitSummaryComponent implements OnInit, OnDestroy {
   * Save followup
   * @returns {void}
   */
-  saveFollowUp() {
+  addFollowUp() {
     let body = {
       concept: conceptIds.conceptFollow,
       person: this.visit.patient.uuid,
@@ -1604,17 +1659,40 @@ export class VisitSummaryComponent implements OnInit, OnDestroy {
       body.value = (this.followUpForm.value.followUpReason) ?
         `${moment(this.followUpForm.value.followUpDate).format('YYYY-MM-DD')}, Time: ${this.followUpForm.value.followUpTime}, Remark: ${this.followUpForm.value.followUpReason}` : `${moment(this.followUpForm.value.followUpDate).format('YYYY-MM-DD')}, Time: ${this.followUpForm.value.followUpTime}`;
     }
+    if (this.followUpForm.value.followUpReason) {
+      this.disableAddReason = true;
+       this.isReasonRejected = false;
+      this.reason = this.followUpForm.value.followUpReason;
+    } else {
+      this.saveFollowUp(body);
+    }
+
+  }
+
+  saveFollowUp(body: { concept: string; person: string; obsDatetime: Date; value: string; encounter: string; }) {
     if (this.isVisitNoteProvider) {
       this.encounterService.postObs(body).subscribe((res: ObsModel) => {
         if (res) {
           this.followUpForm.patchValue({ present: true, uuid: res.uuid });
         }
+        this.disableReasonBtn = false;
       });
     } else {
       this.toastr.warning("Another doctor is viewing this case");
     }
   }
 
+
+  saveFollowUpTranslation(reason: string) {
+    let body = {
+      concept: conceptIds.conceptFollow,
+      person: this.visit.patient.uuid,
+      obsDatetime: new Date(),
+      value: `${moment(this.followUpForm.value.followUpDate).format('YYYY-MM-DD')}, Time: ${this.followUpForm.value.followUpTime}, Remark: ${reason}`,
+      encounter: this.visitNotePresent.uuid
+    }
+    this.saveFollowUp(body);
+  }
   /**
   * Delete followup
   * @returns {void}
@@ -1623,6 +1701,7 @@ export class VisitSummaryComponent implements OnInit, OnDestroy {
     if (this.isVisitNoteProvider) {
       this.diagnosisService.deleteObs(this.followUpForm.value.uuid).subscribe(() => {
         this.followUpForm.patchValue({ present: false, uuid: null, wantFollowUp: '', followUpDate: null, followUpTime: null, followUpReason: null });
+        this.onClearReason();
       });
     } else {
       this.toastr.warning("Another doctor is viewing this case");
@@ -1638,25 +1717,43 @@ export class VisitSummaryComponent implements OnInit, OnDestroy {
       this.toastr.warning(this.translateService.instant('Diagnosis not added'), this.translateService.instant('Diagnosis Required'));
       return false;
     }
-    if (!this.followUpForm.value.present) {
-      this.toastr.warning(this.translateService.instant('Follow-up not added'), this.translateService.instant('Follow-up Required'));
+    
+    if (this.instructions !== 'Add instructions' && this.isInstructionRejected === false) {
+      this.approvInstructionMsg = true;
+      this.toastr.warning(this.translateService.instant('Additional instruction is not approved'), this.translateService.instant('Approval Required'));
       return false;
+    }
+    if (this.advice !== 'Add advice' && !this.isAdviceRejected) {
+      this.approvAdviceMsg = true;
+      this.toastr.warning(this.translateService.instant('Advice is not approved'), this.translateService.instant('Approval Required'));
+      return false;
+    }
+
+    if (!this.followUpForm.value.present) {
+      if (this.reason !== 'Enter reason' && this.isReasonRejected === false) {
+        this.approvReasonMsg = true;
+        this.toastr.warning(this.translateService.instant('Follow-up reason is not approved'), this.translateService.instant('Approval Required'));
+        return false;
+      } else {
+        this.toastr.warning(this.translateService.instant('Follow-up not added'), this.translateService.instant('Follow-up Required'));
+        return false;
+      }
     }
     this.coreService.openSharePrescriptionConfirmModal().subscribe((res: boolean) => {
       if (res) {
         if (this.provider.attributes.length) {
           if (navigator.onLine) {
-              this.visitService.fetchVisitDetails(this.route.snapshot.paramMap.get('id')).subscribe((visitDetails) => {
+            this.visitService.fetchVisitDetails(this.route.snapshot.paramMap.get('id')).subscribe((visitDetails) => {
               let visitComplete = this.visitSummaryService.checkIfEncounterExists(visitDetails.encounters, visitTypes.VISIT_COMPLETE);
               let visitNote = this.visitSummaryService.checkIfEncounterExists(visitDetails.encounters, visitTypes.VISIT_NOTE);
               let isSameVisitNoteProvider = false;
-               visitNote?.encounterProviders?.forEach((p: EncounterProviderModel) => {
+              visitNote?.encounterProviders?.forEach((p: EncounterProviderModel) => {
                 if (p.provider.uuid === this.provider.uuid) {
-                 isSameVisitNoteProvider = true;
+                  isSameVisitNoteProvider = true;
                 }
               });
-              if(!visitNote) {
-               this.coreService.openSharePrescriptionErrorModal({ msg: 'Unable to send the prescription as the visit has already moved to the awaiting state because the 1-hour prescription provision window has passed.', confirmBtnText: 'Go to dashboard' }).subscribe((c: boolean) => {
+              if (!visitNote) {
+                this.coreService.openSharePrescriptionErrorModal({ msg: 'Unable to send the prescription as the visit has already moved to the awaiting state because the 1-hour prescription provision window has passed.', confirmBtnText: 'Go to dashboard' }).subscribe((c: boolean) => {
                   if (c) {
                     this.router.navigate(['/dashboard']);
                   }
@@ -1873,6 +1970,7 @@ export class VisitSummaryComponent implements OnInit, OnDestroy {
    */
   getLocationAndSetSanch() {
     this.visitService.getLocations().subscribe((res: any) => {
+      this.getStateByVillage(this.clinicName, res);
       const state = res.states.find(state => state?.name === this.patient?.person.preferredAddress.stateProvince);
       if (state) {
         let districtName = '-', sanchName = '-';
@@ -1942,5 +2040,157 @@ export class VisitSummaryComponent implements OnInit, OnDestroy {
       code = '#FF0000'
     }
     return code;
+  }
+
+  /**
+ * Finds the state name for a given village.
+ *
+ * @param villageName - The name of the village to search for
+ * @param locations   - The hierarchical location array (states → districts → [optional sanch] → villages)
+ * @returns The state name if the village is found, otherwise null
+ */
+  getStateByVillage(villageName: string, locations) {
+    let hwState: string;
+    for (const state of locations?.states) {
+      if (this.searchInDistricts(villageName, state.districts)) {
+        hwState = state.name;
+      }
+    }
+    this.hwStateData = stateLanguages?.find((v: any) => v.state === hwState);
+  }
+
+  searchInDistricts(villageName: string, districts: any[]): boolean {
+    return districts?.some(district => {
+      // Case 1: Villages directly under district
+      if (district.villages?.some((v: any) => v.name === villageName)) {
+        return true;
+      }
+
+      // Case 2: Villages inside sanch
+      return district.sanchs?.some(sanch =>
+        sanch.villages?.some((v: any) => v.name === villageName)
+      );
+    });
+  }
+
+  handleAction(event: { tabType: string; action: string, approvedText?: string }) {
+    switch (event.tabType) {
+      case 'instructions':
+        if (event.action === 'approve') {
+          let instructionsValue = this.getTranslationValue(this.addAdditionalInstructionForm.value.note, event?.approvedText);
+          this.saveAdditionalInstructions(instructionsValue);
+           this.isInstructionRejected = false;
+           this.approvInstructionMsg = false;
+        } else {
+          this.disableInstructionBtn = false;
+          this.isInstructionRejected = true;
+        }
+        break;
+
+      case 'advice':
+        if (event.action === 'approve') {
+          let adviceValue = this.getTranslationValue(this.addAdviceForm.value.advice, event?.approvedText);
+          this.saveAdvice(adviceValue);
+          this.isAdviceRejected = false;
+          this.approvAdviceMsg = false;
+        } else {
+          this.disableApproveBtn = false;
+          this.isAdviceRejected = true;
+        }
+        break;
+
+      case 'reason':
+        if (event.action === 'approve') {
+          let reasonValue = this.getTranslationValue(this.followUpForm.value.followUpReason, event?.approvedText);
+          this.saveFollowUpTranslation(reasonValue);
+          this.followUpForm.patchValue({ followUpReason: reasonValue });
+          this.isReasonRejected = false;
+          this.approvReasonMsg = false;
+        } else {
+          this.disableReasonBtn = false;
+          this.isReasonRejected = true;
+        }
+        break;
+    }
+  }
+
+  getTranslationValue(advice: any, approvedText: string) {
+    return advice + ' :: ' + approvedText;
+  }
+
+  onApprove(tabType: string) {
+    switch (tabType) {
+      case 'instructions':
+        this.isInstructionRejected = false;
+        this.disableInstructionBtn = true;
+        break;
+
+      case 'advice':
+        this.isAdviceRejected = false;
+        this.disableApproveBtn = true;
+        break;
+
+      case 'reason':
+        this.isReasonRejected = false;
+        this.disableReasonBtn = true;
+        break;
+    }
+  }
+
+  onClearReason() {
+    this.reason = 'Enter reason';
+    this.followUpForm.get('followUpReason')?.reset();
+    this.isReasonRejected = false;
+  }
+
+    onTextChange(event: any) {
+    const cursorPos = event.target.selectionStart;
+    const textBeforeCursor = this.summaryText.substring(0, cursorPos);
+    const lastWordMatch = textBeforeCursor.match(/(\S+)$/);
+    const lastWord = lastWordMatch ? lastWordMatch[0] : '';
+
+    if (lastWord.length > 0) {
+      this.filteredSuggestions = this.advicesList.filter(s =>
+        s.toLowerCase().startsWith(lastWord.toLowerCase())
+      );
+    } else {
+      this.filteredSuggestions = [];
+    }
+    this.selectedIndex = 0;
+  }
+
+  onKeyDown(event: KeyboardEvent) {
+    if (this.filteredSuggestions.length === 0) return;
+
+    if (event.key === 'ArrowDown') {
+      event.preventDefault();
+      this.selectedIndex = (this.selectedIndex + 1) % this.filteredSuggestions.length;
+    } else if (event.key === 'ArrowUp') {
+      event.preventDefault();
+      this.selectedIndex =
+        (this.selectedIndex - 1 + this.filteredSuggestions.length) %
+        this.filteredSuggestions.length;
+    } else if (event.key === 'Enter') {
+      event.preventDefault();
+      this.selectSuggestion(this.filteredSuggestions[this.selectedIndex]);
+    }
+  }
+
+  selectSuggestion(suggestion: string) {
+    const cursorPos = (document.getElementById('summary') as HTMLTextAreaElement).selectionStart;
+    const textBeforeCursor = this.summaryText.substring(0, cursorPos);
+    const textAfterCursor = this.summaryText.substring(cursorPos);
+
+    // Replace last word with selected suggestion
+    const newTextBeforeCursor = textBeforeCursor.replace(/(\S+)$/, suggestion + ' ');
+    this.summaryText = newTextBeforeCursor + textAfterCursor;
+
+    // Move cursor to after inserted suggestion
+    setTimeout(() => {
+      const textarea = document.getElementById('summary') as HTMLTextAreaElement;
+      textarea.selectionStart = textarea.selectionEnd = newTextBeforeCursor.length;
+    }, 0);
+
+    this.filteredSuggestions = [];
   }
 }
