@@ -306,6 +306,22 @@ export class VisitService {
      return this.http.post(url, json)
   }
 
+  getTranslatedText(textToTranslate: string, targetLang:string, tabType: string): Observable<any> {
+    return this.http.post(`${this.baseURLMindmap}/mindmap/translate`, this.buildRequestBody(textToTranslate, targetLang, tabType))
+  }
+
+  saveTranslatedData(body: any) {
+   return this.http.post(`${this.baseURLMindmap}/mindmap/saveTranslation`, body)
+  }
+  
+  // A reusable function to build translation request body
+  buildRequestBody(input: string, targetLang: string, tabType: string) {
+    return {
+      textToTranslate: input,
+      targetLang:targetLang,
+      tabType: tabType
+    };
+  }
   /**
    * Get followup date for a given encounter type
    * @param  visit - Visit

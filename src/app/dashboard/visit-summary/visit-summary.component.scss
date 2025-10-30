@@ -191,7 +191,7 @@
 .items-list {
   font-family: DM Sans;
   font-size: 16px;
-  padding: 24px 0px 0px 24px;
+  padding: 10px 0px 0px 24px;
   margin-bottom: 0px;
 
   li {
@@ -413,6 +413,7 @@
   }
 
   .blue-btn {
+    width: 130px;
     background: var(--color-darkBlue);
     border-radius: 8px;
     font-size: 18px;
@@ -422,6 +423,7 @@
   }
 
   .white-btn {
+    width: 130px;
     background: var(--color-white);
     border-radius: 8px;
     font-size: 18px;
@@ -433,6 +435,7 @@
   }
 
   .gray-btn {
+    width: 130px;
     background: var(--color-lightGray);
     border-radius: 8px;
     font-size: 18px;
@@ -441,6 +444,7 @@
     font-weight: bold;
     border: 1px solid var(--color-lightGray);
     padding: 10px 16px;
+    white-space: nowrap;
   }
 
   .blue-btn:disabled,
@@ -470,7 +474,7 @@
 }
 
 textarea.form-control {
-  height: fit-content;
+  height: 80px;
 }
 
 .form-control:focus {
@@ -559,10 +563,39 @@ textarea.form-control {
   opacity: 0.5;
 }
 
+.fTable {
+  table-layout: fixed;
+}
+
+.dropdown-suggestions {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  background: white;
+  border: 1px solid #ccc;
+  width: 100%;
+  max-height: 150px;
+  overflow-y: auto;
+  z-index: 10;
+  font-weight: 400;
+  color: #212529;
+}
+
+.dropdown-suggestions div {
+  padding: 5px 10px;
+  cursor: pointer;
+}
+
+.dropdown-suggestions div.active {
+  color: #fff;
+  text-decoration: none;
+  background-color: #007bff;
+}
+
 .table th,
 .table td {
   vertical-align: middle;
-  white-space: nowrap;
+  white-space: break-spaces;
 }
 
 .tableBorder {
@@ -754,6 +787,167 @@ th.mat-header-cell:last-child {
   display: none;
 }
 
+.instructions-row {
+  display: flex;
+  align-items: stretch;
+  gap: 1rem;
+
+  textarea {
+    flex: 1 1 50%;
+    resize: none;
+  }
+
+  .translation-box {
+    flex: 1 1 50%;
+    background: #e6f9f0;
+    border: 1px solid #ccead8;
+    border-radius: 8px;
+    padding: 0.75rem;
+    position: relative;
+
+    .translation-label {
+      position: absolute;
+      top: -12px;
+      left: 12px;
+      background: #fff;
+      padding: 0 6px;
+      font-size: 0.8rem;
+      font-weight: 500;
+      color: #555;
+    }
+
+    .translation-content {
+      margin-top: 8px;
+      font-size: 0.9rem;
+      color: #333;
+    }
+  }
+}
+
+.box-adjust {
+  width: 50%;
+  min-height: 80px;
+}
+
+.extra-margin {
+  margin-top: 28px;
+}
+
+textarea[formControlName="advice"].form-control,
+textarea[formControlName="followUpReason"].form-control {
+  height: 80px;
+  background: #F6F6F6 !important;
+  ;
+}
+
+.textarea-wrapper {
+  position: relative;
+  display: inline-block;
+}
+
+.textarea-wrapper textarea {
+  padding-right: 30px;
+  resize: none;
+}
+
+.close-btn {
+  position: absolute;
+  top: 6px;
+  right: 8px;
+  border: none;
+  background: transparent;
+  font-size: 18px;
+  font-weight: bold;
+  color: #888;
+  cursor: pointer;
+}
+
+.apr-btn-top {
+  top: 75px !important;
+}
+
+.apr-btn {
+  position: absolute;
+  top: 43px;
+  right: 8px;
+  border: none;
+  background: transparent;
+  font-size: 18px;
+  font-weight: bold;
+  color: #888;
+  cursor: pointer;
+}
+
+.textarea-wrapper {
+  position: relative; // make this the anchor
+  display: inline-block;
+  width: 50%; // so it expands with panel
+}
+
+.apr-btn1 {
+  right: 10px;
+  bottom: 32px;
+  position: absolute;
+  border: none;
+  background: transparent;
+  font-size: 18px;
+  font-weight: bold;
+  color: #888;
+  cursor: pointer;
+}
+
+.input-wrapper1 {
+  position: relative;
+  margin: 28px 0 0px;
+}
+
+.approve-btn {
+  position: absolute;
+  bottom: 8px;
+  right: 8px;
+  background: transparent;
+  border: none;
+  color: #555;
+  font-size: 18px;
+  cursor: pointer;
+}
+
+.approve-active {
+  width: 29px;
+  height: 29px;
+  background-image: url('../../../assets/svgs/approve.svg');
+}
+
+.approve-disabled {
+  width: 29px;
+  height: 29px;
+  pointer-events: none;
+  background-image: url('../../../assets/svgs/disable-approve.svg');
+}
+
+.input-wrapper1 label {
+  position: absolute;
+  top: 25px;
+  /* float above the input */
+  left: 17px;
+  /* align with input padding */
+  pointer-events: none;
+  /* so click goes to input */
+  font-size: 16px;
+  color: #919192;
+}
+
+.input-wrapper1 input {
+  height: 80px;
+}
+
+.top-strict {
+  height: 80px;
+  padding-top: 30px;
+  //padding-left: 12px;
+  box-sizing: border-box;
+}
+
 @media (max-width: 768px) {
 
   ::ng-deep .visit-summary-tab-group.mat-tab-group {
@@ -851,6 +1045,25 @@ th.mat-header-cell:last-child {
 
   .mobile-list {
     display: block;
+  }
+
+  .instructions-row {
+    flex-direction: column;
+
+    .box-adjust {
+      width: 100%;
+    }
+
+    .extra-margin {
+      margin-top: 0px;
+    }
+    .top-strict {
+      padding-bottom: 80px;
+      padding-top: 5px;
+    }
+    .apr-btn-top{
+      top:43px !important;
+    }
   }
 }
 

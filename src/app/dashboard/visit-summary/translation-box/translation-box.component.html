@@ -1,0 +1,50 @@
+<div class="pwa-margin-top translation-wrapper">
+  <!-- Floating Label (outside the green box but pinned to top-left) -->
+  <label class="translation-label">
+    <span class="important-text"> Review the {{tabType}} translated in
+      <b>{{ hwStateData?.language }}</b></span>
+  </label>
+
+  <!-- Green Box -->
+  <div class="translation-box">
+    <div class="translation-content low-width">
+      <div *ngIf="isLoading; else dataTemplate">
+      <ng-template #loading>
+        <div class="circle-loader"></div>
+      </ng-template>
+       <ng-container *ngTemplateOutlet="loading"></ng-container>
+      </div>
+      <ng-template #dataTemplate>
+        <span *ngIf="!tabButtonStates[tabType].isRejected">
+          <span *ngIf="changeDefaultTextToEnglish" class="gray">{{ showDefaultEnglishText }}</span>
+          <span *ngIf="!changeDefaultTextToEnglish" class="green">{{ tabResponses[tabType]?.translated_text}}</span>
+        </span>
+        <textarea *ngIf="tabButtonStates[tabType].isRejected" [(ngModel)]="tabResponses[tabType].translated_text"
+          class="form-control translatedTextarea">
+        </textarea>
+      </ng-template>
+    </div>
+
+    <!-- Button Group pinned bottom-right -->
+    <div class="button-group">
+      <button type="submit" class="reject-btn" *ngIf="shouldShowReject()" (click)="onReject()"
+        data-test-id="btnOnReject">
+        <img src="assets/svgs/reject.svg" alt="" />
+      </button>
+      <button type="submit" class="approve-btn" *ngIf="shouldShowApprove()" (click)="onApprove()"
+        data-test-id="btnOnApprove" [ngClass]="isApproveDisabled() ? 'approve-disabled' : 'approve-active'">
+      </button>
+      <button type="button" class="retry-btn" *ngIf="shouldShowRetry()" (click)="onRetry()" data-test-id="btnOnRetry">
+        <img src="assets/svgs/retry.svg" alt="" />
+      </button>
+    </div>
+  </div>
+</div>
+<small class="red-color" *ngIf="showError && !shouldShowApprove()">Something went wrong... please click on retry button
+  to try again.</small>
+<small class="red-color" *ngIf="showError && shouldShowApprove()">
+  <img src="assets/svgs/trans-error.svg" alt="" /> Please update manually the required translation.</small>
+<small class="red-color" *ngIf="tabButtonStates[tabType].isTranslationApr">
+  <img src="assets/svgs/trans-error.svg" alt="" /> Please approve to move ahead.</small>
+
+
