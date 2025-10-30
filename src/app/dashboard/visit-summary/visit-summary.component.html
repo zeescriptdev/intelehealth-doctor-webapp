@@ -2084,18 +2084,6 @@
 </ng-container>
 
               </mat-expansion-panel>
-
-              <app-follow-up-instruction
-                [title]="'Follow up'"
-                [isVisitNoteProvider]="isVisitNoteProvider"
-                [visitEnded]="visitEnded"
-                [visit]="visit"
-                [visitNotePresent]="visitNotePresent"
-                [isMCCUser]="isMCCUser"
-                (instructionsChanged)="onInstructionsChanged()"
-                *ngIf="isFeatureAvailable('follow-up-instruction')"
-              >
-              </app-follow-up-instruction>
             </ng-template>
             <mat-expansion-panel [expanded]="true" #panel7 hideToggle class="overflow-show" *ngIf="!brandName"
               data-test-id="matExpReferral">
