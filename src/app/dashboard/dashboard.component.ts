@@ -68,6 +68,8 @@ export class DashboardComponent implements OnInit {
   @ViewChild('followupMatSort', { static: true }) followupMatSort: MatSort;
 
 
+ currentSort = { active: 'visit_created', direction: 'desc' };
+
   offset: number = environment.recordsPerPage;
   awatingRecordsFetched: number = 0;
   pageEvent1: PageEvent;
@@ -190,6 +192,7 @@ export class DashboardComponent implements OnInit {
         this.getFollowUpVisits(newfollowupVisits);
         this.awaitingVisits.sort((a,b) => new Date(b.date_created) < new Date(a.date_created) ? -1 : 1);
         this.dataSource3.data = [...this.awaitingVisits];
+        this.applySorting();
         if (page == 1) {
           this.dataSource3.paginator = this.tempPaginator2;
           this.dataSource3.sort = this.awaitingMatSort;
@@ -786,5 +789,41 @@ export class DashboardComponent implements OnInit {
     };
     this.visitService.closeVisit(visit.uuid, json).subscribe(() => {
     });
+  }
+
+  ngAfterViewInit() {
+    this.awaitingMatSort.sortChange.subscribe(sort => {
+      this.currentSort = sort;
+      this.applySorting();
+    });
+  }
+
+  applySorting() {
+    const { active, direction } = this.currentSort;
+
+    this.awaitingVisits.sort((a, b) => {
+      if (!direction || direction === '') return 0;
+
+      const aValue = a[active];
+      const bValue = b[active];
+
+      // handle date fields properly
+      const aDate = new Date(aValue);
+      const bDate = new Date(bValue);
+
+      // If field is a date, compare by date
+      if (!isNaN(aDate.getTime()) && !isNaN(bDate.getTime())) {
+        return direction === 'asc'
+          ? aDate.getTime() - bDate.getTime()
+          : bDate.getTime() - aDate.getTime();
+      }
+
+      // Otherwise compare as strings
+      return direction === 'asc'
+        ? (aValue > bValue ? 1 : -1)
+        : (aValue < bValue ? 1 : -1);
+    });
+
+    this.dataSource3.data = [...this.awaitingVisits];
   }
 }
