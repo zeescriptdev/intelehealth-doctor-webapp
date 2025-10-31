@@ -497,7 +497,7 @@ export class DigitalStethoscopeComponent implements OnInit {
   heartPoints: MeasurementPoint[] = [
     { id: 1, top: '52%', left: '42%' },
     { id: 2, top: '52%', left: '58%' },
-    { id: 3, top: '68%', left: '58%' },
+    { id: 3, top: '63%', left: '58%' },
     { id: 4, top: '74%', left: '62%' }
   ];
 
