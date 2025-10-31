@@ -14,6 +14,48 @@ import { DiagnosisModel, EncounterModel, FollowUpDataModel, ObsApiResponseModel,
 (<any>pdfMake).vfs = pdfFonts.pdfMake.vfs;
 import { precription, logo } from "../../utils/base64"
 
+function detectFont(text: string): string {
+  for (const ch of text) {
+    const code = ch.charCodeAt(0);
+
+    if (code >= 0x0900 && code <= 0x097F) return 'NotoSansDevanagari'; // Hindi, Marathi
+    if (code >= 0x0980 && code <= 0x09FF) return 'NotoSansBengali';    // Bengali / Assamese
+    if (code >= 0x0A80 && code <= 0x0AFF) return 'NotoSansGujarati';   // Gujarati
+    if (code >= 0x0C80 && code <= 0x0CFF) return 'NotoSansKannada';    // Kannada
+    if (code >= 0x0B00 && code <= 0x0B7F) return 'NotoSansOdia';       // Odia
+    if (code >= 0x0B80 && code <= 0x0BFF) return 'NotoSansTamil';      // Tamil
+    if (code >= 0x0C00 && code <= 0x0C7F) return 'NotoSansTelugu';     // Telugu
+  }
+  return 'DmSans'; // default for English
+}
+
+function fontRun(text: string) {
+  // For mixed-script text
+  const runs: any[] = [];
+  let currentFont = detectFont(text[0]);
+  let buffer = '';
+
+  for (const ch of text) {
+    if (ch === ' ' || ch === '\n' || ch === '\t' || /[\s\d.,;!?"'()\-–—…]/.test(ch)) {
+      // spaces & breaks keep same font
+      buffer += ch;
+      continue;
+    }
+
+    const f = detectFont(ch);
+    if (f !== currentFont) {
+      runs.push({ text: buffer, font: currentFont });
+      buffer = ch;
+      currentFont = f;
+    } else {
+      buffer += ch;
+    }
+  }
+
+  if (buffer) runs.push({ text: buffer, font: currentFont });
+  return runs;
+}
+
 @Component({
   selector: 'app-view-visit-prescription',
   templateUrl: './view-visit-prescription.component.html',
@@ -75,7 +117,28 @@ export class ViewVisitPrescriptionComponent implements OnInit, OnDestroy {
         bold: `${window.location.origin}${environment.production ? '/intelehealth' : ''}/assets/fonts/DM_Sans/DMSans-Bold.ttf`,
         italics: `${window.location.origin}${environment.production ? '/intelehealth' : ''}/assets/fonts/DM_Sans/DMSans-Italic.ttf`,
         bolditalics: `${window.location.origin}${environment.production ? '/intelehealth' : ''}/assets/fonts/DM_Sans/DMSans-BoldItalic.ttf`,
-      }
+      },
+    NotoSansDevanagari: {
+    normal: `${window.location.origin}${environment.production ? '/intelehealth' : ''}/assets/fonts/NotoSans/NotoSansDevanagari-Regular.ttf`
+  },
+   NotoSansBengali: {
+    normal: `${window.location.origin}${environment.production ? '/intelehealth' : ''}/assets/fonts/NotoSans/NotoSansBengali-Regular.ttf`
+  },
+   NotoSansGujarati: {
+    normal: `${window.location.origin}${environment.production ? '/intelehealth' : ''}/assets/fonts/NotoSans/NotoSansGujarati-Regular.ttf`
+  },
+   NotoSansKannada: {
+    normal: `${window.location.origin}${environment.production ? '/intelehealth' : ''}/assets/fonts/NotoSans/NotoSansKannada-Regular.ttf`
+  },
+   NotoSansOdia: {
+    normal: `${window.location.origin}${environment.production ? '/intelehealth' : ''}/assets/fonts/NotoSans/NotoSansOriya-Regular.ttf`
+  },
+   NotoSansTamil: {
+    normal: `${window.location.origin}${environment.production ? '/intelehealth' : ''}/assets/fonts/NotoSans/NotoSansTamil-Regular.ttf`
+  },
+   NotoSansTelugu: {
+    normal: `${window.location.origin}${environment.production ? '/intelehealth' : ''}/assets/fonts/NotoSans/NotoSansTelugu-Regular.ttf`
+  },
     };
     this.eventsSubscription = this.download?.subscribe((val) => { if (val) { this.downloadPrescription(); } });
   }
@@ -1067,7 +1130,7 @@ export class ViewVisitPrescriptionComponent implements OnInit, OnDestroy {
       case 'additionalInstruction':
         if (this.additionalInstructions.length) {
           this.additionalInstructions.forEach(ai => {
-            records.push({ text: ai.value, margin: [0, 5, 0, 5] });
+            records.push({ text: fontRun(ai.value), margin: [0, 5, 0, 5] });
           });
         } else {
           records.push([{ text: 'No additional instructions added'}]);
@@ -1076,7 +1139,7 @@ export class ViewVisitPrescriptionComponent implements OnInit, OnDestroy {
       case 'advice':
         if (this.advices.length) {
           this.advices.forEach(a => {
-            records.push({ text: a.value, margin: [0, 5, 0, 5] });
+            records.push({ text: fontRun(a.value), margin: [0, 5, 0, 5] });
           });
         } else {
           records.push([{ text: 'No advices added'}]);
@@ -1101,13 +1164,40 @@ export class ViewVisitPrescriptionComponent implements OnInit, OnDestroy {
         }
         break;
       case 'followUp':
-          if (this.followUp) {
-            records.push([this.followUp.wantFollowUp, this.followUp.followUpDate ? moment(this.followUp.followUpDate).format('DD MMM YYYY'): '-',
-             this.followUp.followUpTime ? this.followUp.followUpTime : '-', this.followUp.followUpReason ? this.followUp.followUpReason : '-']);
-          } else {
-            records.push([{text: 'No followup added', colSpan: 4, alignment: 'center'}]);
-          }
-          break;
+        if (this.followUp) {
+          // Detect fonts for the Reason text
+          const reasonRuns = fontRun(
+            this.followUp.followUpReason ? this.followUp.followUpReason : '-'
+          );
+
+          // Convert runs into pdfmake-friendly fragments
+          const pdfmakeReason = reasonRuns.map(r => ({
+            text: r.text,
+            font: r.font
+          }));
+
+          records.push([
+            this.followUp.wantFollowUp || '-',
+            this.followUp.followUpDate
+              ? moment(this.followUp.followUpDate).format('DD MMM YYYY')
+              : '-',
+            this.followUp.followUpTime || '-',
+            {
+              text: pdfmakeReason,     // ← array of fragments
+              alignment: 'left',
+            }
+          ]);
+        } else {
+          records.push([
+            {
+              text: 'No followup added',
+              colSpan: 4,
+              alignment: 'center'
+            },
+            {}, {}, {}
+          ]);
+        }
+        break;
       case 'cheifComplaint':
         if (this.cheifComplaints.length) {
           this.cheifComplaints.forEach(cc => {
