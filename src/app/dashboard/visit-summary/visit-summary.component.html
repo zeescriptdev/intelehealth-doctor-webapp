@@ -459,6 +459,14 @@
                           </li>
                         </ul>
                       </ng-container>
+                      <!-- END Diagnosis -->
+
+                      <!-- Digital Stethoscope: interactive UI -->
+                      <ng-container *ngSwitchCase="pvsConstant['digital_stethoscope'].key">
+                        <app-digital-stethoscope></app-digital-stethoscope>
+                      </ng-container>
+                      <!-- END Digital Stethoscope -->
+
                       <!-- Vitals -->
                         <ng-container *ngSwitchCase="pvsConstant['vitals'].key">
                           <ul class="items-list">

@@ -154,6 +154,447 @@ export class VisitSummaryComponent implements OnInit, OnDestroy, AfterViewInit {
   patientRegFields: string[] = [];
   vitals: VitalModel[] = [];
   diagnostics: DiagnosticModel[] = [];
+  digitalStethoscope: DiagnosticModel[] = [];
+  // Digital stethoscope playback state (UI helper)
+  dsAudio: HTMLAudioElement | null = null;
+  dsPlaying: boolean = false;
+  dsCurrentIndex: number = -1;
+  dsSpeed: number = 1.0;
+  dsGraphicalInsightOpen: boolean = false;
+  heartSoundData:any = [
+    {
+      "heart_bpm": "79",
+      "location": "heart",
+      "position": "aortic",
+      "report_url": "https://analytics-html-js-plot.s3.amazonaws.com/Ali.ayudevices40gmail.com_1_2020092620115128.084_A/Ali.ayudevices40gmail.com_1_2020092620115128.084_A.html",
+      "screening_results": [
+        {
+          "confidence_score": 97,
+          "condition": "Normal Heart Sound",
+          "description": "Abnormal heart sound",
+          "condition_detected": "false"
+        },
+        {
+          "confidence_score": 72,
+          "condition": "Murmur",
+          "type": "Soft Murmur",
+          "description": "Soft murmur detected",
+          "condition_detected": "true"
+        },
+        {
+          "confidence_score": 67,
+          "condition": "Pulmonary Arterial Hypertension",
+          "description": "Possibly PAH detected",
+          "condition_detected": "true"
+        }
+      ]
+    },
+    {
+      "heart_bpm": "75",
+      "location": "heart",
+      "position": "left ventricle",
+      "report_url": "https://analytics-html-js-plot.s3.amazonaws.com/Ali.ayudevices40gmail.com_1_2020092620115128.084_A/Ali.ayudevices40gmail.com_1_2020092620115128.084_A.html",
+      "screening_results": [
+        {
+          "confidence_score": 88,
+          "condition": "Normal Heart Sound",
+          "description": "Normal heart sound detected",
+          "condition_detected": "false"
+        },
+        {
+          "confidence_score": 55,
+          "condition": "Murmur",
+          "type": "Soft Murmur",
+          "description": "Murmur detected",
+          "condition_detected": "true"
+        },
+        {
+          "confidence_score": 60,
+          "condition": "Pulmonary Arterial Hypertension",
+          "description": "Possible PAH detected",
+          "condition_detected": "true"
+        }
+      ]
+    },
+    {
+      "heart_bpm": "82",
+      "location": "heart",
+      "position": "right atrium",
+      "report_url": "https://analytics-html-js-plot.s3.amazonaws.com/Ali.ayudevices40gmail.com_1_2020092620115128.084_A/Ali.ayudevices40gmail.com_1_2020092620115128.084_A.html",
+      "screening_results": [
+        {
+          "confidence_score": 94,
+          "condition": "Normal Heart Sound",
+          "description": "Normal heart sound detected",
+          "condition_detected": "false"
+        },
+        {
+          "confidence_score": 50,
+          "condition": "Murmur",
+          "type": "Medium Murmur",
+          "description": "Medium murmur detected",
+          "condition_detected": "true"
+        },
+        {
+          "confidence_score": 66,
+          "condition": "Pulmonary Arterial Hypertension",
+          "description": "Possible PAH detected",
+          "condition_detected": "true"
+        }
+      ]
+    },
+    {
+      "heart_bpm": "74",
+      "location": "heart",
+      "position": "mitral valve",
+      "report_url": "https://analytics-html-js-plot.s3.amazonaws.com/Ali.ayudevices40gmail.com_1_2020092620115128.084_A/Ali.ayudevices40gmail.com_1_2020092620115128.084_A.html",
+      "screening_results": [
+        {
+          "confidence_score": 90,
+          "condition": "Normal Heart Sound",
+          "description": "Normal heart sound detected",
+          "condition_detected": "false"
+        },
+        {
+          "confidence_score": 62,
+          "condition": "Murmur",
+          "type": "Soft Murmur",
+          "description": "Soft murmur detected",
+          "condition_detected": "true"
+        },
+        {
+          "confidence_score": 59,
+          "condition": "Pulmonary Arterial Hypertension",
+          "description": "Possible PAH detected",
+          "condition_detected": "true"
+        }
+      ]
+    }
+  ];
+  lungData:any = [
+    {
+      "lung_bpm": "16",
+      "location": "lung",
+      "position": "right lung",
+      "report_url": "https://analytics-html-js-plot.s3.amazonaws.com/nivethaintelehealth.org_1_2025101420145521.448_Ant_6/nivethaintelehealth.org_1_2025101420145521.448_Ant_6.html",
+      "screening_results": [
+        {
+          "confidence_score": 96,
+          "condition": "Normal Lung Sound",
+          "description": "Normal lung sound detected",
+          "condition_detected": "false"
+        },
+        {
+          "confidence_score": 68,
+          "condition": "Wheeze",
+          "description": "Wheezing detected",
+          "condition_detected": "true"
+        }
+      ]
+    },
+    {
+      "lung_bpm": "14",
+      "location": "lung",
+      "position": "left lung",
+      "report_url": "https://analytics-html-js-plot.s3.amazonaws.com/nivethaintelehealth.org_1_2025101420145521.448_Ant_6/nivethaintelehealth.org_1_2025101420145521.448_Ant_6.html",
+      "screening_results": [
+        {
+          "confidence_score": 88,
+          "condition": "Normal Lung Sound",
+          "description": "Normal lung sound detected",
+          "condition_detected": "false"
+        },
+        {
+          "confidence_score": 72,
+          "condition": "Crackles",
+          "description": "Crackling sounds detected",
+          "condition_detected": "true"
+        }
+      ]
+    },
+    {
+      "lung_bpm": "20",
+      "location": "lung",
+      "position": "right lung",
+      "report_url": "https://analytics-html-js-plot.s3.amazonaws.com/nivethaintelehealth.org_1_2025101420145521.448_Ant_6/nivethaintelehealth.org_1_2025101420145521.448_Ant_6.html",
+      "screening_results": [
+        {
+          "confidence_score": 90,
+          "condition": "Normal Lung Sound",
+          "description": "Normal lung sound detected",
+          "condition_detected": "false"
+        },
+        {
+          "confidence_score": 65,
+          "condition": "Wheeze",
+          "description": "Wheezing detected",
+          "condition_detected": "true"
+        }
+      ]
+    },
+    {
+      "lung_bpm": "17",
+      "location": "lung",
+      "position": "left lung",
+      "report_url": "https://analytics-html-js-plot.s3.amazonaws.com/nivethaintelehealth.org_1_2025101420145521.448_Ant_6/nivethaintelehealth.org_1_2025101420145521.448_Ant_6.html",
+      "screening_results": [
+        {
+          "confidence_score": 93,
+          "condition": "Normal Lung Sound",
+          "description": "Normal lung sound detected",
+          "condition_detected": "false"
+        },
+        {
+          "confidence_score": 71,
+          "condition": "Rhonchi",
+          "description": "Rhonchi detected",
+          "condition_detected": "true"
+        }
+      ]
+    },
+    {
+      "lung_bpm": "22",
+      "location": "lung",
+      "position": "right lung",
+      "report_url": "https://analytics-html-js-plot.s3.amazonaws.com/nivethaintelehealth.org_1_2025101420145521.448_Ant_5/nivethaintelehealth.org_1_2025101420145521.448_Ant_5.html",
+      "screening_results": [
+        {
+          "confidence_score": 89,
+          "condition": "Normal Lung Sound",
+          "description": "Normal lung sound detected",
+          "condition_detected": "false"
+        },
+        {
+          "confidence_score": 60,
+          "condition": "Crackles",
+          "description": "Crackling sounds detected",
+          "condition_detected": "true"
+        }
+      ]
+    },
+    {
+      "lung_bpm": "18",
+      "location": "lung",
+      "position": "left lung",
+      "report_url": "https://analytics-html-js-plot.s3.amazonaws.com/nivethaintelehealth.org_1_2025101420145521.448_Ant_5/nivethaintelehealth.org_1_2025101420145521.448_Ant_5.html",
+      "screening_results": [
+        {
+          "confidence_score": 91,
+          "condition": "Normal Lung Sound",
+          "description": "Normal lung sound detected",
+          "condition_detected": "false"
+        },
+        {
+          "confidence_score": 63,
+          "condition": "Wheeze",
+          "description": "Wheezing detected",
+          "condition_detected": "true"
+        }
+      ]
+    },
+    {
+      "lung_bpm": "15",
+      "location": "lung",
+      "position": "right lung",
+      "report_url": "https://analytics-html-js-plot.s3.amazonaws.com/nivethaintelehealth.org_1_2025101420145521.448_Ant_5/nivethaintelehealth.org_1_2025101420145521.448_Ant_5.html",
+      "screening_results": [
+        {
+          "confidence_score": 94,
+          "condition": "Normal Lung Sound",
+          "description": "Normal lung sound detected",
+          "condition_detected": "false"
+        },
+        {
+          "confidence_score": 70,
+          "condition": "Rhonchi",
+          "description": "Rhonchi detected",
+          "condition_detected": "true"
+        }
+      ]
+    },
+    {
+      "lung_bpm": "19",
+      "location": "lung",
+      "position": "left lung",
+      "report_url": "https://analytics-html-js-plot.s3.amazonaws.com/nivethaintelehealth.org_1_2025101420145521.448_Ant_3/nivethaintelehealth.org_1_2025101420145521.448_Ant_3.html",
+      "screening_results": [
+        {
+          "confidence_score": 95,
+          "condition": "Normal Lung Sound",
+          "description": "Normal lung sound detected",
+          "condition_detected": "false"
+        },
+        {
+          "confidence_score": 62,
+          "condition": "Crackles",
+          "description": "Crackling sounds detected",
+          "condition_detected": "true"
+        }
+      ]
+    },
+    {
+      "lung_bpm": "20",
+      "location": "lung",
+      "position": "right lung",
+      "report_url": "https://analytics-html-js-plot.s3.amazonaws.com/nivethaintelehealth.org_1_2025101420145521.448_Ant_3/nivethaintelehealth.org_1_2025101420145521.448_Ant_3.html",
+      "screening_results": [
+        {
+          "confidence_score": 92,
+          "condition": "Normal Lung Sound",
+          "description": "Normal lung sound detected",
+          "condition_detected": "false"
+        },
+        {
+          "confidence_score": 64,
+          "condition": "Wheeze",
+          "description": "Wheezing detected",
+          "condition_detected": "true"
+        }
+      ]
+    },
+    {
+      "lung_bpm": "18",
+      "location": "lung",
+      "position": "left lung",
+      "report_url": "https://analytics-html-js-plot.s3.amazonaws.com/nivethaintelehealth.org_1_2025101420145521.448_Ant_3/nivethaintelehealth.org_1_2025101420145521.448_Ant_3.html",
+      "screening_results": [
+        {
+          "confidence_score": 91,
+          "condition": "Normal Lung Sound",
+          "description": "Normal lung sound detected",
+          "condition_detected": "false"
+        },
+        {
+          "confidence_score": 69,
+          "condition": "Rhonchi",
+          "description": "Rhonchi detected",
+          "condition_detected": "true"
+        }
+      ]
+    },
+    {
+      "lung_bpm": "16",
+      "location": "lung",
+      "position": "right lung",
+      "report_url": "https://analytics-html-js-plot.s3.amazonaws.com/nivethaintelehealth.org_1_2025101420145521.448_Ant_1/nivethaintelehealth.org_1_2025101420145521.448_Ant_1.html",
+      "screening_results": [
+        {
+          "confidence_score": 88,
+          "condition": "Normal Lung Sound",
+          "description": "Normal lung sound detected",
+          "condition_detected": "false"
+        },
+        {
+          "confidence_score": 72,
+          "condition": "Crackles",
+          "description": "Crackling sounds detected",
+          "condition_detected": "true"
+        }
+      ]
+    },
+    {
+      "lung_bpm": "21",
+      "location": "lung",
+      "position": "left lung",
+      "report_url": "https://analytics-html-js-plot.s3.amazonaws.com/nivethaintelehealth.org_1_2025101420145521.448_Ant_1/nivethaintelehealth.org_1_2025101420145521.448_Ant_1.html",
+      "screening_results": [
+        {
+          "confidence_score": 90,
+          "condition": "Normal Lung Sound",
+          "description": "Normal lung sound detected",
+          "condition_detected": "false"
+        },
+        {
+          "confidence_score": 67,
+          "condition": "Wheeze",
+          "description": "Wheezing detected",
+          "condition_detected": "true"
+        }
+      ]
+    },
+    {
+      "lung_bpm": "17",
+      "location": "lung",
+      "position": "right lung",
+      "report_url": "https://analytics-html-js-plot.s3.amazonaws.com/nivethaintelehealth.org_1_2025101420145521.448_Ant_1/nivethaintelehealth.org_1_2025101420145521.448_Ant_1.html",
+      "screening_results": [
+        {
+          "confidence_score": 89,
+          "condition": "Normal Lung Sound",
+          "description": "Normal lung sound detected",
+          "condition_detected": "false"
+        },
+        {
+          "confidence_score": 74,
+          "condition": "Crackles",
+          "description": "Crackling sounds detected",
+          "condition_detected": "true"
+        }
+      ]
+    },
+    {
+      "lung_bpm": "22",
+      "location": "lung",
+      "position": "left lung",
+      "report_url": "https://analytics-html-js-plot.s3.amazonaws.com/nivethaintelehealth.org_1_2025101420145521.448_Ant_1/nivethaintelehealth.org_1_2025101420145521.448_Ant_1.html",
+      "screening_results": [
+        {
+          "confidence_score": 92,
+          "condition": "Normal Lung Sound",
+          "description": "Normal lung sound detected",
+          "condition_detected": "false"
+        },
+        {
+          "confidence_score": 66,
+          "condition": "Rhonchi",
+          "description": "Rhonchi detected",
+          "condition_detected": "true"
+        }
+      ]
+    },
+    {
+      "lung_bpm": "19",
+      "location": "lung",
+      "position": "right lung",
+      "report_url": "https://analytics-html-js-plot.s3.amazonaws.com/nivethaintelehealth.org_1_2025101420145521.448_Ant_2/nivethaintelehealth.org_1_2025101420145521.448_Ant_2.html",
+      "screening_results": [
+        {
+          "confidence_score": 85,
+          "condition": "Normal Lung Sound",
+          "description": "Normal lung sound detected",
+          "condition_detected": "false"
+        },
+        {
+          "confidence_score": 70,
+          "condition": "Wheeze",
+          "description": "Wheezing detected",
+          "condition_detected": "true"
+        }
+      ]
+    },
+    {
+      "lung_bpm": "16",
+      "location": "lung",
+      "position": "left lung",
+      "report_url": "https://analytics-html-js-plot.s3.amazonaws.com/nivethaintelehealth.org_1_2025101420145521.448_Ant_2/nivethaintelehealth.org_1_2025101420145521.448_Ant_2.html",
+      "screening_results": [
+        {
+          "confidence_score": 93,
+          "condition": "Normal Lung Sound",
+          "description": "Normal lung sound detected",
+          "condition_detected": "false"
+        },
+        {
+          "confidence_score": 69,
+          "condition": "Crackles",
+          "description": "Crackling sounds detected",
+          "condition_detected": "true"
+        }
+      ]
+    }
+  ]
+
+
   patientVisitSummary: PatientVisitSummaryConfigModel;
   pvsConfigs: PatientVisitSection[] = [];
   pvsConstant = VISIT_SECTIONS;
@@ -436,6 +877,7 @@ export class VisitSummaryComponent implements OnInit, OnDestroy, AfterViewInit {
 
     this.vitals = [...this.appConfigService.patient_vitals];
     this.diagnostics = this.appConfigService.patient_diagnostics_section ? [...this.appConfigService.patient_diagnostics] : [];
+    this.digitalStethoscope = this.appConfigService.digital_stethoscope_section ? [...this.appConfigService.digital_stethoscope] : [];
     this.specializations = [...this.appConfigService.specialization];
     this.referSpecializations = this.appConfigService?.dropdown_values?.['refer specialisation']?.filter((val) => val?.is_enabled);
     this.patientVisitSummary = { ...this.appConfigService.patient_visit_summary };
@@ -555,6 +997,17 @@ export class VisitSummaryComponent implements OnInit, OnDestroy, AfterViewInit {
       this.appConfigService.patient_visit_sections = this.appConfigService.patient_visit_sections.filter((e: PatientVisitSection) => e.key !== 'diagnostics');
     }
     this.pvsConfigs = this.appConfigService.patient_visit_sections.filter(obj=>!["share_prescription","share_patient_visit_summary"].includes(obj.key));
+    // Ensure digital_stethoscope section exists in pvsConfigs so template ngFor can iterate it even if
+    // the server config didn't include it. This is a local bypass for visibility/testing.
+    // try {
+    //   const dsKey = this.pvsConstant['digital_stethoscope'].key;
+    //   if (!this.pvsConfigs.find(p => p.key === dsKey)) {
+    //     // push a minimal section entry. Other properties (lang, name) will be null/missing but not required for rendering.
+    //     this.pvsConfigs.push({ key: dsKey, is_enabled: true, lang: null, name: 'Digital Stethoscope' } as any);
+    //   }
+    // } catch (e) {
+    //   // ignore if pvsConstant doesn't have the key (very unlikely)
+    // }
     this.isMCCUser = !!this.rolesService.getRole('ORGANIZATIONAL:MCC');
   }
 
@@ -585,6 +1038,65 @@ export class VisitSummaryComponent implements OnInit, OnDestroy, AfterViewInit {
     this.dSearchSubject.pipe(debounceTime(500), distinctUntilChanged()).subscribe(searchTextValue => {
       this.searchDiagnosis(searchTextValue);
     });
+    // If sample heartSoundData is present, integrate it so the DS UI becomes dynamic
+    this.integrateHeartSoundData();
+  }
+
+  /**
+   * Integrate sample heartSoundData into the digitalStethoscope array so UI becomes dynamic.
+   * This maps incoming obs-style objects into the shape used by the template.
+   */
+  integrateHeartSoundData(): void {
+    if (!this.heartSoundData || !this.heartSoundData.length) return;
+    // Map heartSoundData into digitalStethoscope entries.
+    this.digitalStethoscope = this.heartSoundData.map((h: any, idx: number) => {
+      return {
+        // use provided fields where possible; template expects .name and heartRate
+        uuid: h.uuid || (`hs-${idx}`),
+        name: h.position ? this.capitalizeWords(h.position) : (h.position || `Position ${idx+1}`),
+        position: h.position,
+        heartRate: h.heart_bpm || h.heartRate || null,
+        screening_results: h.screening_results || [],
+        // optional audioUrl (if obs contains binary path or external url)
+        audioUrl: h.audioUrl || h.audio_url || null,
+        // keep original payload for debugging
+        _raw: h
+      } as any;
+    });
+
+    // default to first position selected so UI shows data
+    if (this.digitalStethoscope.length && this.dsCurrentIndex < 0) {
+      this.dsCurrentIndex = 0;
+    }
+  }
+
+  capitalizeWords(s: string): string {
+    if (!s) return s;
+    return s.split(/\s+/).map((w: string) => w.charAt(0).toUpperCase() + w.slice(1)).join(' ');
+  }
+
+  /**
+   * Returns a short summary string for the top screening result at the given index.
+   * Example: "Murmur (72%)" or "Normal (97%)".
+   */
+  getTopCondition(index: number): string {
+    const d = this.digitalStethoscope && this.digitalStethoscope[index];
+  if (!d || !(d as any).screening_results || !(d as any).screening_results.length) return '';
+  // prefer detected conditions (condition_detected true) and highest confidence
+  const sorted = [...(d as any).screening_results].sort((a: any, b: any) => (b.confidence_score || 0) - (a.confidence_score || 0));
+    const top = sorted[0];
+    if (!top) return '';
+    const cond = top.condition || top.type || 'Result';
+    const score = top.confidence_score != null ? `${top.confidence_score}%` : '';
+    return `${cond}${score ? ' (' + score + ')' : ''}`;
+  }
+
+  /** Return tooltip text for hotspot at index */
+  getHotspotTooltip(index: number): string {
+    const d = this.digitalStethoscope && this.digitalStethoscope[index];
+  const name = d?.name || this.capitalizeWords((d as any)?.position || `Position ${index+1}`);
+    const cond = this.getTopCondition(index);
+    return cond ? `${name}: ${cond}` : name;
   }
 
   /**
@@ -2505,6 +3017,14 @@ export class VisitSummaryComponent implements OnInit, OnDestroy, AfterViewInit {
     if(this.callTimerInterval && !this.callTimerInterval.closed) this.callTimerInterval.unsubscribe();
     // Add unsubscribe from form tracking
     this.unsubscribeFromFormTracking();
+    // cleanup digital stethoscope audio
+    if (this.dsAudio) {
+      try {
+        this.dsAudio.pause();
+        this.dsAudio.src = '';
+      } catch (e) {}
+      this.dsAudio = null;
+    }
   }
 
   /**
@@ -2546,6 +3066,101 @@ export class VisitSummaryComponent implements OnInit, OnDestroy, AfterViewInit {
   getAbhaDetails(_patient: PatientModel): void {
     this.patient.person.abhaNumber = _patient.identifiers.find((v) => v.identifierType?.display?.toLowerCase() === 'abha number')?.identifier
     this.patient.person.abhaAddress = _patient.identifiers.find((v) => v.identifierType?.display?.toLowerCase() === 'abha address')?.identifier
+  }
+
+  /**
+   * Get audio URL for a digital stethoscope obs entry
+   */
+  getDsUrl(d: any): string {
+    // If the mapped object contains an explicit audioUrl use it
+    if (!d) return '';
+    if (d.audioUrl && typeof d.audioUrl === 'string' && d.audioUrl.trim().length) return d.audioUrl;
+    // otherwise, if the object looks like an obs with uuid, return the obs binary path
+    if (d.uuid && String(d.uuid).indexOf('hs-') !== 0) {
+      return `${this.baseURL}/obs/${d.uuid}/value`;
+    }
+    // No usable audio URL available
+    return '';
+  }
+
+  /**
+   * Play selected digital stethoscope position
+   * @param index index in digitalStethoscope array
+   */
+  playDs(index: number): void {
+    if (!this.digitalStethoscope || !this.digitalStethoscope.length) return;
+    if (index < 0 || index >= this.digitalStethoscope.length) return;
+
+    // if clicking the currently playing index, toggle pause/play
+    if (this.dsCurrentIndex === index && this.dsAudio) {
+      if (this.dsPlaying) {
+        this.dsAudio.pause();
+        this.dsPlaying = false;
+      } else {
+        this.dsAudio.play();
+        this.dsPlaying = true;
+      }
+      return;
+    }
+
+    // otherwise stop previous audio
+    if (this.dsAudio) {
+      try { this.dsAudio.pause(); } catch (e) {}
+      this.dsAudio = null;
+    }
+
+    const d = this.digitalStethoscope[index];
+  const url = this.getDsUrl(d) || (d as any)?.audioUrl || null;
+
+    // If there is no audio to play, just set the selected index and return (UI still shows details)
+    if (!url) {
+      this.dsPlaying = false;
+      this.dsCurrentIndex = index;
+      return;
+    }
+
+    this.dsAudio = new Audio(url);
+    this.dsAudio.playbackRate = this.dsSpeed || 1.0;
+    this.dsAudio.play().then(() => {
+      this.dsPlaying = true;
+      this.dsCurrentIndex = index;
+    }).catch(() => {
+      this.dsPlaying = false;
+      this.dsCurrentIndex = index;
+    });
+
+    this.dsAudio.onended = () => {
+      this.dsPlaying = false;
+    };
+  }
+
+  togglePlayFor(index: number): void {
+    if (index === undefined || index < 0) return;
+    this.playDs(index);
+  }
+
+  /** Seek the current playing audio forward/back by seconds (positive/negative). */
+  seekDs(seconds: number): void {
+    if (!this.dsAudio) return;
+    try {
+      const newTime = Math.max(0, (this.dsAudio.currentTime || 0) + seconds);
+      this.dsAudio.currentTime = newTime;
+    } catch (e) {
+      // ignore if seeking not supported
+    }
+  }
+
+  setDsSpeed(v: number | string): void {
+    const sp = Number(v) || 1.0;
+    this.dsSpeed = sp;
+    if (this.dsAudio) {
+      try { this.dsAudio.playbackRate = this.dsSpeed; } catch (e) {}
+    }
+  }
+
+  openGraphicalInsight(): void {
+    // placeholder action — in real implementation this could open a modal with waveform / analysis
+    this.dsGraphicalInsightOpen = !this.dsGraphicalInsightOpen;
   }
 
   updateAbhaDetails(encounterUUID: string): void {
