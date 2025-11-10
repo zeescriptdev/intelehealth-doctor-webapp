@@ -701,6 +701,7 @@ export class VisitSummaryComponent implements OnInit, OnDestroy, AfterViewInit {
               this.checkIfPatientInteractionPresent(visit.attributes);
               this.checkIfDiagnosisPresent();
               this.checkIfMedicationPresent();
+              this.checkIfAdditionalInstructionPresent();
               this.getAdvicesList();
               this.checkIfAdvicePresent();
               this.getTestsList();
@@ -1807,7 +1808,7 @@ export class VisitSummaryComponent implements OnInit, OnDestroy, AfterViewInit {
         return this.diagnosisService.deleteObs(this.additionalInstructionForm.value.uuid).pipe(tap((response: ObsModel) => this.additionalInstructionForm.patchValue({ uuid: null })))
     } else if (this.additionalInstructionForm.valid) {
       return this.encounterService.postObs({
-        concept: conceptIds.conceptMed,
+        concept: conceptIds.conceptAdvice,
         person: this.visit.patient.uuid,
         obsDatetime: new Date(),
         value: this.additionalInstructionForm.value.value,
@@ -1872,6 +1873,37 @@ export class VisitSummaryComponent implements OnInit, OnDestroy, AfterViewInit {
   }
 
   /**
+  * Get additional instructions for the visit
+  * @returns {void}
+  */
+  checkIfAdditionalInstructionPresent(): void {
+    this.diagnosisService.getObs(this.visit.patient.uuid, conceptIds.conceptAdvice)
+      .subscribe((response: ObsApiResponseModel) => {
+        response.results.forEach((obs: ObsModel) => {
+          if (obs.encounter && obs.encounter.visit.uuid === this.visit.uuid) {
+            // Check if this observation is the additional instruction (not a regular advice)
+            // Additional instructions are stored as single observations without the medication format
+            // They don't contain HTML links and are typically longer text
+            if (this.additionalInstructionForm && !obs.value.includes('</a>')) {
+              // Additional instructions are typically longer text without the colon-separated format
+              // We identify them by checking if they don't match the medication pattern
+              if (!obs.value.includes(':') || obs.value.split(':').length < 3) {
+                // Check if this is likely an additional instruction (not a short advice)
+                // Additional instructions are usually longer and more detailed
+                if (obs.value.length > 20 || !this.advicesList.includes(obs.value)) {
+                  this.additionalInstructions = obs;
+                  if (this.additionalInstructionForm) {
+                    this.additionalInstructionForm.patchValue({ uuid: obs.uuid, value: obs.value });
+                  }
+                }
+              }
+            }
+          }
+        });
+      });
+  }
+
+  /**
   * Get advices for the visit
   * @returns {void}
   */
@@ -1882,7 +1914,10 @@ export class VisitSummaryComponent implements OnInit, OnDestroy, AfterViewInit {
         response.results.forEach((obs: ObsModel) => {
           if (obs.encounter && obs.encounter.visit.uuid === this.visit.uuid) {
             if (!obs.value.includes('</a>')) {
-              this.advices.push(obs);
+              // Exclude additional instructions from advices list
+              if (!this.additionalInstructions || this.additionalInstructions.uuid !== obs.uuid) {
+                this.advices.push(obs);
+              }
             }
           }
         });
