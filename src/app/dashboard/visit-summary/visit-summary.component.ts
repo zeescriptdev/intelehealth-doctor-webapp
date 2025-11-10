@@ -1881,16 +1881,12 @@ export class VisitSummaryComponent implements OnInit, OnDestroy, AfterViewInit {
       .subscribe((response: ObsApiResponseModel) => {
         response.results.forEach((obs: ObsModel) => {
           if (obs.encounter && obs.encounter.visit.uuid === this.visit.uuid) {
-            // Check if this observation is the additional instruction (not a regular advice)
-            // Additional instructions are stored as single observations without the medication format
-            // They don't contain HTML links and are typically longer text
+        
             if (this.additionalInstructionForm && !obs.value.includes('</a>')) {
-              // Additional instructions are typically longer text without the colon-separated format
-              // We identify them by checking if they don't match the medication pattern
+            
               if (!obs.value.includes(':') || obs.value.split(':').length < 3) {
-                // Check if this is likely an additional instruction (not a short advice)
-                // Additional instructions are usually longer and more detailed
-                if (obs.value.length > 20 || !this.advicesList.includes(obs.value)) {
+              
+                if (!this.advicesList.includes(obs.value)) {
                   this.additionalInstructions = obs;
                   if (this.additionalInstructionForm) {
                     this.additionalInstructionForm.patchValue({ uuid: obs.uuid, value: obs.value });
