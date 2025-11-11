@@ -1661,7 +1661,7 @@ export class VisitSummaryComponent implements OnInit, OnDestroy {
     }
     if (this.followUpForm.value.followUpReason) {
       this.disableAddReason = true;
-       this.isReasonRejected = false;
+      this.isReasonRejected = false;
       this.reason = this.followUpForm.value.followUpReason;
     } else {
       this.saveFollowUp(body);
@@ -1717,7 +1717,7 @@ export class VisitSummaryComponent implements OnInit, OnDestroy {
       this.toastr.warning(this.translateService.instant('Diagnosis not added'), this.translateService.instant('Diagnosis Required'));
       return false;
     }
-    
+
     if (this.instructions !== 'Add instructions' && this.isInstructionRejected === false) {
       this.approvInstructionMsg = true;
       this.toastr.warning(this.translateService.instant('Additional instruction is not approved'), this.translateService.instant('Approval Required'));
@@ -2079,8 +2079,8 @@ export class VisitSummaryComponent implements OnInit, OnDestroy {
         if (event.action === 'approve') {
           let instructionsValue = this.getTranslationValue(this.addAdditionalInstructionForm.value.note, event?.approvedText);
           this.saveAdditionalInstructions(instructionsValue);
-           this.isInstructionRejected = false;
-           this.approvInstructionMsg = false;
+          this.isInstructionRejected = false;
+          this.approvInstructionMsg = false;
         } else {
           this.disableInstructionBtn = false;
           this.isInstructionRejected = true;
@@ -2143,22 +2143,19 @@ export class VisitSummaryComponent implements OnInit, OnDestroy {
     this.isReasonRejected = false;
   }
 
-    onTextChange(event: any) {
-    const cursorPos = event.target.selectionStart;
-    const textBeforeCursor = this.summaryText.substring(0, cursorPos);
-    const lastWordMatch = textBeforeCursor.match(/(\S+)$/);
-    const lastWord = lastWordMatch ? lastWordMatch[0] : '';
-
-    if (lastWord.length > 0) {
+  onTextChange(event: any) {
+    const inputValue = event.target.value.trim().toLowerCase();
+    // If user typed something, filter advice list by partial or full sentence match
+    if (inputValue.length > 0) {
       this.filteredSuggestions = this.advicesList.filter(s =>
-        s.toLowerCase().startsWith(lastWord.toLowerCase())
+        s.toLowerCase().includes(inputValue)
       );
     } else {
       this.filteredSuggestions = [];
     }
     this.selectedIndex = 0;
   }
-
+  
   onKeyDown(event: KeyboardEvent) {
     if (this.filteredSuggestions.length === 0) return;
 
