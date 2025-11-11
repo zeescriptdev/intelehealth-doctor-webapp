@@ -1171,7 +1171,7 @@
                       <li *ngFor="let m of medicines; let i = index">
                         <div class="d-flex justify-content-between">
                           <span>{{ m.value }}</span>
-                          <button mat-icon-button (click)="deleteMedicine(i, m.uuid)"
+                          <button mat-icon-button  type="button" (click)="deleteMedicine(i, m.uuid)"
                             data-test-id="btnDeleteMedVisitSummary"
                             *ngIf="isVisitNoteProvider && !visitEnded && !visitCompleted">
                             <img src="assets/svgs/delete-icon.svg" alt="" />
