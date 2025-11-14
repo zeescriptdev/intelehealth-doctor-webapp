@@ -198,6 +198,7 @@ export class VisitSummaryComponent implements OnInit, OnDestroy, AfterViewInit {
   @ViewChild('lazyDDxContainer', { read: ViewContainerRef, static: false }) lazyLoadDDxContainer!: ViewContainerRef;
   ddxCompRef: any;
   furtherQuestionsList: string[] = [];
+  showAndHideUiElement: boolean = true;
 
   async lazyLoadDDx() {
     setTimeout(async () => {
@@ -587,6 +588,7 @@ export class VisitSummaryComponent implements OnInit, OnDestroy, AfterViewInit {
     this.dSearchSubject.pipe(debounceTime(500), distinctUntilChanged()).subscribe(searchTextValue => {
       this.searchDiagnosis(searchTextValue);
     });
+    this.showAndHideUiElements();
   }
 
   /**
@@ -3796,5 +3798,14 @@ export class VisitSummaryComponent implements OnInit, OnDestroy, AfterViewInit {
   onPastMedicalHistoryNotesChanged(newNotes: ObsModel[]) {
     this.updatedObsData.pastMedicalHistoryNote = [...newNotes];
     this.checkChanges(this.updatedObsData);
+  }
+
+  /**
+  * Check if login profile then show/hide features accondingly
+  * @returns {boolean}
+  */
+  showAndHideUiElements(): boolean {
+    const doctorName = getCacheData(true, doctorDetails.USER)?.person?.display;
+    return this.showAndHideUiElement = !doctorName || !doctorName.includes('Namco');
   }
 }

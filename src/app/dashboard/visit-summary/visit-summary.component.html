@@ -847,10 +847,10 @@
         <div class="card-body">
           <mat-accordion class="intel-accordion-con" multi>
 
-            <app-notes #familyHistoryNote *ngIf="appConfigService?.patient_visit_summary?.family_history_notes"
+            <app-notes #familyHistoryNote *ngIf="appConfigService?.patient_visit_summary?.family_history_notes && showAndHideUiElement"
               [title]="'Family History Notes'" [isVisitNoteProvider]="isVisitNoteProvider" [visitEnded]="visitEnded"
               [visit]="visit" [visitNotePresent]="visitNotePresent" (notesChanged)="onFamilyHistoryNotesChanged($event)"></app-notes>
-            <app-notes #pastMedicalHistoryNote *ngIf="appConfigService?.patient_visit_summary?.past_medical_history_notes"
+            <app-notes #pastMedicalHistoryNote *ngIf="appConfigService?.patient_visit_summary?.past_medical_history_notes && showAndHideUiElement"
               [title]="'Past Medical History Notes'" [isVisitNoteProvider]="isVisitNoteProvider"
               [visitEnded]="visitEnded" [visit]="visit" [visitNotePresent]="visitNotePresent" (notesChanged)="onPastMedicalHistoryNotesChanged($event)"></app-notes>
 
@@ -876,7 +876,7 @@
                     </label>
                     <div class="col-sm-9 align-items-center" *ngIf="this.getPhoneNumber() else noContactDetails"
                       data-test-id="divContactActions">
-                      <div class="d-flex align-items-center mb-3" data-test-id="divContactIcons">
+                      <!-- <div class="d-flex align-items-center mb-3" data-test-id="divContactIcons">
                         <a href="tel:{{ this.getPhoneNumber() }}" target="_blank" class="icon-btn m-0 mr-2"
                           data-test-id="linkPatientPhone" *ngIf="!brandName">
                           <img src="assets/svgs/phone-green.svg" alt="" data-test-id="imgPhoneIcon" />
@@ -888,7 +888,7 @@
                         <span class="text-muted" data-test-id="spanConnectPrompt">
                           {{ 'Click here to connect with the patient' | translate }}
                         </span>
-                      </div>
+                      </div> -->
                       <div class="d-flex align-items-center">
                         <button
                           type="button"
@@ -941,7 +941,7 @@
                 <li *ngIf="isSubSectionEnabled('patient_interaction','HW')" data-test-id="itemHWInteraction">
                   <div class="row">
                     <label class="col-sm-3 col-form-label" data-test-id="labelHWInteraction">
-                      {{ 'Have you spoken with the healthcare worker directly?' | translate }}*
+                      {{ 'Have you spoken with the healthcare worker directly?' | translate }}
                     </label>
                     <div class="col-sm-9 d-flex align-items-center" data-test-id="divHWOptions">
                       <div class="pretty p-default p-round" data-test-id="wrapperHWYes">
