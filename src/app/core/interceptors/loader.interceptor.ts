@@ -25,6 +25,8 @@ export class LoaderInterceptor implements HttpInterceptor {
         '/vlrv',
         '/lcrep',
         '/attribute',
+        '/translate',
+        '/saveTranslation',
         '/ncd',
         '/ncdsummary'
     ];
