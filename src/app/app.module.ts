@@ -183,12 +183,12 @@ registerLocaleData(localeEn);
       useClass: LoaderInterceptor,
       multi: true,
     },
-    // {
-    //   provide: APP_INITIALIZER,
-    //   useFactory: initializer,
-    //   deps: [PwaService],
-    //   multi: true
-    // }
+    {
+      provide: APP_INITIALIZER,
+      useFactory: initializer,
+      deps: [PwaService],
+      multi: true
+    }
   ],
   schemas: [CUSTOM_ELEMENTS_SCHEMA, NO_ERRORS_SCHEMA],
   bootstrap: [AppComponent],
