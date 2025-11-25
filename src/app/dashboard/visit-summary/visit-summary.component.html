@@ -1277,7 +1277,7 @@
                 <form class="mt-3" [formGroup]="addAdviceForm" (ngSubmit)="addAdvice()" *ngIf="!addMoreAdvice"
                   data-test-id="formAddAdvice">
                   <div class="form-group" data-test-id="divAdviceInputWrapper">
-                    <label for="note" data-test-id="labelAdvice"><b>{{ 'Advice' | translate }}*</b></label>
+                    <label for="note" data-test-id="labelAdvice"><b>{{ 'Advice' | translate }}</b></label>
                     <input type="text" class="form-control" formControlName="advice"
                       placeholder="{{ 'Type here' | translate }}" [ngbTypeahead]="search" data-test-id="etAdvice" />
                   </div>
@@ -2032,7 +2032,7 @@
                       data-test-id="formAddTest"
                     >
                       <div class="form-group" data-test-id="divInputTest">
-                        <label for="note" data-test-id="labelTest"><b>{{ "Test" | translate }}*</b></label>
+                        <label for="note" data-test-id="labelTest"><b>{{ "Test" | translate }}</b></label>
                         <input
                           type="text"
                           class="form-control"
