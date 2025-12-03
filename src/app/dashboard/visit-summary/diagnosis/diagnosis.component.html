@@ -272,13 +272,13 @@
         </div>            
       </div>
       <div class="form-row" *ngIf="!addMoreMedicine && !isMCCUser">
-        <div class="col-md-6 form-group mb-0 input-wrapper">
+        <div class="form-group mb-0 input-wrapper" [ngClass]="{'col-md-6': (appConfigService?.patient_visit_summary?.dp_medication_secondary === false && showAndHideUiElement), 'col-md-12': !(appConfigService?.patient_visit_summary?.dp_medication_secondary === false && showAndHideUiElement)}">
           <input style="border-radius: 8px;" formControlName="instructRemark" type="text" class="form-control input-widths"
             data-test-id="etRemarkMed"
             [ngbTypeahead]="search6" [popupClass]="'custom-typeahead-popup'" id="instructRemark" />
           <label class="pl-2" for="instructRemark">{{'Instruction (Remarks)'|translate}}</label>
         </div>
-        <div class="col-md-6" *ngIf="!appConfigService?.patient_visit_summary?.dp_medication_secondary">
+        <div class="col-md-6" *ngIf="!appConfigService?.patient_visit_summary?.dp_medication_secondary && showAndHideUiElement">
         <form  [formGroup]="additionalInstructionForm" (ngSubmit)="saveAdditionalInstruction()">
             <div class="form-group input-wrapper">
               <input  style="border-radius: 8px;" formControlName="value" type="text"  class="form-control input-widths" id="instructions"
