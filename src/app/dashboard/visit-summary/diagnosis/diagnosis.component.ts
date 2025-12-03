@@ -9,7 +9,7 @@ import { NgSelectModule } from '@ng-select/ng-select';
 import { TranslateModule } from '@ngx-translate/core';
 import { Observable, of, Subject } from 'rxjs';
 import { AiddxLibraryModule, AiddxService, AiTxService, AillmddxComponent, AillmtxMedicationComponent, AillmtxAdviceComponent, AillmtxTestComponent, AillmtxFollowupComponent, AillmtxReferralComponent, ENVIRONMENT } from 'aiddx-library';
-import { isFeaturePresent } from 'src/app/utils/utility-functions';
+import { getCacheData, isFeaturePresent } from 'src/app/utils/utility-functions';
 import { environment } from 'src/environments/environment';
 import { AppConfigService } from 'src/app/services/app-config.service';
 import { DiagnosticModel, DropdownItemModel, EncounterModel, ObsApiResponseModel, ObsModel, ReferralModel, TestModel } from 'src/app/model/model';
@@ -20,7 +20,7 @@ import { debounceTime, distinctUntilChanged, map, tap } from 'rxjs/operators';
 import { DataItemModel, MedicineModel } from 'src/app/model/model';
 import instructionRemarks from 'src/app/core/data/instructionRemarks';
 import durationUnitList from 'src/app/core/data/durationUnitList';
-import { conceptIds, days, facility, refer_prioritie } from 'src/config/constant';
+import { conceptIds, days, doctorDetails, facility, refer_prioritie } from 'src/config/constant';
 import doses from '../../../core/data/dose';
 import { VisitService } from 'src/app/services/visit.service';
 import { EncounterService } from 'src/app/services/encounter.service';
@@ -158,6 +158,7 @@ export class DiagnosisComponent implements OnInit, OnDestroy {
   diagnostics: DiagnosticModel[] = [];
   timeList: string[] = [];
   minDate = new Date();
+  showAndHideUiElement: boolean = true;
 
   constructor(
     private fb: FormBuilder,
@@ -285,6 +286,7 @@ export class DiagnosisComponent implements OnInit, OnDestroy {
         this.visitNotePresent = visit.encounters.find(({ display = '' }) => display.includes('Visit Note'));
       }
     });
+    this.showAndHideUiElements();
   }
 
   ngOnDestroy() {
@@ -1386,6 +1388,15 @@ export class DiagnosisComponent implements OnInit, OnDestroy {
     if (this.aillmddxComponent) {
       this.aillmddxComponent.selectedDiagnosis = [...this.selectedDiagnoses];
     }
+  }
+
+  /**
+  * Check if login profile then show/hide features accondingly
+  * @returns {boolean}
+  */
+  showAndHideUiElements(): boolean {
+    const doctorName = getCacheData(true, doctorDetails.USER)?.person?.display;
+    return this.showAndHideUiElement = !doctorName || !doctorName.includes('Namco');
   }
 }
 
