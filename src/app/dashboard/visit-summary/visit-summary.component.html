@@ -2344,7 +2344,7 @@
                         </div>
                       </div>
                     </li>
-                    <li>
+                    <!-- <li>
                       <div class="row">
                         <label class="col-sm-3 col-form-label" data-test-id="lblFollowUpTime">
                           {{'Select time'| translate}}*
@@ -2357,7 +2357,7 @@
                           </ng-select>
                         </div>
                       </div>
-                    </li>
+                    </li> -->
                     <li>
                       <div class="row">
                         <label class="col-sm-3 col-form-label" data-test-id="lblFollowUpReason">
@@ -2388,7 +2388,7 @@
                       <th scope="col" data-test-id="lblFollowUpRequested">{{'Follow Up Requested'|translate}}</th>
                       <th scope="col" *ngIf="isFeatureAvailable('followUpType')" data-test-id="lblFollowUpTypeTable">{{'Type'|translate}}</th>
                       <th scope="col" data-test-id="lblFollowUpDateTable">{{'Date'|translate}}</th>
-                      <th scope="col" data-test-id="lblFollowUpTimeTable">{{'Time'| translate}}</th>
+                      <!-- <th scope="col" data-test-id="lblFollowUpTimeTable">{{'Time'| translate}}</th> -->
                       <th scope="col" data-test-id="lblFollowUpReasonTable">{{'Reason'|translate}}</th>
                       <th scope="col"></th>
                     </tr>
@@ -2398,7 +2398,7 @@
                       <td data-test-id="valFollowUpRequested">{{ followUpForm.value.wantFollowUp }}</td>
                       <td *ngIf="isFeatureAvailable('followUpType')" data-test-id="valFollowUpType">{{ followUpForm.value.followUpType || '-' }}</td>
                       <td data-test-id="valFollowUpDate">{{ followUpForm.value.followUpDate ? (followUpForm.value.followUpDate|date:'dd MMMM yyyy') : '-' }}</td>
-                      <td data-test-id="valFollowUpTime">{{ followUpForm.value.followUpTime || '-' }}</td>
+                      <!-- <td data-test-id="valFollowUpTime">{{ followUpForm.value.followUpTime || '-' }}</td> -->
                       <td data-test-id="valFollowUpReason">{{ followUpForm.value.followUpReason || '-' }}</td>
                       <td class="pr-0">
                         <button type="button" class="float-right" mat-icon-button (click)="deleteFollowUp()"

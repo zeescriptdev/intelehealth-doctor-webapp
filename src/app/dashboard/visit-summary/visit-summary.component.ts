@@ -508,7 +508,7 @@ export class VisitSummaryComponent implements OnInit, OnDestroy, AfterViewInit {
       present: new FormControl(false, [Validators.required]),
       wantFollowUp: new FormControl('', [Validators.required]),
       followUpDate: new FormControl(null),
-      followUpTime: new FormControl(null),
+      // followUpTime: new FormControl(null),
       followUpReason: new FormControl(null),
       uuid: new FormControl(null),
       followUpType: new FormControl(null)
@@ -646,13 +646,13 @@ export class VisitSummaryComponent implements OnInit, OnDestroy, AfterViewInit {
       if (val === 'Yes' || val === 'Да') {
         this.followUpForm.get('followUpDate').setValidators(Validators.required);
         this.followUpForm.get('followUpDate').updateValueAndValidity();
-        this.followUpForm.get('followUpTime').setValidators(Validators.required);
-        this.followUpForm.get('followUpTime').updateValueAndValidity();
+        // this.followUpForm.get('followUpTime').setValidators(Validators.required);
+        // this.followUpForm.get('followUpTime').updateValueAndValidity();
       } else {
         this.followUpForm.get('followUpDate').clearValidators();
         this.followUpForm.get('followUpDate').updateValueAndValidity();
-        this.followUpForm.get('followUpTime').clearValidators();
-        this.followUpForm.get('followUpTime').updateValueAndValidity();
+        // this.followUpForm.get('followUpTime').clearValidators();
+        // this.followUpForm.get('followUpTime').updateValueAndValidity();
       }
     });
     this.followUpForm.get('followUpDate').valueChanges.subscribe((val: string) => {
@@ -2216,13 +2216,13 @@ export class VisitSummaryComponent implements OnInit, OnDestroy, AfterViewInit {
     this.diagnosisService.getObs(this.visit.patient.uuid, conceptIds.conceptFollow).subscribe((response: ObsApiResponseModel) => {
       response.results.forEach((obs: ObsModel) => {
         if (obs.encounter.visit.uuid === this.visit.uuid) {
-          let followUpDate: string, followUpTime: any, followUpReason: any, wantFollowUp: string = 'No', followUpType: any;
+          let followUpDate: string, /* followUpTime: any, */ followUpReason: any, wantFollowUp: string = 'No', followUpType: any;
           if (obs.value.includes('Time:')) {
             const result = obs.value.split(',').filter(Boolean);
-            const time = result.find((v: string) => v.includes('Time:'))?.split('Time:')?.[1]?.trim();
+            // const time = result.find((v: string) => v.includes('Time:'))?.split('Time:')?.[1]?.trim();
             const remark = result.find((v: string) => v.includes('Remark:'))?.split('Remark:')?.[1]?.trim();
             followUpDate = moment(result[0]).format('YYYY-MM-DD');
-            followUpTime = time ? time : null;
+            // followUpTime = time ? time : null;
             followUpReason = remark ? remark : null;
             wantFollowUp = 'Yes';
 
@@ -2237,7 +2237,7 @@ export class VisitSummaryComponent implements OnInit, OnDestroy, AfterViewInit {
             present: true,
             wantFollowUp,
             followUpDate,
-            followUpTime,
+            // followUpTime,
             followUpReason,
             uuid: obs.uuid,
             followUpType: this.isFeatureAvailable('followUpType') ? followUpType : null
@@ -2253,7 +2253,7 @@ export class VisitSummaryComponent implements OnInit, OnDestroy, AfterViewInit {
   */
   saveFollowUp(): Observable<any> {
     if (this.followUpForm.value.wantFollowUp === 'Yes') {
-      const value = `${moment(this.followUpForm.value.followUpDate).format('YYYY-MM-DD')},Time:${this.followUpForm.value.followUpTime},Remark:${this.followUpForm.value.followUpReason}${this.isFeatureAvailable('followUpType') ? ',Type:' + (this.followUpForm.value.followUpType) : ''}`;
+      const value = `${moment(this.followUpForm.value.followUpDate).format('YYYY-MM-DD')},Remark:${this.followUpForm.value.followUpReason}${this.isFeatureAvailable('followUpType') ? ',Type:' + (this.followUpForm.value.followUpType) : ''}`; // Removed Time:${this.followUpForm.value.followUpTime}
       
       if (this.followUpForm.value.uuid) {
         return this.encounterService.updateObs(this.followUpForm.value.uuid, { value });
@@ -2269,7 +2269,7 @@ export class VisitSummaryComponent implements OnInit, OnDestroy, AfterViewInit {
             present: true,
             wantFollowUp: 'Yes',
             followUpDate : this.followUpForm.value.followUpDate,
-            followUpTime : this.followUpForm.value.followUpTime,
+            // followUpTime : this.followUpForm.value.followUpTime,
             followUpReason : this.followUpForm.value.followUpReason,
             uuid: res.uuid,
             followUpType : this.isFeatureAvailable('followUpType') ? this.followUpForm.value.followUpType : null
@@ -2288,7 +2288,7 @@ export class VisitSummaryComponent implements OnInit, OnDestroy, AfterViewInit {
             present: true,
             wantFollowUp: 'No',
             followUpDate : null,
-            followUpTime : null,
+            // followUpTime : null,
             followUpReason :null,
             uuid: res.uuid,
             followUpType : null
@@ -2303,7 +2303,7 @@ export class VisitSummaryComponent implements OnInit, OnDestroy, AfterViewInit {
   */
   deleteFollowUp(): void {
     this.diagnosisService.deleteObs(this.followUpForm.value.uuid).subscribe(() => {
-      this.followUpForm.patchValue({ present: false, uuid: null, wantFollowUp: '', followUpDate: null, followUpTime: null, followUpReason: null, followUpType: null });
+      this.followUpForm.patchValue({ present: false, uuid: null, wantFollowUp: '', followUpDate: null, /* followUpTime: null, */ followUpReason: null, followUpType: null });
       this.followUpDatetime = null;
     });
   }
@@ -2360,7 +2360,7 @@ export class VisitSummaryComponent implements OnInit, OnDestroy, AfterViewInit {
                       ]
                     }).subscribe((post) => {
                       this.visitCompleted = true;
-                      const followUpDate = `${this.followUpForm.value.followUpDate},Time:${this.followUpForm.value.followUpTime}`;
+                      const followUpDate = `${this.followUpForm.value.followUpDate}`; // Removed ,Time:${this.followUpForm.value.followUpTime}
 
                       this.notifyHwForAvailablePrescription("","",followUpDate);
                       this.appointmentService.completeAppointment({ visitUuid: this.visit.uuid }).subscribe();
