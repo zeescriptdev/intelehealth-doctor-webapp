@@ -165,7 +165,11 @@ export class DashboardComponent implements OnInit {
       this.awatingRecordsFetched = 0;
     }
     let newfollowupVisits = [];
-    this.visitService.getAwaitingVisits(this.specialization, page).subscribe((av: ApiResponseModel) => {
+    // Get sort parameters - only apply to visit_created (visit uploaded) field
+    const sortField = this.currentSort.active === 'visit_created' ? 'date_created' : 'date_created';
+    const sortOrder = this.currentSort.active === 'visit_created' && this.currentSort.direction ? this.currentSort.direction : 'desc';
+    console.log(`🔍 Frontend - Fetching awaiting visits page ${page} with sort:`, { sortField, sortOrder });
+    this.visitService.getAwaitingVisits(this.specialization, page, sortField, sortOrder).subscribe((av: ApiResponseModel) => {
       if (av.success) {
         //this.awaitingVisitsCount = av.totalCount;
         this.awatingRecordsFetched += this.offset;
@@ -190,9 +194,12 @@ export class DashboardComponent implements OnInit {
         }
         this.awaitingVisitsCount = av.totalCount;
         this.getFollowUpVisits(newfollowupVisits);
-        this.awaitingVisits.sort((a,b) => new Date(b.date_created) < new Date(a.date_created) ? -1 : 1);
+        // Backend handles sorting for visit_created, so don't sort here
+        // Only apply client-side sorting if sorting by other columns
+        if (this.currentSort.active && this.currentSort.active !== 'visit_created') {
+          this.applySorting();
+        }
         this.dataSource3.data = [...this.awaitingVisits];
-        this.applySorting();
         if (page == 1) {
           this.dataSource3.paginator = this.tempPaginator2;
           this.dataSource3.sort = this.awaitingMatSort;
@@ -204,7 +211,11 @@ export class DashboardComponent implements OnInit {
              data?.patient_name.given_name.concat((data?.patient_name.middle_name ? ' ' + data?.patient_name.middle_name : '') + ' ' + data?.patient_name.family_name).toLowerCase().indexOf(filter) != -1;
         } else {
           this.tempPaginator2.length = av.totalCount;
-          this.tempPaginator2.nextPage();
+
+          // Only auto-advance pagination when NOT sorting
+          if (!this.currentSort || this.currentSort.active !== 'visit_created') {
+            this.tempPaginator2.nextPage();
+          }
         }
       }
     });
@@ -790,17 +801,71 @@ export class DashboardComponent implements OnInit {
     this.visitService.closeVisit(visit.uuid, json).subscribe(() => {
     });
   }
+ngAfterViewInit() {
+  this.awaitingMatSort.sortChange.subscribe(sort => {
+    this.currentSort = sort;
 
-  ngAfterViewInit() {
+    if (sort.active === 'visit_created') {
+
+      // Reset data
+      this.awaitingVisits = [];
+      this.awatingRecordsFetched = 0;
+      this.dataSource3.data = [];
+
+      // Reset BOTH paginators
+      if (this.tempPaginator2) {
+        this.tempPaginator2.pageIndex = 0;
+        this.tempPaginator2.firstPage();
+      }
+
+      if (this.awaitingPaginator) {
+        this.awaitingPaginator.pageIndex = 0;      // <<< FIX
+        this.awaitingPaginator.firstPage();        // <<< FIX
+      }
+
+      // Fetch sorted, page=1
+      this.getAwaitingVisits(1);
+    } else {
+      this.applySorting();
+    }
+  });
+}
+
+  ngAfterViewInit1() {
     this.awaitingMatSort.sortChange.subscribe(sort => {
       this.currentSort = sort;
-      this.applySorting();
+      console.log(`🔄 Sort changed - Column: ${sort.active}, Direction: ${sort.direction}`);
+
+      // If sorting by visit_created (visit uploaded), fetch from backend
+      if (sort.active === 'visit_created') {
+        console.log('✅ Visit uploaded column - fetching from backend with new sort order');
+        // Clear data immediately to reset UI
+        this.awaitingVisits = [];
+        this.awatingRecordsFetched = 0;
+        this.dataSource3.data = [];
+
+        // Reset pagination to page 1
+        if (this.tempPaginator2) {
+          this.tempPaginator2.pageIndex = 0;
+          this.tempPaginator2.firstPage();
+        }
+
+        // Fetch fresh data from backend
+        this.getAwaitingVisits(1);
+      } else {
+        // For other columns (name, age, patient_id, complaints, sanch), use client-side sorting
+        console.log('📋 Other column - using client-side sorting');
+        this.applySorting();
+      }
     });
   }
 
   applySorting() {
+     if (this.currentSort?.active === 'visit_created') {
+      return; 
+  }
     const { active, direction } = this.currentSort;
-
+console.log("active==",active,"direction==",direction);
     this.awaitingVisits.sort((a, b) => {
       if (!direction || direction === '') return 0;
 
@@ -823,7 +888,7 @@ export class DashboardComponent implements OnInit {
         ? (aValue > bValue ? 1 : -1)
         : (aValue < bValue ? 1 : -1);
     });
-
+console.log("this.awaitingVisits===",this.awaitingVisits);
     this.dataSource3.data = [...this.awaitingVisits];
   }
 }
