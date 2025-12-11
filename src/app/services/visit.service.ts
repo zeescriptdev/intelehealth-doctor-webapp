@@ -231,8 +231,8 @@ export class VisitService {
   * @param {number} page - Page number
   * @return {Observable<any>}
   */
-  getAwaitingVisits(speciality: string, page: number = 1): Observable<any> {
-    return this.http.get(`${this.baseURLMindmap}/openmrs/getAwaitingVisits?speciality=${speciality}&page=${page}`);
+  getAwaitingVisits(speciality: string, page: number = 1, sortField: string = 'date_created', sortOrder: string = 'desc'): Observable<any> {
+    return this.http.get(`${this.baseURLMindmap}/openmrs/getAwaitingVisits?speciality=${speciality}&page=${page}&sortField=${sortField}&sortOrder=${sortOrder}`);
   }
 
   /**
@@ -320,6 +320,8 @@ export class VisitService {
     const provider = getCacheData(true, doctorDetails.PROVIDER);
     let speaker_gender = provider?.person?.gender || null;
 
+    console.log('👤 Doctor gender from provider cache:', speaker_gender);
+
     // Convert database values (M/F/U) to full names (Male/Female) as required by Sarvam API
     if (speaker_gender === 'F') {
       speaker_gender = 'Female';
@@ -328,6 +330,8 @@ export class VisitService {
     } else {
       speaker_gender = 'Male';
     }
+
+    console.log('🔊 Sending speaker_gender to backend:', speaker_gender);
 
     return {
       textToTranslate: input,
