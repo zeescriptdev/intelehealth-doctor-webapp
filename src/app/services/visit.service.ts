@@ -320,8 +320,6 @@ export class VisitService {
     const provider = getCacheData(true, doctorDetails.PROVIDER);
     let speaker_gender = provider?.person?.gender || null;
 
-    console.log('👤 Doctor gender from provider cache:', speaker_gender);
-
     // Convert database values (M/F/U) to full names (Male/Female) as required by Sarvam API
     if (speaker_gender === 'F') {
       speaker_gender = 'Female';
@@ -330,8 +328,6 @@ export class VisitService {
     } else {
       speaker_gender = 'Male';
     }
-
-    console.log('🔊 Sending speaker_gender to backend:', speaker_gender);
 
     return {
       textToTranslate: input,
