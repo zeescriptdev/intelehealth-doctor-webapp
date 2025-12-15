@@ -134,13 +134,12 @@ export class DashboardComponent implements OnInit {
         this.specialization = this.getSpecialization(provider.attributes);
       } else {
         this.router.navigate(['/dashboard/get-started']);
-      }
+      } 
       this.getVisitCountsForDashboard();
       this.getAwaitingVisits(1);
       this.getPriorityVisits(1);
      // this.getInProgressVisits(1);
     }
-    console.log("check log");
     this.socket.initSocket(true);
   }
 
