@@ -216,22 +216,19 @@ export class DashboardComponent implements OnInit {
       this.awaitingVisitsCount = res.totalCount;
 
       if (this.currentSort.active === "visit_created") {
-        const startIndex = (page - 1) * this.offset;
-
-        if (this.awaitingVisits.length < startIndex + processed.length) {
-          this.awaitingVisits.length = res.totalCount;
+        // For visit_created sorting, accumulate all loaded pages
+        if (isInitialPage) {
+          this.awaitingVisits = [...processed];
+        } else {
+          this.awaitingVisits.push(...processed);
         }
-
-        this.awaitingVisits.splice(startIndex, processed.length, ...processed);
         this.dataSource3.sort = this.awaitingMatSort;
-        // Filter out undefined elements before assigning
-        this.dataSource3.data = this.awaitingVisits.filter(visit => visit !== undefined);
+        this.dataSource3.data = this.awaitingVisits;
 
       } else {
         this.awaitingVisits.push(...processed);
         this.dataSource3.sort = this.awaitingMatSort;
         this.applySorting();
-        this.dataSource3.data = this.awaitingVisits.filter(visit => visit !== undefined);
       }
 
       if (isInitialPage) {
@@ -837,6 +834,7 @@ ngAfterViewInit() {
       this.awaitingVisits = [];
       this.awatingRecordsFetched = 0;
       this.dataSource3.data = [];
+      this.pageIndex1 = 0;
 
       // Reset BOTH paginators
       if (this.tempPaginator2) {
@@ -882,24 +880,31 @@ ngAfterViewInit() {
     if (aValue === undefined || aValue === null) return 1;
     if (bValue === undefined || bValue === null) return -1;
 
-    const aDate = new Date(aValue);
-    const bDate = new Date(bValue);
-
-    // Date compare
-    if (!isNaN(aDate.getTime()) && !isNaN(bDate.getTime())) {
-      return direction === 'asc'
-        ? aDate.getTime() - bDate.getTime()
-        : bDate.getTime() - aDate.getTime();
-    }
-
-    // Number compare (for age, etc.)
+    // Number compare first (for age, etc.) - check if value is a number type or purely numeric
     const aNum = Number(aValue);
     const bNum = Number(bValue);
-    if (!isNaN(aNum) && !isNaN(bNum)) {
+    if (!isNaN(aNum) && !isNaN(bNum) && typeof aValue !== 'string') {
       return direction === 'asc'
         ? aNum - bNum
         : bNum - aNum;
     }
+
+    // Date compare - only if value looks like a date string (contains -, /, or is ISO format)
+    const isDateLike = (val: any) => {
+      if (typeof val !== 'string') return false;
+      return val.includes('-') || val.includes('/') || val.includes('T');
+    };
+
+    if (isDateLike(aValue) && isDateLike(bValue)) {
+      const aDate = new Date(aValue);
+      const bDate = new Date(bValue);
+      if (!isNaN(aDate.getTime()) && !isNaN(bDate.getTime())) {
+        return direction === 'asc'
+          ? aDate.getTime() - bDate.getTime()
+          : bDate.getTime() - aDate.getTime();
+      }
+    }
+
     // String compare
     const aStr = String(aValue).toLowerCase();
     const bStr = String(bValue).toLowerCase();
