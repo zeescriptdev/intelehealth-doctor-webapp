@@ -223,13 +223,15 @@ export class DashboardComponent implements OnInit {
         }
 
         this.awaitingVisits.splice(startIndex, processed.length, ...processed);
-        this.dataSource3.sort = null;
-        this.dataSource3.data = [...this.awaitingVisits];
+        this.dataSource3.sort = this.awaitingMatSort;
+        // Filter out undefined elements before assigning
+        this.dataSource3.data = this.awaitingVisits.filter(visit => visit !== undefined);
+
       } else {
         this.awaitingVisits.push(...processed);
         this.dataSource3.sort = this.awaitingMatSort;
         this.applySorting();
-        this.dataSource3.data = [...this.awaitingVisits];
+        this.dataSource3.data = this.awaitingVisits.filter(visit => visit !== undefined);
       }
 
       if (isInitialPage) {
@@ -824,6 +826,10 @@ export class DashboardComponent implements OnInit {
     });
   }
 ngAfterViewInit() {
+  // Set initial sort arrow state to match default sort
+  this.awaitingMatSort.active = this.currentSort.active;
+  this.awaitingMatSort.direction = this.currentSort.direction as 'asc' | 'desc' | '';
+
   this.awaitingMatSort.sortChange.subscribe(sort => {
     this.currentSort = sort;
     if (sort.active === 'visit_created') {
@@ -839,9 +845,10 @@ ngAfterViewInit() {
       }
 
       if (this.awaitingPaginator) {
-        this.awaitingPaginator.pageIndex = 0;      // <<< FIX
-        this.awaitingPaginator.firstPage();        // <<< FIX
+        this.awaitingPaginator.pageIndex = 0;
+        this.awaitingPaginator.firstPage();
       }
+
       // Fetch sorted, page=1
       this.getAwaitingVisits(1);
     } else {
@@ -856,26 +863,49 @@ ngAfterViewInit() {
     return;
   }
   const { active, direction } = this.currentSort;
-  // Avoid sorting if direction is empty
+  // Filter out undefined elements first
+  const validVisits = this.awaitingVisits.filter(visit => visit !== undefined);
   if (!direction) {
-    this.dataSource3.data = [...this.awaitingVisits];
+    this.dataSource3.data = [...validVisits];
     return;
   }
-  const sorted = [...this.awaitingVisits].sort((a, b) => {
+
+  // Create a copy before sorting to avoid mutating the original array
+  const sorted = [...validVisits].sort((a, b) => {
+    // Handle undefined values
+    if (!a || !b) return 0;
+
     const aValue = a[active];
     const bValue = b[active];
+
+    // Handle undefined or null values
+    if (aValue === undefined || aValue === null) return 1;
+    if (bValue === undefined || bValue === null) return -1;
+
     const aDate = new Date(aValue);
     const bDate = new Date(bValue);
+
     // Date compare
     if (!isNaN(aDate.getTime()) && !isNaN(bDate.getTime())) {
       return direction === 'asc'
         ? aDate.getTime() - bDate.getTime()
         : bDate.getTime() - aDate.getTime();
     }
+
+    // Number compare (for age, etc.)
+    const aNum = Number(aValue);
+    const bNum = Number(bValue);
+    if (!isNaN(aNum) && !isNaN(bNum)) {
+      return direction === 'asc'
+        ? aNum - bNum
+        : bNum - aNum;
+    }
     // String compare
+    const aStr = String(aValue).toLowerCase();
+    const bStr = String(bValue).toLowerCase();
     return direction === 'asc'
-      ? (aValue > bValue ? 1 : -1)
-      : (aValue < bValue ? 1 : -1);
+      ? (aStr > bStr ? 1 : -1)
+      : (aStr < bStr ? 1 : -1);
   });
   this.dataSource3.data = sorted;
 }
