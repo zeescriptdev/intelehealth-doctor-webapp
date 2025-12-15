@@ -3,7 +3,7 @@ import { HttpClient, HttpHeaders } from "@angular/common/http";
 import { Observable, Subject } from "rxjs";
 import { environment } from "../../environments/environment";
 import * as moment from "moment";
-import { visitTypes } from "src/config/constant";
+import { doctorDetails, visitTypes } from "src/config/constant";
 import { getCacheData } from 'src/app/utils/utility-functions';
 import { PatientModel, PersonAttributeModel } from "../model/model";
 
@@ -231,8 +231,8 @@ export class VisitService {
   * @param {number} page - Page number
   * @return {Observable<any>}
   */
-  getAwaitingVisits(speciality: string, page: number = 1): Observable<any> {
-    return this.http.get(`${this.baseURLMindmap}/openmrs/getAwaitingVisits?speciality=${speciality}&page=${page}`);
+  getAwaitingVisits(speciality: string, page: number = 1,sortField: string = 'date_created', sortOrder: string = 'desc'): Observable<any> {
+    return this.http.get(`${this.baseURLMindmap}/openmrs/getAwaitingVisits?speciality=${speciality}&page=${page}&sortField=${sortField}&sortOrder=${sortOrder}`);
   }
 
   /**
@@ -316,10 +316,23 @@ export class VisitService {
   
   // A reusable function to build translation request body
   buildRequestBody(input: string, targetLang: string, tabType: string) {
+    // Get gender from cached provider data
+    const provider = getCacheData(true, doctorDetails.PROVIDER);
+    let speaker_gender = provider?.person?.gender || null;
+
+    // Convert database values (M/F/U) to full names (Male/Female) as required by Sarvam API
+    if (speaker_gender === 'F') {
+      speaker_gender = 'Female';
+    } else if (speaker_gender === 'M') {
+      speaker_gender = 'Male';
+    } else {
+      speaker_gender = 'Male';
+    }
     return {
       textToTranslate: input,
       targetLang:targetLang,
-      tabType: tabType
+      tabType: tabType,
+      speaker_gender:speaker_gender
     };
   }
   /**
