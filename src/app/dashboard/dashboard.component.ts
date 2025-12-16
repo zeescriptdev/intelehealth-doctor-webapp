@@ -204,91 +204,88 @@ export class DashboardComponent implements OnInit {
    * @param {number} page - Page number
    * @return {void}
    */
-  getAwaitingVisits(page: number = 1) {
-    const isInitialPage = page === 1;
+getAwaitingVisits(page: number = 1) {
+  const isInitialPage = page === 1;
 
-    if (isInitialPage) {
-      this.awaitingVisits = [];
-      this.awatingRecordsFetched = 0;
-    }
+  if (isInitialPage) {
+    this.awaitingVisits = [];
+    this.awatingRecordsFetched = 0;
+  }
 
-    const sortField = "date_created";
-    const sortOrder =
-      this.currentSort.active === "visit_created"
-        ? this.currentSort.direction || "desc"
-        : "desc";
+  const sortField = "date_created";
+  const sortOrder =
+    this.currentSort.active === "visit_created"
+      ? this.currentSort.direction || "desc"
+      : "desc";
 
-    this.visitService
-      .getAwaitingVisits(this.specialization, page, sortField, sortOrder)
-      .subscribe((res: ApiResponseModel) => {
-        if (!res.success) return;
+  this.visitService
+    .getAwaitingVisits(this.specialization, page, sortField, sortOrder)
+    .subscribe((res: ApiResponseModel) => {
+      if (!res.success) return;
 
-        const visits = res.data || [];
-        const newFollowups = [];
+      const visits = res.data || [];
+      const newFollowups = [];
 
-        this.awatingRecordsFetched += this.offset;
+      this.awatingRecordsFetched += this.offset;
 
-        const processed = visits.map((visit) => {
-          visit.cheif_complaint = this.getCheifComplaint(visit);
-          visit.visit_created = visit.date_created;
-          visit.uploaded_Date = visit.date_created
+      const processed = visits.map((visit) => {
+        visit.cheif_complaint = this.getCheifComplaint(visit);
+        visit.visit_created = visit.date_created;
+        visit.uploaded_Date =
+          visit.date_created
             ? this.getCreatedAt(visit.date_created)
             : this.getEncounterCreated(visit, visitTypes.FLAGGED)?.created_at;
-          visit.age = this.visitService.calculateAge(visit.person.birthdate);
-          visit.name =
-            visit.patient_name.given_name +
-            " " +
-            (visit.patient_name.middle_name
-              ? visit.patient_name.middle_name + " "
-              : "") +
-            visit.patient_name.family_name;
-          visit.location = visit.sanch;
-          visit.openMrsId = visit.patient?.identifier;
+        visit.age = this.visitService.calculateAge(visit.person.birthdate);
+        visit.name =
+          visit.patient_name.given_name +
+          " " +
+          (visit.patient_name.middle_name
+            ? visit.patient_name.middle_name + " "
+            : "") +
+          visit.patient_name.family_name;
+        visit.location = visit.sanch;
+        visit.openMrsId = visit.patient?.identifier;
 
-          const isFollowUp =
-            visit.cheif_complaint.some((x) => x.includes("Follow")) &&
-            !this.visitService
-              .getPatientVerdict(visit)
-              .includes("Patient is feeling better");
+        const isFollowUp =
+          visit.cheif_complaint.some((x) => x.includes("Follow")) &&
+          !this.visitService
+            .getPatientVerdict(visit)
+            .includes("Patient is feeling better");
 
-          if (isFollowUp) newFollowups.push(visit);
+        if (isFollowUp) newFollowups.push(visit);
 
-          return { ...visit, isFollowUp };
-        });
+        return { ...visit, isFollowUp };
+      });
 
-        this.getFollowUpVisits(newFollowups);
-        this.awaitingVisitsCount = res.totalCount;
+      this.getFollowUpVisits(newFollowups);
+      this.awaitingVisitsCount = res.totalCount;
 
-        if (this.currentSort.active === "visit_created") {
-          const startIndex = (page - 1) * this.offset;
-
-          if (this.awaitingVisits.length < startIndex + processed.length) {
-            this.awaitingVisits.length = res.totalCount;
-          }
-
-          this.awaitingVisits.splice(
-            startIndex,
-            processed.length,
-            ...processed
-          );
-          this.dataSource3.sort = null;
-          this.dataSource3.data = [...this.awaitingVisits];
+      if (this.currentSort.active === "visit_created") {
+        // For visit_created sorting, accumulate all loaded pages
+        if (isInitialPage) {
+          this.awaitingVisits = [...processed];
         } else {
           this.awaitingVisits.push(...processed);
-          this.dataSource3.sort = this.awaitingMatSort;
-          this.applySorting();
-          this.dataSource3.data = [...this.awaitingVisits];
         }
+        this.dataSource3.sort = this.awaitingMatSort;
+        this.dataSource3.data = this.awaitingVisits;
 
-        if (isInitialPage) {
-          this.dataSource3.paginator = this.tempPaginator2;
-          this.tempPaginator2.pageIndex = 0;
-        } else {
-          this.tempPaginator2.length = res.totalCount;
-          this.tempPaginator2.nextPage();
-        }
-      });
-  }
+      } else {
+        this.awaitingVisits.push(...processed);
+        this.dataSource3.sort = this.awaitingMatSort;
+        this.applySorting();
+      }
+
+      if (isInitialPage) {
+        this.dataSource3.paginator = this.tempPaginator2;
+        this.tempPaginator2.pageIndex = 0;
+      } else {
+        this.tempPaginator2.length = res.totalCount;
+        this.tempPaginator2.nextPage();
+      }
+    });
+}
+
 
   /**
    * Callback for page change event and Get awaiting visit for a selected page index and page size
@@ -1059,8 +1056,11 @@ export class DashboardComponent implements OnInit {
     };
     this.visitService.closeVisit(visit.uuid, json).subscribe(() => {});
   }
-
 ngAfterViewInit() {
+  // Set initial sort arrow state to match default sort
+  this.awaitingMatSort.active = this.currentSort.active;
+  this.awaitingMatSort.direction = this.currentSort.direction as 'asc' | 'desc' | '';
+
   this.awaitingMatSort.sortChange.subscribe(sort => {
     this.currentSort = sort;
     if (sort.active === 'visit_created') {
@@ -1068,6 +1068,7 @@ ngAfterViewInit() {
       this.awaitingVisits = [];
       this.awatingRecordsFetched = 0;
       this.dataSource3.data = [];
+      this.pageIndex1 = 0;
 
       // Reset BOTH paginators
       if (this.tempPaginator2) {
@@ -1076,9 +1077,10 @@ ngAfterViewInit() {
       }
 
       if (this.awaitingPaginator) {
-        this.awaitingPaginator.pageIndex = 0;      // <<< FIX
-        this.awaitingPaginator.firstPage();        // <<< FIX
+        this.awaitingPaginator.pageIndex = 0;
+        this.awaitingPaginator.firstPage();
       }
+
       // Fetch sorted, page=1
       this.getAwaitingVisits(1);
     } else {
@@ -1093,26 +1095,56 @@ ngAfterViewInit() {
     return;
   }
   const { active, direction } = this.currentSort;
-  // Avoid sorting if direction is empty
+  // Filter out undefined elements first
+  const validVisits = this.awaitingVisits.filter(visit => visit !== undefined);
   if (!direction) {
-    this.dataSource3.data = [...this.awaitingVisits];
+    this.dataSource3.data = [...validVisits];
     return;
   }
-  const sorted = [...this.awaitingVisits].sort((a, b) => {
+
+  // Create a copy before sorting to avoid mutating the original array
+  const sorted = [...validVisits].sort((a, b) => {
+    // Handle undefined values
+    if (!a || !b) return 0;
+
     const aValue = a[active];
     const bValue = b[active];
-    const aDate = new Date(aValue);
-    const bDate = new Date(bValue);
-    // Date compare
-    if (!isNaN(aDate.getTime()) && !isNaN(bDate.getTime())) {
+
+    // Handle undefined or null values
+    if (aValue === undefined || aValue === null) return 1;
+    if (bValue === undefined || bValue === null) return -1;
+
+    // Number compare first (for age, etc.) - check if value is a number type or purely numeric
+    const aNum = Number(aValue);
+    const bNum = Number(bValue);
+    if (!isNaN(aNum) && !isNaN(bNum) && typeof aValue !== 'string') {
       return direction === 'asc'
-        ? aDate.getTime() - bDate.getTime()
-        : bDate.getTime() - aDate.getTime();
+        ? aNum - bNum
+        : bNum - aNum;
     }
+
+    // Date compare - only if value looks like a date string (contains -, /, or is ISO format)
+    const isDateLike = (val: any) => {
+      if (typeof val !== 'string') return false;
+      return val.includes('-') || val.includes('/') || val.includes('T');
+    };
+
+    if (isDateLike(aValue) && isDateLike(bValue)) {
+      const aDate = new Date(aValue);
+      const bDate = new Date(bValue);
+      if (!isNaN(aDate.getTime()) && !isNaN(bDate.getTime())) {
+        return direction === 'asc'
+          ? aDate.getTime() - bDate.getTime()
+          : bDate.getTime() - aDate.getTime();
+      }
+    }
+
     // String compare
+    const aStr = String(aValue).toLowerCase();
+    const bStr = String(bValue).toLowerCase();
     return direction === 'asc'
-      ? (aValue > bValue ? 1 : -1)
-      : (aValue < bValue ? 1 : -1);
+      ? (aStr > bStr ? 1 : -1)
+      : (aStr < bStr ? 1 : -1);
   });
   this.dataSource3.data = sorted;
 }

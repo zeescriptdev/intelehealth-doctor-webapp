@@ -318,3 +318,13 @@ th:last-child {
     display: none;
   }
 }
+// Show upward arrow on hover for Visit Uploaded column on first load
+::ng-deep .mat-sort-header-container:hover .mat-sort-header-arrow {
+  opacity: 0.54 !important;
+
+  .mat-sort-header-indicator {
+    &::before {
+      content: '' !important;
+    }
+  }
+}
