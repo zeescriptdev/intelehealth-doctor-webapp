@@ -216,20 +216,19 @@ getAwaitingVisits(page: number = 1) {
       this.awaitingVisitsCount = res.totalCount;
 
       if (this.currentSort.active === "visit_created") {
-        const startIndex = (page - 1) * this.offset;
-
-        if (this.awaitingVisits.length < startIndex + processed.length) {
-          this.awaitingVisits.length = res.totalCount;
+        // For visit_created sorting, accumulate all loaded pages
+        if (isInitialPage) {
+          this.awaitingVisits = [...processed];
+        } else {
+          this.awaitingVisits.push(...processed);
         }
+        this.dataSource3.sort = this.awaitingMatSort;
+        this.dataSource3.data = this.awaitingVisits;
 
-        this.awaitingVisits.splice(startIndex, processed.length, ...processed);
-        this.dataSource3.sort = null;
-        this.dataSource3.data = [...this.awaitingVisits];
       } else {
         this.awaitingVisits.push(...processed);
         this.dataSource3.sort = this.awaitingMatSort;
         this.applySorting();
-        this.dataSource3.data = [...this.awaitingVisits];
       }
 
       if (isInitialPage) {
@@ -824,6 +823,10 @@ getAwaitingVisits(page: number = 1) {
     });
   }
 ngAfterViewInit() {
+  // Set initial sort arrow state to match default sort
+  this.awaitingMatSort.active = this.currentSort.active;
+  this.awaitingMatSort.direction = this.currentSort.direction as 'asc' | 'desc' | '';
+
   this.awaitingMatSort.sortChange.subscribe(sort => {
     this.currentSort = sort;
     if (sort.active === 'visit_created') {
@@ -831,6 +834,7 @@ ngAfterViewInit() {
       this.awaitingVisits = [];
       this.awatingRecordsFetched = 0;
       this.dataSource3.data = [];
+      this.pageIndex1 = 0;
 
       // Reset BOTH paginators
       if (this.tempPaginator2) {
@@ -839,8 +843,8 @@ ngAfterViewInit() {
       }
 
       if (this.awaitingPaginator) {
-        this.awaitingPaginator.pageIndex = 0;      // <<< FIX
-        this.awaitingPaginator.firstPage();        // <<< FIX
+        this.awaitingPaginator.pageIndex = 0;
+        this.awaitingPaginator.firstPage();
       }
 
       // Fetch sorted, page=1
@@ -851,74 +855,63 @@ ngAfterViewInit() {
   });
 }
 
-  ngAfterViewInit1() {
-    this.awaitingMatSort.sortChange.subscribe(sort => {
-      this.currentSort = sort;
-      console.log(`🔄 Sort changed - Column: ${sort.active}, Direction: ${sort.direction}`);
-
-      // If sorting by visit_created (visit uploaded), fetch from backend
-      if (sort.active === 'visit_created') {
-        console.log('✅ Visit uploaded column - fetching from backend with new sort order');
-        // Clear data immediately to reset UI
-        this.awaitingVisits = [];
-        this.awatingRecordsFetched = 0;
-        this.dataSource3.data = [];
-
-        // Reset pagination to page 1
-        if (this.tempPaginator2) {
-          this.tempPaginator2.pageIndex = 0;
-          this.tempPaginator2.firstPage();
-        }
-
-        // Fetch fresh data from backend
-        this.getAwaitingVisits(1);
-      } else {
-        // For other columns (name, age, patient_id, complaints, sanch), use client-side sorting
-        console.log('📋 Other column - using client-side sorting');
-        this.applySorting();
-      }
-    });
-  }
-
  applySorting() {
   // if sorting is inactive for this column
   if (this.currentSort?.active === 'visit_created') {
     return;
   }
-
   const { active, direction } = this.currentSort;
-
-  console.log("active==", active, "direction==", direction);
-
-  // Avoid sorting if direction is empty
+  // Filter out undefined elements first
+  const validVisits = this.awaitingVisits.filter(visit => visit !== undefined);
   if (!direction) {
-    this.dataSource3.data = [...this.awaitingVisits];
+    this.dataSource3.data = [...validVisits];
     return;
   }
 
-  const sorted = [...this.awaitingVisits].sort((a, b) => {
+  // Create a copy before sorting to avoid mutating the original array
+  const sorted = [...validVisits].sort((a, b) => {
+    // Handle undefined values
+    if (!a || !b) return 0;
+
     const aValue = a[active];
     const bValue = b[active];
 
-    const aDate = new Date(aValue);
-    const bDate = new Date(bValue);
+    // Handle undefined or null values
+    if (aValue === undefined || aValue === null) return 1;
+    if (bValue === undefined || bValue === null) return -1;
 
-    // Date compare
-    if (!isNaN(aDate.getTime()) && !isNaN(bDate.getTime())) {
+    // Number compare first (for age, etc.) - check if value is a number type or purely numeric
+    const aNum = Number(aValue);
+    const bNum = Number(bValue);
+    if (!isNaN(aNum) && !isNaN(bNum) && typeof aValue !== 'string') {
       return direction === 'asc'
-        ? aDate.getTime() - bDate.getTime()
-        : bDate.getTime() - aDate.getTime();
+        ? aNum - bNum
+        : bNum - aNum;
+    }
+
+    // Date compare - only if value looks like a date string (contains -, /, or is ISO format)
+    const isDateLike = (val: any) => {
+      if (typeof val !== 'string') return false;
+      return val.includes('-') || val.includes('/') || val.includes('T');
+    };
+
+    if (isDateLike(aValue) && isDateLike(bValue)) {
+      const aDate = new Date(aValue);
+      const bDate = new Date(bValue);
+      if (!isNaN(aDate.getTime()) && !isNaN(bDate.getTime())) {
+        return direction === 'asc'
+          ? aDate.getTime() - bDate.getTime()
+          : bDate.getTime() - aDate.getTime();
+      }
     }
 
     // String compare
+    const aStr = String(aValue).toLowerCase();
+    const bStr = String(bValue).toLowerCase();
     return direction === 'asc'
-      ? (aValue > bValue ? 1 : -1)
-      : (aValue < bValue ? 1 : -1);
+      ? (aStr > bStr ? 1 : -1)
+      : (aStr < bStr ? 1 : -1);
   });
-
-  console.log("sorted===", sorted);
-
   this.dataSource3.data = sorted;
 }
-
 }
