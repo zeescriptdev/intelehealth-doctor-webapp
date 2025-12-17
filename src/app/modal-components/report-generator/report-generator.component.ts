@@ -17,7 +17,8 @@ export class ReportGeneratorComponent implements OnInit {
   today = new Date().toISOString().slice(0, 10);
   specializations = ["General Physician", "Specialist doctor not needed"];
   ncd_protocols=[ { name: 'Anemia', id: 1 },
-    { name: 'Hypertension', id: 2 }];
+    { name: 'Hypertension', id: 2 },
+    { name: 'Diabetes', id: 3 }];
   states: any = [];
   districts: any = [];
   sanchs: any = [];
