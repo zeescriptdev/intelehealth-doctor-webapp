@@ -2168,7 +2168,8 @@
                               formControlName="speciality" bindLabel="label" bindValue="label" [clearable]="false"
                               [searchable]="true" [addTag]="true" placeholder="{{'Select specialization'|translate}}*"
                               data-test-id="selectReferralSpecialityVisitSummary">
-                              <ng-option *ngFor="let specialization of referSpecializations" [value]="specialization.name">
+                              <ng-option *ngFor="let specialization of referSpecializations" [value]="specialization.name" [attr.data-test-id]="'optionReferralSpeciality' + specialization.name"
+>
                                 {{ (specialization.name) | translate }}
                               </ng-option>
                             </ng-select>
@@ -2178,7 +2179,8 @@
                               formControlName="facility" bindLabel="label" bindValue="label" [clearable]="false"
                               [searchable]="true" [addTag]="true" placeholder="{{'Select facility'|translate}}*"
                               data-test-id="selectReferralFacilityVisitSummary">
-                              <ng-option *ngFor="let facility of facilities" [value]="facility.name">
+                              <ng-option *ngFor="let facility of facilities" [value]="facility.name"  [attr.data-test-id]="'optionReferralFacility' + facility.name"
+>
                                 {{ (facility.name) | translate }}
                               </ng-option>
                             </ng-select>
@@ -2188,7 +2190,8 @@
                               formControlName="priority_refer" [clearable]="false" bindLabel="name" bindValue="name"
                               [searchable]="false" [addTag]="false" placeholder="{{'Select Priority'|translate}}*"
                               data-test-id="selectReferralPriorityVisitSummary">
-                              <ng-option *ngFor="let ref_priority of refer_priorities" [value]="ref_priority.name">
+                              <ng-option *ngFor="let ref_priority of refer_priorities" [value]="ref_priority.name"  [attr.data-test-id]="'optionReferralPriority' + ref_priority.name"
+>
                                 {{ (ref_priority.name) | translate }}
                               </ng-option>
                             </ng-select>
