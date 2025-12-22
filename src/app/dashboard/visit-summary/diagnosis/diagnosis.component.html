@@ -578,13 +578,13 @@
         <table class="table table1 mt-3" aria-describedby="">
           <tbody>
              <tr *ngFor="let r of referrals; let i = index">
-              <td  width="26%">{{ (r.speciality) | translate }}</td>
-              <td  width="26%" *ngIf="isFeatureAvailable('referralFacility', true)">{{ (r.facility) | translate }}</td>
-              <td  width="26%" *ngIf="isFeatureAvailable('priorityOfReferral', true)">{{ (r.priority) | translate }}</td>
+              <td  width="26%" [attr.data-test-id]="'tdReferralTo-' + i">{{ (r.speciality) | translate }}</td>
+              <td  width="26%" *ngIf="isFeatureAvailable('referralFacility', true)" [attr.data-test-id]="'tdReferralFacility-' + i" >{{ (r.facility) | translate }}</td>
+              <td  width="26%" *ngIf="isFeatureAvailable('priorityOfReferral', true)" [attr.data-test-id]="'tdReferralPriority-' + i">{{ (r.priority) | translate }}</td>
               <td  width="25%">{{ r.reason }}</td>
               <td class="pr-0 pt-0">
                 <button type="button" class="float-right" mat-icon-button (click)="deleteReferral(i, r.uuid)"
-                  data-test-id="{{'btnDeleteReferralVisitSummary'+i}}"
+                [attr.data-test-id]="'btnDeleteReferralVisitSummary' + i"
                   *ngIf="!isMCCUser && isVisitNoteProvider && !visitEnded">
                   <img src="assets/svgs/delete-icon.svg" alt="" />
                 </button>
