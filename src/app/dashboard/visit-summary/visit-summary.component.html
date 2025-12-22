@@ -999,10 +999,10 @@
               </ul>
               <div *ngIf="hasAILLMEnabled && visit?.demarcation === 'New'" class="notes-section">
               <div class="top-row">
-                <div class="notes-form">
-                  <h6 class="notes-label">Notes</h6>
-                  <span class="grey-color">Add notes on the interaction to support future reference</span>
-                  <form class="mt-3" [formGroup]="patientInteractionNotesForm">
+                <div class="notes-form" data-test-id="divPatientInteractionNotesForm">
+                  <h6 class="notes-label" data-test-id="h6NotesLabel">Notes</h6>
+                  <span class="grey-color" data-test-id="spanNotesDescription">Add notes on the interaction to support future reference</span>
+                  <form class="mt-3" [formGroup]="patientInteractionNotesForm" data-test-id="formPatientInteractionNotes">
                     <textarea
                       formControlName="value"
                       class="notes-textarea"
@@ -1010,8 +1010,9 @@
                       placeholder="Type here"
                       (keyup)="autoGrowTextZone($event)"
                       [attr.disabled]="(isMCCUser || !isVisitNoteProvider || visitEnded)? 'disabled' : null"
+                      data-test-id="textareaPatientInteractionNotes"
                     ></textarea>
-                    <button [disabled]="!patientInteractionNotesForm.value.value" *ngIf="!isMCCUser && isVisitNoteProvider && !visitEnded" type="submit" (click)="saveDDxNotes()" class="save-btn">Save</button>
+                    <button [disabled]="!patientInteractionNotesForm.value.value" *ngIf="!isMCCUser && isVisitNoteProvider && !visitEnded" type="submit" (click)="saveDDxNotes()" class="save-btn" data-test-id="btnSavePatientInteractionNotes">Save</button>
                   </form>
                 </div>
 
@@ -1506,6 +1507,7 @@
                                   <img
                                     src="assets/svgs/plus-circle.svg"
                                     alt=""
+                                    data-test-id="imgAddMoreMed"
                                   />
                                   <span class="ml-2">{{
                                     "Add more medicine" | translate
@@ -1588,7 +1590,15 @@
                                   'Select frequency' | translate
                                 }}"
                                 data-test-id="selectFrequency"
-                              ></ng-select>
+                              >
+                            <ng-template ng-option-tmp let-item="item">
+                            <div
+                              [attr.data-test-id]="'frequency-option-' + item.id"
+                            >
+                              {{ item.label }}
+                            </div>
+                          </ng-template>    
+                        </ng-select>
                             </td>
                             <td colspan="2">
                               <div class="form-group mb-0">
@@ -1793,6 +1803,7 @@
                                   <img
                                     src="assets/svgs/plus-circle.svg"
                                     alt=""
+                                    data-test-id="imgAddMoreStandardMed"
                                   />
                                   <span class="ml-2">{{
                                     "Add more medicine" | translate
