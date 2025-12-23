@@ -941,7 +941,7 @@
                     </label>
                     <div class="col-sm-9 d-flex align-items-center" data-test-id="divHWOptions">
                       <div class="pretty p-default p-round" data-test-id="wrapperHWYes">
-                        <input type="radio" value="{{ 'Yes' | translate }}" data-test-id="hwRadioSpokenYes"
+                        <input type="radio" value="{{ 'Yes' | translate }}" data-test-id="radioPatientInteractionYes"
                           (click)="hwInteraction = 'Yes'" [checked]="hwInteraction === 'Yes'"
                           [attr.disabled]="(!isVisitNoteProvider || visitEnded) ? 'disabled' : null" />
                         <div class="state p-success" data-test-id="stateHWYes">
@@ -949,7 +949,7 @@
                         </div>
                       </div>
                       <div class="pretty p-default p-round" data-test-id="wrapperHWNo">
-                        <input type="radio" value="{{ 'No' | translate }}" data-test-id="hwRadioSpokenNo"
+                        <input type="radio" value="{{ 'No' | translate }}" data-test-id="radioPatientInteractionNo"
                           (click)="hwInteraction = 'No'" [checked]="hwInteraction === 'No'"
                           [attr.disabled]="(!isVisitNoteProvider || visitEnded) ? 'disabled' : null" />
                         <div class="state p-success" data-test-id="stateHWNo">
@@ -997,12 +997,12 @@
                   </form>
                 </li>
               </ul>
-              <div *ngIf="hasAILLMEnabled && visit?.demarcation === 'New'" class="notes-section">
-              <div class="top-row">
-                <div class="notes-form">
-                  <h6 class="notes-label">Notes</h6>
-                  <span class="grey-color">Add notes on the interaction to support future reference</span>
-                  <form class="mt-3" [formGroup]="patientInteractionNotesForm">
+              <div *ngIf="hasAILLMEnabled && visit?.demarcation === 'New'" class="notes-section" data-test-id="divNotesSection">
+              <div class="top-row" data-test-id="divNotesTopRow">
+                <div class="notes-form" data-test-id="divNotesForm">
+                  <h6 class="notes-label" data-test-id="h6NotesLabel">Notes</h6>
+                  <span class="grey-color" data-test-id="spanNotesDescription">Add notes on the interaction to support future reference</span>
+                  <form class="mt-3" [formGroup]="patientInteractionNotesForm" data-test-id="formPatientInteractionNotes">
                     <textarea
                       formControlName="value"
                       class="notes-textarea"
@@ -1010,19 +1010,20 @@
                       placeholder="Type here"
                       (keyup)="autoGrowTextZone($event)"
                       [attr.disabled]="(isMCCUser || !isVisitNoteProvider || visitEnded)? 'disabled' : null"
+                      data-test-id="textareaPatientInteractionNotes"
                     ></textarea>
-                    <button [disabled]="!patientInteractionNotesForm.value.value" *ngIf="!isMCCUser && isVisitNoteProvider && !visitEnded" type="submit" (click)="saveDDxNotes()" class="save-btn">Save</button>
+                    <button [disabled]="!patientInteractionNotesForm.value.value" *ngIf="!isMCCUser && isVisitNoteProvider && !visitEnded" type="submit" (click)="saveDDxNotes()" class="save-btn" data-test-id="btnSaveNotes">Save</button>
                   </form>
                 </div>
 
                 <!-- Further Questions Section -->
-                <div *ngIf="furtherQuestionsList.length > 0" class="suggestions-box">
-                  <div style="margin-top: 0;display: flex;justify-content: space-between;">
-                    <h4><img src="assets/svgs/ayu-ddx.svg" alt="" class="mr-2"/> Ayu suggested questions</h4> 
+                <div *ngIf="furtherQuestionsList.length > 0" class="suggestions-box" data-test-id="divSuggestionsBox">
+                  <div style="margin-top: 0;display: flex;justify-content: space-between;" data-test-id="divSuggestionsHeader">
+                    <h4 data-test-id="h4SuggestedQuestions"><img src="assets/svgs/ayu-ddx.svg" alt="" class="mr-2" data-test-id="imgAyuIcon"/> Ayu suggested questions</h4>
                     <!-- <span style="font-size: 12px; color: #888;">Show details</span> -->
                   </div>
-                  <div class="question-list mb-2" *ngFor="let question of furtherQuestionsList; let i = index">
-                    <span class="ml-2"> {{i+1}}. {{ question }}</span>
+                  <div class="question-list mb-2" *ngFor="let question of furtherQuestionsList; let i = index" [attr.data-test-id]="'divQuestion' + i">
+                    <span class="ml-2" [attr.data-test-id]="'spanQuestion' + i"> {{i+1}}. {{ question }}</span>
                   </div>
                 </div>
               </div>
