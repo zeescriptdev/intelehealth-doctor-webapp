@@ -1,0 +1,98 @@
+<div class="ncd-report-container">
+  <div class="container">
+    <div class="header">
+      <h1>Ekal Telemedicine Project</h1>
+      <h2>NCD Report</h2>
+    </div>
+
+    <div class="content">
+      <!-- Debug info -->
+      <div *ngIf="patientUuid" style="background: #e3f2fd; padding: 10px; margin-bottom: 10px; border-radius: 4px; font-size: 12px;">
+        <strong>Debug:</strong> Patient UUID: {{ patientUuid }}
+      </div>
+      <!-- Loading State -->
+      <div *ngIf="loading" class="loading">
+        <div class="spinner"></div>
+        <p>Loading NCD Report...</p>
+      </div>
+
+      <!-- Error State -->
+      <div *ngIf="error && !loading" class="error">
+        <p>{{ error }}</p>
+      </div>
+
+      <!-- Report Content -->
+      <div *ngIf="reportData && !loading && !error" class="report-content">
+        <!-- Patient Info Section -->
+        <div class="patient-info">
+          <div class="patient-avatar">
+            <img 
+              [src]="patientImageUrl" 
+              [alt]="reportData.patient.name"
+              (error)="onImageError($event)"
+              [attr.data-test-id]="'imgPersonImage'">
+          </div>
+          <div class="patient-details">
+            <div class="patient-name">{{ reportData.patient.name }}</div>
+            <div class="patient-meta">
+              <div class="meta-item">
+                <span class="meta-label">Patient ID:</span>
+                <span>{{ reportData.patient.identifier }}</span>
+              </div>
+              <div class="meta-item">
+                <span class="meta-label">Age:</span>
+                <span>{{ reportData.patient.gender === 'Male' ? 'M' : reportData.patient.gender === 'Female' ? 'F' : '' }} {{ reportData.patient.age }}</span>
+              </div>
+              <div class="meta-item">
+                <span class="meta-label">Sex:</span>
+                <span>{{ reportData.patient.gender }}</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Recent NCD Readings Section -->
+        <div class="section-title">Recent NCD Readings</div>
+
+        <div class="table-container">
+          <table>
+            <thead>
+              <tr>
+                <th>Date</th>
+                <th>BP<br><span style="font-size: 10px; opacity: 0.8;">(mm/Hg)</span></th>
+                <th>HB<br><span style="font-size: 10px; opacity: 0.8;">(gm/dL)</span></th>
+                <th>RBS<br><span style="font-size: 10px; opacity: 0.8;">(mg/dL)</span></th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let visit of reportData.visits">
+                <td>{{ visit.date || visit.visitDate || 'N/A' }}</td>
+                <td><span class="vital-value">{{ visit.bp || visit.bloodPressure || 'N/A' }}</span></td>
+                <td><span class="vital-value">{{ visit.hgb !== undefined && visit.hgb !== null && visit.hgb !== 'N/A' ? visit.hgb : (visit.hemoglobin || 'N/A') }}</span></td>
+                <td><span class="vital-value">{{ visit.rbs !== undefined && visit.rbs !== null && visit.rbs !== 'N/A' ? visit.rbs : (visit.bloodSugar || 'N/A') }}</span></td>
+              </tr>
+              <tr *ngIf="!reportData.visits || reportData.visits.length === 0">
+                <td colspan="4" class="no-data">No NCD visit data available</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Disclaimer Section -->
+        <div class="disclaimer">
+          <div class="disclaimer-title">⚠️ Disclaimer</div>
+          <div class="disclaimer-text">
+            The above vitals have been recorded by the frontline health worker using calibrated devices.
+            These readings are provided for preliminary guidance only. Final confirmation and clinical
+            interpretation should be obtained from a qualified doctor at the nearest hospital, PHC, or CHC.
+          </div>
+        </div>
+
+        <div class="footer">
+          Generated on <span>{{ reportData.generatedAt }}</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+

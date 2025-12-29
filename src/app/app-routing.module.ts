@@ -20,6 +20,10 @@ const routes: Routes = [
     loadChildren: () => import('./prescription-download/prescription-download.module').then(m => m.PrescriptionDownloadModule),
   },
   {
+    path: 'r/:patientUuid',
+    loadChildren: () => import('./ncd-report/ncd-report.module').then(m => m.NcdReportModule),
+  },
+  {
     path: '',
     component: MainContainerComponent,
     canActivate: [RouteAuthGuard],
