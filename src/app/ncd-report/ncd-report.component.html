@@ -6,10 +6,6 @@
     </div>
 
     <div class="content">
-      <!-- Debug info -->
-      <div *ngIf="patientUuid" style="background: #e3f2fd; padding: 10px; margin-bottom: 10px; border-radius: 4px; font-size: 12px;">
-        <strong>Debug:</strong> Patient UUID: {{ patientUuid }}
-      </div>
       <!-- Loading State -->
       <div *ngIf="loading" class="loading">
         <div class="spinner"></div>
@@ -25,13 +21,6 @@
       <div *ngIf="reportData && !loading && !error" class="report-content">
         <!-- Patient Info Section -->
         <div class="patient-info">
-          <div class="patient-avatar">
-            <img 
-              [src]="patientImageUrl" 
-              [alt]="reportData.patient.name"
-              (error)="onImageError($event)"
-              [attr.data-test-id]="'imgPersonImage'">
-          </div>
           <div class="patient-details">
             <div class="patient-name">{{ reportData.patient.name }}</div>
             <div class="patient-meta">
@@ -41,7 +30,7 @@
               </div>
               <div class="meta-item">
                 <span class="meta-label">Age:</span>
-                <span>{{ reportData.patient.gender === 'Male' ? 'M' : reportData.patient.gender === 'Female' ? 'F' : '' }} {{ reportData.patient.age }}</span>
+                <span>{{ reportData.patient.age }}</span>
               </div>
               <div class="meta-item">
                 <span class="meta-label">Sex:</span>

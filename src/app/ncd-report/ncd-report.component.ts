@@ -35,8 +35,7 @@ export class NcdReportComponent implements OnInit, OnDestroy {
   error: string = null;
   reportData: NcdReportData['data'] = null;
   baseURL = environment.baseURL;
-  patientImageUrl: string = 'assets/svgs/user.svg';
-  defaultImageUrl = 'assets/svgs/user.svg';
+  
 
   constructor(
     private route: ActivatedRoute,
@@ -70,25 +69,13 @@ export class NcdReportComponent implements OnInit, OnDestroy {
     this.loading = true;
     this.error = null;
 
-    console.log('NCD Report - Loading data for patient:', this.patientUuid);
     const apiUrl = `${environment.mindmapURL}/ncdReport/r/${this.patientUuid}`;
-    console.log('NCD Report - API URL:', apiUrl);
 
     this.ncdReportService.getNcdReportData(this.patientUuid).subscribe({
       next: (response: NcdReportData) => {
         console.log('NCD Report - Response received:', response);
         if (response.success && response.data) {
           this.reportData = response.data;
-          // Set patient image URL
-          const patientUuidForImage = this.reportData.patient?.uuid || this.patientUuid;
-          if (patientUuidForImage && this.baseURL) {
-            this.patientImageUrl = `${this.baseURL}/personimage/${patientUuidForImage}`;
-          } else {
-            this.patientImageUrl = this.defaultImageUrl;
-            console.warn('NCD Report - Cannot set image URL. BaseURL:', this.baseURL, 'Patient UUID:', patientUuidForImage);
-          }
-          console.log('NCD Report - Data loaded successfully');
-          console.log('NCD Report - Visits data:', JSON.stringify(this.reportData.visits, null, 2));
           if (this.reportData.visits && this.reportData.visits.length > 0) {
             console.log('NCD Report - First visit sample:', this.reportData.visits[0]);
             console.log('NCD Report - First visit BP:', this.reportData.visits[0].bp);
@@ -102,7 +89,6 @@ export class NcdReportComponent implements OnInit, OnDestroy {
         this.loading = false;
       },
       error: (err) => {
-        console.error('NCD Report - Error loading report:', err);
         console.error('NCD Report - Error details:', {
           status: err.status,
           statusText: err.statusText,
@@ -115,16 +101,6 @@ export class NcdReportComponent implements OnInit, OnDestroy {
     });
   }
 
-  /**
-   * Handle image error - fallback to default image
-   */
-  onImageError(event: any): void {
-    console.error('NCD Report - Image failed to load:', event.target.src);
-    console.error('NCD Report - BaseURL:', this.baseURL);
-    console.error('NCD Report - Patient UUID:', this.reportData?.patient?.uuid || this.patientUuid);
-    event.target.src = this.defaultImageUrl;
-    event.target.onerror = null; // Prevent infinite loop
-  }
 
   /**
    * Determine if BP is high (for color coding)
@@ -201,26 +177,5 @@ export class NcdReportComponent implements OnInit, OnDestroy {
     return this.isHighRBS(rbs) ? '#dc3545' : (this.isNormalRBS(rbs) ? '#28a745' : '#dc3545');
   }
 
-  /**
-   * Get patient image URL
-   */
-  getPatientImageUrl(): string {
-    if (!this.baseURL) {
-      console.warn('NCD Report - baseURL is not set');
-      return this.defaultImageUrl;
-    }
-    
-    const uuid = this.reportData?.patient?.uuid || this.patientUuid;
-    if (!uuid) {
-      console.warn('NCD Report - Patient UUID is not available');
-      return this.defaultImageUrl;
-    }
-    
-    const imageUrl = `${this.baseURL}/personimage/${uuid}`;
-    console.log('NCD Report - Constructed image URL:', imageUrl);
-    console.log('NCD Report - Base URL:', this.baseURL);
-    console.log('NCD Report - Patient UUID:', uuid);
-    return imageUrl;
-  }
 }
 
