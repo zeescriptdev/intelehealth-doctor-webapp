@@ -69,18 +69,12 @@ export class NcdReportComponent implements OnInit, OnDestroy {
     this.loading = true;
     this.error = null;
 
-    const apiUrl = `${environment.mindmapURL}/ncdReport/r/${this.patientUuid}`;
-
     this.ncdReportService.getNcdReportData(this.patientUuid).subscribe({
       next: (response: NcdReportData) => {
-        console.log('NCD Report - Response received:', response);
         if (response.success && response.data) {
           this.reportData = response.data;
           if (this.reportData.visits && this.reportData.visits.length > 0) {
             console.log('NCD Report - First visit sample:', this.reportData.visits[0]);
-            console.log('NCD Report - First visit BP:', this.reportData.visits[0].bp);
-            console.log('NCD Report - First visit HGB:', this.reportData.visits[0].hgb);
-            console.log('NCD Report - First visit RBS:', this.reportData.visits[0].rbs);
           }
         } else {
           console.error('NCD Report - Response not successful:', response);
