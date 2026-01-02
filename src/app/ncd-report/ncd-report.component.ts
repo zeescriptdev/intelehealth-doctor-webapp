@@ -19,7 +19,6 @@ interface NcdReportData {
       hgb: string | number;
       rbs: string | number;
     }>;
-    generatedAt: string;
   };
   message?: string;
 }
