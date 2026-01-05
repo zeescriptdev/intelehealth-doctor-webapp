@@ -42,7 +42,7 @@
                     <span>{{ patient?.person?.preferredName?.givenName }}</span>
                     <span *ngIf="checkPatientRegField('Middle Name') && patient?.person?.preferredName?.middleName">{{ ' ' + patient?.person?.preferredName?.middleName }}</span>
                     <span>{{ ' ' + patient?.person?.preferredName?.familyName }}</span>
-                    <!-- <span *ngIf="checkPatientRegField('Gender')">{{ " (" + (patient?.person.gender | translate) + ") "}}</span> -->
+                    <span *ngIf="checkPatientRegField('Gender')">{{ " (" + (patient?.person.gender | translate) + ", " + (patient?.person.age) + ")" }}</span>
                   </h6>
                   <p data-test-id="etPatienOpenMRSId" *ngIf="isFeatureAvailable('tnmStaging')">{{ getPersonAttributeValue('TMH Case Number') }}</p>
                   <p data-test-id="etPatienOpenMRSId" *ngIf="!isFeatureAvailable('tnmStaging')">{{ getPatientIdentifier('OpenMRS ID') }}</p>
@@ -64,12 +64,21 @@
               </div>
             </div>
 
-            <div class="col-md-3 patient-info-section p-3" *ngIf="checkPatientRegField('Date of Birth') && patient?.person.birthdate !== 'NA'">
+            <div class="col-md-2 patient-info-section p-3" *ngIf="checkPatientRegField('Date of Birth') && patient?.person.birthdate !== 'NA'">
               <div class="patient-info-item mb-3">
                 <h6 data-test-id="etPatientAge">{{'Date of birth'|translate}}</h6>
                 <p data-test-id="etPatient">{{ patient?.person.birthdate | date : "dd MMM, yyyy" }}</p>
               </div>
             </div>
+
+            <ng-container *ngFor="let v of vitals">
+              <div class="col-md-2 patient-info-section p-3" *ngIf="(v.name === 'Weight' || v.name === 'Weight (kg)' || v.key === 'weight') && getObsValue(v.uuid, v.key)">
+                <div class="patient-info-item mb-3">
+                  <h6 data-test-id="etPatientWeight">{{'Weight (in kg)'|translate}}</h6>
+                  <p data-test-id="etPatientWeightValue">{{ getObsValue(v.uuid, v.key) }}</p>
+                </div>
+              </div>
+            </ng-container>
 
             <div class="col-md-2 patient-info-section p-3" *ngIf="checkPatientRegField('Request ID') && getPersonAttributeValue('Request ID') !== 'NA'">
               <div class="patient-info-item mb-3">
