@@ -134,7 +134,7 @@
     background: white;
     border-radius: 8px;
     overflow: hidden;
-    table-layout: auto;
+    table-layout: fixed;
   }
 
   thead {
@@ -152,7 +152,6 @@
     letter-spacing: normal;
     vertical-align: middle;
     width: 25%;
-    white-space: nowrap;
   }
 
   .date-header {
@@ -160,8 +159,7 @@
     font-size: 15px;
     color: #212529;
     text-align: left;
-    width: 30%;
-    white-space: nowrap;
+    width: 20%;
   }
 
   .vital-header {
@@ -233,7 +231,6 @@
     color: #495057;
     font-size: 13px;
     text-align: left;
-    white-space: nowrap;
   }
 
   .vital-value {
