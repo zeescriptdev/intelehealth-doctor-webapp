@@ -96,78 +96,150 @@ export class NcdReportComponent implements OnInit, OnDestroy {
 
 
   /**
-   * Determine if BP is high (for color coding)
+   * Get systolic color based on ranges
+   * 90-119: Green (#008000)
+   * 120-139: Yellow (#d9d900)
+   * Default: Red (#FF0000)
    */
-  isHighBP(bp: string): boolean {
-    if (!bp || bp === 'N/A') return false;
+  getSystolicColor(systolic: number): string {
+    if (systolic >= 90 && systolic <= 119) {
+      return '#008000'; // Green
+    } else if (systolic >= 120 && systolic <= 139) {
+      return '#d9d900'; // Yellow
+    }
+    return '#FF0000'; // Red - Default
+  }
+
+  /**
+   * Get diastolic color based on ranges
+   * <80: Green (#008000)
+   * 80-99: Yellow (#d9d900)
+   * Default: Red (#FF0000)
+   */
+  getDiastolicColor(diastolic: number): string {
+    if (diastolic < 80) {
+      return '#008000'; // Green
+    } else if (diastolic >= 80 && diastolic <= 99) {
+      return '#d9d900'; // Yellow
+    }
+    return '#FF0000'; // Red - Default
+  }
+
+  /**
+   * Parse BP string and return systolic/diastolic values
+   */
+  parseBP(bp: string): { systolic: number | null, diastolic: number | null, sysText: string, diaText: string } {
+    if (!bp || bp === 'N/A') {
+      return { systolic: null, diastolic: null, sysText: 'N/A', diaText: '' };
+    }
+
     const parts = bp.split('/');
     if (parts.length === 2) {
-      const systolic = parseFloat(parts[0]);
-      const diastolic = parseFloat(parts[1]);
+      const sysText = parts[0].trim();
+      const diaText = parts[1].trim();
+      const systolic = parseFloat(sysText);
+      const diastolic = parseFloat(diaText);
+
       if (!isNaN(systolic) && !isNaN(diastolic)) {
-        return systolic >= 140 || diastolic >= 90;
+        return { systolic, diastolic, sysText, diaText };
       }
     }
-    return false;
+
+    return { systolic: null, diastolic: null, sysText: bp, diaText: '' };
   }
 
   /**
-   * Determine if HB is high (for color coding)
-   */
-  isHighHB(hgb: string | number): boolean {
-    if (hgb === null || hgb === undefined || hgb === 'N/A') return false;
-    const hgbNum = parseFloat(hgb.toString());
-    return !isNaN(hgbNum) && hgbNum > 18;
-  }
-
-  /**
-   * Determine if HB is normal (for color coding)
-   */
-  isNormalHB(hgb: string | number): boolean {
-    if (hgb === null || hgb === undefined || hgb === 'N/A') return false;
-    const hgbNum = parseFloat(hgb.toString());
-    return !isNaN(hgbNum) && hgbNum >= 12 && hgbNum <= 18;
-  }
-
-  /**
-   * Determine if RBS is high (for color coding)
-   */
-  isHighRBS(rbs: string | number): boolean {
-    if (rbs === null || rbs === undefined || rbs === 'N/A') return false;
-    const rbsNum = parseFloat(rbs.toString());
-    return !isNaN(rbsNum) && rbsNum > 140;
-  }
-
-  /**
-   * Determine if RBS is normal (for color coding)
-   */
-  isNormalRBS(rbs: string | number): boolean {
-    if (rbs === null || rbs === undefined || rbs === 'N/A') return false;
-    const rbsNum = parseFloat(rbs.toString());
-    return !isNaN(rbsNum) && rbsNum >= 70 && rbsNum <= 140;
-  }
-
-  /**
-   * Get color for BP value
+   * Get color for entire BP value (fallback for simple display)
    */
   getBPColor(bp: string): string {
-    return this.isHighBP(bp) ? '#dc3545' : (bp !== 'N/A' ? '#28a745' : '#000');
+    const parsed = this.parseBP(bp);
+    if (parsed.systolic === null || parsed.diastolic === null) {
+      return '#6c757d'; // Gray for N/A
+    }
+    // Return systolic color as primary color
+    return this.getSystolicColor(parsed.systolic);
   }
 
   /**
-   * Get color for HB value
+   * Get color for HB value based on ranges and gender
+   * Normal: ≥13 (M), ≥12 (F) - Green
+   * Mild: 11.0-12.9 (M), 11.0-11.9 (F) - Yellow
+   * Moderate: 8.0-10.9 (M/F) - Orange
+   * Severe: <8 - Red
    */
   getHBColor(hgb: string | number): string {
-    if (hgb === null || hgb === undefined || hgb === 'N/A') return '#000';
-    return this.isHighHB(hgb) ? '#dc3545' : (this.isNormalHB(hgb) ? '#28a745' : '#dc3545');
+    if (hgb === null || hgb === undefined || hgb === 'N/A') return '#837c85';
+
+    const hgbNum = parseFloat(hgb.toString());
+    if (isNaN(hgbNum)) return '#837c85';
+
+    // Determine if patient is male or female (from reportData)
+    const isMale = this.reportData?.patient?.gender?.toLowerCase() === 'male' ||
+                   this.reportData?.patient?.gender?.toLowerCase() === 'm';
+
+    // Severe - Red
+    if (hgbNum < 8) {
+      return '#dc3545'; // Red
+    }
+    // Moderate - Orange
+    if (hgbNum >= 8 && hgbNum <= 10.9) {
+      return '#ff8c00'; // Orange
+    }
+    // Mild - Yellow
+    if (isMale) {
+      if (hgbNum >= 11.0 && hgbNum <= 12.9) {
+        return '#ffc107'; // Yellow
+      }
+    } else {
+      if (hgbNum >= 11.0 && hgbNum <= 11.9) {
+        return '#ffc107'; // Yellow
+      }
+    }
+    // Normal - Green
+    if (isMale) {
+      if (hgbNum >= 13) {
+        return '#28a745'; // Green
+      }
+    } else {
+      if (hgbNum >= 12) {
+        return '#28a745'; // Green
+      }
+    }
+
+    return '#000';
   }
 
   /**
-   * Get color for RBS value
+   * Get color for RBS value based on ranges
+   * Hypoglycemia: <70 - Red
+   * Normal: 70-139 - Green
+   * Pre-Diabetes: 140-199 - Yellow
+   * Suspected Diabetes: ≥200 - Orange
    */
   getRBSColor(rbs: string | number): string {
-    if (rbs === null || rbs === undefined || rbs === 'N/A') return '#000';
-    return this.isHighRBS(rbs) ? '#dc3545' : (this.isNormalRBS(rbs) ? '#28a745' : '#dc3545');
+    if (rbs === null || rbs === undefined || rbs === 'N/A') return '#837c85';
+
+    const rbsNum = parseFloat(rbs.toString());
+    if (isNaN(rbsNum)) return '#837c85';
+
+    // Hypoglycemia - Red
+    if (rbsNum < 70) {
+      return '#dc3545'; // Red
+    }
+    // Normal - Green
+    if (rbsNum >= 70 && rbsNum <= 139) {
+      return '#28a745'; // Green
+    }
+    // Pre-Diabetes - Yellow
+    if (rbsNum >= 140 && rbsNum <= 199) {
+      return '#ffc107'; // Yellow
+    }
+    // Suspected Diabetes - Orange
+    if (rbsNum >= 200) {
+      return '#ff8c00'; // Orange
+    }
+
+    return '#000';
   }
 
 }

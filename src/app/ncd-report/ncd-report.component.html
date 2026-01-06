@@ -1,7 +1,7 @@
 <div class="ncd-report-container">
   <div class="container">
     <div class="header">
-      <h1>Test</h1>
+      <h1>Ekal Telemedicine Project</h1>
       <h2>NCD Report</h2>
     </div>
 
@@ -47,18 +47,59 @@
           <table>
             <thead>
               <tr>
-                <th>Date</th>
-                <th>BP<br><span style="font-size: 10px; opacity: 0.8;">(mm/Hg)</span></th>
-                <th>HB<br><span style="font-size: 10px; opacity: 0.8;">(gm/dL)</span></th>
-                <th>RBS<br><span style="font-size: 10px; opacity: 0.8;">(mg/dL)</span></th>
+                <th class="date-header">Date</th>
+                <th class="vital-header">
+                  <div class="header-with-icon">
+                    <div class="icon-label-group">
+                      <img src="assets/svgs/bp-icon.svg" alt="BP" class="vital-icon">
+                      <div class="vital-name">BP</div>
+                    </div>
+                    <div class="unit-text">(mm/Hg)</div>
+                  </div>
+                </th>
+                <th class="vital-header">
+                  <div class="header-with-icon">
+                    <div class="icon-label-group">
+                      <img src="assets/svgs/hb-icon.svg" alt="HB" class="vital-icon">
+                      <div class="vital-name">HB</div>
+                    </div>
+                    <div class="unit-text">(gm/dL)</div>
+                  </div>
+                </th>
+                <th class="vital-header">
+                  <div class="header-with-icon">
+                    <div class="icon-label-group">
+                      <img src="assets/svgs/rbs-icon.svg" alt="RBS" class="vital-icon">
+                      <div class="vital-name">RBS</div>
+                    </div>
+                    <div class="unit-text">(mg/dL)</div>
+                  </div>
+                </th>
               </tr>
             </thead>
             <tbody>
               <tr *ngFor="let visit of reportData.visits">
-                <td>{{ visit.date || visit.visitDate || 'N/A' }}</td>
-                <td><span class="vital-value">{{ visit.bp || visit.bloodPressure || 'N/A' }}</span></td>
-                <td><span class="vital-value">{{ visit.hgb !== undefined && visit.hgb !== null && visit.hgb !== 'N/A' ? visit.hgb : (visit.hemoglobin || 'N/A') }}</span></td>
-                <td><span class="vital-value">{{ visit.rbs !== undefined && visit.rbs !== null && visit.rbs !== 'N/A' ? visit.rbs : (visit.bloodSugar || 'N/A') }}</span></td>
+                <td class="date-cell">{{ visit.date || visit.visitDate || 'N/A' }}</td>
+                <td>
+                  <ng-container *ngIf="parseBP(visit.bp || visit.bloodPressure || 'N/A') as bpData">
+                    <span class="vital-value" *ngIf="bpData.systolic !== null && bpData.diastolic !== null">
+                      <span [style.color]="getSystolicColor(bpData.systolic)">{{ bpData.sysText }}</span>/<span [style.color]="getDiastolicColor(bpData.diastolic)">{{ bpData.diaText }}</span>
+                    </span>
+                    <span class="vital-value" *ngIf="bpData.systolic === null || bpData.diastolic === null" style="color: #6c757d;">
+                      {{ bpData.sysText }}
+                    </span>
+                  </ng-container>
+                </td>
+                <td>
+                  <span class="vital-value" [style.color]="getHBColor(visit.hgb !== undefined && visit.hgb !== null && visit.hgb !== 'N/A' ? visit.hgb : (visit.hemoglobin || 'N/A'))">
+                    {{ visit.hgb !== undefined && visit.hgb !== null && visit.hgb !== 'N/A' ? visit.hgb : (visit.hemoglobin || 'N/A') }}
+                  </span>
+                </td>
+                <td>
+                  <span class="vital-value" [style.color]="getRBSColor(visit.rbs !== undefined && visit.rbs !== null && visit.rbs !== 'N/A' ? visit.rbs : (visit.bloodSugar || 'N/A'))">
+                    {{ visit.rbs !== undefined && visit.rbs !== null && visit.rbs !== 'N/A' ? visit.rbs : (visit.bloodSugar || 'N/A') }}
+                  </span>
+                </td>
               </tr>
               <tr *ngIf="!reportData.visits || reportData.visits.length === 0">
                 <td colspan="4" class="no-data">No NCD visit data available</td>
