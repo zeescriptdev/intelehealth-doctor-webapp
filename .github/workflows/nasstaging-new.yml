@@ -1,0 +1,66 @@
+name: Nasstaging-new
+on:
+  push:
+    branches:
+      - nas-ida5-development-master
+  workflow_dispatch:  # Allows manual trigger
+  
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      # STEP 1: Fetch the .env from the server to use during the build
+      - name: Download .env from Server
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          host: ${{ secrets.NASSTAGINGNEW_HOST }}
+          username: ${{ secrets.REMOTE_USER }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          source: "/home/ubuntu/deploy/webapp/.env"
+          target: "./"
+          strip_components: 4 # Removes /home/ubuntu/deploy/webapp/ prefix
+
+      # STEP 2: Build the Docker image (Dockerfile will now find the .env)
+      - name: Build and Save Docker Image
+        run: |
+          # Move the downloaded .env to the root if scp nested it
+          mv .env ./ || true 
+          docker build -t intelehealth-webapp:latest .
+          docker save intelehealth-webapp:latest > webapp_image.tar
+
+      # STEP 3: Transfer the built image back to the server
+      - name: Upload Image to Server
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          host: ${{ secrets.NASSTAGINGNEW_HOST }}
+          username: ${{ secrets.REMOTE_USER }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          source: "webapp_image.tar"
+          target: "/home/ubuntu/deploy/webapp/"
+
+      # STEP 4: Restart the container
+      - name: Deploy Container
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.REMOTE_HOST }}
+          username: ${{ secrets.REMOTE_USER }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          script: |
+            cd /home/ubuntu/deploy/webapp/
+            docker load < webapp_image.tar
+            docker stop webapp-container || true
+            docker rm webapp-container || true
+            
+            # Note: We still mount the .env at runtime just in case 
+            # your Node server (SSR) or Docker entrypoint needs it.
+            docker run -d \
+              --name webapp-container \
+              -p 80:80 \
+              --env-file /home/ubuntu/deploy/webapp/.env \
+              intelehealth-webapp:latest
+            
+            rm webapp_image.tar
