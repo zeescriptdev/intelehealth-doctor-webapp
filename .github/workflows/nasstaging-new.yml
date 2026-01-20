@@ -32,7 +32,7 @@ jobs:
           # Move the downloaded .env to the root if scp nested it
           mv .env ./ || true 
           docker build -t intelehealth-webapp:latest .
-          docker save intelehealth-webapp:latest > webapp_image.tar
+          docker save intelehealth-webapp:latest | gzip > webapp_image.tar.gz
 
       # STEP 3: Transfer the built image back to the server
       - name: Upload Image to Server
@@ -41,7 +41,7 @@ jobs:
           host: ${{ secrets.NASSTAGINGNEW_HOST }}
           username: ${{ secrets.REMOTE_USER }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
-          source: "webapp_image.tar"
+          source: "webapp_image.tar.gz"
           target: "/home/ubuntu/deploy/webapp/"
 
       # STEP 4: Restart the container
@@ -53,7 +53,8 @@ jobs:
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           script: |
             cd /home/ubuntu/deploy/webapp/
-            docker load < webapp_image.tar
+            gunzip -c webapp_image.tar.gz | docker load
+            
             docker stop webapp-container || true
             docker rm webapp-container || true
             
