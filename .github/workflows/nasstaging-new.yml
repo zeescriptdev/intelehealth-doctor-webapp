@@ -14,16 +14,18 @@ jobs:
         uses: actions/checkout@v4
 
       # STEP 1: Fetch the .env from the server to use during the build
-      - name: Download .env from Server
-        uses: appleboy/scp-action@v0.1.7
-        with:
-          host: ${{ secrets.NASSTAGINGNEW_HOST }}
-          username: ${{ secrets.REMOTE_USER }}
-          key: ${{ secrets.SSH_PRIVATE_KEY }}
-          source: "/home/ubuntu/deploy/webapp/.env"
-          target: "./"
-          strip_components: 4 # Removes /home/ubuntu/deploy/webapp/ prefix
-
+      - name: Download .env via Native SCP
+        run: |
+          # Create the .ssh directory and add the private key
+          mkdir -p ~/.ssh
+          echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/id_rsa
+          chmod 600 ~/.ssh/id_rsa
+          
+          # Add the server to known_hosts to prevent interactive prompts
+          ssh-keyscan -H ${{ secrets.REMOTE_HOST }} >> ~/.ssh/known_hosts
+          
+          # Execute the download
+          scp -i ~/.ssh/id_rsa ${{ secrets.REMOTE_USER }}@${{ secrets.REMOTE_HOST }}:/home/ubuntu/deploy/webapp/.env .env
       # STEP 2: Build the Docker image (Dockerfile will now find the .env)
       - name: Build and Save Docker Image
         run: |
