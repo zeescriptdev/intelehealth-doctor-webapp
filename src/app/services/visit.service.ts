@@ -316,7 +316,7 @@ export class VisitService {
   
   // A reusable function to build translation request body
   buildRequestBody(input: string, targetLang: string, tabType: string) {
-    // Get gender from cached provider data
+      // Get gender from cached provider data
     const provider = getCacheData(true, doctorDetails.PROVIDER);
     let speaker_gender = provider?.person?.gender || null;
 
@@ -332,7 +332,7 @@ export class VisitService {
       textToTranslate: input,
       targetLang:targetLang,
       tabType: tabType,
-      speaker_gender:speaker_gender
+      speaker_gender: speaker_gender // Send full gender name: 'Male' or 'Female'
     };
   }
   /**

@@ -301,7 +301,7 @@ export class ViewVisitPrescriptionComponent implements OnInit, OnDestroy {
     this.diagnosisService.getObs(this.visit.patient.uuid, this.conceptMed).subscribe((response: ObsApiResponseModel) => {
       response.results.forEach((obs: ObsModel) => {
         if (obs.encounter.visit.uuid === this.visit.uuid) {
-          if (obs.value.includes(',')) {
+          if (/(\s*[:\-]\s*)?\d+\s*/i.test(obs.value) && !obs.value.includes('::')) {
             this.medicines.push({uuid: obs.uuid, value: obs.value});
           } else {
             this.additionalInstructions.push(obs);

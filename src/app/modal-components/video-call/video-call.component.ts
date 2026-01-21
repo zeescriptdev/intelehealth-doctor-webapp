@@ -141,6 +141,7 @@ export class VideoCallComponent implements OnInit, OnDestroy {
       handleTrackUnmuted: this.handleTrackUnmuted.bind(this),
       handleParticipantDisconnected: this.handleParticipantDisconnected.bind(this),
       handleParticipantConnect: this.handleParticipantConnect.bind(this),
+      autoEnableLocalMedia: true
     });
   }
 
@@ -292,11 +293,6 @@ export class VideoCallComponent implements OnInit, OnDestroy {
     }
   }
 
-  /**
-  * Handle track unmuted callback
-  * @param {any} event - Track muted Event
-  * @return {void}
-  */
   handleTrackUnmuted(event: any) {
     if (event instanceof RemoteTrackPublication) {
       if (event.kind === Track.Kind.Audio) {
@@ -455,45 +451,87 @@ export class VideoCallComponent implements OnInit, OnDestroy {
   * @return {void}
   */
   endCallInRoom(flag?) {
-    setTimeout(() => {
+    try {
+      if (this.endCall) {
+        // already ending - avoid double execution
+        return;
+      }
+      this.endCall = true;
+
+      // 1) Stop LiveKit local tracks
+      try { this.webrtcSvc.stopAllLocalTracks(); } catch (e) { console.warn('stopAllLocalTracks failed', e); }
+
+      // 2) Cleanup local/remote video elements (ViewChild refs)
+      this.cleanupVideoElement(this.localVideoRef);
+      this.cleanupVideoElement(this.remoteVideoRef);
+
+      // 3) Disconnect the room (service handles defensive cleanup)
+      try { this.webrtcSvc.disconnect(true); } catch (e) { console.warn('webrtcSvc.disconnect failed', e); }
+
+      // 4) Clear token & cancel timers
+      this.webrtcSvc.token = '';
+      clearTimeout(this.callEndTimeout);
+
+      // 5) Emit appropriate socket events
+      if (this.callDuration) {
+        this.socketSvc.emitEvent("bye", {
+          ...this.incomingData,
+          nurseId: this.nurseId,
+          webapp: true,
+          initiator: this.initiator,
+        });
+      } else if(this.endCall) {
+        this.socketSvc.emitEvent("cancel_dr", {
+          ...this.incomingData,
+          nurseId: this.nurseId,
+          webapp: true,
+          initiator: this.initiator,
+        });
+      } else if (this.callDuration === "" && !this.endCall && (flag === 'call_time_up')) {
+        this.socketSvc.emitEvent('call_time_up', this.nurseId);
+      }
+
+      // 6) Close dialog once
       this.close();
-      this.webrtcSvc.room.disconnect(true);
-    }, 0);
-    this.webrtcSvc.token = '';
-    this.cleanupVideoElement('localVideo');
-    this.cleanupVideoElement('remoteVideo');
-    this.webrtcSvc.handleDisconnect();
-    if (this.callDuration) {
-      this.socketSvc.emitEvent("bye", {
-        ...this.incomingData,
-        nurseId: this.nurseId,
-        webapp: true,
-        initiator: this.initiator,
-      });
-    } else if(this.endCall) {
-      this.socketSvc.emitEvent("cancel_dr", {
-        ...this.incomingData,
-        nurseId: this.nurseId,
-        webapp: true,
-        initiator: this.initiator,
-      });
-    } else if (this.callDuration === "" && !this.endCall && (flag === 'call_time_up')) {
-      this.socketSvc.emitEvent('call_time_up', this.nurseId);
-    } 
-    this.close();
+    } catch (err) {
+      console.error('endCallInRoom error', err);
+      try { this.close(); } catch (e) {}
+    }
   }
 
-  cleanupVideoElement(videoElementId: string) {
-  const videoEl = document.getElementById(videoElementId) as HTMLVideoElement;
-  if (videoEl && videoEl.srcObject instanceof MediaStream) {
-    videoEl.srcObject.getTracks().forEach(track => track.stop());
-    videoEl.srcObject = null;
+  cleanupVideoElement(refOrId: any) {
+    try {
+      if (!refOrId) return;
+
+      let videoEl: HTMLVideoElement | null = null;
+
+      if (typeof refOrId === 'string') {
+        videoEl = document.getElementById(refOrId) as HTMLVideoElement;
+      } else if (refOrId?.nativeElement) {
+        videoEl = refOrId.nativeElement as HTMLVideoElement;
+      } else if (refOrId instanceof HTMLVideoElement) {
+        videoEl = refOrId;
+      }
+
+      if (!videoEl) return;
+
+      try { videoEl.pause?.(); } catch (e) {}
+      try {
+        if (videoEl.srcObject && (videoEl.srcObject as MediaStream).getTracks) {
+          (videoEl.srcObject as MediaStream).getTracks().forEach(t => {
+            try { t.stop(); } catch (e) {}
+          });
+        }
+      } catch (e) {}
+
+      try { (videoEl as any).detach?.(); } catch (e) {}
+      try { videoEl.srcObject = null; } catch (e) {}
+      try { videoEl.remove?.(); } catch (e) {}
+    } catch (err) {
+      console.warn('cleanupVideoElement error', err);
+    }
   }
-}
-  /**
-  * Close modal
-  * @return {void}
-  */
+
   close() {
     clearTimeout(this.callEndTimeout);
     this.dialogRef.close(true);
@@ -587,7 +625,15 @@ export class VideoCallComponent implements OnInit, OnDestroy {
   ngOnDestroy(): void {
     this.socketSvc.incoming = false;
     clearInterval(this.changeDetForDuration);
-    this.webrtcSvc.disconnect();
-    this.webrtcSvc.token = '';
+
+    try {
+      this.webrtcSvc.stopAllLocalTracks();
+      this.cleanupVideoElement(this.localVideoRef);
+      this.cleanupVideoElement(this.remoteVideoRef);
+      this.webrtcSvc.disconnect(true);
+      this.webrtcSvc.token = '';
+    } catch (e) {
+      console.warn('ngOnDestroy cleanup error', e);
+    }
   }
 }
