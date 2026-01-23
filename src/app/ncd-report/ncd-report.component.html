@@ -1,0 +1,125 @@
+<div class="ncd-report-container">
+  <div class="container">
+    <div class="header">
+      <h1>Ekal Telemedicine Project</h1>
+      <h2>NCD Report</h2>
+    </div>
+
+    <div class="content">
+      <!-- Loading State -->
+      <div *ngIf="loading" class="loading">
+        <div class="spinner"></div>
+        <p>Loading NCD Report...</p>
+      </div>
+
+      <!-- Error State -->
+      <div *ngIf="error && !loading" class="error">
+        <p>{{ error }}</p>
+      </div>
+
+      <!-- Report Content -->
+      <div *ngIf="reportData && !loading && !error" class="report-content">
+        <!-- Patient Info Section -->
+        <div class="patient-info">
+          <div class="patient-details">
+            <span class="meta-label">Patient Name: </span> 
+            <span>{{ reportData.patient.name }}</span>
+            <div class="patient-meta">
+              <div class="meta-item">
+                <span class="meta-label">Patient ID:</span>
+                <span>{{ reportData.patient.identifier }}</span>
+              </div>
+              <div class="meta-item">
+                <span class="meta-label">Age:</span>
+                <span>{{ reportData.patient.age }}</span>
+              </div>
+              <div class="meta-item">
+                <span class="meta-label">Sex:</span>
+                <span>{{ reportData.patient.gender }}</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Recent NCD Readings Section -->
+        <div class="section-title">Recent NCD Readings</div>
+
+        <div class="table-container">
+          <table>
+            <thead>
+              <tr>
+                <th class="date-header">Date</th>
+                <th class="vital-header">
+                  <div class="header-with-icon">
+                    <div class="icon-label-group">
+                      <img src="assets/svgs/bp-icon.svg" alt="BP" class="vital-icon">
+                      <div class="vital-name">BP</div>
+                    </div>
+                    <div class="unit-text">(mm/Hg)</div>
+                  </div>
+                </th>
+                <th class="vital-header">
+                  <div class="header-with-icon">
+                    <div class="icon-label-group">
+                      <img src="assets/svgs/hb-icon.svg" alt="HB" class="vital-icon">
+                      <div class="vital-name">HB</div>
+                    </div>
+                    <div class="unit-text">(gm/dL)</div>
+                  </div>
+                </th>
+                <th class="vital-header">
+                  <div class="header-with-icon">
+                    <div class="icon-label-group">
+                      <img src="assets/svgs/rbs-icon.svg" alt="RBS" class="vital-icon">
+                      <div class="vital-name">RBS</div>
+                    </div>
+                    <div class="unit-text">(mg/dL)</div>
+                  </div>
+                </th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let visit of reportData.visits">
+                <td class="date-cell">{{ visit.date || visit.visitDate || 'N/A' }}</td>
+                <td>
+                  <ng-container *ngIf="parseBP(visit.bp || visit.bloodPressure || 'N/A') as bpData">
+                    <span class="vital-value" *ngIf="bpData.systolic !== null && bpData.diastolic !== null">
+                      <span [style.color]="getSystolicColor(bpData.systolic)">{{ bpData.sysText }}</span>/<span [style.color]="getDiastolicColor(bpData.diastolic)">{{ bpData.diaText }}</span>
+                    </span>
+                    <span class="vital-value" *ngIf="bpData.systolic === null || bpData.diastolic === null" style="color: #6c757d;">
+                      {{ bpData.sysText }}
+                    </span>
+                  </ng-container>
+                </td>
+                <td>
+                  <span class="vital-value" [style.color]="getHBColor(visit.hgb !== undefined && visit.hgb !== null && visit.hgb !== 'N/A' ? visit.hgb : (visit.hemoglobin || 'N/A'))">
+                    {{ visit.hgb !== undefined && visit.hgb !== null && visit.hgb !== 'N/A' ? visit.hgb : (visit.hemoglobin || 'N/A') }}
+                  </span>
+                </td>
+                <td>
+                  <span class="vital-value" [style.color]="getRBSColor(visit.rbs !== undefined && visit.rbs !== null && visit.rbs !== 'N/A' ? visit.rbs : (visit.bloodSugar || 'N/A'))">
+                    {{ visit.rbs !== undefined && visit.rbs !== null && visit.rbs !== 'N/A' ? visit.rbs : (visit.bloodSugar || 'N/A') }}
+                  </span>
+                </td>
+              </tr>
+              <tr *ngIf="!reportData.visits || reportData.visits.length === 0">
+                <td colspan="4" class="no-data">No NCD visit data available</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Disclaimer Section -->
+        <div class="disclaimer">
+          <div class="disclaimer-title">⚠️ Disclaimer</div>
+          <div class="disclaimer-text">
+            The above vitals have been recorded by the frontline health worker using calibrated devices.
+            These readings are provided for preliminary guidance only. Final confirmation and clinical
+            interpretation should be obtained from a qualified doctor at the nearest hospital, PHC, or CHC.
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+

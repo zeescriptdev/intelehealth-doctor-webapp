@@ -1,4 +1,5 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ViewChild } from '@angular/core';
+import { MatPaginator } from '@angular/material/paginator';
 import { MatTableDataSource } from '@angular/material/table';
 import { TranslateService } from '@ngx-translate/core';
 import { PageTitleService } from 'src/app/core/page-title/page-title.service';
@@ -12,6 +13,7 @@ import { languages } from 'src/config/constant';
   styleUrls: ['./report-list.component.scss']
 })
 export class ReportListComponent implements OnInit {
+  @ViewChild(MatPaginator, { static: true }) paginator: MatPaginator;
   dataSource = new MatTableDataSource<any>();
   reports = [
     {
@@ -38,6 +40,16 @@ export class ReportListComponent implements OnInit {
       id: 5,
       name: 'Location Level Report',
       buttonName: "Create Report"
+    },
+    {
+      id: 6,
+      name: 'NCD Detailed Report',
+      buttonName: "Create Report"
+    },
+    {
+      id: 7,
+      name: 'NCD Aggregated Report',
+      buttonName: "Create Report"
     }
   ];
 
@@ -49,6 +61,8 @@ export class ReportListComponent implements OnInit {
   ngOnInit(): void {
     this.translateService.use(getCacheData(false, languages.SELECTED_LANGUAGE));
     this.pageTitleService.setTitle({ title: 'Reports', imgUrl: 'assets/svgs/report-logo.svg' })
+    this.dataSource.data = this.reports;
+    this.dataSource.paginator = this.paginator;
   }
 
   createReport(element) {

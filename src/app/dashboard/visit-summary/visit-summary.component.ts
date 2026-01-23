@@ -155,6 +155,8 @@ export class VisitSummaryComponent implements OnInit, OnDestroy {
 
   openChatFlag: boolean = false;
   collapsed: boolean = true;
+  isNcdSevikaVisit = false;
+  isSevikaVisit = false;
 
   summaryText: string = '';
   filteredSuggestions: string[] = [];
@@ -377,6 +379,10 @@ export class VisitSummaryComponent implements OnInit, OnDestroy {
         } else if (this.visitSummaryService.checkIfEncounterExists(visit.encounters, visitTypes.ADULTINITIAL) || this.visitSummaryService.checkIfEncounterExists(visit.encounters, visitTypes.VITALS)) {
           this.visit['visitUploadTime'] = this.visitSummaryService.checkIfEncounterExists(visit.encounters, visitTypes.ADULTINITIAL) ? this.visitSummaryService.checkIfEncounterExists(visit.encounters, visitTypes.ADULTINITIAL)['encounterDatetime'] : null;
         }
+        if (Array.isArray(this.visit.attributes)) {
+          this.isSevikaVisit = !!this.visit.attributes.find(atr => atr.value === 'Specialist doctor not needed');
+          this.isNcdSevikaVisit = Boolean(this.visit.attributes.find(atr => atr.display.includes('isNcdSevikaVisit'))?.value);
+        }
         this.checkVisitStatus(visit.encounters);
         this.visitService.patientInfo(visit.patient.uuid).subscribe((patient: PatientModel) => {
           if (patient) {
@@ -533,7 +539,8 @@ export class VisitSummaryComponent implements OnInit, OnDestroy {
               if (currentComplaint[i] && currentComplaint[i].length > 1) {
                 const obs1 = currentComplaint[i].split('<');
                 if (!obs1[0].match(visitTypes.ASSOCIATED_SYMPTOMS)) {
-                  this.cheifComplaints.push(obs1[0]);
+                  let complaint = this.isNcdSevikaVisit &&  i === 1 ? "NCD - "+obs1[0] : obs1[0];
+                  this.cheifComplaints.push(complaint);
                 }
                 const splitByBr = currentComplaint[i].split('<br/>');
                 if (splitByBr[0].includes(visitTypes.ASSOCIATED_SYMPTOMS)) {
@@ -548,7 +555,7 @@ export class VisitSummaryComponent implements OnInit, OnDestroy {
                   this.checkUpReasonData.push(obj1);
                 } else {
                   const obj1: PatientHistoryModel = {};
-                  obj1.title = splitByBr[0].replace('</b>:', '');
+                  obj1.title = this.isNcdSevikaVisit &&  i === 1 ? "NCD - "+ splitByBr[0].replace('</b>:', '') : splitByBr[0].replace('</b>:', '');
                   obj1.data = [];
                   for (let k = 1; k < splitByBr.length; k++) {
                     if (splitByBr[k].trim() && splitByBr[k].trim().length > 1) {
@@ -1886,8 +1893,9 @@ export class VisitSummaryComponent implements OnInit, OnDestroy {
         visits.forEach((visit: VisitModel) => {
           if (visit.uuid !== this.visit.uuid) {
             this.visitService.fetchVisitDetails(visit.uuid).subscribe((visitdetail: VisitModel) => {
+             let isNcdSevikaVisit = Boolean(visitdetail.attributes.find(atr => atr.display.includes('isNcdSevikaVisit'))?.value);
               visitdetail.created_on = visitdetail.startDatetime;
-              visitdetail.cheif_complaint = this.visitSummaryService.getCheifComplaint(visitdetail);
+              visitdetail.cheif_complaint = this.visitSummaryService.getCheifComplaint(visitdetail, isNcdSevikaVisit);
               visitdetail.encounters.forEach((encounter: EncounterModel) => {
                 if (encounter.encounterType.display === visitTypes.VISIT_COMPLETE) {
                   visitdetail.prescription_sent = this.checkIfDateOldThanOneDay(encounter.encounterDatetime);

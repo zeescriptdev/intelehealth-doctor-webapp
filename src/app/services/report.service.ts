@@ -36,5 +36,15 @@ export class ReoportService {
       return this.http.get(
         `${environment.base}/lcrep`, { reportProgress: true, observe: "events" });
     }
+
+    if (body.reportId === 6) {
+      return this.http.get(
+        `${environment.base}/ncd/${body.selectedData.value.field1}/${body.selectedData.value.field2}/${body.selectedData.value.field3[0]?.id}/${body.selectedData.filter.stateId}/${body.selectedData.filter.districtId}/${body.selectedData.filter.sanchId}/${body.selectedData.filter.villageId}`, { reportProgress: true, observe: "events" });
+    }
+
+    if (body.reportId === 7) {
+      return this.http.get(
+        `${environment.base}/ncdsummary/${body.selectedData.value.field1}/${body.selectedData.value.field2}/${body.selectedData.filter.stateId}/${body.selectedData.filter.districtId}/${body.selectedData.filter.sanchId}/${body.selectedData.filter.villageId}`, { reportProgress: true, observe: "events" });
+    }
   }
 }

@@ -12,7 +12,6 @@ import * as pdfMake from 'pdfmake/build/pdfmake';
 import * as pdfFonts from 'pdfmake/build/vfs_fonts';
 (<any>pdfMake).vfs = pdfFonts.pdfMake.vfs;
 import { visit as visit_logos, logo as main_logo} from "../../utils/base64"
-import { promise } from 'protractor';
 
 @Component({
   selector: 'app-view-visit-summary',
@@ -38,6 +37,8 @@ export class ViewVisitSummaryComponent implements OnInit {
   baseURL = environment.baseURL;
   conceptAdditionlDocument = "07a816ce-ffc0-49b9-ad92-a1bf9bf5e2ba";
   conceptPhysicalExamination = '200b7a45-77bc-4986-b879-cc727f5f7d5b';
+  isNcdSevikaVisit = false;
+  isSevikaVisit = false;
 
   constructor(
     @Inject(MAT_DIALOG_DATA) public data,
@@ -69,7 +70,11 @@ export class ViewVisitSummaryComponent implements OnInit {
     this.visitService.fetchVisitDetails(uuid).subscribe((visit: VisitModel) => {
       if (visit) {
         this.visit = visit;
-        this.checkVisitStatus(visit.encounters);
+        if (Array.isArray(this.visit.attributes)) {
+          this.isSevikaVisit = !!this.visit.attributes.find(atr => atr.value === 'Specialist doctor not needed');
+          this.isNcdSevikaVisit = Boolean(this.visit.attributes.find(atr => atr.display.includes('isNcdSevikaVisit'))?.value);
+        }
+        this.isNcdSevikaVisit ? this.visitStatus = "Ended Visit" : this.checkVisitStatus(visit.encounters);
         this.visitService.patientInfo(visit.patient.uuid).subscribe((patient: PatientModel) => {
           if (patient) {
             this.patient = patient;
@@ -254,7 +259,8 @@ export class ViewVisitSummaryComponent implements OnInit {
               if (currentComplaint[i] && currentComplaint[i].length > 1) {
                 const obs1 = currentComplaint[i].split('<');
                 if (!obs1[0].match(visitTypes.ASSOCIATED_SYMPTOMS)) {
-                  this.cheifComplaints.push(obs1[0]);
+                  let complaint = this.isNcdSevikaVisit &&  i === 1 ? "NCD - "+obs1[0] : obs1[0]
+                  this.cheifComplaints.push(complaint);
                 }
 
                 const splitByBr = currentComplaint[i].split('<br/>');
@@ -270,7 +276,7 @@ export class ViewVisitSummaryComponent implements OnInit {
                   this.checkUpReasonData.push(obj1);
                 } else {
                   let obj1: PatientHistoryModel = {};
-                  obj1.title = splitByBr[0].replace('</b>:', '');
+                  obj1.title =  this.isNcdSevikaVisit &&  i === 1 ? "NCD - "+splitByBr[0].replace('</b>:', '') :splitByBr[0].replace('</b>:', '');
                   obj1.data = [];
                   for (let k = 1; k < splitByBr.length; k++) {
                     if (splitByBr[k].trim() && splitByBr[k].trim().length > 1) {
@@ -631,7 +637,8 @@ export class ViewVisitSummaryComponent implements OnInit {
                           ul: [
                             {text: [{text: 'Visit ID:', bold: true}, ` ${(this.visit?.uuid) ? this.replaceWithStar(this.visit?.uuid).toUpperCase() : "" }`], margin: [0, 5, 0, 5]},
                             {text: [{text: 'Visit Created:', bold: true}, ` ${moment(this.visit?.startDatetime).format('DD MMM yyyy')}`],  margin: [0, 5, 0, 5]},
-                            {text: [{text: 'Appointment on:', bold: true}, ` No appointment`],  margin: [0, 5, 0, 5]},
+                            !this.isNcdSevikaVisit ? 
+                            {text: [{text: 'Appointment on:', bold: true}, ` No appointment`],  margin: [0, 5, 0, 5]} : {},
                             {text: [{text: 'Status:', bold: true}, ` ${this.visitStatus}`],  margin: [0, 5, 0, 5]},
                             {text: [{text: 'Location:', bold: true}, ` ${this.clinicName}`],  margin: [0, 5, 0, 5]},
                             {text: [{text: 'Provided by:', bold: true}, ` ${this.providerName}`],  margin: [0, 5, 0, 5]}
@@ -646,8 +653,8 @@ export class ViewVisitSummaryComponent implements OnInit {
                   }
                 }
               ],
-              [
-                {
+              !this.isNcdSevikaVisit ? [
+                 {
                   colSpan: 4,
                   table: {
                     widths: [30, '*'],
@@ -667,9 +674,8 @@ export class ViewVisitSummaryComponent implements OnInit {
                   layout: {
                     defaultBorder: false
                   }
-                },
-                
-              ],
+                 }
+              ] : [ {}, '', '', ''],
               [
                 {
                   colSpan: 4,
@@ -698,8 +704,8 @@ export class ViewVisitSummaryComponent implements OnInit {
                 '',
                 ''
               ],
-              [
-                {
+              !this.isNcdSevikaVisit ?  [
+              {
                   colSpan: 4,
                   table: {
                     widths: [30, '*'],
@@ -725,9 +731,9 @@ export class ViewVisitSummaryComponent implements OnInit {
                 '',
                 '',
                 ''
-              ],
-              [
-                {
+              ] : [ {}, '', '', ''],
+              !this.isNcdSevikaVisit ?  [
+               {
                   colSpan: 4,
                   table: {
                     widths: [30, '*'],
@@ -744,8 +750,8 @@ export class ViewVisitSummaryComponent implements OnInit {
                 '',
                 '',
                 ''
-              ],
-              [
+              ] : [ {}, '', '', ''],
+              !this.isNcdSevikaVisit ? [
                 {
                   colSpan: 4,
                   table: {
@@ -763,7 +769,7 @@ export class ViewVisitSummaryComponent implements OnInit {
                 '',
                 '',
                 ''
-              ]
+              ]: [ {}, '', '', ''],
             ]
           },
           layout: 'noBorders'

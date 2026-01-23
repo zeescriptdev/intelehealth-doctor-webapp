@@ -55,7 +55,7 @@
         </div>
       </div>
 
-      <div *ngIf="data.reportId !== 3 && data.reportId !== 4" class="row">
+      <div *ngIf="![3, 4, 6, 7].includes(data.reportId)" class="row">
         <div class="input-field-group" style="padding-left:15px;">
           <label>Speciality</label>
           <ng-multiselect-dropdown class="multiselect" 
@@ -63,6 +63,18 @@
             [settings]="villageDropDownSettings" [data]="specializations" [(ngModel)]="selectedSpeciality"
             [ngModelOptions]="{ standalone: true }">
           </ng-multiselect-dropdown>
+        </div>
+      </div>
+      
+      <div *ngIf="[6].includes(data.reportId)" class="row">
+        <div class="input-field-group" style="padding-left:15px;">
+          <label>NCD Protocol</label>
+          <ng-multiselect-dropdown class="multiselect" 
+          style="width: 425px;" [placeholder]="'Select Protocol'"
+            [settings]="protocolSettings" [data]="ncd_protocols" formControlName="field3" 
+            [ngModelOptions]="{ standalone: true }">
+          </ng-multiselect-dropdown>
+          <small class="text-danger" *ngIf="submitted && f.field3.errors">*Required</small>
         </div>
       </div>
       <small class="text-danger" *ngIf="isDatesValid">Start date should not be greater than end date</small>

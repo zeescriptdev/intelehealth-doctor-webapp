@@ -3,7 +3,7 @@ import { HttpClient, HttpHeaders } from "@angular/common/http";
 import { Observable, Subject } from "rxjs";
 import { environment } from "../../environments/environment";
 import * as moment from "moment";
-import { visitTypes, doctorDetails } from "src/config/constant";
+import { doctorDetails, visitTypes } from "src/config/constant";
 import { getCacheData } from 'src/app/utils/utility-functions';
 import { PatientModel, PersonAttributeModel } from "../model/model";
 
@@ -231,7 +231,7 @@ export class VisitService {
   * @param {number} page - Page number
   * @return {Observable<any>}
   */
-  getAwaitingVisits(speciality: string, page: number = 1, sortField: string = 'date_created', sortOrder: string = 'desc'): Observable<any> {
+  getAwaitingVisits(speciality: string, page: number = 1,sortField: string = 'date_created', sortOrder: string = 'desc'): Observable<any> {
     return this.http.get(`${this.baseURLMindmap}/openmrs/getAwaitingVisits?speciality=${speciality}&page=${page}&sortField=${sortField}&sortOrder=${sortOrder}`);
   }
 
@@ -328,10 +328,9 @@ export class VisitService {
     } else {
       speaker_gender = 'Male';
     }
-
     return {
       textToTranslate: input,
-      targetLang: targetLang,
+      targetLang:targetLang,
       tabType: tabType,
       speaker_gender: speaker_gender // Send full gender name: 'Male' or 'Female'
     };

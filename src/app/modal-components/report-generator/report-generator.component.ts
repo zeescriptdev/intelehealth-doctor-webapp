@@ -16,6 +16,9 @@ export class ReportGeneratorComponent implements OnInit {
   submitted: boolean = false;
   today = new Date().toISOString().slice(0, 10);
   specializations = ["General Physician", "Specialist doctor not needed"];
+  ncd_protocols=[ { name: 'Anemia', id: 1 },
+    { name: 'Hypertension', id: 2 },
+    { name: 'Diabetes', id: 3 }];
   states: any = [];
   districts: any = [];
   sanchs: any = [];
@@ -29,7 +32,8 @@ export class ReportGeneratorComponent implements OnInit {
   selectedDistrict: any;
   selectedSanch: any;
   selectedVillage: any;
-  selectedSpeciality: string
+  selectedSpeciality: string;
+  selectedProtocol: string
 
   /* For State DropDown */
   stateDropDownSettings: IDropdownSettings = {
@@ -71,6 +75,14 @@ export class ReportGeneratorComponent implements OnInit {
     closeDropDownOnSelection: true,
   };
 
+  protocolSettings = {
+    singleSelection: true, 
+    idField: 'id',
+    textField: 'name',
+    itemsShowLimit: 5,
+    allowSearchFilter: false,
+    closeDropDownOnSelection: true,
+  };
 
   constructor(@Inject(MAT_DIALOG_DATA) public data,
     private dialogRef: MatDialogRef<ReportGeneratorComponent>,
@@ -78,6 +90,7 @@ export class ReportGeneratorComponent implements OnInit {
     this.reportForm = new FormGroup({
       field1: new FormControl('', [Validators.required]),
       field2: new FormControl('', [Validators.required]),
+      field3:new FormControl('')
     });
   }
 
@@ -85,6 +98,9 @@ export class ReportGeneratorComponent implements OnInit {
     this.visitService.getLocations().subscribe((res: any) => {
       this.states = res.states;
     });
+    if(this.data.reportId === 6) {
+        this.setConditionalValidation(true);
+    }
   }
 
   onStateSelect(state: any) {
@@ -178,4 +194,15 @@ export class ReportGeneratorComponent implements OnInit {
     let item = data?.filter((item: any) => item.name === selectedItem);
     return item[0].id;
   }
+
+  setConditionalValidation(condition: boolean) {
+    const field3 = this.reportForm.get('field3');
+    if (condition) {
+      field3?.setValidators([Validators.required]);
+    } else {
+      field3?.clearValidators();
+    }
+    field3?.updateValueAndValidity();
+  }
+
 }
