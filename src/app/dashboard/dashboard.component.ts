@@ -1089,18 +1089,11 @@ ngAfterViewInit() {
 }
 
  applySorting() {
-  // if sorting is inactive for this column
+  // if sortapplySortinging is inactive for this column
   if (this.currentSort?.active === 'visit_created') {
     return;
   }
-  const { active, direction } = this.currentSort;
-  // Filter out undefined elements first
-  const validVisits = this.awaitingVisits.filter(visit => visit !== undefined);
-  if (!direction) {
-    this.dataSource3.data = [...validVisits];
-    return;
-  }
-  const { active, direction } = this.currentSort;
+  const { active, direction } = this.currentSort;  // Filter out undefined elements first
   // Filter out undefined elements first
   const validVisits = this.awaitingVisits.filter(visit => visit !== undefined);
   if (!direction) {
