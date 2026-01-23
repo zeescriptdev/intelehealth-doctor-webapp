@@ -1079,12 +1079,12 @@ export class VisitSummaryComponent implements OnInit, OnDestroy {
             if (concept.mappings.length > 0) {
               concept.mappings.forEach(maping => {
                 if (maping.conceptReferenceTerm.display.includes('ICD-10-WHO')) {
-                  diagnosisArray.push(concept.display);
+                  diagnosisArray.push({ name: concept.display, id: concept.uuid });
                 }
               });
             } else {
               if (concept.conceptClass.uuid === conceptIds.conceptDiagnosisClass) {
-                diagnosisArray.push(concept.display);
+                  diagnosisArray.push({ name: concept.display, id: concept.uuid });
               }
             }
           });
