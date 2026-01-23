@@ -313,10 +313,10 @@ export class VisitService {
   saveTranslatedData(body: any) {
    return this.http.post(`${this.baseURLMindmap}/mindmap/saveTranslation`, body)
   }
-  
+
   // A reusable function to build translation request body
   buildRequestBody(input: string, targetLang: string, tabType: string) {
-      // Get gender from cached provider data
+    // Get gender from cached provider data
     const provider = getCacheData(true, doctorDetails.PROVIDER);
     let speaker_gender = provider?.person?.gender || null;
 

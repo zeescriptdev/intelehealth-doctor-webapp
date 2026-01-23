@@ -199,10 +199,10 @@ export class DashboardComponent implements OnInit {
   }
 
   /**
-   * Get awaiting visits for a given page number
-   * @param {number} page - Page number
-   * @return {void}
-   */
+  * Get awaiting visits for a given page number
+  * @param {number} page - Page number
+  * @return {void}
+  */
 getAwaitingVisits(page: number = 1) {
   const isInitialPage = page === 1;
 
@@ -1091,6 +1091,13 @@ ngAfterViewInit() {
  applySorting() {
   // if sorting is inactive for this column
   if (this.currentSort?.active === 'visit_created') {
+    return;
+  }
+  const { active, direction } = this.currentSort;
+  // Filter out undefined elements first
+  const validVisits = this.awaitingVisits.filter(visit => visit !== undefined);
+  if (!direction) {
+    this.dataSource3.data = [...validVisits];
     return;
   }
   const { active, direction } = this.currentSort;
