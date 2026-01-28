@@ -3831,6 +3831,13 @@ export class VisitSummaryComponent implements OnInit, OnDestroy, AfterViewInit {
   */
   showAndHideUiElements(): boolean {
     const doctorName = getCacheData(true, doctorDetails.USER)?.person?.display;
-    return this.showAndHideUiElement = !doctorName || !doctorName.includes('Namco');
+    const isNamcoDoctor = doctorName && doctorName.includes('Namco');
+
+    // Hide AI features for Namco doctors
+    if (isNamcoDoctor) {
+      this.hasAILLMEnabled = false;
+    }
+
+    return this.showAndHideUiElement = !isNamcoDoctor;
   }
 }
