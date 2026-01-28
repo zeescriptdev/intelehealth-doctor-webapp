@@ -2357,7 +2357,7 @@ export class VisitSummaryComponent implements OnInit, OnDestroy, AfterViewInit {
         const consultationDuration = this.consultationStartTime
           ? (new Date().getTime() - this.consultationStartTime.getTime()) / 1000 // duration in seconds
           : null;
-        const isRapidCompletion = consultationDuration !== null && consultationDuration < 60; // less than 1 minute
+        const isRapidCompletion = this.hasAILLMEnabled && consultationDuration !== null && consultationDuration < 60; // less than 1 minute
 
         //Open Share Prescription Confirmation Modal
         this.coreService.openSharePrescriptionConfirmModal({ isRapidCompletion }).subscribe((res: boolean) => {
