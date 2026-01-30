@@ -303,7 +303,7 @@ export class VisitSummaryComponent implements OnInit, OnDestroy, AfterViewInit {
     }, 1000);
   }
   isWhatsappCallWarningShown = false;
-  consultationStartTime: Date; // Track consultation start time
+  consultationStartTime: Date; 
 
   reasons = {
     'Completed': [
@@ -702,8 +702,8 @@ export class VisitSummaryComponent implements OnInit, OnDestroy, AfterViewInit {
             this.visitEnded = this.visitSummaryService.checkIfEncounterExists(visit.encounters, visitTypes.PATIENT_EXIT_SURVEY) || visit.stopDatetime;
             this.getPastVisitHistory();
             if (this.visitNotePresent) {
-              // Set consultation start time from visit note encounter datetime if not already set
-              if (!this.consultationStartTime && this.visitNotePresent.encounterDatetime) {
+        
+              if (!this.consultationStartTime && this.visitNotePresent.encounterDatetime && !this.visitEnded) {
                 this.consultationStartTime = new Date(this.visitNotePresent.encounterDatetime);
               }
               this.visitNotePresent.encounterProviders.forEach((p: EncounterProviderModel) => {
@@ -1409,7 +1409,6 @@ export class VisitSummaryComponent implements OnInit, OnDestroy, AfterViewInit {
   * @return {void}
   */
   startVisitNote(): void {
-    // Capture consultation start time
     this.consultationStartTime = new Date();
 
     const json = {
@@ -2359,7 +2358,13 @@ export class VisitSummaryComponent implements OnInit, OnDestroy, AfterViewInit {
         const consultationDuration = this.consultationStartTime
           ? (new Date().getTime() - this.consultationStartTime.getTime()) / 1000 // duration in seconds
           : null;
-        const isRapidCompletion = this.hasAILLMEnabled && consultationDuration !== null && consultationDuration < 60; // less than 1 minute
+        const isNewVisit = this.visitDemarcation === 'New';
+        const isRapidCompletion = this.hasAILLMEnabled
+          && isNewVisit
+          && !this.visitEnded
+          && this.consultationStartTime
+          && consultationDuration !== null
+          && consultationDuration < 60; 
 
         //Open Share Prescription Confirmation Modal
         this.coreService.openSharePrescriptionConfirmModal({ isRapidCompletion }).subscribe((res: boolean) => {
