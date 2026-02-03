@@ -2362,7 +2362,10 @@ export class VisitSummaryComponent implements OnInit, OnDestroy, AfterViewInit {
         const consultationDuration = this.consultationStartTime
           ? (new Date().getTime() - this.consultationStartTime.getTime()) / 1000 // duration in seconds
           : null;
-        const isRapidCompletion = this.hasAILLMEnabled && consultationDuration !== null && consultationDuration < 60; // less than 1 minute
+        // Check if visit is a follow-up visit
+        const isFollowUpVisit = this.visit?.demarcation === visitTypes.FOLLOW_UP;
+        // Timer should NOT show for follow-up visits
+        const isRapidCompletion = this.hasAILLMEnabled && !isFollowUpVisit && consultationDuration !== null && consultationDuration < 60; // less than 1 minute
 
         //Open Share Prescription Confirmation Modal
         this.coreService.openSharePrescriptionConfirmModal({ isRapidCompletion }).subscribe((res: boolean) => {
@@ -2517,6 +2520,9 @@ export class VisitSummaryComponent implements OnInit, OnDestroy, AfterViewInit {
     this.visitService.recentVisits(this.visit.patient.uuid).subscribe((res: RecentVisitsApiResponseModel) => {
       const visits = res.results;
       if (visits.length > 1) {
+        let loadedVisitsCount = 0;
+        const totalVisitsToLoad = visits.filter(v => v.uuid !== this.visit.uuid).length;
+
         visits.forEach((visit: VisitModel) => {
           if (visit.uuid !== this.visit.uuid) {
             this.visitService.fetchVisitDetails(visit.uuid).subscribe((visitdetail: VisitModel) => {
@@ -2538,11 +2544,115 @@ export class VisitSummaryComponent implements OnInit, OnDestroy, AfterViewInit {
               });
               this.pastVisits.push(visitdetail);
               this.dataSource = new MatTableDataSource(this.pastVisits);
+
+              // Log visit status after all visits are loaded
+              loadedVisitsCount++;
+              if (loadedVisitsCount === totalVisitsToLoad) {
+                this.logVisitStatus();
+              }
             });
           }
         });
       }
     });
+  }
+
+  /**
+  * Check if patient has previous visits
+  * @returns {boolean} - True if patient has previous visits
+  */
+  hasPreviousVisits(): boolean {
+    return this.pastVisits && this.pastVisits.length > 0;
+  }
+
+  /**
+  * Check if a specific visit is ended
+  * @param {VisitModel} visit - Visit to check
+  * @returns {boolean} - True if visit is ended
+  */
+  isVisitEnded(visit: VisitModel): boolean {
+    if (!visit) return false;
+    // Check if visit has stopDatetime
+    if (visit.stopDatetime) return true;
+    // Check if Patient Exit Survey encounter exists
+    if (visit.encounters) {
+      return !!this.visitSummaryService.checkIfEncounterExists(visit.encounters, visitTypes.PATIENT_EXIT_SURVEY);
+    }
+    return false;
+  }
+
+  /**
+  * Get all ended previous visits
+  * @returns {VisitModel[]} - Array of ended visits
+  */
+  getEndedPreviousVisits(): VisitModel[] {
+    if (!this.pastVisits) return [];
+    return this.pastVisits.filter(visit => this.isVisitEnded(visit));
+  }
+
+  /**
+  * Get all active (not ended) previous visits
+  * @returns {VisitModel[]} - Array of active visits
+  */
+  getActivePreviousVisits(): VisitModel[] {
+    if (!this.pastVisits) return [];
+    return this.pastVisits.filter(visit => !this.isVisitEnded(visit));
+  }
+
+  /**
+  * Check if patient has any active (not ended) previous visits
+  * @returns {boolean} - True if patient has active previous visits
+  */
+  hasActivePreviousVisits(): boolean {
+    return this.getActivePreviousVisits().length > 0;
+  }
+
+  /**
+  * Check if patient has any ended previous visits
+  * @returns {boolean} - True if patient has ended previous visits
+  */
+  hasEndedPreviousVisits(): boolean {
+    return this.getEndedPreviousVisits().length > 0;
+  }
+
+  /**
+  * Check if current visit is a follow-up visit
+  * @returns {boolean} - True if current visit is a follow-up visit
+  */
+  isFollowUpVisit(): boolean {
+    return this.visit?.demarcation === visitTypes.FOLLOW_UP;
+  }
+
+  /**
+  * Log visit status information for debugging
+  * @returns {void}
+  */
+  logVisitStatus(): void {
+    console.log('=== Current Visit Status ===');
+    console.log('Current Visit:', this.visit?.uuid);
+    console.log('Current Visit Demarcation:', this.visit?.demarcation);
+    console.log('Is Follow-up Visit:', this.isFollowUpVisit());
+    console.log('Current Visit Ended:', this.visitEnded);
+    console.log('Current Visit Stop Date:', this.visit?.stopDatetime);
+    console.log('1-Min Timer Will Show:', this.hasAILLMEnabled && !this.isFollowUpVisit());
+
+    console.log('\n=== Previous Visits Status ===');
+    console.log('Total Previous Visits:', this.pastVisits?.length || 0);
+    console.log('Ended Previous Visits:', this.getEndedPreviousVisits().length);
+    console.log('Active Previous Visits:', this.getActivePreviousVisits().length);
+
+    if (this.pastVisits && this.pastVisits.length > 0) {
+      console.log('\n=== Previous Visits Details ===');
+      this.pastVisits.forEach((visit, index) => {
+        console.log(`Visit ${index + 1}:`, {
+          uuid: visit.uuid,
+          startDate: visit.startDatetime,
+          stopDate: visit.stopDatetime,
+          demarcation: visit.demarcation,
+          isEnded: this.isVisitEnded(visit)
+        });
+      });
+    }
   }
 
   /**
