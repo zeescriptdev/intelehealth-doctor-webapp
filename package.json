@@ -48,9 +48,9 @@
     "date-fns": "^2.29.3",
     "html2pdf.js": "^0.12.1",
     "ih-library": "github:Intelehealth/intelehealth-doctor-webapp-config-table-grid#v-0.2.22",
-    "jspdf": "^4.0.0",
     "intl-tel-input": "^17.0.19",
     "jquery": "^3.5.1",
+    "jspdf": "^4.0.0",
     "lib-presciption": "github:Intelehealth/intelehealth-doctor-webapp-download-prescription#build_0.0.15",
     "libphonenumber-js": "^1.10.18",
     "livekit-client": "^2.8.0",
@@ -67,7 +67,7 @@
     "ngx-permissions": "^13.0.1",
     "ngx-toastr": "^14.3.0",
     "ngx-ui-loader": "^13.0.0",
-    "pdfmake": "^0.2.7",
+    "pdfmake": "0.2.7",
     "popper.js": "^1.14.3",
     "pretty-checkbox": "^3.0.3",
     "rxjs": "~6.6.2",
@@ -79,7 +79,11 @@
     "zone.js": "~0.11.4"
   },
   "overrides": {
-    "jspdf": "^4.0.0"
+    "jspdf": "^4.0.0",
+    "form-data": "^2.5.4",
+    "socket.io-client": {
+      "socket.io-parser": "~3.4.3"
+    }
   },
   "devDependencies": {
     "@angular-devkit/build-angular": "^14.2.11",
