@@ -6,7 +6,7 @@ import {
   MatDialogConfig,
 } from "@angular/material/dialog";
 import { BehaviorSubject, Observable } from "rxjs";
-import * as io from "socket.io-client";
+import { io } from "socket.io-client";
 import { environment } from "../../environments/environment";
 import { VisitService } from "./visit.service";
 import { getCacheData, setCacheData } from "../utils/utility-functions";
@@ -77,11 +77,12 @@ export class SocketService {
     }
     if (!this.socket || forceInit) {
       if (!sessionStorage.webrtcDebug) {
-        setCacheData('socketQuery', `userId=${this.userUuid}&name=${this.userName}`);
+        setCacheData('socketQuery', JSON.stringify({ userId: this.userUuid, name: this.userName }));
       }
 
+      const queryData = getCacheData(false, 'socketQuery');
       this.socket = io(environment.socketURL, {
-        query: getCacheData(false, 'socketQuery'),
+        query: typeof queryData === 'string' ? JSON.parse(queryData) : queryData,
       });
 
       this.onEvent("log").subscribe((array) => {
@@ -218,7 +219,7 @@ export class SocketService {
     }
     if (!this.socket || forceInit) {
       this.socket = io(environment.socketURL, {
-        query: `userId=${this.userUuid}&name=${this.userName}`
+        query: { userId: this.userUuid, name: this.userName }
       });
     }
     this.initEvents();
