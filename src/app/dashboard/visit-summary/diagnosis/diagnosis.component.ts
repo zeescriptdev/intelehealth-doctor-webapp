@@ -506,11 +506,43 @@ export class DiagnosisComponent implements OnInit, OnDestroy, OnChanges {
 
       this.diagnosisSubject.next(this.selectedDiagnoses);
       const { diagnosisAiGenerated, ...restForm } = this.diagnosisForm.value;
-      const newDiagnosis = { 
-          ...restForm, 
-          diagnosisName: this.diagnosisName, 
+
+      // For AI-generated diagnoses, extract rationale and likelihood from AI diagnosis list
+      let rationale: string[] = [];
+      let from: string | undefined = undefined;
+      let likelihood: string | undefined = undefined;
+
+      if (diagnosisAiGenerated && this.aillmddxComponent?.diagnosisList) {
+        const aiDiagnosis = this.aillmddxComponent.diagnosisList.find(
+          (d: any) => d.diagnosis?.toLowerCase() === this.diagnosisName?.toLowerCase()
+        );
+
+        // Extract likelihood
+        if (aiDiagnosis?.likelihood) {
+          likelihood = aiDiagnosis.likelihood;
+        }
+
+        if (aiDiagnosis?.rationale) {
+          if (Array.isArray(aiDiagnosis.rationale) && typeof aiDiagnosis.rationale[0] === 'string') {
+            rationale = aiDiagnosis.rationale.filter((val: string) => val && val.trim() !== '');
+          } else {
+            rationale = aiDiagnosis.rationale
+              .map((obj: any) => Object.values(obj).pop())
+              .filter((val: any) => val && val !== '.' && val.trim() !== '');
+          }
+        }
+        from = 'AI generated';
+      }
+
+      const newDiagnosis = {
+          ...restForm,
+          diagnosisName: this.diagnosisName,
           ...(diagnosisAiGenerated ? { diagnosisAiGenerated: diagnosisAiGenerated } : {}),
+          ...(rationale.length > 0 ? { rationale: rationale } : {}),
+          ...(from ? { from: from } : {}),
+          ...(likelihood ? { likelihood: likelihood } : {}),
       };
+
       this.existingDiagnosis.push(newDiagnosis);
       this.removeDiagnosis(this.diagnosisName);
       this.diagnosisForm.patchValue({ diagnosisName: this.selectedDiagnoses?.[0] || null });

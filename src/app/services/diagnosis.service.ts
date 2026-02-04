@@ -124,4 +124,14 @@ export class DiagnosisService {
       return false;
     }
   }
+
+  /**
+  * Save manual diagnosis to DDx API
+  * @param {any} payload - Diagnosis payload with visitUuid, diagnoses, and ai_assisted
+  * @return {Observable<any>}
+  */
+  saveManualDiagnosis(payload: any): Observable<any> {
+    const url = `${environment.base}/ddx/manual`;
+    return this.http.post(url, payload);
+  }
 }

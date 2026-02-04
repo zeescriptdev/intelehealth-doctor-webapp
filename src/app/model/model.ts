@@ -546,6 +546,9 @@ export interface DiagnosisModel {
   diagnosisCode?: string,
   isSnomed? : boolean,
   diagnosisAiGenerated?: string,
+  rationale?: string[],
+  from?: string,
+  likelihood?: string,
 }
 
 export interface DocImagesModel {

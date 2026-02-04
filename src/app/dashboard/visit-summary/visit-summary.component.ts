@@ -16,7 +16,7 @@ import { MatAccordion } from '@angular/material/expansion';
 import medicines from '../../core/data/medicines';
 import doses from '../../core/data/dose';
 import { BehaviorSubject, forkJoin, interval, Observable, of, Subject, Subscription } from 'rxjs';
-import { debounceTime, distinctUntilChanged, map, switchMap, tap } from 'rxjs/operators';
+import { catchError, debounceTime, distinctUntilChanged, map, switchMap, tap } from 'rxjs/operators';
 import { MatTableDataSource } from '@angular/material/table';
 import { DateAdapter, MAT_DATE_FORMATS, NativeDateAdapter } from '@angular/material/core';
 import { formatDate } from '@angular/common';
@@ -213,7 +213,7 @@ export class VisitSummaryComponent implements OnInit, OnDestroy, AfterViewInit {
         this.ddxCompRef.instance.isVisitNoteProvider = this.isVisitNoteProvider;
         this.ddxCompRef.instance.visitEnded = this.visitEnded;
         this.ddxCompRef.instance.patientInteractionNotesForm = this.patientInteractionNotesForm;
-       this.ddxCompRef.instance.hasAILLMEnabled = this.hasAILLMEnabled;
+        this.ddxCompRef.instance.hasAILLMEnabled = this.hasAILLMEnabled;
 
         this.ddxCompRef.instance.diagnosisReceived.subscribe((digData:any)=>{
           if(this.visitNotePresent && !this.visitEnded && this.isVisitNoteProvider && !this.visitCompleted){
@@ -2958,19 +2958,21 @@ export class VisitSummaryComponent implements OnInit, OnDestroy, AfterViewInit {
 
       // Handle diagnosis
       if (!this.isFeatureAvailable('dp_diagnosis_secondary')) {
-        for (const diagnosis of this.existingDiagnosis) {
-          if (diagnosis?.uuid) continue;
-          postObsRequests.push(
-            this.encounterService.postObs({
-              concept: conceptIds.conceptDiagnosis,
-              person: this.visit.patient.uuid,
-              obsDatetime: new Date(),
-              value: `${diagnosis.diagnosisCode ? diagnosis.diagnosisCode : 'NA'}::${diagnosis.diagnosisName ?? ''}:${diagnosis.diagnosisType ?? ''} & ${diagnosis.diagnosisStatus ?? ''}`,
-              encounter: this.visitNotePresent.uuid
-            }).pipe(tap((res: ObsModel) => diagnosis.uuid = res.uuid))
-          );
-          if (diagnosis?.isSnomed && this.appConfigService?.patient_visit_summary?.diagnosis_snomedct) {
-            postObsRequests.push(this.diagnosisService.addSnomedDiagnosis(diagnosis.diagnosisName, diagnosis.diagnosisCode));
+        if (!this.hasAILLMEnabled) {
+          for (const diagnosis of this.existingDiagnosis) {
+            if (diagnosis?.uuid) continue;
+            postObsRequests.push(
+              this.encounterService.postObs({
+                concept: conceptIds.conceptDiagnosis,
+                person: this.visit.patient.uuid,
+                obsDatetime: new Date(),
+                value: `${diagnosis.diagnosisCode ? diagnosis.diagnosisCode : 'NA'}::${diagnosis.diagnosisName ?? ''}:${diagnosis.diagnosisType ?? ''} & ${diagnosis.diagnosisStatus ?? ''}`,
+                encounter: this.visitNotePresent.uuid
+              }).pipe(tap((res: ObsModel) => diagnosis.uuid = res.uuid))
+            );
+            if (diagnosis?.isSnomed && this.appConfigService?.patient_visit_summary?.diagnosis_snomedct) {
+              postObsRequests.push(this.diagnosisService.addSnomedDiagnosis(diagnosis.diagnosisName, diagnosis.diagnosisCode));
+            }
           }
         }
       }
@@ -3222,7 +3224,29 @@ export class VisitSummaryComponent implements OnInit, OnDestroy, AfterViewInit {
       }
     }
 
-    return postObsRequests.length > 0 ? forkJoin(postObsRequests) : of(null);
+    const newlyAddedDiagnoses: DiagnosisModel[] = [];
+
+    if (!this.isFeatureAvailable('dp_diagnosis_secondary') && !this.hasAILLMEnabled) {
+      newlyAddedDiagnoses.push(...this.existingDiagnosis.filter((d: DiagnosisModel) => !d.uuid));
+    }
+
+    if (this.hasAILLMEnabled && this.ddxCompRef?.instance?.existingDiagnosis) {
+      newlyAddedDiagnoses.push(...this.ddxCompRef.instance.existingDiagnosis.filter((d: DiagnosisModel) => !d.uuid));
+    }
+
+    const saveObs$ = postObsRequests.length > 0 ? forkJoin(postObsRequests) : of(null);
+
+    return saveObs$.pipe(
+      switchMap((responses) => {
+        return this.sendDiagnosisToManualDDxAPI(newlyAddedDiagnoses).pipe(
+          map(() => responses),
+          catchError((error) => {
+            console.error('Error sending diagnosis to manual DDx API:', error);
+            return of(responses);
+          })
+        );
+      })
+    );
   }
 
   /**
@@ -3795,6 +3819,43 @@ export class VisitSummaryComponent implements OnInit, OnDestroy, AfterViewInit {
         return this.encounterService.postObs(diagnosisRecord, true)
       })
       return forkJoin(diagnosisObs)
+  }
+
+  /**
+  * Send selected diagnoses to manual DDx API
+  * @param {DiagnosisModel[]} diagnosesToSend - Array of diagnoses to send to the API
+  * @returns {Observable<any>}
+  */
+  sendDiagnosisToManualDDxAPI(diagnosesToSend: DiagnosisModel[]): Observable<any> {
+    if (!diagnosesToSend || diagnosesToSend.length === 0) {
+      return of(null);
+    }
+
+    const apiCalls = diagnosesToSend.map(diagnosis => {
+      const isAiGenerated = diagnosis.diagnosisAiGenerated === 'Y' || diagnosis.from === 'AI generated';
+      const validRationale = isAiGenerated && diagnosis.rationale?.length
+        ? diagnosis.rationale.filter(r => r?.trim())
+        : [];
+
+      const diagnosisPayload: any = {
+        diagnosis: diagnosis.diagnosisName || '',
+        "Diagnosis type": diagnosis.diagnosisType || '',
+        "Diagnosis status": diagnosis.diagnosisStatus || '',
+        rationale: validRationale.length ? validRationale : ['N/A']
+      };
+
+      if (isAiGenerated && diagnosis.likelihood) {
+        diagnosisPayload.likelihood = diagnosis.likelihood;
+      }
+
+      return this.diagnosisService.saveManualDiagnosis({
+        visitUuid: this.visit.uuid,
+        diagnoses: [diagnosisPayload],
+        ai_assisted: isAiGenerated ? 'Y' : 'N'
+      });
+    });
+
+    return forkJoin(apiCalls);
   }
 
   /**
