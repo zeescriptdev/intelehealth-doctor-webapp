@@ -723,15 +723,64 @@ export class DiagnosisComponent implements OnInit, OnDestroy, OnChanges {
     if (this.selectedMedication.length > 0) {
       const medicine = this.selectedMedication[0];
 
-      const formattedMedicine = {
+      const formattedMedicine: any = {
         drug: this.addMedicineForm.value.drug,
         dose: this.addMedicineForm.value.dose,
         frequency: this.addMedicineForm.value.frequency,
         durationNo: this.addMedicineForm.value.durationNo,
         durationUnit: this.addMedicineForm.value.durationUnit,
         instructRemark: this.addMedicineForm.value.instructRemark || '',
-        uuid: medicine.uuid
+        uuid: medicine.uuid,
+        aiGenerated: true,
+        // Store ORIGINAL AI values for modification detection
+        originalAiData: {
+          dose: medicine.dosage || medicine.dose,
+          durationNo: medicine.duration || medicine.durationNo,
+          durationUnit: medicine.duration_unit || medicine.durationUnit,
+          instructRemark: medicine.instructions || medicine.instructRemark || '',
+          frequency: medicine.frequency
+        }
       };
+
+      // Extract rationale and likelihood from AI medication component list
+      if (this.aillmtxMedicationComponent) {
+        const medicationList = (this.aillmtxMedicationComponent as any).medicationList ||
+                               (this.aillmtxMedicationComponent as any).medicineList ||
+                               (this.aillmtxMedicationComponent as any).medications;
+
+        if (medicationList && medicationList.length > 0) {
+          const drugName = formattedMedicine.drug?.toLowerCase().trim();
+          const aiMedication = medicationList.find((m: any) =>
+            m.name?.toLowerCase().trim() === drugName ||
+            m.drug?.toLowerCase().trim() === drugName ||
+            m.medication?.toLowerCase().trim() === drugName
+          );
+
+          if (aiMedication) {
+            if (aiMedication.rationale) {
+              if (Array.isArray(aiMedication.rationale)) {
+                const isStringArray = typeof aiMedication.rationale[0] === 'string';
+                formattedMedicine.rationale = isStringArray
+                  ? aiMedication.rationale.filter((r: string) => r?.trim())
+                  : aiMedication.rationale.map((obj: any) => Object.values(obj).pop()).filter((val: any) => val?.trim() && val !== '.');
+              } else if (typeof aiMedication.rationale === 'string') {
+                formattedMedicine.rationale = [aiMedication.rationale];
+              }
+            }
+            if (aiMedication.likelihood) {
+              formattedMedicine.likelihood = aiMedication.likelihood;
+            }
+          }
+        }
+      }
+
+      // Fallback: try to extract from medicine object directly
+      if (!formattedMedicine.rationale && medicine.rationale && medicine.rationale.length > 0) {
+        formattedMedicine.rationale = medicine.rationale.filter((r: string) => r?.trim());
+      }
+      if (!formattedMedicine.likelihood && medicine.likelihood) {
+        formattedMedicine.likelihood = medicine.likelihood;
+      }
 
       // Check for duplicates
       if (!this.medicines.find(m => m.drug.toLowerCase() === formattedMedicine.drug.toLowerCase())) {

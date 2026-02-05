@@ -85,6 +85,9 @@ export class VisitSummaryComponent implements OnInit, OnDestroy, AfterViewInit {
   existingDiagnosis: DiagnosisModel[] = [];
   advices: ObsModel[] = [];
   additionalInstructions: ObsModel;
+  // Track which items have been sent to manual APIs to prevent duplicates
+  private sentDiagnosisNames: Set<string> = new Set();
+  private sentMedicationNames: Set<string> = new Set();
   tests: TestModel[] = [];
   referrals: ReferralModel[] = [];
   pastVisits: VisitModel[] = [];
@@ -259,10 +262,35 @@ export class VisitSummaryComponent implements OnInit, OnDestroy, AfterViewInit {
 
         // Subscribe to medication saved event
         this.ddxCompRef.instance.medicationSaved.subscribe((medicines: any[]) => {
-          this.standardMedicines = [...medicines];
+          // Merge new medications with existing ones, preserving UUIDs and saving flags
+          this.standardMedicines = medicines.map(med => {
+            const existing = this.standardMedicines.find(m => m.drug === med.drug);
+            // If exists, keep the existing one (preserves UUID and saving flag)
+            if (existing) {
+              return existing;
+            }
+            // New medication - add with AI tracking data if applicable
+            if (med.aiGenerated === true) {
+              return {
+                ...med,
+                modified: false,
+                rationale: med.rationale || [],
+                likelihood: med.likelihood,
+                originalAiData: med.originalAiData || {
+                  dose: med.dose,
+                  durationNo: med.durationNo,
+                  durationUnit: med.durationUnit,
+                  instructRemark: med.instructRemark,
+                  frequency: med.frequency
+                }
+              };
+            } else {
+              return { ...med };
+            }
+          });
           this.changesMade = true;
           if (this.updatedObsData) {
-            this.updatedObsData.standardMedicines = medicines;
+            this.updatedObsData.standardMedicines = this.standardMedicines;
           }
         });
         // Subscribe to advice saved event
@@ -3224,28 +3252,48 @@ export class VisitSummaryComponent implements OnInit, OnDestroy, AfterViewInit {
       }
     }
 
-    const newlyAddedDiagnoses: DiagnosisModel[] = [];
+    const diagnosisSource = this.hasAILLMEnabled && this.ddxCompRef?.instance?.existingDiagnosis
+      ? this.ddxCompRef.instance.existingDiagnosis
+      : this.existingDiagnosis;
 
-    if (!this.isFeatureAvailable('dp_diagnosis_secondary') && !this.hasAILLMEnabled) {
-      newlyAddedDiagnoses.push(...this.existingDiagnosis.filter((d: DiagnosisModel) => !d.uuid));
-    }
+    const newlyAddedDiagnoses = !this.isFeatureAvailable('dp_diagnosis_secondary')
+      ? diagnosisSource.filter((d: DiagnosisModel) =>
+          !d.uuid && !this.sentDiagnosisNames.has(d.diagnosisName?.toLowerCase() || '')
+        )
+      : [];
 
-    if (this.hasAILLMEnabled && this.ddxCompRef?.instance?.existingDiagnosis) {
-      newlyAddedDiagnoses.push(...this.ddxCompRef.instance.existingDiagnosis.filter((d: DiagnosisModel) => !d.uuid));
-    }
+    const newlyAddedMedications = this.standardMedicines.filter((m: StandardMedicineModel) =>
+      !m.uuid && !this.sentMedicationNames.has(m.drug?.toLowerCase() || '')
+    );
 
-    const saveObs$ = postObsRequests.length > 0 ? forkJoin(postObsRequests) : of(null);
+    const saveObs$ = postObsRequests.length ? forkJoin(postObsRequests) : of(null);
 
     return saveObs$.pipe(
-      switchMap((responses) => {
-        return this.sendDiagnosisToManualDDxAPI(newlyAddedDiagnoses).pipe(
-          map(() => responses),
-          catchError((error) => {
-            console.error('Error sending diagnosis to manual DDx API:', error);
+      switchMap(responses =>
+        forkJoin([
+          this.sendDiagnosisToManualDDxAPI(newlyAddedDiagnoses),
+          this.sendMedicationToManualTTxAPI(newlyAddedMedications)
+        ]).pipe(
+          map(() => {
+            // Add to Sets to prevent duplicate sends
+            newlyAddedDiagnoses.forEach((d: DiagnosisModel) => {
+              if (d.diagnosisName) {
+                this.sentDiagnosisNames.add(d.diagnosisName.toLowerCase());
+              }
+            });
+            newlyAddedMedications.forEach((m: StandardMedicineModel) => {
+              if (m.drug) {
+                this.sentMedicationNames.add(m.drug.toLowerCase());
+              }
+            });
+            return responses;
+          }),
+          catchError(error => {
+            console.error('Error sending data to manual APIs:', error);
             return of(responses);
           })
-        );
-      })
+        )
+      )
     );
   }
 
@@ -3852,6 +3900,79 @@ export class VisitSummaryComponent implements OnInit, OnDestroy, AfterViewInit {
         visitUuid: this.visit.uuid,
         diagnoses: [diagnosisPayload],
         ai_assisted: isAiGenerated ? 'Y' : 'N'
+      });
+    });
+
+    return forkJoin(apiCalls);
+  }
+
+  /**
+  * Check if AI-generated medication has been modified
+  */
+  checkMedicationModification(medication: StandardMedicineModel): void {
+    if (!medication.aiGenerated || !medication.originalAiData) {
+      return;
+    }
+
+    const isModified =
+      medication.dose !== medication.originalAiData.dose ||
+      medication.durationNo !== medication.originalAiData.durationNo ||
+      medication.durationUnit !== medication.originalAiData.durationUnit ||
+      medication.instructRemark !== medication.originalAiData.instructRemark ||
+      medication.frequency !== medication.originalAiData.frequency;
+
+    medication.modified = isModified;
+  }
+
+  /**
+  * Send selected medications to manual TTx API
+  * Each medication is sent separately with its own ai_assisted flag (Y/N/M)
+  */
+  sendMedicationToManualTTxAPI(medicationsToSend: StandardMedicineModel[]): Observable<any> {
+    if (!medicationsToSend || medicationsToSend.length === 0) {
+      return of(null);
+    }
+
+    const apiCalls = medicationsToSend.map(medication => {
+      this.checkMedicationModification(medication);
+
+      const isAiGenerated = medication.aiGenerated === true;
+      const isModified = medication.modified === true;
+
+      const medicationPayload: any = {
+        medication: medication.drug,
+        dose: medication.dose,
+        duration: medication.durationNo,
+        duration_unit: medication.durationUnit,
+        instructions: medication.instructRemark,
+        frequency: medication.frequency
+      };
+
+      let aiAssistedFlag: 'Y' | 'N' | 'M';
+      if (isAiGenerated && isModified) {
+        aiAssistedFlag = 'M';
+      } else if (isAiGenerated) {
+        aiAssistedFlag = 'Y';
+      } else {
+        aiAssistedFlag = 'N';
+      }
+
+      if (isAiGenerated) {
+        if (medication.rationale?.length) {
+          // TTx API expects rationale as a string, not an array
+          medicationPayload.rationale = Array.isArray(medication.rationale)
+            ? medication.rationale.join('\n')
+            : medication.rationale;
+        }
+        if (medication.likelihood) {
+          medicationPayload.likelihood = medication.likelihood;
+        }
+      }
+
+      return this.diagnosisService.saveManualTreatment({
+        visitUuid: this.visit.uuid,
+        medications: [medicationPayload],
+        ai_assisted: aiAssistedFlag
       });
     });
 
