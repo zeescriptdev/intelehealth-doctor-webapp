@@ -2884,7 +2884,17 @@ export class VisitSummaryComponent implements OnInit, OnDestroy, AfterViewInit {
   }
 
   formatMedicineSave(medicine: StandardMedicineModel): string {
-    return `${medicine.drug ?? ''}:${medicine.dose ?? ''}:${medicine.durationNo ?? ''}:${medicine.durationUnit ?? ''  }:${medicine.instructRemark ?? ''}:${medicine.frequency ?? ''}`;
+    // Check if medication has been modified (for AI medications)
+    this.checkMedicationModification(medicine);
+    const rank = medicine.aiGenerated ? ((medicine as any).rank || 'NA') : 'NA';
+
+    // Set AI flag: Y (AI unchanged), M (AI modified), or N (manual)
+    let aiFlag = 'N';
+    if (medicine.aiGenerated) {
+      aiFlag = medicine.modified ? 'M' : 'Y';
+    }
+
+    return `${medicine.drug ?? ''}:${medicine.dose ?? ''}:${medicine.durationNo ?? ''}:${medicine.durationUnit ?? ''}:${medicine.instructRemark ?? ''}:${medicine.frequency ?? ''}:${rank}:${aiFlag}`;
   }
 
   saveDiscussionSummary(): Observable<any>{
@@ -2998,12 +3008,17 @@ export class VisitSummaryComponent implements OnInit, OnDestroy, AfterViewInit {
         if (!this.hasAILLMEnabled) {
           for (const diagnosis of this.existingDiagnosis) {
             if (diagnosis?.uuid) continue;
+
+            // Non-AI diagnosis: rank = NA, aiFlag = N
+            const rank = 'NA';
+            const aiFlag = 'N';
+
             postObsRequests.push(
               this.encounterService.postObs({
                 concept: conceptIds.conceptDiagnosis,
                 person: this.visit.patient.uuid,
                 obsDatetime: new Date(),
-                value: `${diagnosis.diagnosisCode ? diagnosis.diagnosisCode : 'NA'}::${diagnosis.diagnosisName ?? ''}:${diagnosis.diagnosisType ?? ''} & ${diagnosis.diagnosisStatus ?? ''}`,
+                value: `${diagnosis.diagnosisCode ? diagnosis.diagnosisCode : 'NA'}::${diagnosis.diagnosisName ?? ''}:${diagnosis.diagnosisType ?? ''} & ${diagnosis.diagnosisStatus ?? ''}:${rank}:${aiFlag}`,
                 encounter: this.visitNotePresent.uuid
               }).pipe(tap((res: ObsModel) => diagnosis.uuid = res.uuid))
             );
@@ -3017,15 +3032,18 @@ export class VisitSummaryComponent implements OnInit, OnDestroy, AfterViewInit {
       if (this.hasAILLMEnabled && this.ddxCompRef?.instance) {
         for (const diagnosis of this.ddxCompRef.instance.existingDiagnosis) {
           if (diagnosis?.uuid) continue;
-            postObsRequests.push(
-              this.encounterService.postObs({
-                concept: conceptIds.conceptDiagnosis,
-                person: this.visit.patient.uuid,
-                obsDatetime: new Date(),
-                value: `${diagnosis.diagnosisCode ? diagnosis.diagnosisCode : 'NA'}::${diagnosis.diagnosisName}:${diagnosis.diagnosisType} & ${diagnosis.diagnosisStatus}${diagnosis.from ? ' : ' + diagnosis.from : ''}`,// :AI generated
-                encounter: this.visitNotePresent.uuid
-              }).pipe(tap((res: ObsModel) => diagnosis.uuid = res.uuid))
-            );
+          // AI diagnosis: get rank if available, set aiFlag = Y
+          const rank = (diagnosis as any).rank || 'NA';
+          const aiFlag = diagnosis.diagnosisAiGenerated === 'Y' || diagnosis.from === 'AI generated' ? 'Y' : 'N';
+          postObsRequests.push(
+            this.encounterService.postObs({
+              concept: conceptIds.conceptDiagnosis,
+              person: this.visit.patient.uuid,
+              obsDatetime: new Date(),
+              value: `${diagnosis.diagnosisCode ? diagnosis.diagnosisCode : 'NA'}::${diagnosis.diagnosisName}:${diagnosis.diagnosisType} & ${diagnosis.diagnosisStatus}:${rank}:${aiFlag}`,
+              encounter: this.visitNotePresent.uuid
+            }).pipe(tap((res: ObsModel) => diagnosis.uuid = res.uuid))
+          );
           if (diagnosis?.isSnomed && this.appConfigService?.patient_visit_summary?.diagnosis_snomedct) {
             postObsRequests.push(this.diagnosisService.addSnomedDiagnosis(diagnosis.diagnosisName, diagnosis.diagnosisCode))
           }
@@ -3181,12 +3199,15 @@ export class VisitSummaryComponent implements OnInit, OnDestroy, AfterViewInit {
       if (this.changedFields.includes('diagnosis') && !this.isFeatureAvailable('dp_diagnosis_secondary')) {
         for (const diagnosis of this.existingDiagnosis) {
           if (diagnosis?.uuid) continue;
+          // Determine rank and AI flag
+          const rank = (diagnosis as any).rank || 'NA';
+          const aiFlag = diagnosis.diagnosisAiGenerated === 'Y' || (diagnosis as any).from === 'AI generated' ? 'Y' : 'N';
           postObsRequests.push(
             this.encounterService.postObs({
               concept: conceptIds.conceptDiagnosis,
               person: this.visit.patient.uuid,
               obsDatetime: new Date(),
-              value: `${diagnosis.diagnosisCode ? diagnosis.diagnosisCode : 'NA'}::${diagnosis.diagnosisName ?? ''}:${diagnosis.diagnosisType ?? ''} & ${diagnosis.diagnosisStatus ?? ''}`,
+              value: `${diagnosis.diagnosisCode ? diagnosis.diagnosisCode : 'NA'}::${diagnosis.diagnosisName ?? ''}:${diagnosis.diagnosisType ?? ''} & ${diagnosis.diagnosisStatus ?? ''}:${rank}:${aiFlag}`,
               encounter: this.visitNotePresent.uuid
             }).pipe(tap((res:ObsModel)=>diagnosis.uuid=res.uuid))
           );
@@ -3894,11 +3915,15 @@ export class VisitSummaryComponent implements OnInit, OnDestroy, AfterViewInit {
         ? diagnosis.rationale.filter(r => r?.trim())
         : [];
 
+      // Get rank and flag
+      const rank = (diagnosis as any).rank || 'NA';
+      const aiFlag = isAiGenerated ? 'Y' : 'N';
       const diagnosisPayload: any = {
         diagnosis: diagnosis.diagnosisName || '',
         "Diagnosis type": diagnosis.diagnosisType || '',
         "Diagnosis status": diagnosis.diagnosisStatus || '',
-        rationale: validRationale.length ? validRationale : ['N/A']
+        rationale: validRationale.length ? validRationale : ['N/A'],
+        ai_assisted: `${rank}:${aiFlag}`
       };
 
       if (isAiGenerated && diagnosis.likelihood) {
@@ -3907,8 +3932,7 @@ export class VisitSummaryComponent implements OnInit, OnDestroy, AfterViewInit {
 
       return this.diagnosisService.saveManualDiagnosis({
         visitUuid: this.visit.uuid,
-        diagnoses: [diagnosisPayload],
-        ai_assisted: isAiGenerated ? 'Y' : 'N'
+        diagnoses: [diagnosisPayload]
       });
     });
 
@@ -3935,7 +3959,7 @@ export class VisitSummaryComponent implements OnInit, OnDestroy, AfterViewInit {
 
   /**
   * Send selected medications to manual TTx API
-  * Each medication is sent separately with its own ai_assisted flag (Y/N/M)
+  * Each medication is sent separately with its own ai_assisted flag (rank:Y/N/M)
   */
   sendMedicationToManualTTxAPI(medicationsToSend: StandardMedicineModel[]): Observable<any> {
     if (!medicationsToSend || medicationsToSend.length === 0) {
@@ -3948,15 +3972,8 @@ export class VisitSummaryComponent implements OnInit, OnDestroy, AfterViewInit {
       const isAiGenerated = medication.aiGenerated === true;
       const isModified = medication.modified === true;
 
-      const medicationPayload: any = {
-        medication: medication.drug,
-        dose: medication.dose,
-        duration: medication.durationNo,
-        duration_unit: medication.durationUnit,
-        instructions: medication.instructRemark,
-        frequency: medication.frequency
-      };
-
+      // Get rank and flag
+      const rank = (medication as any).rank || 'NA';
       let aiAssistedFlag: 'Y' | 'N' | 'M';
       if (isAiGenerated && isModified) {
         aiAssistedFlag = 'M';
@@ -3965,6 +3982,16 @@ export class VisitSummaryComponent implements OnInit, OnDestroy, AfterViewInit {
       } else {
         aiAssistedFlag = 'N';
       }
+
+      const medicationPayload: any = {
+        medication: medication.drug,
+        dose: medication.dose,
+        duration: medication.durationNo,
+        duration_unit: medication.durationUnit,
+        instructions: medication.instructRemark,
+        frequency: medication.frequency,
+        ai_assisted: `${rank}:${aiAssistedFlag}`
+      };
 
       if (isAiGenerated) {
         if (medication.rationale?.length) {
@@ -3980,8 +4007,7 @@ export class VisitSummaryComponent implements OnInit, OnDestroy, AfterViewInit {
 
       return this.diagnosisService.saveManualTreatment({
         visitUuid: this.visit.uuid,
-        medications: [medicationPayload],
-        ai_assisted: aiAssistedFlag
+        medications: [medicationPayload]
       });
     });
 

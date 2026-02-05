@@ -511,11 +511,18 @@ export class DiagnosisComponent implements OnInit, OnDestroy, OnChanges {
       let rationale: string[] = [];
       let from: string | undefined = undefined;
       let likelihood: string | undefined = undefined;
+      let rank: any = undefined;
 
       if (diagnosisAiGenerated && this.aillmddxComponent?.diagnosisList) {
         const aiDiagnosis = this.aillmddxComponent.diagnosisList.find(
           (d: any) => d.diagnosis?.toLowerCase() === this.diagnosisName?.toLowerCase()
         );
+
+        // Extract rank from AI diagnosis (based on order in list)
+        if (aiDiagnosis) {
+          const diagIndex = this.aillmddxComponent.diagnosisList.indexOf(aiDiagnosis);
+          rank = diagIndex >= 0 ? (diagIndex + 1) : undefined;
+        }
 
         // Extract likelihood
         if (aiDiagnosis?.likelihood) {
@@ -541,6 +548,7 @@ export class DiagnosisComponent implements OnInit, OnDestroy, OnChanges {
           ...(rationale.length > 0 ? { rationale: rationale } : {}),
           ...(from ? { from: from } : {}),
           ...(likelihood ? { likelihood: likelihood } : {}),
+          ...(rank !== undefined ? { rank: rank } : {}),
       };
 
       this.existingDiagnosis.push(newDiagnosis);
@@ -757,6 +765,9 @@ export class DiagnosisComponent implements OnInit, OnDestroy, OnChanges {
           );
 
           if (aiMedication) {
+            // Extract rank from AI medication (based on order in list)
+            const medIndex = medicationList.indexOf(aiMedication);
+            formattedMedicine.rank = medIndex >= 0 ? (medIndex + 1) : 'NA';
             if (aiMedication.rationale) {
               if (Array.isArray(aiMedication.rationale)) {
                 const isStringArray = typeof aiMedication.rationale[0] === 'string';
