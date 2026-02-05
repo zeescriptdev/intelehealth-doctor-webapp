@@ -205,7 +205,10 @@ export class VisitSummaryComponent implements OnInit, OnDestroy, AfterViewInit {
 
   async lazyLoadDDx() {
     setTimeout(async () => {
-      this.lazyLoadDDxContainer?.clear();
+      if (!this.lazyLoadDDxContainer) {
+        return;
+      }
+      this.lazyLoadDDxContainer.clear();
       const { DiagnosisComponent } = await import(/* webpackChunkName: "diagnosis-aillm-ddx" */'./diagnosis/diagnosis.component');
       this.ddxCompRef = this.lazyLoadDDxContainer.createComponent(DiagnosisComponent);
       if (this.ddxCompRef) {
@@ -331,7 +334,7 @@ export class VisitSummaryComponent implements OnInit, OnDestroy, AfterViewInit {
     }, 1000);
   }
   isWhatsappCallWarningShown = false;
-  consultationStartTime: Date; 
+  consultationStartTime: Date; // Track consultation start time
 
   reasons = {
     'Completed': [
@@ -730,8 +733,8 @@ export class VisitSummaryComponent implements OnInit, OnDestroy, AfterViewInit {
             this.visitEnded = this.visitSummaryService.checkIfEncounterExists(visit.encounters, visitTypes.PATIENT_EXIT_SURVEY) || visit.stopDatetime;
             this.getPastVisitHistory();
             if (this.visitNotePresent) {
-        
-              if (!this.consultationStartTime && this.visitNotePresent.encounterDatetime && !this.visitEnded) {
+              // Set consultation start time from visit note encounter datetime if not already set
+              if (!this.consultationStartTime && this.visitNotePresent.encounterDatetime) {
                 this.consultationStartTime = new Date(this.visitNotePresent.encounterDatetime);
               }
               this.visitNotePresent.encounterProviders.forEach((p: EncounterProviderModel) => {
@@ -1437,6 +1440,7 @@ export class VisitSummaryComponent implements OnInit, OnDestroy, AfterViewInit {
   * @return {void}
   */
   startVisitNote(): void {
+    // Capture consultation start time
     this.consultationStartTime = new Date();
 
     const json = {
@@ -2386,13 +2390,10 @@ export class VisitSummaryComponent implements OnInit, OnDestroy, AfterViewInit {
         const consultationDuration = this.consultationStartTime
           ? (new Date().getTime() - this.consultationStartTime.getTime()) / 1000 // duration in seconds
           : null;
-        const isNewVisit = this.visitDemarcation === 'New';
-        const isRapidCompletion = this.hasAILLMEnabled
-          && isNewVisit
-          && !this.visitEnded
-          && this.consultationStartTime
-          && consultationDuration !== null
-          && consultationDuration < 60; 
+        // Check if visit is a follow-up visit
+        const isFollowUpVisit = this.visit?.demarcation === visitTypes.FOLLOW_UP;
+        // Timer should NOT show for follow-up visits
+        const isRapidCompletion = this.hasAILLMEnabled && !isFollowUpVisit && consultationDuration !== null && consultationDuration < 60; // less than 1 minute
 
         //Open Share Prescription Confirmation Modal
         this.coreService.openSharePrescriptionConfirmModal({ isRapidCompletion }).subscribe((res: boolean) => {
@@ -2573,6 +2574,14 @@ export class VisitSummaryComponent implements OnInit, OnDestroy, AfterViewInit {
         });
       }
     });
+  }
+
+  /**
+  * Check if current visit is a follow-up visit
+  * @returns {boolean} - True if current visit is a follow-up visit
+  */
+  isFollowUpVisit(): boolean {
+    return this.visit?.demarcation === visitTypes.FOLLOW_UP;
   }
 
   /**
