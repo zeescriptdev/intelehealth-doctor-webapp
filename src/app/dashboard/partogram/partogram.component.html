@@ -36,10 +36,10 @@
                       <td colspan="3" class="nb"></td>
                       <td>Time</td>
                       <ng-container *ngFor="let item of timeStage1; let i=index;">
-                        <td colspan="2" [ngClass]="{ 'sos': (parameters[24]?.stage1values) ? parameters[24]?.stage1values[i]?.value === 'SOS' : false }">
+                        <td colspan="2" [ngClass]="{ 'sos': sosStage1[i] }">
                           <div class="value-item" *ngIf="item">
                             {{item|date:'dd/MM/YYYY'}} <br/> {{item|date:'hh:mm a'}}
-                            <ng-container *ngIf="(parameters[24]?.stage1values) ? parameters[24]?.stage1values[i]?.value === 'SOS' : false">
+                            <ng-container *ngIf="sosStage1[i]">
                               <br>
                               <h5>SOS</h5>
                             </ng-container>
@@ -48,10 +48,10 @@
                       </ng-container>
                       <td rowspan="52" class="divider"></td>
                       <ng-container *ngFor="let item of timeStage2; let i=index;">
-                        <td colspan="4" [ngClass]="{ 'sos': (parameters[24]?.stage2values) ? parameters[24]?.stage2values[i]?.value === 'SOS' : false }">
+                        <td colspan="4" [ngClass]="{ 'sos': sosStage2[i] }">
                           <div class="value-item" *ngIf="item">
                             {{item|date:'dd/MM/YYYY'}} <br/> {{item|date:'hh:mm a'}}
-                            <ng-container *ngIf="(parameters[24]?.stage2values) ? parameters[24]?.stage2values[i]?.value === 'SOS' : false">
+                            <ng-container *ngIf="sosStage2[i]">
                               <br>
                               <h5>SOS</h5>
                             </ng-container>

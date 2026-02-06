@@ -3,22 +3,22 @@
 // The list of file replacements can be found in `angular.json`.
 
 export const environment = {
-  production: false,
-  base: "https://devezazi.intelehealth.org",
-  baseURL: "https://devezazi.intelehealth.org/openmrs/ws/rest/v1",
-  baseURLCoreApp: "https://devezazi.intelehealth.org/openmrs/coreapps/diagnoses",
-  baseURLLegacy: "https://devezazi.intelehealth.org/openmrs",
-  mindmapURL: "https://devezazi.intelehealth.org:3004/api",
-  notificationURL: "https://devezazi.intelehealth.org:3004/notification",
-  socketURL: "https://devezazi.intelehealth.org:3004",
-  captchaSiteKey: "6LeNZvklAAAAABQO-10y2egkCxjVOnXxswDSWL8m",
-  siteKey: "6LeNZvklAAAAABQO-10y2egkCxjVOnXxswDSWL8m",
-  externalPrescriptionCred: 'ZXh0ZXJuYWxwcmVzdXNlcjpJSFVzZXIjMQ==', //externaluser
-  vapidPublicKey: "BM4tUVW1UwkMpfAWh2mwhA-wwdIC2rCF1MFypbFpjn23qYMQXaeAaYi6ydGslRb_Vdr2Ws0MW5RSUH9InEbYNhA",
-  webrtcSdkServerUrl: "wss://devezazi.intelehealth.org:9090",
-  webrtcTokenServerUrl: 'https://devezazi.intelehealth.org:3000/',
-  gatewayURL: "https://devezazi.intelehealth.org:3030/",
-  recordsPerPage: 50
+  production: false,
+  base: "https://testezazi.intelehealth.org",
+  baseURL: "https://testezazi.intelehealth.org/openmrs/ws/rest/v1",
+  baseURLCoreApp: "https://testezazi.intelehealth.org/openmrs/coreapps/diagnoses",
+  baseURLLegacy: "https://testezazi.intelehealth.org/openmrs",
+  mindmapURL: "https://testezazi.intelehealth.org:3004/api",
+  notificationURL: "https://testezazi.intelehealth.org:3004/notification",
+  socketURL: "https://testezazi.intelehealth.org:3004",
+  captchaSiteKey: "6LelRWAsAAAAAD-RkHB_lT9OT19I5ClAIHQzen7O",
+  siteKey: "6LelRWAsAAAAAD-RkHB_lT9OT19I5ClAIHQzen7O",
+  externalPrescriptionCred: 'ZXh0ZXJuYWxwcmVzdXNlcjpJSFVzZXIjMQ==', //externaluser
+  vapidPublicKey: "BM4tUVW1UwkMpfAWh2mwhA-wwdIC2rCF1MFypbFpjn23qYMQXaeAaYi6ydGslRb_Vdr2Ws0MW5RSUH9InEbYNhA",
+  webrtcSdkServerUrl: "wss://testezazi.intelehealth.org:9090",
+  webrtcTokenServerUrl: 'https://testezazi.intelehealth.org:3000/',
+  gatewayURL: "https://testezazi.intelehealth.org:3030/",
+  recordsPerPage: 50
 };
 
 /*
