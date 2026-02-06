@@ -148,7 +148,7 @@ export class PrescriptionComponent implements OnInit , OnDestroy{
   * @return {void}
   */
   getPrescriptionSentVisits(page: number = 1) {
-    if(page == 1) this.prescriptionSent = [];  this.allPrescriptionSent = []; // 🔥 IMPORTANT;
+    if(page == 1) this.prescriptionSent = [];  this.allPrescriptionSent = []; //IMPORTANT;
     this.visitService.getCompletedVisits(this.specialization, page).subscribe((ps: ApiResponseModel) => {
       if (ps.success) {
         this.prescriptionSentCount = ps.totalCount;
@@ -165,7 +165,7 @@ export class PrescriptionComponent implements OnInit , OnDestroy{
        // master list
       this.allPrescriptionSent = [...this.allPrescriptionSent, ...records];
 
-      // 🔍 apply search AFTER data loads5855
+      // apply search AFTER data loads5855
       this.applySearch();
 
         if(!this.loaded2) {;
