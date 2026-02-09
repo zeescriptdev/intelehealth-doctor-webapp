@@ -1091,7 +1091,7 @@ export class VisitSummaryComponent implements OnInit, OnDestroy {
               });
             } else {
               if (concept.conceptClass.uuid === conceptIds.conceptDiagnosisClass) {
-                  diagnosisArray.push({ name: concept.display, id: concept.uuid });
+                diagnosisArray.push({ name: concept.display, id: concept.uuid });
               }
             }
           });
