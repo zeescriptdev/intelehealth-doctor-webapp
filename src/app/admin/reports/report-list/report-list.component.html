@@ -7,7 +7,7 @@
       </div>
       <div class="card-body">
         <div class="mat-elevation-z8">
-          <table mat-table [dataSource]="reports">
+          <table mat-table [dataSource]="dataSource">
             <ng-container matColumnDef="name">
               <td mat-cell [attr.colspan]="3" *matCellDef="let element">
                 <img src="assets/svgs/report-list.svg" alt=""> &nbsp; {{element.name}}
@@ -32,7 +32,7 @@
 
             <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
           </table>
-
+          <mat-paginator [pageSizeOptions]="[5, 10, 20]"></mat-paginator>
         </div>
       </div>
     </div>

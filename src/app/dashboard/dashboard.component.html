@@ -223,17 +223,20 @@
                    <div *ngIf="!element || !element.person" class="loading-placeholder">
                     <span>-</span>
                   </div>
+                   <div *ngIf="!element || !element.person" class="loading-placeholder">
+                    <span>-</span>
+                  </div>
                 </td>
               </ng-container>
 
               <!-- Age Column -->
               <ng-container matColumnDef="age">
-                <th mat-header-cell *matHeaderCellDef mat-sort-header > {{'Age' | translate}} </th>
+                <th mat-header-cell *matHeaderCellDef mat-sort-header [disableClear]="true"> {{'Age' | translate}} </th>
                 <td mat-cell *matCellDef="let element;let j=index;" [attr.data-test-id]="'prAge'+j"> {{element.age}}
                   {{'y'| translate}}</td>
               </ng-container>
 
-              <!-- Location Column -->
+              <!--  Location Column -->
               <ng-container matColumnDef="location">
                 <th mat-header-cell *matHeaderCellDef mat-sort-header> {{'Sanch' | translate}} </th>
                 <td mat-cell *matCellDef="let element;let j=index;" [attr.data-test-id]="'prLocation'+j">
@@ -335,7 +338,11 @@
 
               <!-- Age Column -->
               <ng-container matColumnDef="age">
+<<<<<<< ida4-ekal-migration-development
+                <th mat-header-cell *matHeaderCellDef mat-sort-header [disableClear]="true"> {{'Age' | translate}} </th>
+=======
                 <th mat-header-cell *matHeaderCellDef mat-sort-header [disableClear]="true" > {{'Age' | translate}} </th>
+>>>>>>> ida4-ekal-migration-master-NCD
                 <td mat-cell *matCellDef="let element;let j=index;" [attr.data-test-id]="'awAge'+j"> {{element.age}}
                   {{'y'| translate}} </td>
               </ng-container>

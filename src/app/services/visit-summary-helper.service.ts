@@ -29,7 +29,7 @@ export class VisitSummaryHelperService {
     private translateService: TranslateService,
   ) { }
 
-  getCheifComplaint(visit: VisitModel) {
+  getCheifComplaint(visit: VisitModel, isNcdSevikaVisit?: Boolean) {
     const recent: string[] = [];
     const encounters = visit.encounters;
     encounters.forEach(encounter => {
@@ -42,7 +42,8 @@ export class VisitSummaryHelperService {
             for (let i = 1; i < currentComplaint.length; i++) {
               const obs1 = currentComplaint[i].split('<');
               if (!obs1[0].match(visitTypes.ASSOCIATED_SYMPTOMS)) {
-                recent.push(obs1[0]);
+                let complaint = isNcdSevikaVisit &&  i === 1 ? "NCD - "+obs1[0] : obs1[0]
+                recent.push(complaint);
               }
             }
           }

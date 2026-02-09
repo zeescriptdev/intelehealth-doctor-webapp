@@ -3,7 +3,7 @@ import { HttpClient, HttpHeaders } from "@angular/common/http";
 import { Observable, Subject } from "rxjs";
 import { environment } from "../../environments/environment";
 import * as moment from "moment";
-import { visitTypes ,doctorDetails } from "src/config/constant";
+import { doctorDetails, visitTypes } from "src/config/constant";
 import { getCacheData } from 'src/app/utils/utility-functions';
 import { PatientModel, PersonAttributeModel } from "../model/model";
 
@@ -313,10 +313,10 @@ export class VisitService {
   saveTranslatedData(body: any) {
    return this.http.post(`${this.baseURLMindmap}/mindmap/saveTranslation`, body)
   }
-  
+
   // A reusable function to build translation request body
   buildRequestBody(input: string, targetLang: string, tabType: string) {
-      // Get gender from cached provider data
+    // Get gender from cached provider data
     const provider = getCacheData(true, doctorDetails.PROVIDER);
     let speaker_gender = provider?.person?.gender || null;
 
