@@ -106,7 +106,6 @@ export class DiagnosisComponent implements OnInit, OnDestroy, OnChanges {
   @Output() referralSaved = new EventEmitter<any>();
   @Output() followUpSaved = new EventEmitter<any>();
   @Output() furtherQuestionsReceived = new EventEmitter<string[]>();
-  @Output() diagnosisReceived = new EventEmitter<any>();
 
   diagnosisForm: FormGroup;
   diagnosisSecondaryForm: FormGroup;
@@ -256,12 +255,6 @@ export class DiagnosisComponent implements OnInit, OnDestroy, OnChanges {
       this.aillmddxComponent.furtherQuestionsListReceived.subscribe((questions: string[]) => {
         if (questions && questions.length) {
           this.furtherQuestionsReceived.emit(questions);
-        }
-      });
-
-      this.aillmddxComponent.diagnosisReceived.subscribe((diagnosisData:any) => {
-        if (diagnosisData && diagnosisData.length) {
-          this.diagnosisReceived.emit(diagnosisData);
         }
       });
     }

@@ -27,7 +27,7 @@ import { VideoCallComponent } from 'src/app/modal-components/video-call/video-ca
 import { TranslateService } from '@ngx-translate/core';
 import { TranslationService } from 'src/app/services/translation.service';
 import { calculateBMI, convertCelsiusToFahrenheit, deleteCacheData, getCacheData, getFieldValueByLanguage, setCacheData, isFeaturePresent, getCallDuration, autoGrowTextZone, autoGrowAllTextAreaZone, obsStringify, obsParse } from 'src/app/utils/utility-functions';
-import { doctorDetails, languages, visitTypes, facility, refer_specialization, refer_prioritie, strength, days, timing, PICK_FORMATS, conceptIds, visitAttributeTypes, visitEncounters } from 'src/config/constant';
+import { doctorDetails, languages, visitTypes, facility, refer_specialization, refer_prioritie, strength, days, timing, PICK_FORMATS, conceptIds, visitAttributeTypes } from 'src/config/constant';
 import { VisitSummaryHelperService } from 'src/app/services/visit-summary-helper.service';
 import { ApiResponseModel, DataItemModel, DiagnosisModel, DiagnosticModel, DocImagesModel, EncounterModel, EncounterProviderModel, MedicineModel, ObsApiResponseModel, ObsModel, PatientHistoryModel, PatientIdentifierModel, PatientModel, PatientVisitSection, PatientVisitSummaryConfigModel, PersonAttributeModel, ProviderAttributeModel, ProviderModel, RecentVisitsApiResponseModel, ReferralModel, SpecializationModel, TestModel, VisitAttributeModel, VisitModel, VitalModel, DiagnosticUnit, DiagnosticName, DropdownItemModel, StandardMedicineModel } from 'src/app/model/model';
 import { AppConfigService } from 'src/app/services/app-config.service';
@@ -220,12 +220,6 @@ export class VisitSummaryComponent implements OnInit, OnDestroy, AfterViewInit {
         this.ddxCompRef.instance.visitEnded = this.visitEnded;
         this.ddxCompRef.instance.patientInteractionNotesForm = this.patientInteractionNotesForm;
         this.ddxCompRef.instance.hasAILLMEnabled = this.hasAILLMEnabled;
-
-        this.ddxCompRef.instance.diagnosisReceived.subscribe((digData:any)=>{
-          if(this.visitNotePresent && !this.visitEnded && this.isVisitNoteProvider && !this.visitCompleted){
-            this.SaveAIDiagosisHistory(this.visit,digData);
-          }
-        })
 
         // Subscribe to diagnosis saved event
         this.ddxCompRef.instance.diagnosisSaved.subscribe((diagnoses: any[]) => {
@@ -2896,15 +2890,8 @@ export class VisitSummaryComponent implements OnInit, OnDestroy, AfterViewInit {
   formatMedicineSave(medicine: StandardMedicineModel): string {
     // Check if medication has been modified (for AI medications)
     this.checkMedicationModification(medicine);
-    const rank = medicine.aiGenerated ? ((medicine as any).rank || 'NA') : 'NA';
 
-    // Set AI flag: Y (AI unchanged), M (AI modified), or N (manual)
-    let aiFlag = 'N';
-    if (medicine.aiGenerated) {
-      aiFlag = medicine.modified ? 'M' : 'Y';
-    }
-
-    return `${medicine.drug ?? ''}:${medicine.dose ?? ''}:${medicine.durationNo ?? ''}:${medicine.durationUnit ?? ''}:${medicine.instructRemark ?? ''}:${medicine.frequency ?? ''}:${rank}:${aiFlag}`;
+    return `${medicine.drug ?? ''}:${medicine.dose ?? ''}:${medicine.durationNo ?? ''}:${medicine.durationUnit ?? ''}:${medicine.instructRemark ?? ''}:${medicine.frequency ?? ''}`;
   }
 
   saveDiscussionSummary(): Observable<any>{
@@ -3019,16 +3006,12 @@ export class VisitSummaryComponent implements OnInit, OnDestroy, AfterViewInit {
           for (const diagnosis of this.existingDiagnosis) {
             if (diagnosis?.uuid) continue;
 
-            // Non-AI diagnosis: rank = NA, aiFlag = N
-            const rank = 'NA';
-            const aiFlag = 'N';
-
             postObsRequests.push(
               this.encounterService.postObs({
                 concept: conceptIds.conceptDiagnosis,
                 person: this.visit.patient.uuid,
                 obsDatetime: new Date(),
-                value: `${diagnosis.diagnosisCode ? diagnosis.diagnosisCode : 'NA'}::${diagnosis.diagnosisName ?? ''}:${diagnosis.diagnosisType ?? ''} & ${diagnosis.diagnosisStatus ?? ''}:${rank}:${aiFlag}`,
+                value: `${diagnosis.diagnosisCode ? diagnosis.diagnosisCode : 'NA'}::${diagnosis.diagnosisName ?? ''}:${diagnosis.diagnosisType ?? ''} & ${diagnosis.diagnosisStatus ?? ''}`,
                 encounter: this.visitNotePresent.uuid
               }).pipe(tap((res: ObsModel) => diagnosis.uuid = res.uuid))
             );
@@ -3042,15 +3025,12 @@ export class VisitSummaryComponent implements OnInit, OnDestroy, AfterViewInit {
       if (this.hasAILLMEnabled && this.ddxCompRef?.instance) {
         for (const diagnosis of this.ddxCompRef.instance.existingDiagnosis) {
           if (diagnosis?.uuid) continue;
-          // AI diagnosis: get rank if available, set aiFlag = Y
-          const rank = (diagnosis as any).rank || 'NA';
-          const aiFlag = diagnosis.diagnosisAiGenerated === 'Y' || diagnosis.from === 'AI generated' ? 'Y' : 'N';
           postObsRequests.push(
             this.encounterService.postObs({
               concept: conceptIds.conceptDiagnosis,
               person: this.visit.patient.uuid,
               obsDatetime: new Date(),
-              value: `${diagnosis.diagnosisCode ? diagnosis.diagnosisCode : 'NA'}::${diagnosis.diagnosisName}:${diagnosis.diagnosisType} & ${diagnosis.diagnosisStatus}:${rank}:${aiFlag}`,
+              value: `${diagnosis.diagnosisCode ? diagnosis.diagnosisCode : 'NA'}::${diagnosis.diagnosisName}:${diagnosis.diagnosisType} & ${diagnosis.diagnosisStatus}`,
               encounter: this.visitNotePresent.uuid
             }).pipe(tap((res: ObsModel) => diagnosis.uuid = res.uuid))
           );
@@ -3209,15 +3189,12 @@ export class VisitSummaryComponent implements OnInit, OnDestroy, AfterViewInit {
       if (this.changedFields.includes('diagnosis') && !this.isFeatureAvailable('dp_diagnosis_secondary')) {
         for (const diagnosis of this.existingDiagnosis) {
           if (diagnosis?.uuid) continue;
-          // Determine rank and AI flag
-          const rank = (diagnosis as any).rank || 'NA';
-          const aiFlag = diagnosis.diagnosisAiGenerated === 'Y' || (diagnosis as any).from === 'AI generated' ? 'Y' : 'N';
           postObsRequests.push(
             this.encounterService.postObs({
               concept: conceptIds.conceptDiagnosis,
               person: this.visit.patient.uuid,
               obsDatetime: new Date(),
-              value: `${diagnosis.diagnosisCode ? diagnosis.diagnosisCode : 'NA'}::${diagnosis.diagnosisName ?? ''}:${diagnosis.diagnosisType ?? ''} & ${diagnosis.diagnosisStatus ?? ''}:${rank}:${aiFlag}`,
+              value: `${diagnosis.diagnosisCode ? diagnosis.diagnosisCode : 'NA'}::${diagnosis.diagnosisName ?? ''}:${diagnosis.diagnosisType ?? ''} & ${diagnosis.diagnosisStatus ?? ''}`,
               encounter: this.visitNotePresent.uuid
             }).pipe(tap((res:ObsModel)=>diagnosis.uuid=res.uuid))
           );
@@ -3809,104 +3786,6 @@ export class VisitSummaryComponent implements OnInit, OnDestroy, AfterViewInit {
   // Add this method to receive questions from AILLMDDX
   onFurtherQuestionsReceived(questions: string[]) {
     this.furtherQuestionsList = questions;
-  }
-
-  SaveAIDiagosisHistory(visit:any, diagnosisData:any){
-    let checkAIDiagnosisEncounter = this.visitSummaryService.checkIfEncounterExists(visit.encounters, visitTypes.AI_DIAGNOSIS_SUPPORT);
-    if(checkAIDiagnosisEncounter){
-      let checkLLMRegenerationEncounter = this.visitSummaryService.checkIfEncounterExists(visit.encounters, visitTypes.LLM_REGENERATION);
-      if(checkLLMRegenerationEncounter){
-        this.deleteExistingLLMObs(checkLLMRegenerationEncounter.obs).subscribe(res=>{
-          this.createLLMObs(checkLLMRegenerationEncounter.uuid,diagnosisData,true).subscribe();
-        })
-      } else {
-        this.createLLMEncounter(true).subscribe(res=>{
-          if(res){
-            this.createLLMObs(res.uuid,diagnosisData,true).subscribe();
-          }
-        })
-      }
-    } else {
-      this.createLLMEncounter().subscribe(res=>{
-        if(res){
-          this.createLLMObs(res.uuid,diagnosisData).subscribe();
-        }
-      })
-    }
-  }
-
-  deleteExistingLLMObs(obs: ObsModel[]):Observable<any>{
-    let deleteAllObs = obs.map(o=>this.diagnosisService.deleteObs(o.uuid,true))
-    return forkJoin(deleteAllObs)
-  }
-
-  createLLMEncounter(revised:boolean = false):Observable<any>{
-    const json = {
-      patient: this.visit.patient.uuid,
-      encounterType: revised ? visitEncounters.llmRegeneration : visitEncounters.aiDiagnosis, // Visit Note encounter
-      encounterProviders: [
-        {
-          provider: this.provider.uuid,
-          encounterRole: visitEncounters.doctorProviderId, // Doctor encounter role
-        },
-      ],
-      visit: this.visit.uuid,
-      encounterDatetime: new Date(Date.now() - 30000),
-    };
-    return this.encounterService.postEncounter(json);
-  }
-
-  createLLMObs(encounterUUID:string, diagnosisData:any, revised: boolean = false):Observable<any>{
-      let diagnosisObs = diagnosisData.map((diagnosisAIData:any,rank:number)=>{
-        let diagnosisRecord = {
-          concept: conceptIds.conceptLLM,
-          person: this.visit.patient.uuid,
-          obsDatetime: new Date(),
-          encounter: encounterUUID,
-          groupMembers: [
-            {
-              concept: conceptIds.conceptDiagnosisName,
-              value: diagnosisAIData.diagnosis,
-              obsDatetime: new Date(),
-              person: this.visit.patient.uuid,
-              
-            },
-            {
-              concept: conceptIds.conceptDiagnosisLikelihood,
-              value: diagnosisAIData.likelihood + " likely",
-              obsDatetime: new Date(),
-              person: this.visit.patient.uuid,
-            },
-            {
-              concept: conceptIds.conceptRationale,
-              value: diagnosisAIData.summarised_rationale.map(obj=>Object.values(obj).pop()).join(":"),
-              obsDatetime: new Date(),
-              person: this.visit.patient.uuid,
-            },
-            {
-              concept: conceptIds.conceptRank,
-              value: (rank+1),
-              obsDatetime: new Date(),
-              person: this.visit.patient.uuid,
-            },
-            {
-              concept: conceptIds.conceptVersion,
-              value: revised ? 'revised' : 'initial',
-              obsDatetime: new Date(),
-              person: this.visit.patient.uuid,
-            },
-            {
-              concept: conceptIds.conceptWasRegenerated,
-              value: revised,
-              obsDatetime: new Date(),
-              person: this.visit.patient.uuid,
-            }
-          ]
-        }
-
-        return this.encounterService.postObs(diagnosisRecord, true)
-      })
-      return forkJoin(diagnosisObs)
   }
 
   /**
