@@ -2627,6 +2627,12 @@ export class VisitSummaryComponent implements OnInit, OnDestroy, AfterViewInit {
   */
   notifyHwForAvailablePrescription(title = null, type = null,followupDatetime = null): void {
     const hwUuid = getCacheData(true, visitTypes.PATIENT_VISIT_PROVIDER)?.provider?.uuid;
+
+    if (!hwUuid) {
+      console.warn('Cannot send notification: Health worker UUID is not available');
+      return;
+    }
+
     const openMRSID = this.getPatientIdentifier("OpenMRS ID");
     const payload = {
       title: title || `Prescription available for ${this.visit?.patient?.person?.display || 'Patient'}`,
@@ -2642,7 +2648,11 @@ export class VisitSummaryComponent implements OnInit, OnDestroy, AfterViewInit {
         followupDatetime: followupDatetime
       }
     }
-    this.mindmapService.notifyApp(hwUuid, payload).subscribe();
+    console.log("payload from web app==",payload);
+    this.mindmapService.notifyApp(hwUuid, payload).subscribe({
+      next: () => console.log('Notification sent successfully'),
+      error: (err) => console.error('Failed to send notification:', err)
+    });
   }
 
   /**
