@@ -108,14 +108,14 @@ const initializer = (pwaService: PwaService) => () => pwaService.initPwaPrompt()
     NgxUiLoaderHttpModule.forRoot({
       showForeground: true,
      exclude: [
-        'https://testezazi.intelehealth.org:3004/api/messages/',
-        'https://testezazi.intelehealth.org:3004/api/support/',
-        'https://testezazi.intelehealth.org:3004/api/auth/validateProviderAttribute',
-        'https://testezazi.intelehealth.org/openmrs/ws/rest/v1/visit/',
-        'https://testezazi.intelehealth.org:3004/api/messages/',
-        'https://testezazi.intelehealth.org:3004/api/support/',
-        'https://testezazi.intelehealth.org:3004/api/auth/validateProviderAttribute',
-        'https://testezazi.intelehealth.org/openmrs/ws/rest/v1/visit/'
+        'https://ezazi.intelehealth.org:3004/api/messages/',
+        'https://ezazi.intelehealth.org:3004/api/support/',
+        'https://ezazi.intelehealth.org:3004/api/auth/validateProviderAttribute',
+        'https://ezazi.intelehealth.org/openmrs/ws/rest/v1/visit/',
+        'https://ezazi.intelehealth.org:3004/api/messages/',
+        'https://ezazi.intelehealth.org:3004/api/support/',
+        'https://ezazi.intelehealth.org:3004/api/auth/validateProviderAttribute',
+        'https://ezazi.intelehealth.org/openmrs/ws/rest/v1/visit/'
       ]
     }),
     NgxPermissionsModule.forRoot({

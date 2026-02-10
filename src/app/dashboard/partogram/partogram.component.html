@@ -35,11 +35,11 @@
                     <tr>
                       <td colspan="3" class="nb"></td>
                       <td>Time</td>
-                      <ng-container *ngFor="let item of timeStage1; let i=index;">
-                        <td colspan="2" [ngClass]="{ 'sos': sosStage1[i] }">
+                      <ng-container *ngFor="let item of timeFullStage1; let i=index;">
+                        <td [ngClass]="{ 'sos': item && encuuid1Full[i]?.enc_uuid && sosEncounterUUIDs.has(encuuid1Full[i].enc_uuid) }">
                           <div class="value-item" *ngIf="item">
                             {{item|date:'dd/MM/YYYY'}} <br/> {{item|date:'hh:mm a'}}
-                            <ng-container *ngIf="sosStage1[i]">
+                            <ng-container *ngIf="item && encuuid1Full[i]?.enc_uuid && sosEncounterUUIDs.has(encuuid1Full[i].enc_uuid)">
                               <br>
                               <h5>SOS</h5>
                             </ng-container>
@@ -47,11 +47,11 @@
                         </td>
                       </ng-container>
                       <td rowspan="52" class="divider"></td>
-                      <ng-container *ngFor="let item of timeStage2; let i=index;">
-                        <td colspan="4" [ngClass]="{ 'sos': sosStage2[i] }">
+                      <ng-container *ngFor="let item of timeFullStage2; let i=index;">
+                        <td [ngClass]="{ 'sos': item && encuuid2Full[i]?.enc_uuid && sosEncounterUUIDs.has(encuuid2Full[i].enc_uuid) }">
                           <div class="value-item" *ngIf="item">
                             {{item|date:'dd/MM/YYYY'}} <br/> {{item|date:'hh:mm a'}}
-                            <ng-container *ngIf="sosStage2[i]">
+                            <ng-container *ngIf="item && encuuid2Full[i]?.enc_uuid && sosEncounterUUIDs.has(encuuid2Full[i].enc_uuid)">
                               <br>
                               <h5>SOS</h5>
                             </ng-container>
@@ -62,26 +62,12 @@
                     <tr>
                       <td colspan="3" class="nb"></td>
                       <td>Hours</td>
-                      <td colspan="2">1</td>
-                      <td colspan="2">2</td>
-                      <td colspan="2">3</td>
-                      <td colspan="2">4</td>
-                      <td colspan="2">5</td>
-                      <td colspan="2">6</td>
-                      <td colspan="2">7</td>
-                      <td colspan="2">8</td>
-                      <td colspan="2">9</td>
-                      <td colspan="2">10</td>
-                      <td colspan="2">11</td>
-                      <td colspan="2">12</td>
-                      <td colspan="2">13</td>
-                      <td colspan="2">14</td>
-                      <td colspan="2">15</td>
-                      <td colspan="4">1</td>
-                      <td colspan="4">2</td>
-                      <td colspan="4">3</td>
-                      <td colspan="4">4</td>
-                      <td colspan="4">5</td>
+                      <ng-container *ngFor="let item of timeStage1; let i=index;">
+                        <td [attr.colspan]="subColsPerHourStage1[i]">{{i + 1}}</td>
+                      </ng-container>
+                      <ng-container *ngFor="let item of timeStage2; let i=index;">
+                        <td [attr.colspan]="subColsPerHourStage2[i]">{{i + 1}}</td>
+                      </ng-container>
                     </tr>
                     <tr>
                       <td colspan="55" class="divider"></td>
@@ -89,14 +75,14 @@
                     <tr class="alert-row">
                       <td colspan="3" class="nb"></td>
                       <td>ALERT</td>
-                      <td colspan="30" class="nb">
+                      <td [attr.colspan]="totalStage1Cols" class="nb">
                         <div class="d-flex align-items-center">
                           <div class="arrow left"></div>
                           <span>ACTIVE FIRST STAGE</span>
                           <div class="arrow right"></div>
                         </div>
                       </td>
-                      <td colspan="20" class="nb">
+                      <td [attr.colspan]="totalStage2Cols" class="nb">
                         <div class="d-flex align-items-center">
                           <div class="arrow left"></div>
                           <span>SECOND STAGE</span>
@@ -112,14 +98,14 @@
                       <td colspan="2">Companion</td>
                       <td>N</td>
                       <ng-container *ngFor="let item of parameters[0].stage1values;">
-                        <td colspan="2">
+                        <td>
                           <div class="value-item" *ngIf="item" [ngClass]="{ 'red': item?.comment == 'R', 'yellow': item?.comment == 'Y'}">
                             {{item?.value}}
                           </div>
                         </td>
                       </ng-container>
                       <ng-container *ngFor="let item of parameters[0].stage2values;">
-                        <td colspan="4">
+                        <td>
                           <div class="value-item" *ngIf="item" [ngClass]="{ 'red': item?.comment == 'R', 'yellow': item?.comment == 'Y'}">
                             {{item?.value}}
                           </div>
@@ -130,14 +116,14 @@
                       <td colspan="2">Pain Relief</td>
                       <td>N</td>
                       <ng-container *ngFor="let item of parameters[1].stage1values;">
-                        <td colspan="2">
+                        <td>
                           <div class="value-item" *ngIf="item" [ngClass]="{ 'red': item?.comment == 'R', 'yellow': item?.comment == 'Y'}">
                             {{item?.value}}
                           </div>
                         </td>
                       </ng-container>
                       <ng-container *ngFor="let item of parameters[1].stage2values;">
-                        <td colspan="4">
+                        <td>
                           <div class="value-item" *ngIf="item" [ngClass]="{ 'red': item?.comment == 'R', 'yellow': item?.comment == 'Y'}">
                             {{item?.value}}
                           </div>
@@ -192,14 +178,14 @@
                       <td colspan="2">Oral Fluid</td>
                       <td>N</td>
                       <ng-container *ngFor="let item of parameters[2].stage1values;">
-                        <td colspan="2">
+                        <td>
                           <div class="value-item" *ngIf="item" [ngClass]="{ 'red': item?.comment == 'R', 'yellow': item?.comment == 'Y'}">
                             {{item?.value}}
                           </div>
                         </td>
                       </ng-container>
                       <ng-container *ngFor="let item of parameters[2].stage2values;">
-                        <td colspan="4">
+                        <td>
                           <div class="value-item" *ngIf="item" [ngClass]="{ 'red': item?.comment == 'R', 'yellow': item?.comment == 'Y'}">
                             {{item?.value}}
                           </div>
@@ -210,14 +196,14 @@
                       <td colspan="2">Posture</td>
                       <td>SP</td>
                       <ng-container *ngFor="let item of parameters[3].stage1values;">
-                        <td colspan="2">
+                        <td>
                           <div class="value-item" *ngIf="item" [ngClass]="{ 'red': item?.comment == 'R', 'yellow': item?.comment == 'Y'}">
                             {{item?.value}}
                           </div>
                         </td>
                       </ng-container>
                       <ng-container *ngFor="let item of parameters[3].stage2values;">
-                        <td colspan="4">
+                        <td>
                           <div class="value-item" *ngIf="item" [ngClass]="{ 'red': item?.comment == 'R', 'yellow': item?.comment == 'Y'}">
                             {{item?.value}}
                           </div>
@@ -268,7 +254,7 @@
                       <td colspan="2">Amniotic Fluid</td>
                       <td>M+++, B</td>
                       <ng-container *ngFor="let item of parameters[6].stage1values;">
-                        <td colspan="2">
+                        <td>
                           <div class="value-item" *ngIf="item" [ngClass]="{ 'red': item?.comment == 'R', 'yellow': item?.comment == 'Y'}">
                             {{item?.value}}
                           </div>
@@ -286,7 +272,7 @@
                       <td colspan="2">Fetal Position</td>
                       <td>P, T</td>
                       <ng-container *ngFor="let item of parameters[7].stage1values;">
-                        <td colspan="2">
+                        <td>
                           <div class="value-item" *ngIf="item" [ngClass]="{ 'red': item?.comment == 'R', 'yellow': item?.comment == 'Y'}">
                             {{item?.value}}
                           </div>
@@ -304,7 +290,7 @@
                       <td colspan="2">Caput</td>
                       <td>+++</td>
                       <ng-container *ngFor="let item of parameters[8].stage1values;">
-                        <td colspan="2">
+                        <td>
                           <div class="value-item" *ngIf="item" [ngClass]="{ 'red': item?.comment == 'R', 'yellow': item?.comment == 'Y'}">
                             {{item?.value}}
                           </div>
@@ -322,7 +308,7 @@
                       <td colspan="2">Moulding</td>
                       <td>+++</td>
                       <ng-container *ngFor="let item of parameters[9].stage1values;">
-                        <td colspan="2">
+                        <td>
                           <div class="value-item" *ngIf="item" [ngClass]="{ 'red': item?.comment == 'R', 'yellow': item?.comment == 'Y'}">
                             {{item?.value}}
                           </div>
@@ -344,7 +330,7 @@
                       <td colspan="2">Pulse</td>
                       <td>&#60;60, ≥120</td>
                       <ng-container *ngFor="let item of parameters[10].stage1values;">
-                        <td colspan="2">
+                        <td>
                           <div class="value-item" *ngIf="item" [ngClass]="{ 'red': item?.comment == 'R', 'yellow': item?.comment == 'Y'}">
                             {{item?.value}}
                           </div>
@@ -362,7 +348,7 @@
                       <td colspan="2">Systolic BP</td>
                       <td>&#60;80, ≥140</td>
                       <ng-container *ngFor="let item of parameters[11].stage1values;">
-                        <td colspan="2">
+                        <td>
                           <div class="value-item" *ngIf="item" [ngClass]="{ 'red': item?.comment == 'R', 'yellow': item?.comment == 'Y'}">
                             {{item?.value}}
                           </div>
@@ -380,7 +366,7 @@
                       <td colspan="2">Diastolic BP</td>
                       <td>≥90</td>
                       <ng-container *ngFor="let item of parameters[12].stage1values;">
-                        <td colspan="2">
+                        <td>
                           <div class="value-item" *ngIf="item" [ngClass]="{ 'red': item?.comment == 'R', 'yellow': item?.comment == 'Y'}">
                             {{item?.value}}
                           </div>
@@ -398,7 +384,7 @@
                       <td colspan="2">Temprature °C</td>
                       <td>&#60;35.0, ≥37.5</td>
                       <ng-container *ngFor="let item of parameters[13].stage1values;">
-                        <td colspan="2">
+                        <td>
                           <div class="value-item" *ngIf="item" [ngClass]="{ 'red': item?.comment == 'R', 'yellow': item?.comment == 'Y'}">
                             {{item?.value}}
                           </div>
@@ -416,7 +402,7 @@
                       <td colspan="2">Urine Protein</td>
                       <td>P3+, P4+</td>
                       <ng-container *ngFor="let item of parameters[14].stage1values;">
-                        <td colspan="2">
+                        <td>
                           <div class="value-item" *ngIf="item" [ngClass]="{ 'red': item?.comment == 'R', 'yellow': item?.comment == 'Y'}">
                             {{item?.value}}
                           </div>
@@ -434,7 +420,7 @@
                       <td colspan="2">Urine Acetone</td>
                       <td>A3+, A4+</td>
                       <ng-container *ngFor="let item of parameters[25].stage1values;">
-                        <td colspan="2">
+                        <td>
                           <div class="value-item" *ngIf="item" [ngClass]="{ 'red': item?.comment == 'R', 'yellow': item?.comment == 'Y'}">
                             {{item?.value}}
                           </div>
@@ -496,7 +482,7 @@
                       <td>10</td>
                       <td class="bg-secondary"></td>
                       <ng-container *ngFor="let item of parameters[17].stage1values;">
-                        <td colspan="2">
+                        <td>
                           <div class="value-item" *ngIf="item?.value == '10'">
                             X
                           </div>
@@ -514,7 +500,7 @@
                       <td>9</td>
                       <td>≥2h</td>
                       <ng-container *ngFor="let item of parameters[17].stage1values;">
-                        <td colspan="2">
+                        <td>
                           <div class="value-item" *ngIf="item?.value == '9'">
                             X
                           </div>
@@ -528,7 +514,7 @@
                       <td>8</td>
                       <td>≥2.5h</td>
                       <ng-container *ngFor="let item of parameters[17].stage1values;">
-                        <td colspan="2">
+                        <td>
                           <div class="value-item" *ngIf="item?.value == '8'">
                             X
                           </div>
@@ -539,7 +525,7 @@
                       <td>7</td>
                       <td>≥3h</td>
                       <ng-container *ngFor="let item of parameters[17].stage1values;">
-                        <td colspan="2">
+                        <td>
                           <div class="value-item" *ngIf="item?.value == '7'">
                             X
                           </div>
@@ -550,7 +536,7 @@
                       <td>6</td>
                       <td>≥5h</td>
                       <ng-container *ngFor="let item of parameters[17].stage1values;">
-                        <td colspan="2">
+                        <td>
                           <div class="value-item" *ngIf="item?.value == '6'">
                             X
                           </div>
@@ -561,7 +547,7 @@
                       <td>5</td>
                       <td>≥6h</td>
                       <ng-container *ngFor="let item of parameters[17].stage1values;">
-                        <td colspan="2">
+                        <td>
                           <div class="value-item" *ngIf="item?.value == '5'">
                             X
                           </div>
@@ -576,7 +562,7 @@
                       <td>5</td>
                       <td class="bg-secondary"></td>
                       <ng-container *ngFor="let item of parameters[18].stage1values;">
-                        <td colspan="2">
+                        <td>
                           <div class="value-item" *ngIf="item?.value == '5'">
                             O
                           </div>
@@ -594,7 +580,7 @@
                       <td>4</td>
                       <td class="bg-secondary"></td>
                       <ng-container *ngFor="let item of parameters[18].stage1values;">
-                        <td colspan="2">
+                        <td>
                           <div class="value-item" *ngIf="item?.value == '4'">
                             O
                           </div>
@@ -612,7 +598,7 @@
                       <td>3</td>
                       <td class="bg-secondary"></td>
                       <ng-container *ngFor="let item of parameters[18].stage1values;">
-                        <td colspan="2">
+                        <td>
                           <div class="value-item" *ngIf="item?.value == '3'">
                             O
                           </div>
@@ -630,7 +616,7 @@
                       <td>2</td>
                       <td class="bg-secondary"></td>
                       <ng-container *ngFor="let item of parameters[18].stage1values;">
-                        <td colspan="2">
+                        <td>
                           <div class="value-item" *ngIf="item?.value == '2'">
                             O
                           </div>
@@ -648,7 +634,7 @@
                       <td>1</td>
                       <td class="bg-secondary"></td>
                       <ng-container *ngFor="let item of parameters[18].stage1values;">
-                        <td colspan="2">
+                        <td>
                           <div class="value-item" *ngIf="item?.value == '1'">
                             O
                           </div>
@@ -666,7 +652,7 @@
                       <td>0</td>
                       <td class="bg-secondary"></td>
                       <ng-container *ngFor="let item of parameters[18].stage1values;">
-                        <td colspan="2">
+                        <td>
                           <div class="value-item" *ngIf="item?.value == '0'">
                             O
                           </div>
@@ -721,7 +707,7 @@
                         </td>
                       </ng-container>
                       <!-- <ng-container *ngFor="let item of parameters[19].stage1values;">
-                        <td colspan="2">
+                        <td>
                           <ng-container *ngIf="item">
                             <div class="value-item note">
                               <ng-container *ngFor="let oxy of item; let last=last;">
@@ -739,7 +725,7 @@
                         </td>
                       </ng-container>
                       <ng-container *ngFor="let item of parameters[19].stage2values;">
-                        <td colspan="4">
+                        <td>
                           <ng-container *ngIf="item">
                             <div class="value-item note">
                               <ng-container *ngFor="let oxy of item; let last=last;">
@@ -757,7 +743,7 @@
                     <tr>
                       <td colspan="3">Medicine</td>
                       <ng-container *ngFor="let item of parameters[20].stage1values;">
-                        <td colspan="2">
+                        <td>
                           <div class="value-item note" *ngIf="item">
                             <ng-container *ngFor="let m of item">
                               {{m?.value?.replaceAll('::',' ')}} <small><i>({{m?.initial}} {{m?.obsDatetime|date:'hh:mm a'}})</i></small><br/>
@@ -766,7 +752,7 @@
                         </td>
                       </ng-container>
                       <ng-container *ngFor="let item of parameters[20].stage2values;">
-                        <td colspan="4">
+                        <td>
                           <div class="value-item note" *ngIf="item">
                             <ng-container *ngFor="let m of item">
                               {{m?.value?.replaceAll('::',' ')}} <small><i>({{m?.initial}} {{m?.obsDatetime|date:'hh:mm a'}})</i></small><br/>
@@ -812,7 +798,7 @@
                         </td>
                       </ng-container>
                       <!-- <ng-container *ngFor="let item of parameters[21].stage1values;">
-                        <td colspan="2">
+                        <td>
                           <ng-container *ngIf="item">
                             <div class="value-item note">
                               <ng-container *ngFor="let iv of item; let last=last;">
@@ -830,7 +816,7 @@
                         </td>
                       </ng-container>
                       <ng-container *ngFor="let item of parameters[21].stage2values;">
-                        <td colspan="4">
+                        <td>
                           <ng-container *ngIf="item">
                             <div class="value-item note">
                               <ng-container *ngFor="let iv of item; let last=last;">
