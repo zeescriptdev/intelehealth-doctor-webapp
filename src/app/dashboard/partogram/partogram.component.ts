@@ -639,21 +639,9 @@ export class PartogramComponent implements OnInit, OnDestroy {
       const stage1Count = this.parameters[x].stage1Count;
       const stage2Count = this.parameters[x].stage2Count;
       
-     
-      let actualStage1Size = 0;
-      let actualStage2Size = 0;
-      
-      if (stage1Count === 15) {
-        actualStage1Size = 15; 
-      } else if (stage1Count === 30) {
-        actualStage1Size = totalStage1SubCols; 
-      }
-      
-      if (stage2Count === 5) {
-        actualStage2Size = 5; // One value per hour
-      } else if (stage2Count === 10 || stage2Count === 20) {
-        actualStage2Size = totalStage2SubCols; 
-      }
+      // All parameters now use full sub-column indexing to prevent overwrites
+      const actualStage1Size = totalStage1SubCols;
+      const actualStage2Size = totalStage2SubCols;
       
       if (x == 20 || x == 22 || x == 23 || x == 26 || x == 27 || x == 28) {
         this.parameters[x]['stage1values'] = Array(actualStage1Size).fill([]);
@@ -755,29 +743,16 @@ export class PartogramComponent implements OnInit, OnDestroy {
           if (parameterIndex != -1) {
             const parameterValue = this.parameters.find((o: any) => o.conceptName == ob.concept.display);
             let valueIndex = -1;
+            
+            // Always use full sub-column indexing to prevent encounters from overwriting each other
             if (stageNo == 1) {
-              if (parameterValue.stage1Count == 15) {
-              
-                valueIndex = stageHourNo - 1;
-              } else {
-                
-                const hourKey = `1_${stageHourNo}`;
-                const hourStartIndex = hourToIndexMap.get(hourKey) || 0;
-                valueIndex = hourStartIndex + (stageHourSecNo - 1);
-              }
+              const hourKey = `1_${stageHourNo}`;
+              const hourStartIndex = hourToIndexMap.get(hourKey) || 0;
+              valueIndex = hourStartIndex + (stageHourSecNo - 1);
             } else {
-              if (parameterValue.stage2Count == 5) {
-                
-                valueIndex = stageHourNo - 1;
-              } else if (parameterValue.stage2Count == 10) {
-              
-                valueIndex = (stageHourSecNo == 1) ? ((2 * (stageHourNo - 1)) + (stageHourSecNo - 1)) : ((stageHourSecNo == 4) ? ((2 * (stageHourNo - 1)) + (stageHourSecNo - 3)) : ((2 * (stageHourNo - 1)) + (stageHourSecNo - 2)));
-              } else {
-                
-                const hourKey = `2_${stageHourNo}`;
-                const hourStartIndex = hourToIndexMap.get(hourKey) || 0;
-                valueIndex = hourStartIndex + (stageHourSecNo - 1);
-              }
+              const hourKey = `2_${stageHourNo}`;
+              const hourStartIndex = hourToIndexMap.get(hourKey) || 0;
+              valueIndex = hourStartIndex + (stageHourSecNo - 1);
             }
 
             switch (parameterIndex) {
