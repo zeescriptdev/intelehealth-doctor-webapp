@@ -239,17 +239,57 @@ export class EpartogramComponent implements OnInit {
   ];
   timeStage1: any[] = Array(15).fill(null);
   timeStage2: any[] = Array(5).fill(null);
-  timeFullStage1: any[] = Array(30).fill(null);
-  timeFullStage2: any[] = Array(20).fill(null);
+  timeFullStage1: any[] = [];  
+  timeFullStage2: any[] = [];  
   initialsStage1: string[] = Array(15).fill(null);
   initialsStage2: string[] = Array(5).fill(null);
   encuuid1: string[] = Array(15).fill(null);
   encuuid2: string[] = Array(5).fill(null);
-  encuuid1Full: any[] = Array(30).fill(null);
-  encuuid2Full: any[] = Array(20).fill(null);
+  encuuid1Full: any[] = [];  
+  encuuid2Full: any[] = [];  
+  subColsPerHourStage1: number[] = Array(15).fill(2); 
+  subColsPerHourStage2: number[] = Array(5).fill(4);   
+  totalStage1Cols: number = 30;  
+  totalStage2Cols: number = 20;  
+  sosEncounterUUIDs: Set<string> = new Set();
   displayedColumns: string[] = ['timeAndStage', 'medicine', 'assessment', 'plan'];
   dataSource = new MatTableDataSource<any>();
   @ViewChild('assessmentPaginator') assessmentPaginator: MatPaginator;
+
+  // Helper methods for template calculations
+  getSubColArray(count: number): number[] {
+    return Array(count).fill(0);
+  }
+
+  getFullIndexForStage1(hourIndex: number): number {
+    if (hourIndex === 0) return 0;
+    let sum = 0;
+    for (let i = 0; i < hourIndex; i++) {
+      sum += this.subColsPerHourStage1[i];
+    }
+    return sum;
+  }
+
+  getFullIndexForStage2(hourIndex: number): number {
+    if (hourIndex === 0) return 0;
+    let sum = 0;
+    for (let i = 0; i < hourIndex; i++) {
+      sum += this.subColsPerHourStage2[i];
+    }
+    return sum;
+  }
+
+  getParameterValueAtIndex(paramIndex: number, stage: number, hourIndex: number, subColIndex: number): any {
+    const fullIndex = stage === 1 
+      ? this.getFullIndexForStage1(hourIndex) + subColIndex
+      : this.getFullIndexForStage2(hourIndex) + subColIndex;
+    
+    const stageValues = stage === 1 
+      ? this.parameters[paramIndex]?.stage1values 
+      : this.parameters[paramIndex]?.stage2values;
+    
+    return stageValues?.[fullIndex];
+  }
 
   visitCompleteReason: string;
   outOfTimeReason: string;
@@ -389,79 +429,227 @@ export class EpartogramComponent implements OnInit {
 
   readStageData() {
     const encs = this.visit.encounters.sort((a: any, b: any) => new Date(a.encounterDatetime).getTime() - new Date(b.encounterDatetime).getTime());
+    
+    this.sosEncounterUUIDs.clear();
+    
+    const maxSubColPerHour = new Map<string, number>();
+    
+    for (let hour = 1; hour <= 15; hour++) {
+      maxSubColPerHour.set(`1_${hour}`, 2)
+    }
+    for (let hour = 1; hour <= 5; hour++) {
+      maxSubColPerHour.set(`2_${hour}`, 4)
+    }
+    
+    const encounterSubColMap = new Map<string, { stageNo: number, stageHourNo: number, stageHourSecNo: number }>();
+    const sosEncounterMap = new Map<string, { stageNo: number, stageHourNo: number, stageHourSecNo: number }>();
+    
+    const nextSubColPerHour = new Map<string, number>();
+    
+    for (let hour = 1; hour <= 15; hour++) {
+      nextSubColPerHour.set(`1_${hour}`, 1);
+    }
+    for (let hour = 1; hour <= 5; hour++) {
+      nextSubColPerHour.set(`2_${hour}`, 1);
+    }
+    
     for (const enc of encs) {
-      if (enc.display.includes('Stage')) {
+      let stageNo: number, stageHourNo: number, stageHourSecNo: number;
+      
+      if (enc.encounterType.display === 'LCG_SOS') {
+        const sosStageHourObs = enc.obs.find((o: any) => o.concept.display === 'SOS_Stage_Hour');
+        if (sosStageHourObs) {
+          const sosValue = sosStageHourObs.value;
+          const match = sosValue.match(/Stage(\d+)_Hour(\d+)_SOS(\d+)/);
+          if (match) {
+            stageNo = Number.parseInt(match[1]);
+            stageHourNo = Number.parseInt(match[2]);
+            const hourKey = `${stageNo}_${stageHourNo}`;
+            
+            stageHourSecNo = nextSubColPerHour.get(hourKey)!;
+            nextSubColPerHour.set(hourKey, stageHourSecNo + 1);
+            
+            encounterSubColMap.set(enc.uuid, { stageNo, stageHourNo, stageHourSecNo });
+            sosEncounterMap.set(enc.uuid, { stageNo, stageHourNo, stageHourSecNo });
+            
+            const currentMax = maxSubColPerHour.get(hourKey) || 0;
+            if (stageHourSecNo > currentMax) {
+              maxSubColPerHour.set(hourKey, stageHourSecNo);
+            }
+            
+            this.sosEncounterUUIDs.add(enc.uuid);
+          }
+        }
+      } else if (enc.display.includes('Stage')) {
         const indices = enc.encounterType.display.replace('Stage', '').replace('Hour', '').split('_').map((val: any) => +val);
-        const stageNo = indices[0];
-        const stageHourNo = indices[1];
-        const stageHourSecNo = indices[2];
+        stageNo = indices[0];
+        stageHourNo = indices[1];
 
-        // Get timing and initials
-        if (stageNo == 1 && stageHourNo <= 15) {
+        const hourKey = `${stageNo}_${stageHourNo}`;
+        
+        stageHourSecNo = nextSubColPerHour.get(hourKey)!;
+        nextSubColPerHour.set(hourKey, stageHourSecNo + 1);
+        
+        encounterSubColMap.set(enc.uuid, { stageNo, stageHourNo, stageHourSecNo });
+        
+        const currentMax = maxSubColPerHour.get(hourKey) || 0;
+        if (stageHourSecNo > currentMax) {
+          maxSubColPerHour.set(hourKey, stageHourSecNo);
+        }
+      }
+    }
+    
+    let totalStage1SubCols = 0;
+    let totalStage2SubCols = 0;
+    
+    for (let hour = 1; hour <= 15; hour++) {
+      const key = `1_${hour}`;
+      const subCols = maxSubColPerHour.get(key); 
+      this.subColsPerHourStage1[hour - 1] = subCols; 
+      totalStage1SubCols += subCols;
+    }
+    
+    for (let hour = 1; hour <= 5; hour++) {
+      const key = `2_${hour}`;
+      const subCols = maxSubColPerHour.get(key);  
+      this.subColsPerHourStage2[hour - 1] = subCols; 
+      totalStage2SubCols += subCols;
+    }
+    
+    this.totalStage1Cols = totalStage1SubCols;
+    this.totalStage2Cols = totalStage2SubCols;
+    
+    this.timeFullStage1 = Array(totalStage1SubCols).fill(null);
+    this.timeFullStage2 = Array(totalStage2SubCols).fill(null);
+    this.encuuid1Full = Array(totalStage1SubCols).fill(null);
+    this.encuuid2Full = Array(totalStage2SubCols).fill(null);
+    
+    for (let x = 0; x < this.parameters.length; x++) {
+      const stage1Count = this.parameters[x].stage1Count;
+      const stage2Count = this.parameters[x].stage2Count;
+      
+      const actualStage1Size = totalStage1SubCols;
+      const actualStage2Size = totalStage2SubCols;
+      
+      if (x == 20 || x == 22 || x == 23 || x == 26 || x == 27 || x == 28) {
+        this.parameters[x]['stage1values'] = Array(actualStage1Size).fill([]);
+        this.parameters[x]['stage2values'] = Array(actualStage2Size).fill([]);
+      } else {
+        this.parameters[x]['stage1values'] = Array(actualStage1Size).fill(null);
+        this.parameters[x]['stage2values'] = Array(actualStage2Size).fill(null);
+      }
+    }
+    
+    const hourToIndexMap = new Map<string, number>();
+    let currentIndexStage1 = 0;
+    let currentIndexStage2 = 0;
+    
+    for (let hour = 1; hour <= 15; hour++) {
+      const key = `1_${hour}`;
+      hourToIndexMap.set(key, currentIndexStage1);
+      const subCols = maxSubColPerHour.get(key); 
+      currentIndexStage1 += subCols;
+    }
+    
+    for (let hour = 1; hour <= 5; hour++) {
+      const key = `2_${hour}`;
+      hourToIndexMap.set(key, currentIndexStage2);
+      const subCols = maxSubColPerHour.get(key);  
+      currentIndexStage2 += subCols;
+    }
+    
+    for (const enc of encs) {
+      let stageNo: number, stageHourNo: number, stageHourSecNo: number;
+      
+      if (encounterSubColMap.has(enc.uuid)) {
+        const encInfo = encounterSubColMap.get(enc.uuid);
+        stageNo = encInfo.stageNo;
+        stageHourNo = encInfo.stageHourNo;
+        stageHourSecNo = encInfo.stageHourSecNo;
+      } 
+      else {
+        continue;
+      }
+      
+      if (enc.display.includes('Stage')) {
+        // saveToStorage('patientVisitProvider', enc.encounterProviders[0]);
+      }
 
-          if (stageNo > this.stage) this.stage = stageNo;
-          if (!this.timeStage1[stageHourNo - 1]) this.timeStage1[stageHourNo - 1] = enc.encounterDatetime;
-          this.timeFullStage1[((2 * (stageHourNo - 1)) + (stageHourSecNo - 1))] = enc.encounterDatetime;
+      if (stageNo == 1 && stageHourNo <= 15) {
+        if (stageNo > this.stage) this.stage = stageNo;
+        if (!this.timeStage1[stageHourNo - 1]) this.timeStage1[stageHourNo - 1] = enc.encounterDatetime;
+        
+        const hourKey = `1_${stageHourNo}`;
+        const hourStartIndex = hourToIndexMap.get(hourKey) || 0;
+        const fullIndex = hourStartIndex + (stageHourSecNo - 1);
+        
+        this.timeFullStage1[fullIndex] = enc.encounterDatetime;
+        this.encuuid1Full[fullIndex] = { enc_time: enc.encounterDatetime, enc_uuid: enc.uuid, stageNo, stageHourNo, stageHourSecNo };
+        
+        if (enc.display.includes('Stage')) {
           this.initialsStage1[stageHourNo - 1] = this.getInitials(enc.encounterProviders[0].provider.person.display);
           if (!this.encuuid1[stageHourNo - 1]) this.encuuid1[stageHourNo - 1] = enc.uuid;
-          this.encuuid1Full[((2 * (stageHourNo - 1)) + (stageHourSecNo - 1))] = { enc_time: enc.encounterDatetime, enc_uuid: enc.uuid, stageNo, stageHourNo, stageHourSecNo };
-
-        } else if (stageNo == 2 && stageHourNo <= 5) {
-
-          if (stageNo > this.stage) this.stage = stageNo;
-          if (!this.timeStage2[stageHourNo - 1]) this.timeStage2[stageHourNo - 1] = enc.encounterDatetime;
-          this.timeFullStage2[((4 * (stageHourNo - 1)) + (stageHourSecNo - 1))] = enc.encounterDatetime;
-          this.initialsStage2[stageHourNo - 1] = this.getInitials(enc.encounterProviders[0].provider.person.display);
-          if (!this.encuuid2[stageHourNo - 1]) this.encuuid2[stageHourNo - 1] = enc.uuid;
-          this.encuuid2Full[((4 * (stageHourNo - 1)) + (stageHourSecNo - 1))] = { enc_time: enc.encounterDatetime, enc_uuid: enc.uuid, stageNo, stageHourNo, stageHourSecNo };
-        } else {
-          continue;
         }
 
-        // Read observations
-        const observations = enc.obs.sort((a: any, b: any) => new Date(a.obsDatetime).getTime() - new Date(b.obsDatetime).getTime());
-        if (observations.length) {
-          for (const ob of observations) {
-            const parameterIndex = this.parameters.findIndex((o: any) => o.conceptName == ob.concept.display);
-            if (parameterIndex != -1) {
-              const parameterValue = this.parameters.find((o: any) => o.conceptName == ob.concept.display);
-              let valueIndex = -1;
-              if (stageNo == 1) {
-                (parameterValue.stage1Count == 15) ? (valueIndex = stageHourNo - 1) : (valueIndex = ((2 * (stageHourNo - 1)) + (stageHourSecNo - 1)));
-              } else {
-                switch (parameterValue.stage2Count) {
-                  case 5:
-                    valueIndex = stageHourNo - 1;
-                    break;
-                  case 10:
-                    valueIndex = (stageHourSecNo == 1) ? ((2 * (stageHourNo - 1)) + (stageHourSecNo - 1)) : ((stageHourSecNo == 4) ? ((2 * (stageHourNo - 1)) + (stageHourSecNo - 3)) : ((2 * (stageHourNo - 1)) + (stageHourSecNo - 2)));
-                    break;
-                  default:
-                    valueIndex = ((4 * (stageHourNo - 1)) + (stageHourSecNo - 1));
-                    break;
-                }
-              }
+      } else if (stageNo == 2 && stageHourNo <= 5) {
+        if (stageNo > this.stage) this.stage = stageNo;
+        if (!this.timeStage2[stageHourNo - 1]) this.timeStage2[stageHourNo - 1] = enc.encounterDatetime;
+        
+        const hourKey = `2_${stageHourNo}`;
+        const hourStartIndex = hourToIndexMap.get(hourKey) || 0;
+        const fullIndex = hourStartIndex + (stageHourSecNo - 1);
+        
+        this.timeFullStage2[fullIndex] = enc.encounterDatetime;
+        this.encuuid2Full[fullIndex] = { enc_time: enc.encounterDatetime, enc_uuid: enc.uuid, stageNo, stageHourNo, stageHourSecNo };
+        
+        if (enc.display.includes('Stage')) {
+          this.initialsStage2[stageHourNo - 1] = this.getInitials(enc.encounterProviders[0].provider.person.display);
+          if (!this.encuuid2[stageHourNo - 1]) this.encuuid2[stageHourNo - 1] = enc.uuid;
+        }
+      } else {
+        continue;
+      }
 
-              switch (parameterIndex) {
-                case 20:
-                case 22:
-                case 23:
-                case 26:
-                  this.parameters[parameterIndex][`stage${stageNo}values`][valueIndex] = [...this.parameters[parameterIndex][`stage${stageNo}values`][valueIndex], { value: ob.value, uuid: ob.uuid, creator: ob.creator, obsDatetime: ob.obsDatetime, initial: this.getInitials(ob.creator?.person.display) }];
-                  break;
-                case 27:
-                case 28:
-                  this.parameters[parameterIndex][`stage${stageNo}values`][valueIndex] = [...this.parameters[parameterIndex][`stage${stageNo}values`][valueIndex], { value: ob.value.startsWith("{") ? JSON.parse(ob.value) : ob.value, uuid: ob.uuid, creator: ob.creator, obsDatetime: ob.obsDatetime, initial: this.getInitials(ob.creator?.person.display) }];
-                  break;
-                case 19:
-                case 21:
-                  // this.parameters[parameterIndex][`stage${stageNo}values`][valueIndex] = [...this.parameters[parameterIndex][`stage${stageNo}values`][valueIndex], { value: ob.value.startsWith("{") ? JSON.parse(ob.value) : ob.value, uuid: ob.uuid, creator: ob.creator, obsDatetime: ob.obsDatetime, initial: this.getInitials(ob.creator?.person.display) }];
-                  this.parameters[parameterIndex][`stage${stageNo}values`][valueIndex] = { value: ob.value.startsWith("{") ? JSON.parse(ob.value) : ob.value, uuid: ob.uuid, creator: ob.creator, obsDatetime: ob.obsDatetime, initial: this.getInitials(ob.creator?.person.display) };
-                  break;
-                default:
-                  this.parameters[parameterIndex][`stage${stageNo}values`][valueIndex] = (parameterValue.alert) ? { value: ob.value, comment: ob.comment, uuid: ob.uuid, creator: ob.creator } : { value: ob.value, uuid: ob.uuid, creator: ob.creator };
-                  break;
-              }
+      const observations = enc.obs.sort((a: any, b: any) => new Date(a.obsDatetime).getTime() - new Date(b.obsDatetime).getTime());
+      if (observations.length) {
+        for (const ob of observations) {
+          if (ob.concept.display === 'SOS_Stage_Hour') {
+            continue;
+          }
+          
+          const parameterIndex = this.parameters.findIndex((o: any) => o.conceptName == ob.concept.display);
+          if (parameterIndex != -1) {
+            const parameterValue = this.parameters.find((o: any) => o.conceptName == ob.concept.display);
+            let valueIndex = -1;
+            
+            if (stageNo == 1) {
+              const hourKey = `1_${stageHourNo}`;
+              const hourStartIndex = hourToIndexMap.get(hourKey) || 0;
+              valueIndex = hourStartIndex + (stageHourSecNo - 1);
+            } else {
+              const hourKey = `2_${stageHourNo}`;
+              const hourStartIndex = hourToIndexMap.get(hourKey) || 0;
+              valueIndex = hourStartIndex + (stageHourSecNo - 1);
+            }
+
+            switch (parameterIndex) {
+              case 20:
+              case 22:
+              case 23:
+              case 26:
+                this.parameters[parameterIndex][`stage${stageNo}values`][valueIndex] = [...this.parameters[parameterIndex][`stage${stageNo}values`][valueIndex], { value: ob.value, uuid: ob.uuid, creator: ob.creator, obsDatetime: ob.obsDatetime, initial: this.getInitials(ob.creator?.person.display) }];
+                break;
+              case 27:
+              case 28:
+                this.parameters[parameterIndex][`stage${stageNo}values`][valueIndex] = [...this.parameters[parameterIndex][`stage${stageNo}values`][valueIndex], { value: ob.value.startsWith("{") ? JSON.parse(ob.value) : ob.value, uuid: ob.uuid, creator: ob.creator, obsDatetime: ob.obsDatetime, initial: this.getInitials(ob.creator?.person.display) }];
+                break;
+              case 19:
+              case 21:
+                this.parameters[parameterIndex][`stage${stageNo}values`][valueIndex] = { value: ob.value.startsWith("{") ? JSON.parse(ob.value) : ob.value, uuid: ob.uuid, creator: ob.creator, obsDatetime: ob.obsDatetime, initial: this.getInitials(ob.creator?.person.display) };
+                break;
+              default:
+                this.parameters[parameterIndex][`stage${stageNo}values`][valueIndex] = (parameterValue.alert) ? { value: ob.value, comment: ob.comment, uuid: ob.uuid, creator: ob.creator } : { value: ob.value, uuid: ob.uuid, creator: ob.creator };
+                break;
             }
           }
         }
