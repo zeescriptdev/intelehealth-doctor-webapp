@@ -202,7 +202,7 @@ export class VisitSummaryComponent implements OnInit, OnDestroy, AfterViewInit {
   ddxCompRef: any;
   furtherQuestionsList: string[] = [];
   showAndHideUiElement: boolean = true;
-
+  hasFollowUp:boolean=false;
   async lazyLoadDDx() {
     setTimeout(async () => {
       if (!this.lazyLoadDDxContainer) {
@@ -903,6 +903,7 @@ export class VisitSummaryComponent implements OnInit, OnDestroy, AfterViewInit {
                 } else {
                   const obj1: PatientHistoryModel = {};
                   obj1.title = splitByBr[0].replace('</b>:', '');
+                  this.hasFollowUp = obj1.title && obj1.title.toLowerCase().includes('follow up');
                   obj1.data = [];
                   for (let k = 1; k < splitByBr.length; k++) {
                     if (splitByBr[k].trim() && splitByBr[k].trim().length > 1) {
@@ -915,7 +916,7 @@ export class VisitSummaryComponent implements OnInit, OnDestroy, AfterViewInit {
                         //     value = `<span class="light-green">${value}</span>`;
                         //   } else {
                         //     value = `<span class="red-color">${value}</span>`;
-                        //   }
+                        //   }  
                         // } else {
                         //   if(this.checkTestNameValues(diagnostics?.testNames, value)) {
                         //     value = `<span class="light-green">${value}</span>`;
@@ -2384,11 +2385,10 @@ export class VisitSummaryComponent implements OnInit, OnDestroy, AfterViewInit {
         const consultationDuration = this.consultationStartTime
           ? (new Date().getTime() - this.consultationStartTime.getTime()) / 1000 // duration in seconds
           : null;
-        // Check if visit is a follow-up visit
         const isFollowUpVisit = this.visit?.demarcation === visitTypes.FOLLOW_UP;
-        // Timer should NOT show for follow-up visits
-        const isRapidCompletion = this.hasAILLMEnabled && !isFollowUpVisit && consultationDuration !== null && consultationDuration < 60; // less than 1 minute
 
+        const isRapidCompletion = this.hasAILLMEnabled && !this.hasFollowUp && !isFollowUpVisit && consultationDuration !== null && consultationDuration < 60; // less than 1 minute
+console.log("isRapidCompletion===",isRapidCompletion);
         //Open Share Prescription Confirmation Modal
         this.coreService.openSharePrescriptionConfirmModal({ isRapidCompletion }).subscribe((res: boolean) => {
           if (res) {
