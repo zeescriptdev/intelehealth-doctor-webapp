@@ -221,6 +221,12 @@ export class VisitSummaryComponent implements OnInit, OnDestroy, AfterViewInit {
         this.ddxCompRef.instance.patientInteractionNotesForm = this.patientInteractionNotesForm;
         this.ddxCompRef.instance.hasAILLMEnabled = this.hasAILLMEnabled;
 
+        // this.ddxCompRef.instance.diagnosisReceived.subscribe((digData:any)=>{
+        //   if(this.visitNotePresent && !this.visitEnded && this.isVisitNoteProvider && !this.visitCompleted){
+        //     this.SaveAIDiagosisHistory(this.visit,digData);
+        //   }
+        // })
+
         // Subscribe to diagnosis saved event
         this.ddxCompRef.instance.diagnosisSaved.subscribe((diagnoses: any[]) => {
           const lastDiagnosis = diagnoses[diagnoses.length - 1];
@@ -3787,6 +3793,104 @@ console.log("isRapidCompletion===",isRapidCompletion);
   onFurtherQuestionsReceived(questions: string[]) {
     this.furtherQuestionsList = questions;
   }
+
+  // SaveAIDiagosisHistory(visit:any, diagnosisData:any){
+  //   let checkAIDiagnosisEncounter = this.visitSummaryService.checkIfEncounterExists(visit.encounters, visitTypes.AI_DIAGNOSIS_SUPPORT);
+  //   if(checkAIDiagnosisEncounter){
+  //     let checkLLMRegenerationEncounter = this.visitSummaryService.checkIfEncounterExists(visit.encounters, visitTypes.LLM_REGENERATION);
+  //     if(checkLLMRegenerationEncounter){
+  //       this.deleteExistingLLMObs(checkLLMRegenerationEncounter.obs).subscribe(res=>{
+  //         this.createLLMObs(checkLLMRegenerationEncounter.uuid,diagnosisData,true).subscribe();
+  //       })
+  //     } else {
+  //       this.createLLMEncounter(true).subscribe(res=>{
+  //         if(res){
+  //           this.createLLMObs(res.uuid,diagnosisData,true).subscribe();
+  //         }
+  //       })
+  //     }
+  //   } else {
+  //     this.createLLMEncounter().subscribe(res=>{
+  //       if(res){
+  //         this.createLLMObs(res.uuid,diagnosisData).subscribe();
+  //       }
+  //     })
+  //   }
+  // }
+
+  // deleteExistingLLMObs(obs: ObsModel[]):Observable<any>{
+  //   let deleteAllObs = obs.map(o=>this.diagnosisService.deleteObs(o.uuid,true))
+  //   return forkJoin(deleteAllObs)
+  // }
+
+  // createLLMEncounter(revised:boolean = false):Observable<any>{
+  //   const json = {
+  //     patient: this.visit.patient.uuid,
+  //     encounterType: revised ? visitEncounters.llmRegeneration : visitEncounters.aiDiagnosis, // Visit Note encounter
+  //     encounterProviders: [
+  //       {
+  //         provider: this.provider.uuid,
+  //         encounterRole: visitEncounters.doctorProviderId, // Doctor encounter role
+  //       },
+  //     ],
+  //     visit: this.visit.uuid,
+  //     encounterDatetime: new Date(Date.now() - 30000),
+  //   };
+  //   return this.encounterService.postEncounter(json);
+  // }
+
+  // createLLMObs(encounterUUID:string, diagnosisData:any, revised: boolean = false):Observable<any>{
+  //     let diagnosisObs = diagnosisData.map((diagnosisAIData:any,rank:number)=>{
+  //       let diagnosisRecord = {
+  //         concept: conceptIds.conceptLLM,
+  //         person: this.visit.patient.uuid,
+  //         obsDatetime: new Date(),
+  //         encounter: encounterUUID,
+  //         groupMembers: [
+  //           {
+  //             concept: conceptIds.conceptDiagnosisName,
+  //             value: diagnosisAIData.diagnosis,
+  //             obsDatetime: new Date(),
+  //             person: this.visit.patient.uuid,
+              
+  //           },
+  //           {
+  //             concept: conceptIds.conceptDiagnosisLikelihood,
+  //             value: diagnosisAIData.likelihood + " likely",
+  //             obsDatetime: new Date(),
+  //             person: this.visit.patient.uuid,
+  //           },
+  //           {
+  //             concept: conceptIds.conceptRationale,
+  //             value: diagnosisAIData.summarised_rationale.map(obj=>Object.values(obj).pop()).join(":"),
+  //             obsDatetime: new Date(),
+  //             person: this.visit.patient.uuid,
+  //           },
+  //           {
+  //             concept: conceptIds.conceptRank,
+  //             value: (rank+1),
+  //             obsDatetime: new Date(),
+  //             person: this.visit.patient.uuid,
+  //           },
+  //           {
+  //             concept: conceptIds.conceptVersion,
+  //             value: revised ? 'revised' : 'initial',
+  //             obsDatetime: new Date(),
+  //             person: this.visit.patient.uuid,
+  //           },
+  //           {
+  //             concept: conceptIds.conceptWasRegenerated,
+  //             value: revised,
+  //             obsDatetime: new Date(),
+  //             person: this.visit.patient.uuid,
+  //           }
+  //         ]
+  //       }
+
+  //       return this.encounterService.postObs(diagnosisRecord, true)
+  //     })
+  //     return forkJoin(diagnosisObs)
+  // }
 
   /**
   * Send selected diagnoses to manual DDx API
