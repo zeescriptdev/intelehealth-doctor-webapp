@@ -2377,7 +2377,7 @@ export class VisitSummaryComponent implements OnInit, OnDestroy, AfterViewInit {
       this.toastr.warning(this.translateService.instant('Diagnosis not added'), this.translateService.instant('Diagnosis Required'));
       return false;
     }
-
+console.log("has follow up==",this.hasFollowUp);
     // Skip follow-up validation for Namco doctors
     if (this.showAndHideUiElement && this.isFeatureAvailable('visitFollowUp') && !this.followUpForm.value.wantFollowUp && !this.hasFollowUp) {
       this.toastr.warning(this.translateService.instant('Follow-up not added'), this.translateService.instant('Follow-up Required'));
