@@ -2379,7 +2379,7 @@ export class VisitSummaryComponent implements OnInit, OnDestroy, AfterViewInit {
     }
 
     // Skip follow-up validation for Namco doctors
-    if (this.showAndHideUiElement && this.isFeatureAvailable('visitFollowUp') && !this.followUpForm.value.wantFollowUp) {
+    if (this.showAndHideUiElement && this.isFeatureAvailable('visitFollowUp') && !this.followUpForm.value.wantFollowUp && !this.hasFollowUp) {
       this.toastr.warning(this.translateService.instant('Follow-up not added'), this.translateService.instant('Follow-up Required'));
       return false;
     }
@@ -2394,7 +2394,6 @@ export class VisitSummaryComponent implements OnInit, OnDestroy, AfterViewInit {
         const isFollowUpVisit = this.visit?.demarcation === visitTypes.FOLLOW_UP;
 
         const isRapidCompletion = this.hasAILLMEnabled && !this.hasFollowUp && !isFollowUpVisit && consultationDuration !== null && consultationDuration < 60; // less than 1 minute
-console.log("isRapidCompletion===",isRapidCompletion);
         //Open Share Prescription Confirmation Modal
         this.coreService.openSharePrescriptionConfirmModal({ isRapidCompletion }).subscribe((res: boolean) => {
           if (res) {
