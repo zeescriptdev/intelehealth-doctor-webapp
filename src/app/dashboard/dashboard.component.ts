@@ -306,6 +306,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
     let dateTimeOfBirth = null;
     let provider = null;
     let seen = false;
+    let score = 0;
 
     if (visit?.attributes) {
       const visitReadAttr = visit.attributes.find(a => a.attribute_type?.name == "Visit Read" && !a.voided);
@@ -313,6 +314,11 @@ export class DashboardComponent implements OnInit, OnDestroy {
         if (visitReadAttr.value_reference.includes(this.user?.uuid.split('-')[0])) {
           seen = true;
         }
+      }
+
+      const visitRiskAttr = visit.attributes.find(a => a.attribute_type?.name == "Visit Risk" && !a.voided);
+      if (visitRiskAttr && visitRiskAttr.value_reference) {
+        score = parseFloat(visitRiskAttr.value_reference) || 0;
       }
     }
 
@@ -399,7 +405,8 @@ export class DashboardComponent implements OnInit, OnDestroy {
       motherDeceasedReason,
       dateTimeOfBirth,
       provider,
-      seen
+      seen,
+      score
     }
   }
 

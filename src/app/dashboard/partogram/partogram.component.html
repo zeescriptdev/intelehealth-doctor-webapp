@@ -131,8 +131,8 @@
                       </ng-container>
                     </tr>
                     <tr *ngIf="visitCompleted">
-                      <td colspan="33" class="divider2"></td>
-                      <td colspan="20" class="divider2">
+                      <td [attr.colspan]="3 + totalStage1Cols" class="divider2"></td>
+                      <td [attr.colspan]="totalStage2Cols" class="divider2">
                         <div class="birth-outcome-con">
                           <ng-container *ngIf="visitCompleteReason != 'Out Of Time' && visitCompleteReason != 'Other' && visitCompleteReason != 'Newborn'">
                             <div style="white-space: pre-wrap;">
@@ -261,7 +261,7 @@
                         </td>
                       </ng-container>
                       <ng-container *ngFor="let item of parameters[6].stage2values;">
-                        <td colspan="2">
+                        <td>
                           <div class="value-item" *ngIf="item" [ngClass]="{ 'red': item?.comment == 'R', 'yellow': item?.comment == 'Y'}">
                             {{item?.value}}
                           </div>
@@ -279,7 +279,7 @@
                         </td>
                       </ng-container>
                       <ng-container *ngFor="let item of parameters[7].stage2values;">
-                        <td colspan="2">
+                        <td>
                           <div class="value-item" *ngIf="item" [ngClass]="{ 'red': item?.comment == 'R', 'yellow': item?.comment == 'Y'}">
                             {{item?.value}}
                           </div>
@@ -297,7 +297,7 @@
                         </td>
                       </ng-container>
                       <ng-container *ngFor="let item of parameters[8].stage2values;">
-                        <td colspan="2">
+                        <td>
                           <div class="value-item" *ngIf="item" [ngClass]="{ 'red': item?.comment == 'R', 'yellow': item?.comment == 'Y'}">
                             {{item?.value}}
                           </div>
@@ -315,7 +315,7 @@
                         </td>
                       </ng-container>
                       <ng-container *ngFor="let item of parameters[9].stage2values;">
-                        <td colspan="2">
+                        <td>
                           <div class="value-item" *ngIf="item" [ngClass]="{ 'red': item?.comment == 'R', 'yellow': item?.comment == 'Y'}">
                             {{item?.value}}
                           </div>
@@ -337,7 +337,7 @@
                         </td>
                       </ng-container>
                       <ng-container *ngFor="let item of parameters[10].stage2values;">
-                        <td colspan="2">
+                        <td>
                           <div class="value-item" *ngIf="item" [ngClass]="{ 'red': item?.comment == 'R', 'yellow': item?.comment == 'Y'}">
                             {{item?.value}}
                           </div>
@@ -355,7 +355,7 @@
                         </td>
                       </ng-container>
                       <ng-container *ngFor="let item of parameters[11].stage2values;">
-                        <td colspan="2">
+                        <td>
                           <div class="value-item" *ngIf="item" [ngClass]="{ 'red': item?.comment == 'R', 'yellow': item?.comment == 'Y'}">
                             {{item?.value}}
                           </div>
@@ -373,7 +373,7 @@
                         </td>
                       </ng-container>
                       <ng-container *ngFor="let item of parameters[12].stage2values;">
-                        <td colspan="2">
+                        <td>
                           <div class="value-item" *ngIf="item" [ngClass]="{ 'red': item?.comment == 'R', 'yellow': item?.comment == 'Y'}">
                             {{item?.value}}
                           </div>
@@ -391,7 +391,7 @@
                         </td>
                       </ng-container>
                       <ng-container *ngFor="let item of parameters[13].stage2values;">
-                        <td colspan="2">
+                        <td>
                           <div class="value-item" *ngIf="item" [ngClass]="{ 'red': item?.comment == 'R', 'yellow': item?.comment == 'Y'}">
                             {{item?.value}}
                           </div>
@@ -409,7 +409,7 @@
                         </td>
                       </ng-container>
                       <ng-container *ngFor="let item of parameters[14].stage2values;">
-                        <td colspan="2">
+                        <td>
                           <div class="value-item" *ngIf="item" [ngClass]="{ 'red': item?.comment == 'R', 'yellow': item?.comment == 'Y'}">
                             {{item?.value}}
                           </div>
@@ -427,7 +427,7 @@
                         </td>
                       </ng-container>
                       <ng-container *ngFor="let item of parameters[25].stage2values;">
-                        <td colspan="2">
+                        <td>
                           <div class="value-item" *ngIf="item" [ngClass]="{ 'red': item?.comment == 'R', 'yellow': item?.comment == 'Y'}">
                             {{item?.value}}
                           </div>
