@@ -13,7 +13,10 @@ declare const $: any;
 export class PwaService {
 
   private promptEvent;
-
+ private skipRoutes: string[] = [
+    '/r', // ncd report
+   
+  ];
   constructor(private platform: Platform, private bottomSheet: MatBottomSheet, private router: Router) { }
 
   /**
@@ -21,19 +24,22 @@ export class PwaService {
   * @return {void}
   */
   public initPwaPrompt() {
-    if (this.platform.ANDROID || this.platform.isBrowser) {
-      window.addEventListener('beforeinstallprompt', (event) => {
-        event.preventDefault();
-        this.promptEvent = event;
-        this.openPromptComponent('android');
-      });
+    if(!this.skipRoutes.includes(this.router.url)){
+      if (this.platform.ANDROID || this.platform.isBrowser) {
+          window.addEventListener('beforeinstallprompt', (event) => {
+            event.preventDefault();
+            this.promptEvent = event;
+            this.openPromptComponent('android');
+          });
+        }
+        if (this.platform.IOS) {
+          const isInStandaloneMode = ('standalone' in window.navigator) && (window.navigator['standalone']);
+          if (!isInStandaloneMode) {
+            this.openPromptComponent('ios');
+          }
+        }
     }
-    if (this.platform.IOS) {
-      const isInStandaloneMode = ('standalone' in window.navigator) && (window.navigator['standalone']);
-      if (!isInStandaloneMode) {
-        this.openPromptComponent('ios');
-      }
-    }
+
   }
 
   /**
