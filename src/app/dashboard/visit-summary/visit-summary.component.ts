@@ -2379,7 +2379,7 @@ export class VisitSummaryComponent implements OnInit, OnDestroy, AfterViewInit {
     }
 console.log("has follow up==",this.hasFollowUp);
     // Skip follow-up validation for Namco doctors
-    if (this.showAndHideUiElement && this.isFeatureAvailable('visitFollowUp') && !this.followUpForm.value.wantFollowUp && !this.hasFollowUp) {
+    if (this.showAndHideUiElement && this.isFeatureAvailable('visitFollowUp') && !this.followUpForm.value.wantFollowUp && this.visit?.demarcation !== visitTypes.FOLLOW_UP) {
       this.toastr.warning(this.translateService.instant('Follow-up not added'), this.translateService.instant('Follow-up Required'));
       return false;
     }
