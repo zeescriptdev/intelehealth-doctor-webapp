@@ -25,9 +25,17 @@ export class PwaService {
   * Init PWA prompt
   * @return {void}
   */
+ private isSkipRoute(): boolean {
+  const currentUrl = this.router.url.split('?')[0];
+  return this.skipRoutes.some(route =>
+    currentUrl.startsWith(route)
+  );
+}
   public initPwaPrompt() {
-    if(!this.skipRoutes.includes(this.router.url)){
-      if (this.platform.ANDROID || this.platform.isBrowser) {
+     if (this.isSkipRoute()) {
+        return; 
+      }  
+    if (this.platform.ANDROID || this.platform.isBrowser) {
           window.addEventListener('beforeinstallprompt', (event) => {
             event.preventDefault();
             this.promptEvent = event;
@@ -40,7 +48,7 @@ export class PwaService {
             this.openPromptComponent('ios');
           
           }}
-        }
+        
     
   }
 
@@ -53,9 +61,9 @@ export class PwaService {
     timer(3000)
       .pipe(take(1))
       .subscribe(() => {
-        if (this.skipRoutes.includes(this.router.url)) {
-          return; 
-        }
+        if (this.isSkipRoute()) {
+        return;
+      }
           const activeElement = document.activeElement;
           if (!activeElement.id) {
             activeElement.setAttribute('id', 'XXX');
