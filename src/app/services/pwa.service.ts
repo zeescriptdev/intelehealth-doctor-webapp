@@ -15,6 +15,8 @@ export class PwaService {
   private promptEvent;
  private skipRoutes: string[] = [
     '/r', // ncd report
+   '/i/',
+   '/verify-otp',
    
   ];
   constructor(private platform: Platform, private bottomSheet: MatBottomSheet, private router: Router) { }
@@ -36,10 +38,10 @@ export class PwaService {
           const isInStandaloneMode = ('standalone' in window.navigator) && (window.navigator['standalone']);
           if (!isInStandaloneMode) {
             this.openPromptComponent('ios');
-          }
+          
+          }}
         }
-    }
-
+    
   }
 
   /**
@@ -51,7 +53,9 @@ export class PwaService {
     timer(3000)
       .pipe(take(1))
       .subscribe(() => {
-        if (!(this.router.url.includes('/i/') || this.router.url.includes('/verify-otp'))) {
+        if (this.skipRoutes.includes(this.router.url)) {
+          return; 
+        }
           const activeElement = document.activeElement;
           if (!activeElement.id) {
             activeElement.setAttribute('id', 'XXX');
@@ -63,7 +67,6 @@ export class PwaService {
               activeElement.removeAttribute('id');
             }
           });
-        }
       });
   }
 }
