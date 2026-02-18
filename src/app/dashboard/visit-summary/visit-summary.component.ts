@@ -622,6 +622,7 @@ export class VisitSummaryComponent implements OnInit, OnDestroy, AfterViewInit {
       this.searchDiagnosis(searchTextValue);
     });
     this.showAndHideUiElements();
+    console.log("showAndHideUiElement==>>>>????", );
   }
 
   /**
