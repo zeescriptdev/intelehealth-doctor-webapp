@@ -25,7 +25,7 @@ jobs:
           ssh-keyscan -H ${{ secrets.NASSTAGINGNEW_HOST }} >> ~/.ssh/known_hosts
           
           # Execute the download
-          scp -i ~/.ssh/id_rsa ${{ secrets.REMOTE_USER }}@${{ secrets.DEMOAI_HOST }}:/home/ubuntu/deploy/webapp/.env .env
+          scp -i ~/.ssh/id_rsa ${{ secrets.REMOTE_USER }}@${{ secrets.NASSTAGINGNEW_HOST }}:/home/ubuntu/deploy/webapp/.env .env
       # STEP 2: Build the Docker image (Dockerfile will now find the .env)
       - name: Build and Save Docker Image
         run: |
