@@ -622,7 +622,6 @@ export class VisitSummaryComponent implements OnInit, OnDestroy, AfterViewInit {
       this.searchDiagnosis(searchTextValue);
     });
     this.showAndHideUiElements();
-    console.log("showAndHideUiElement==>>>>????", );
   }
 
   /**
@@ -1409,11 +1408,9 @@ export class VisitSummaryComponent implements OnInit, OnDestroy, AfterViewInit {
     const caller = doctorPhoneNumber ? doctorPhoneNumber : environment.doctorPhoneNumber;
     this.providerService.kaleyraClick2Call(caller, this.hwPhoneNo, custom, '0', notes).subscribe({
       next: (data) => {
-        console.log('Kaleyra call initiated successfully:', data);
         this.toastr.success('Kaleyra call initiated successfully. You will be connected to the health worker.');
       },
       error: (error) => {
-        console.error('Error initiating Kaleyra call:', error);
         this.toastr.error('Failed to initiate Kaleyra call. Please try again.');
       }
     });
