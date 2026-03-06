@@ -80,10 +80,11 @@
                         </div>
                         <div class="form-group col-md-2">
                           <label for="dosage">Dosage *</label>
-                          <input type="number" class="form-control" placeholder="Enter dosage" formControlName="dosage" [readonly]="!fcm.value.canEdit">
+                          <input type="number" min="0" class="form-control" placeholder="Enter dosage" formControlName="dosage" [readonly]="!fcm.value.canEdit">
                           <div *ngIf="submitted && fm.controls[i].controls.dosage.errors">
                             <small class="error-msg" *ngIf="fm.controls[i].controls.dosage.errors.required">Enter dosage</small>
                             <small class="error-msg" *ngIf="fm.controls[i].controls.dosage.errors.maxlength">Dosage should be less than 10 characters</small>
+                            <small class="error-msg" *ngIf="fm.controls[i].controls.dosage.errors.min">Dosage cannot be negative</small>
                           </div>
                         </div>
                         <div class="form-group col-md-2">
@@ -150,10 +151,11 @@
                         </div>
                         <div class="form-group col-md-2">
                           <label for="duration">Duration *</label>
-                          <input type="number" class="form-control" placeholder="Enter duration" formControlName="duration" [readonly]="!fcm.value.canEdit">
+                          <input type="number" min="0" class="form-control" placeholder="Enter duration" formControlName="duration" [readonly]="!fcm.value.canEdit">
                           <div *ngIf="submitted && fm.controls[i].controls.duration.errors">
                             <small class="error-msg" *ngIf="fm.controls[i].controls.duration.errors.required">Enter duration</small>
                             <small class="error-msg" *ngIf="fm.controls[i].controls.duration.errors.maxlength">Duration should be less than 15 characters</small>
+                            <small class="error-msg" *ngIf="fm.controls[i].controls.duration.errors.min">Duration cannot be negative</small>
                           </div>
                         </div>
                         <div class="form-group col-md-2">

@@ -457,7 +457,7 @@ export class EpartogramComponent implements OnInit {
       let stageNo: number, stageHourNo: number, stageHourSecNo: number;
       
       if (enc.encounterType.display === 'LCG_SOS') {
-        const sosStageHourObs = enc.obs.find((o: any) => o.concept.display === 'SOS_Stage_Hour');
+        const sosStageHourObs = enc.obs.find((o: any) => o.concept.display === 'SOS_STAGE_HOUR');
         if (sosStageHourObs) {
           const sosValue = sosStageHourObs.value;
           const match = sosValue.match(/Stage(\d+)_Hour(\d+)_SOS(\d+)/);
@@ -613,7 +613,7 @@ export class EpartogramComponent implements OnInit {
       const observations = enc.obs.sort((a: any, b: any) => new Date(a.obsDatetime).getTime() - new Date(b.obsDatetime).getTime());
       if (observations.length) {
         for (const ob of observations) {
-          if (ob.concept.display === 'SOS_Stage_Hour') {
+          if (ob.concept.display === 'SOS_STAGE_HOUR') {
             continue;
           }
           
@@ -740,15 +740,39 @@ export class EpartogramComponent implements OnInit {
     let oxytocinData = [];
     let ivData = [];
     if (stageNo == 1) {
-      planData = this.parameters[23].stage1values[2 * encounterNo].concat(this.parameters[23].stage1values[((2 * (encounterNo)) + 1)]).sort((a, b) => new Date(b.obsDatetime).getTime() - new Date(a.obsDatetime).getTime());
-      medicationData = this.parameters[26].stage1values[2 * encounterNo].concat(this.parameters[26].stage1values[((2 * (encounterNo)) + 1)]).sort((a, b) => new Date(b.obsDatetime).getTime() - new Date(a.obsDatetime).getTime());
-      oxytocinData = this.parameters[27].stage1values[2 * encounterNo].concat(this.parameters[27].stage1values[((2 * (encounterNo)) + 1)]).sort((a, b) => new Date(b.obsDatetime).getTime() - new Date(a.obsDatetime).getTime());
-      ivData = this.parameters[28].stage1values[2 * encounterNo].concat(this.parameters[28].stage1values[((2 * (encounterNo)) + 1)]).sort((a, b) => new Date(b.obsDatetime).getTime() - new Date(a.obsDatetime).getTime());
+      const startIndex = this.getFullIndexForStage1(encounterNo);
+      const subCols = this.subColsPerHourStage1[encounterNo];
+      for (let j = 0; j < subCols; j++) {
+        const data23 = this.parameters[23].stage1values[startIndex + j];
+        const data26 = this.parameters[26].stage1values[startIndex + j];
+        const data27 = this.parameters[27].stage1values[startIndex + j];
+        const data28 = this.parameters[28].stage1values[startIndex + j];
+        if (data23 && Array.isArray(data23)) planData = planData.concat(data23);
+        if (data26 && Array.isArray(data26)) medicationData = medicationData.concat(data26);
+        if (data27 && Array.isArray(data27)) oxytocinData = oxytocinData.concat(data27);
+        if (data28 && Array.isArray(data28)) ivData = ivData.concat(data28);
+      }
+      planData.sort((a, b) => new Date(b.obsDatetime).getTime() - new Date(a.obsDatetime).getTime());
+      medicationData.sort((a, b) => new Date(b.obsDatetime).getTime() - new Date(a.obsDatetime).getTime());
+      oxytocinData.sort((a, b) => new Date(b.obsDatetime).getTime() - new Date(a.obsDatetime).getTime());
+      ivData.sort((a, b) => new Date(b.obsDatetime).getTime() - new Date(a.obsDatetime).getTime());
     } else {
-      planData = this.parameters[23].stage2values[4 * encounterNo].concat(this.parameters[23].stage2values[((4 * (encounterNo)) + 1)]).concat(this.parameters[23].stage2values[((4 * (encounterNo)) + 2)]).concat(this.parameters[23].stage2values[((4 * (encounterNo)) + 3)]).sort((a, b) => new Date(b.obsDatetime).getTime() - new Date(a.obsDatetime).getTime());
-      medicationData = this.parameters[26].stage2values[4 * encounterNo].concat(this.parameters[26].stage2values[((4 * (encounterNo)) + 1)]).concat(this.parameters[26].stage2values[((4 * (encounterNo)) + 2)]).concat(this.parameters[26].stage2values[((4 * (encounterNo)) + 3)]).sort((a, b) => new Date(b.obsDatetime).getTime() - new Date(a.obsDatetime).getTime());
-      oxytocinData = this.parameters[27].stage2values[4 * encounterNo].concat(this.parameters[27].stage2values[((4 * (encounterNo)) + 1)]).concat(this.parameters[27].stage2values[((4 * (encounterNo)) + 2)]).concat(this.parameters[27].stage2values[((4 * (encounterNo)) + 3)]).sort((a, b) => new Date(b.obsDatetime).getTime() - new Date(a.obsDatetime).getTime());
-      ivData = this.parameters[28].stage2values[4 * encounterNo].concat(this.parameters[28].stage2values[((4 * (encounterNo)) + 1)]).concat(this.parameters[28].stage2values[((4 * (encounterNo)) + 2)]).concat(this.parameters[28].stage2values[((4 * (encounterNo)) + 3)]).sort((a, b) => new Date(b.obsDatetime).getTime() - new Date(a.obsDatetime).getTime());
+      const startIndex = this.getFullIndexForStage2(encounterNo);
+      const subCols = this.subColsPerHourStage2[encounterNo];
+      for (let j = 0; j < subCols; j++) {
+        const data23 = this.parameters[23].stage2values[startIndex + j];
+        const data26 = this.parameters[26].stage2values[startIndex + j];
+        const data27 = this.parameters[27].stage2values[startIndex + j];
+        const data28 = this.parameters[28].stage2values[startIndex + j];
+        if (data23 && Array.isArray(data23)) planData = planData.concat(data23);
+        if (data26 && Array.isArray(data26)) medicationData = medicationData.concat(data26);
+        if (data27 && Array.isArray(data27)) oxytocinData = oxytocinData.concat(data27);
+        if (data28 && Array.isArray(data28)) ivData = ivData.concat(data28);
+      }
+      planData.sort((a, b) => new Date(b.obsDatetime).getTime() - new Date(a.obsDatetime).getTime());
+      medicationData.sort((a, b) => new Date(b.obsDatetime).getTime() - new Date(a.obsDatetime).getTime());
+      oxytocinData.sort((a, b) => new Date(b.obsDatetime).getTime() - new Date(a.obsDatetime).getTime());
+      ivData.sort((a, b) => new Date(b.obsDatetime).getTime() - new Date(a.obsDatetime).getTime());
     }
     return { stage: stageNo, hour: encounterNo + 1, planData: [...planData], medicationData: [...medicationData], oxytocinData: [...oxytocinData], ivData: [...ivData] };
   }
@@ -756,9 +780,21 @@ export class EpartogramComponent implements OnInit {
   getEncounterAssessmentData(stageNo: number, encounterNo: number) {
     let assessmentData = [];
     if (stageNo == 1) {
-      assessmentData = this.parameters[22].stage1values[2 * encounterNo].concat(this.parameters[22].stage1values[((2 * (encounterNo)) + 1)]).sort((a, b) => new Date(b.obsDatetime).getTime() - new Date(a.obsDatetime).getTime());
+      const startIndex = this.getFullIndexForStage1(encounterNo);
+      const subCols = this.subColsPerHourStage1[encounterNo];
+      for (let j = 0; j < subCols; j++) {
+        const data22 = this.parameters[22].stage1values[startIndex + j];
+        if (data22 && Array.isArray(data22)) assessmentData = assessmentData.concat(data22);
+      }
+      assessmentData.sort((a, b) => new Date(b.obsDatetime).getTime() - new Date(a.obsDatetime).getTime());
     } else {
-      assessmentData = this.parameters[22].stage2values[4 * encounterNo].concat(this.parameters[22].stage2values[((4 * (encounterNo)) + 1)]).concat(this.parameters[22].stage2values[((4 * (encounterNo)) + 2)]).concat(this.parameters[23].stage2values[((4 * (encounterNo)) + 3)]).sort((a, b) => new Date(b.obsDatetime).getTime() - new Date(a.obsDatetime).getTime());
+      const startIndex = this.getFullIndexForStage2(encounterNo);
+      const subCols = this.subColsPerHourStage2[encounterNo];
+      for (let j = 0; j < subCols; j++) {
+        const data22 = this.parameters[22].stage2values[startIndex + j];
+        if (data22 && Array.isArray(data22)) assessmentData = assessmentData.concat(data22);
+      }
+      assessmentData.sort((a, b) => new Date(b.obsDatetime).getTime() - new Date(a.obsDatetime).getTime());
     }
     return { stage: stageNo, hour: encounterNo + 1, assessmentData: [...assessmentData] };
   }
@@ -786,13 +822,31 @@ export class EpartogramComponent implements OnInit {
         this.planHistory = [...historyData];
         break;
       case 26:
-        this.medicationPrescribedHistory = [...historyData];
+        // Combine Medicine (index 20) with Medicine Prescribed (index 26)
+        const medicineData = this.parameters[20].stage1values.reduce((acc, item) => {
+          return acc.concat(item);
+        }, []).concat(this.parameters[20].stage2values.reduce((acc, item) => {
+          return acc.concat(item);
+        }, []));
+        this.medicationPrescribedHistory = [...historyData, ...medicineData].sort((a, b) => new Date(b.obsDatetime).getTime() - new Date(a.obsDatetime).getTime());
         break;
       case 27:
-        this.oxytocinPrescribedHistory = [...historyData];
+        // Combine Oxytocin (index 19) with Oxytocin Prescribed (index 27)
+        const oxytocinData = this.parameters[19].stage1values.reduce((acc, item) => {
+          return acc.concat(item);
+        }, []).concat(this.parameters[19].stage2values.reduce((acc, item) => {
+          return acc.concat(item);
+        }, [])).filter(item => item && item.value !== 'NO'); // Filter out null/undefined and "NO" values
+        this.oxytocinPrescribedHistory = [...historyData, ...oxytocinData].filter(item => item && item.value !== 'NO').sort((a, b) => new Date(b.obsDatetime).getTime() - new Date(a.obsDatetime).getTime());
         break;
       case 28:
-        this.ivPrescribedHistory = [...historyData];
+        // Combine IV fluids (index 21) with IV fluids Prescribed (index 28)
+        const ivFluidsData = this.parameters[21].stage1values.reduce((acc, item) => {
+          return acc.concat(item);
+        }, []).concat(this.parameters[21].stage2values.reduce((acc, item) => {
+          return acc.concat(item);
+        }, [])).filter(item => item && item.value !== 'NO'); // Filter out null/undefined and "NO" values
+        this.ivPrescribedHistory = [...historyData, ...ivFluidsData].filter(item => item && item.value !== 'NO').sort((a, b) => new Date(b.obsDatetime).getTime() - new Date(a.obsDatetime).getTime());
         break;
       default:
         break;

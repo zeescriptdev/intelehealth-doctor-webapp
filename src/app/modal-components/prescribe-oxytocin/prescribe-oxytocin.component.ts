@@ -55,8 +55,8 @@ export class PrescribeOxytocinComponent implements OnInit {
           if (element.canEdit) {
             let itemToAdd = new FormGroup({
               id: new FormControl(element.uuid),
-              strength: new FormControl(element.value.strength, [Validators.required, Validators.maxLength(3)]),
-              infusionRate: new FormControl(element.value.infusionRate, [Validators.required, Validators.maxLength(3)]),
+              strength: new FormControl(element.value.strength, [Validators.required, Validators.min(1), Validators.max(10), Validators.maxLength(3)]),
+              infusionRate: new FormControl(element.value.infusionRate, [Validators.required, Validators.min(5), Validators.max(60), Validators.maxLength(3)]),
               infusionStatus: new FormControl(element.value.infusionStatus, [Validators.required]),
               isDeleted: new FormControl(false),
               index: new FormControl(-1),

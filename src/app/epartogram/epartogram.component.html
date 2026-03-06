@@ -20,7 +20,7 @@
                 </tr>
                 <tr class="page-title-row">
                   <td colspan="14"><span>
-                      Raptured membranes:</span>&nbsp;
+                      Ruptured membranes:</span>&nbsp;
                     <ng-container *ngIf="pinfo?.MembraneRupturedTimestamp == 'U'">U</ng-container>
                     <ng-container *ngIf="pinfo?.MembraneRupturedTimestamp != 'U'">
                       <span>[Date</span> {{pinfo?.MembraneRupturedTimestamp|date:'dd/MM/yyyy'|noValue:'NA'}}
@@ -926,16 +926,7 @@
                       <div class="value-item note" *ngIf="item">
                         <ng-container *ngFor="let subCol of getSubColArray(subColsPerHourStage1[i]); let j=index;">
                           <ng-container *ngFor="let it of getParameterValueAtIndex(23, 1, i, j)|emptyArray;">
-                            {{it?.value}}<br/>
-                          </ng-container>
-                          <ng-container *ngFor="let it of getParameterValueAtIndex(26, 1, i, j)|emptyArray;">
-                            {{it?.value}}<br/>
-                          </ng-container>
-                          <ng-container *ngFor="let it of getParameterValueAtIndex(27, 1, i, j)|emptyArray;">
-                            {{it.value.infusionStatus|uppercase}} OXYTOCIN - {{it.value.strength}} U/L ({{it.value.infusionRate}} drops/minute)<br/>
-                          </ng-container>
-                          <ng-container *ngFor="let it of getParameterValueAtIndex(28, 1, i, j)|emptyArray;">
-                            {{it.value.infusionStatus|uppercase}} IV - {{it.value.type}} {{it.value.otherType}} ({{it.value.infusionRate}} drops/minute)<br/>
+                            <p *ngIf="it">{{it?.value}}</p>
                           </ng-container>
                         </ng-container>
                         <button mat-icon-button aria-label="Open in new tab" (click)="viewPlan(1, i)">
@@ -950,15 +941,6 @@
                         <ng-container *ngFor="let subCol of getSubColArray(subColsPerHourStage2[i]); let j=index;">
                           <ng-container *ngFor="let it of getParameterValueAtIndex(23, 2, i, j)|emptyArray;">
                             <p *ngIf="it">{{it?.value}}</p>
-                          </ng-container>
-                          <ng-container *ngFor="let it of getParameterValueAtIndex(26, 2, i, j)|emptyArray;">
-                            <p *ngIf="it">{{it?.value}}</p>
-                          </ng-container>
-                          <ng-container *ngFor="let it of getParameterValueAtIndex(27, 2, i, j)|emptyArray;">
-                            <p *ngIf="it">{{it.value.infusionStatus|uppercase}} OXYTOCIN - {{it.value.strength}} U/L ({{it.value.infusionRate}} drops/minute)</p>
-                          </ng-container>
-                          <ng-container *ngFor="let it of getParameterValueAtIndex(28, 2, i, j)|emptyArray;">
-                            <p *ngIf="it">{{it.value.infusionStatus|uppercase}} IV - {{it.value.type}} {{it.value.otherType}} ({{it.value.infusionRate}} drops/minute)</p>
                           </ng-container>
                         </ng-container>
                         <button mat-icon-button aria-label="Open in new tab" (click)="viewPlan(2, i)">
