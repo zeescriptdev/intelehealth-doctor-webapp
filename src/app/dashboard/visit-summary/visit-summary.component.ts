@@ -711,6 +711,9 @@ export class VisitSummaryComponent implements OnInit, OnDestroy, AfterViewInit {
         },2000)
         this.visit = visit;
         this.visit.demarcation = this.visitDemarcation;
+        if (this.visit.demarcation === visitTypes.FOLLOW_UP) {
+          this.hasAILLMEnabled = false;
+        }
         if (this.visitSummaryService.checkIfEncounterExists(visit.encounters, visitTypes.FLAGGED)) {
           this.visit['visitUploadTime'] = this.visitSummaryService.checkIfEncounterExists(visit.encounters, visitTypes.FLAGGED) ? this.visitSummaryService.checkIfEncounterExists(visit.encounters, visitTypes.FLAGGED)['encounterDatetime'] : null;
         } else if (this.visitSummaryService.checkIfEncounterExists(visit.encounters, visitTypes.ADULTINITIAL) || this.visitSummaryService.checkIfEncounterExists(visit.encounters, visitTypes.VITALS)) {
