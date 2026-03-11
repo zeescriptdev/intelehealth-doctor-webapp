@@ -20,6 +20,7 @@
                 [class.has-condition]="hasCondition(point.id, 'heart')"
                 [style.top]="point.top"
                 [style.left]="point.left"
+                [attr.data-test-id]="'btnHeartPoint' + point.id"
                 (click)="handlePointClick(point, i, 'heart', 'heartData')">
                 {{ point.id }}
               </button>
@@ -60,7 +61,7 @@
         <!-- Control Buttons Section -->
         <div class="controls-section">
           <!-- Volume/Waveform Icon -->
-          <button class="volume-button">
+          <button class="volume-button" data-test-id="btnVolumeWaveformHeart">
             <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
               <line x1="12" y1="20" x2="12" y2="10"></line>
               <line x1="18" y1="20" x2="18" y2="4"></line>
@@ -69,7 +70,7 @@
           </button>
 
           <!-- Play/Pause Button -->
-          <button class="play-button-large" (click)="togglePlayPause()">
+          <button class="play-button-large" (click)="togglePlayPause()" data-test-id="btnPlayPauseHeart">
             <svg *ngIf="!isPlaying" width="36" height="36" viewBox="0 0 24 24" fill="white">
               <polygon points="8 5 19 12 8 19 8 5"></polygon>
             </svg>
@@ -85,7 +86,7 @@
               <div class="speed-text">Speed</div>
               <div class="speed-value">({{ speed.toFixed(1) }}x)</div>
             </div>
-            <button class="speed-adjust-button">
+            <button class="speed-adjust-button" data-test-id="btnSpeedAdjustHeart">
               <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
                 <polygon points="12 2 2 12 22 12"></polygon>
               </svg>
@@ -94,7 +95,7 @@
         </div>
 
         <!-- Graphical Insight Button -->
-        <button class="insight-button" (click)="openReport()" [disabled]="!getSelectedData()">
+        <button class="insight-button" (click)="openReport()" [disabled]="!getSelectedData()" data-test-id="btnGraphicalInsightHeart">
           Graphical Insight
         </button>
       </div>
@@ -176,6 +177,7 @@
                 [class.has-condition]="hasCondition(point.id, 'lung')"
                 [style.top]="point.top"
                 [style.left]="point.left"
+                [attr.data-test-id]="'btnLungAnteriorPoint' + point.id"
                 (click)="handlePointClick(point, i, 'anterior', 'lungData')">
                 {{ point.id }}
               </button>
@@ -196,6 +198,7 @@
                 [class.has-condition]="hasCondition(point.id, 'lung')"
                 [style.top]="point.top"
                 [style.left]="point.left"
+                [attr.data-test-id]="'btnLungLateralPoint' + point.id"
                 (click)="handlePointClick(point, i, 'lateral', 'lungData')">
                 {{ point.id }}
               </button>
@@ -216,6 +219,7 @@
                 [class.has-condition]="hasCondition(point.id, 'lung')"
                 [style.top]="point.top"
                 [style.left]="point.left"
+                [attr.data-test-id]="'btnLungPosteriorPoint' + point.id"
                 (click)="handlePointClick(point, i, 'posterior', 'lungData')">
                 {{ point.id }}
               </button>
@@ -256,7 +260,7 @@
         <!-- Control Buttons Section -->
         <div class="controls-section">
           <!-- Volume/Waveform Icon -->
-          <button class="volume-button">
+          <button class="volume-button" data-test-id="btnVolumeWaveformLung">
             <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
               <line x1="12" y1="20" x2="12" y2="10"></line>
               <line x1="18" y1="20" x2="18" y2="4"></line>
@@ -265,7 +269,7 @@
           </button>
 
           <!-- Play/Pause Button -->
-          <button class="play-button-large" (click)="togglePlayPause()">
+          <button class="play-button-large" (click)="togglePlayPause()" data-test-id="btnPlayPauseLung">
             <svg *ngIf="!isPlaying" width="36" height="36" viewBox="0 0 24 24" fill="white">
               <polygon points="8 5 19 12 8 19 8 5"></polygon>
             </svg>
@@ -281,7 +285,7 @@
               <div class="speed-text">Speed</div>
               <div class="speed-value">({{ speed.toFixed(1) }}x)</div>
             </div>
-            <button class="speed-adjust-button">
+            <button class="speed-adjust-button" data-test-id="btnSpeedAdjustLung">
               <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
                 <polygon points="12 2 2 12 22 12"></polygon>
               </svg>
@@ -290,7 +294,7 @@
         </div>
 
         <!-- Graphical Insight Button -->
-        <button class="insight-button" (click)="openReport()" [disabled]="!getSelectedData()">
+        <button class="insight-button" (click)="openReport()" [disabled]="!getSelectedData()" data-test-id="btnGraphicalInsightLung">
           Graphical Insight
         </button>
       </div>
