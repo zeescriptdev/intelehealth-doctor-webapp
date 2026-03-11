@@ -414,6 +414,19 @@ export class PartogramComponent implements OnInit, OnDestroy {
     this.panZoomAPI.resetView();
   }
 
+  shareOnWhatsApp() {
+    const patientName = this.pinfo?.name || 'Unknown patient';
+    const patientId = this.pinfo?.openMrsId || 'NA';
+    const pageUrl = globalThis.location.href;
+    const message = `Partogram details for ${patientName} (ID: ${patientId}).\n${pageUrl}`;
+    const whatsappLink = `https://wa.me/?text=${encodeURIComponent(message)}`;
+    globalThis.open(whatsappLink, '_blank');
+  }
+
+  printPartogram() {
+    globalThis.print();
+  }
+
   ngOnInit(): void {
     for (let x = 0; x < this.parameters.length; x++) {
       if (x == 20 || x == 22 || x == 23 || x == 26 || x == 27 || x == 28) {

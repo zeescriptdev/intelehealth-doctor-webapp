@@ -6,7 +6,13 @@
           <div class="py-2 d-flex align-items-center justify-content-end">
             <button class="blue-btn mr-1" type="button" (click)="zoomIn()">Zoom In [+]</button>
             <button class="blue-btn mr-1" type="button" (click)="zoomOut()">Zoom Out [-]</button>
-            <button class="blue-btn" type="button" (click)="zoomReset()">Reset</button>
+            <button class="blue-btn mr-1" type="button" (click)="zoomReset()">Reset</button>
+            <button class="icon-action-btn mr-1" type="button" (click)="shareOnWhatsApp()" matTooltip="Share on WhatsApp" matTooltipPosition="below">
+              <img src="assets/svgs/whatsapp-green.svg" alt="WhatsApp" width="24" height="24">
+            </button>
+            <button class="icon-action-btn" type="button" (click)="printPartogram()" matTooltip="Print" matTooltipPosition="below">
+              <mat-icon>print</mat-icon>
+            </button>
           </div>
           <div style="height: 2000px; border: 1px solid black;">
             <pan-zoom [config]="panZoomConfig">
