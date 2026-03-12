@@ -13,27 +13,43 @@ declare const $: any;
 export class PwaService {
 
   private promptEvent;
-
+ private skipRoutes: string[] = [
+    '/r', // ncd report
+   '/i/',
+   '/verify-otp',
+   
+  ];
   constructor(private platform: Platform, private bottomSheet: MatBottomSheet, private router: Router) { }
 
   /**
   * Init PWA prompt
   * @return {void}
   */
+ private isSkipRoute(): boolean {
+  const currentUrl = this.router.url.split('?')[0];
+  return this.skipRoutes.some(route =>
+    currentUrl.startsWith(route)
+  );
+}
   public initPwaPrompt() {
+     if (this.isSkipRoute()) {
+        return; 
+      }  
     if (this.platform.ANDROID || this.platform.isBrowser) {
-      window.addEventListener('beforeinstallprompt', (event) => {
-        event.preventDefault();
-        this.promptEvent = event;
-        this.openPromptComponent('android');
-      });
-    }
-    if (this.platform.IOS) {
-      const isInStandaloneMode = ('standalone' in window.navigator) && (window.navigator['standalone']);
-      if (!isInStandaloneMode) {
-        this.openPromptComponent('ios');
-      }
-    }
+          window.addEventListener('beforeinstallprompt', (event) => {
+            event.preventDefault();
+            this.promptEvent = event;
+            this.openPromptComponent('android');
+          });
+        }
+        if (this.platform.IOS) {
+          const isInStandaloneMode = ('standalone' in window.navigator) && (window.navigator['standalone']);
+          if (!isInStandaloneMode) {
+            this.openPromptComponent('ios');
+          
+          }}
+        
+    
   }
 
   /**
@@ -45,7 +61,9 @@ export class PwaService {
     timer(3000)
       .pipe(take(1))
       .subscribe(() => {
-        if (!(this.router.url.includes('/i/') || this.router.url.includes('/verify-otp'))) {
+        if (this.isSkipRoute()) {
+        return;
+      }
           const activeElement = document.activeElement;
           if (!activeElement.id) {
             activeElement.setAttribute('id', 'XXX');
@@ -57,7 +75,6 @@ export class PwaService {
               activeElement.removeAttribute('id');
             }
           });
-        }
       });
   }
 }
