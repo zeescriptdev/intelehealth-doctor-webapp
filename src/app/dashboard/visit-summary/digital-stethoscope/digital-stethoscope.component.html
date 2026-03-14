@@ -7,11 +7,11 @@
     </div>
     <div class="da-header-badges">
       <span class="badge badge-heart">
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>
+        <img src="assets/svgs/heart.svg" alt="Heart Icon" class="heart-icon"/>
         {{ heartRecordingCount }} heart
       </span>
       <span class="badge badge-lung">
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M15.5 9.5c-.28 0-.5.22-.5.5v4c0 .28.22.5.5.5s.5-.22.5-.5v-4c0-.28-.22-.5-.5-.5zm-7 0c-.28 0-.5.22-.5.5v4c0 .28.22.5.5.5s.5-.22.5-.5v-4c0-.28-.22-.5-.5-.5zM12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8z"/></svg>
+        <img src="assets/svgs/lung.svg" alt="Lung Icon" class="lung-icon"/>
         {{ lungRecordingCount }} lung
       </span>
     </div>
@@ -19,12 +19,12 @@
 
   <!-- Tab Toggle -->
   <div class="tab-toggle">
-    <button class="tab-btn" [class.active]="activeTab === 'heart'" (click)="switchTab('heart')" data-test-id="btnTabHeart">
-      <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>
+    <button class="tab-btn" [class.active-heart]="activeTab === 'heart'" (click)="switchTab('heart')" data-test-id="btnTabHeart">
+      <img [src]="activeTab === 'heart' ? 'assets/svgs/heart-white.svg' : 'assets/svgs/heart-grey.svg'" alt="Heart Icon" class="heart-icon"/>
       Heart
     </button>
-    <button class="tab-btn" [class.active]="activeTab === 'lungs'" (click)="switchTab('lungs')" data-test-id="btnTabLungs">
-      <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M15.5 9.5c-.28 0-.5.22-.5.5v4c0 .28.22.5.5.5s.5-.22.5-.5v-4c0-.28-.22-.5-.5-.5zm-7 0c-.28 0-.5.22-.5.5v4c0 .28.22.5.5.5s.5-.22.5-.5v-4c0-.28-.22-.5-.5-.5zM12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8z"/></svg>
+    <button class="tab-btn" [class.active-lung]="activeTab === 'lungs'" (click)="switchTab('lungs')" data-test-id="btnTabLungs">
+      <img [src]="activeTab === 'lungs' ? 'assets/svgs/lung-white.svg' : 'assets/svgs/lung-grey.svg'" alt="Lung Icon" class="lung-icon"/>
       Lungs
     </button>
   </div>
@@ -140,22 +140,22 @@
         <div class="top-info-row">
           <div class="top-info-left">
             <span class="point-badge" [ngClass]="{'heart-badge': selectedDataSource === 'heart', 'lung-badge': selectedDataSource === 'lung'}">
-              <svg *ngIf="selectedDataSource === 'heart'" width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>
-              <svg *ngIf="selectedDataSource === 'lung'" width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><path d="M15.5 9.5c-.28 0-.5.22-.5.5v4c0 .28.22.5.5.5s.5-.22.5-.5v-4c0-.28-.22-.5-.5-.5zm-7 0c-.28 0-.5.22-.5.5v4c0 .28.22.5.5.5s.5-.22.5-.5v-4c0-.28-.22-.5-.5-.5zM12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8z"/></svg>
+              <img *ngIf="selectedDataSource === 'heart'" src="assets/svgs/heart.svg" alt="Heart Icon" class="heart-icon"/>
+              <img *ngIf="selectedDataSource === 'lung'" src="assets/svgs/lung.svg" alt="Lung Icon" class="lung-icon"/>
               {{ selectedDataSource === 'heart' ? 'Heart' : 'Lung' }} &middot; Point {{ selectedPointId }}
             </span>
             <span *ngIf="hasConditionForSelected()" class="abnormal-detected-badge">
-              <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>
+              <img src="assets/svgs/heart.svg" alt="Heart Icon" class="heart-icon"/>
               Abnormal Detected
             </span>
           </div>
           <div class="top-info-right">
             <span class="bpm-badge bpm-heart">
-              <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>
+              <img src="assets/svgs/heart.svg" alt="Heart Icon" class="heart-icon"/>
               {{ getHeartRate(selectedData) }} bpm
             </span>
             <span class="bpm-badge bpm-lung">
-              <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><path d="M15.5 9.5c-.28 0-.5.22-.5.5v4c0 .28.22.5.5.5s.5-.22.5-.5v-4c0-.28-.22-.5-.5-.5zm-7 0c-.28 0-.5.22-.5.5v4c0 .28.22.5.5.5s.5-.22.5-.5v-4c0-.28-.22-.5-.5-.5zM12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8z"/></svg>
+              <img src="assets/svgs/lung.svg" alt="Lung Icon" class="lung-icon"/>
               {{ getBreathingRate(selectedData) }} brpm
             </span>
           </div>
@@ -195,19 +195,12 @@
         <!-- Graphical Insight Card -->
         <div class="graphical-insight-card">
           <div class="gi-header">
-            <!-- <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <path d="M12 2l2.09 6.26L20.18 9l-5 4.34L16.82 20 12 16.27 7.18 20l1.64-6.66-5-4.34 6.09-.74L12 2z"/>
-            </svg> -->
             <img src="assets/svgs/graphical.svg" alt="Graphical Insight"/>
             <span class="gi-title">Graphical Insight</span>
           </div>
           <p class="gi-description">View waveform recording and full diagnostic report.</p>
           <button class="gi-button" (click)="openReport()" data-test-id="btnOpenGraphicalInsight">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path>
-              <polyline points="15 3 21 3 21 9"></polyline>
-              <line x1="10" y1="14" x2="21" y2="3"></line>
-            </svg>
+            <img src="assets/svgs/polyline.svg" alt="Stroke Icon" class="stroke-icon"/>
             Open Graphical Insight
           </button>
           <p class="gi-subtitle">Opens in new tab &middot; Audio playback available</p>
@@ -221,11 +214,7 @@
           <ng-container *ngIf="getDetectedConditions(selectedData).length > 0">
             <div class="detected-conditions-header">
               <span class="detected-label">
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#ef4444" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                  <circle cx="12" cy="12" r="10"></circle>
-                  <line x1="12" y1="8" x2="12" y2="12"></line>
-                  <line x1="12" y1="16" x2="12.01" y2="16"></line>
-                </svg>
+                <img src="assets/svgs/circle!.svg" alt="Heart Icon" class="heart-icon"/>
                 Detected Conditions
               </span>
               <span class="conditions-count">{{ getDetectedConditions(selectedData).length }} conditions</span>

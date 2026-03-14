@@ -1,49 +1,8 @@
 
 import { Component, OnInit } from '@angular/core';
-
-interface ScreeningResult {
-  confidence_score: number;
-  condition: string;
-  description: string;
-  condition_detected: string;
-  type?: string;
-}
-
-interface LungData {
-  lung_bpm: string;
-  location: string;
-  position: string;
-  point?: number;
-  report_url: string;
-  recorded_time?: string;
-  device?: string;
-  screening_results: ScreeningResult[];
-}
-
-interface HeartData {
-  heart_bpm: number | string;
-  breathing_rate?: number | string;
-  location: string;
-  position: string;
-  point?: number;
-  report_url: string;
-  recorded_time?: string;
-  device?: string;
-  screening_results: ScreeningResult[];
-}
+import { ScreeningResult, LungData, HeartData, DetectedCondition, MeasurementPoint } from 'src/app/model/model';
 
 type AnyData = LungData | HeartData;
-
-interface DetectedCondition {
-  condition: string;
-  confidence: number;
-}
-
-interface MeasurementPoint {
-  id: number;
-  top: string;
-  left: string;
-}
 
 @Component({
   selector: 'app-digital-stethoscope',
