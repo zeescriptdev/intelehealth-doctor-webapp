@@ -2190,8 +2190,15 @@ export class VisitSummaryComponent implements OnInit, OnDestroy, AfterViewInit {
     if (this.followUpForm.value.wantFollowUp === 'Yes') {
       value = `${moment(this.followUpForm.value.followUpDate ?? new Date()).format('YYYY-MM-DD')},Time:${this.followUpForm.value.followUpTime ?? 'NA'},Remark:${this.followUpForm.value.followUpReason || 'NA'},Type:${this.followUpForm.value.followUpType || 'NA'}`;
     }
+    const followUpDate = this.followUpForm.value.wantFollowUp === 'Yes'
+      ? `${this.followUpForm.value.followUpDate},Time:${this.followUpForm.value.followUpTime}`
+      : null;
+
     if (this.followUpForm.value.uuid) {
-      this.encounterService.updateObs(this.followUpForm.value.uuid, { value }).pipe(tap((response: ObsModel) => this.followUpForm.patchValue({ present: true}))).subscribe();
+      this.encounterService.updateObs(this.followUpForm.value.uuid, { value }).pipe(tap((response: ObsModel) => {
+        this.followUpForm.patchValue({ present: true});
+        this.notifyHwForAvailablePrescription(`Follow-up scheduled for ${this.visit?.patient?.person?.display || 'Patient'}`, "", followUpDate);
+      })).subscribe();
     } else {
         this.encounterService.postObs({
           concept: conceptIds.conceptFollow,
@@ -2199,7 +2206,10 @@ export class VisitSummaryComponent implements OnInit, OnDestroy, AfterViewInit {
           obsDatetime: new Date(),
           value: value,
           encounter: this.visitNotePresent.uuid
-        }).pipe(tap((response: ObsModel) => this.followUpForm.patchValue({ present: true}))).subscribe();
+        }).pipe(tap((response: ObsModel) => {
+          this.followUpForm.patchValue({ present: true});
+          this.notifyHwForAvailablePrescription(`Follow-up scheduled for ${this.visit?.patient?.person?.display || 'Patient'}`, "", followUpDate);
+        })).subscribe();
      }
   }
 
@@ -2458,7 +2468,12 @@ export class VisitSummaryComponent implements OnInit, OnDestroy, AfterViewInit {
   */
   notifyHwForAvailablePrescription(title = null, type = null,followupDatetime = null): void {
     const hwUuid = getCacheData(true, visitTypes.PATIENT_VISIT_PROVIDER)?.provider?.uuid;
-    
+
+    if (!hwUuid) {
+      console.warn('Cannot send notification: Health worker UUID is not available');
+      return;
+    }
+
     const openMRSID = this.getPatientIdentifier("OpenMRS ID");
     const payload = {
       title: title || `Prescription available for ${this.visit?.patient?.person?.display || 'Patient'}`,
@@ -2475,7 +2490,10 @@ export class VisitSummaryComponent implements OnInit, OnDestroy, AfterViewInit {
       }
     }
     console.log("payload from web app==",payload);
-    this.mindmapService.notifyApp(hwUuid, payload).subscribe();
+    this.mindmapService.notifyApp(hwUuid, payload).subscribe({
+      next: () => console.log('Notification sent successfully'),
+      error: (err) => console.error('Failed to send notification:', err)
+    });
   }
 
   /**
