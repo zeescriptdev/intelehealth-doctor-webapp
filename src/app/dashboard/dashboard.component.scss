@@ -180,16 +180,16 @@ th:last-child {
 }
 
 .alert-count {
-  width: 40px;
-  height: 40px;
+  width: 42px;
+  height: 42px;
   display: flex;
   align-items: center;
   justify-content: center;
   font-family: 'DM Sans';
   font-style: normal;
   font-weight: 700;
-  font-size: 16px;
-  line-height: 150%;
+  font-size: 14px;
+  // line-height: 150%;
 }
 
 .alert-count.red {

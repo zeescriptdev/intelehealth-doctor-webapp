@@ -225,14 +225,14 @@
                       <td>&#60;110, ≥160</td>
                       <ng-container *ngFor="let item of parameters[4].stage1values; let odd=odd;">
                         <td [ngClass]="{ 'brd': !odd, 'bld': odd }">
-                          <div class="value-item vertical" *ngIf="item" [ngClass]="{ 'red': item?.comment == 'R', 'yellow': item?.comment == 'Y'}">
+                          <div class="value-item" *ngIf="item" [ngClass]="{ 'red': item?.comment == 'R', 'yellow': item?.comment == 'Y'}">
                             {{item?.value}}
                           </div>
                         </td>
                       </ng-container>
                       <ng-container *ngFor="let item of parameters[4].stage2values; let odd=odd;">
                         <td [ngClass]="{ 'brd': !odd, 'bld': odd }">
-                          <div class="value-item vertical" *ngIf="item" [ngClass]="{ 'red': item?.comment == 'R', 'yellow': item?.comment == 'Y'}">
+                          <div class="value-item" *ngIf="item" [ngClass]="{ 'red': item?.comment == 'R', 'yellow': item?.comment == 'Y'}">
                             {{item?.value}}
                           </div>
                         </td>
