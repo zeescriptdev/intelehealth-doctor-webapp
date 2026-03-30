@@ -1890,7 +1890,17 @@ export class VisitSummaryComponent implements OnInit, OnDestroy, AfterViewInit {
     if (this.medicines.find((o: MedicineModel) => o.drug === this.addMedicineForm.value.drug)) {
       this.coreService.showToast("warning", 'Drug already added, please add another drug.','Already Added','warning-toast');
       return;
-    }    
+    }
+
+    const similarDrug = this.findSimilarBaseDrug(this.addMedicineForm.value.drug, this.medicines);
+    if (similarDrug) {
+      const baseName = this.extractBaseDrugName(this.addMedicineForm.value.drug);
+      this.toastr.warning(
+        this.translateService.instant(`Please review the medications selected, "${baseName}" appears twice in the prescription and may cause confusion to the patient. Please proceed with caution.`),
+        this.translateService.instant('Duplicate Drug Warning')
+      );
+    }
+
     this.medicines.push({ ...this.addMedicineForm.value});
     this.addMedicineForm.reset();
   }
@@ -1906,9 +1916,32 @@ export class VisitSummaryComponent implements OnInit, OnDestroy, AfterViewInit {
     if (this.standardMedicines.find((o: StandardMedicineModel) => o.drug === this.addStandardMedicineForm.value.drug)) {
       this.coreService.showToast("warning",'Drug already added, please add another drug.','Already Added','addmedicine-warning-toast');
       return;
-    }    
+    }
+
+    const similarDrug = this.findSimilarBaseDrug(this.addStandardMedicineForm.value.drug, this.standardMedicines);
+    if (similarDrug) {
+      const baseName = this.extractBaseDrugName(this.addStandardMedicineForm.value.drug);
+      this.toastr.warning(
+        this.translateService.instant(`Please review the medications selected, "${baseName}" appears twice in the prescription and may cause confusion to the patient. Please proceed with caution.`),
+        this.translateService.instant('Duplicate Drug Warning')
+      );
+    }
+
     this.standardMedicines.push({ ...this.addStandardMedicineForm.value});
     this.addStandardMedicineForm.reset();
+  }
+
+  extractBaseDrugName(drugName: string): string {
+    if (!drugName) return '';
+    const base = drugName.replace(/\s*\d.*$/, '').trim();
+    return (base || drugName.split(' ')[0]).toLowerCase();
+  }
+
+  findSimilarBaseDrug(drugName: string, medicineList: any[]): string | null {
+    const baseName = this.extractBaseDrugName(drugName);
+    if (!baseName) return null;
+    const match = medicineList.find(m => m.drug && this.extractBaseDrugName(m.drug) === baseName);
+    return match ? match.drug : null;
   }
 
   /**
