@@ -131,6 +131,17 @@ export class ProfileComponent implements OnInit, AfterViewInit, OnDestroy {
     }
   ];
 
+  wards: any[] = [
+    {
+      id: 1,
+      name: 'Post Natal Ward'
+    },
+    {
+      id: 2,
+      name: 'Labor Ward'
+    }
+  ];
+
   signaturePadOptions: Object = { // passed through to szimek/signature_pad constructor
     'minWidth': 5,
     'canvasWidth': 300,
@@ -194,6 +205,7 @@ export class ProfileComponent implements OnInit, AfterViewInit, OnDestroy {
       otherQualification:  new FormControl(null),
       specialization: new FormControl(null, [Validators.required]),
       registrationNumber: new FormControl(null, [Validators.required]),
+      provider_ward: new FormControl('Labor Ward', [Validators.required]),
     });
 
     this.professionalInfoForm = new FormGroup({
@@ -384,6 +396,9 @@ export class ProfileComponent implements OnInit, AfterViewInit, OnDestroy {
             break;
           case 'visitState':
             personalFormValues.visitState = this.getAttributeValue(attrType.uuid, attrType.display);
+            break;
+          case 'provider_ward':
+            personalFormValues.provider_ward = this.getAttributeValue(attrType.uuid, attrType.display);
             break;
           default:
             break;
@@ -716,6 +731,9 @@ export class ProfileComponent implements OnInit, AfterViewInit, OnDestroy {
           requests.push(this.providerService.addOrUpdateProviderAttribute(this.provider.uuid, this.getAttributeUuid(attrType.uuid, attrType.display), attrType.uuid, this.getAttributeValueFromForm(attrType.display)));
           break;
         case 'visitState':
+          requests.push(this.providerService.addOrUpdateProviderAttribute(this.provider.uuid, this.getAttributeUuid(attrType.uuid, attrType.display), attrType.uuid, this.getAttributeValueFromForm(attrType.display)));
+          break;
+        case 'provider_ward':
           requests.push(this.providerService.addOrUpdateProviderAttribute(this.provider.uuid, this.getAttributeUuid(attrType.uuid, attrType.display), attrType.uuid, this.getAttributeValueFromForm(attrType.display)));
           break;
         default:
