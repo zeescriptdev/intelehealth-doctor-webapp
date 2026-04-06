@@ -1,2 +1,3 @@
-<router-outlet></router-outlet>
+<app-splash *ngIf="showSplash"></app-splash>
+<router-outlet *ngIf="!showSplash"></router-outlet>
 <ngx-ui-loader></ngx-ui-loader>

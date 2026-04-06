@@ -54,6 +54,7 @@ import { ModalComponentsModule } from "./modal-components/modal-components.modul
 import { SharedModule } from "./shared.module";
 import { PwaService } from "./services/pwa.service";
 import { TestChatComponent } from "./component/test-chat/test-chat.component";
+import { SplashComponent } from './splash/splash.component';
 
 const ngxUiLoaderConfig: NgxUiLoaderConfig = {
   bgsColor: "#2E1E91",
@@ -76,7 +77,8 @@ const initializer = (pwaService: PwaService) => () => pwaService.initPwaPrompt()
     AppComponent,
     TestComponent,
     TestChatComponent,
-    MainContainerComponent
+    MainContainerComponent,
+    SplashComponent
   ],
 
   imports: [
@@ -107,15 +109,15 @@ const initializer = (pwaService: PwaService) => () => pwaService.initPwaPrompt()
     NgxUiLoaderModule.forRoot(ngxUiLoaderConfig),
     NgxUiLoaderHttpModule.forRoot({
       showForeground: true,
-     exclude: [
-        'https://ezazi.intelehealth.org:3004/api/messages/',
-        'https://ezazi.intelehealth.org:3004/api/support/',
-        'https://ezazi.intelehealth.org:3004/api/auth/validateProviderAttribute',
-        'https://ezazi.intelehealth.org/openmrs/ws/rest/v1/visit/',
-        'https://ezazi.intelehealth.org:3004/api/messages/',
-        'https://ezazi.intelehealth.org:3004/api/support/',
-        'https://ezazi.intelehealth.org:3004/api/auth/validateProviderAttribute',
-        'https://ezazi.intelehealth.org/openmrs/ws/rest/v1/visit/'
+    exclude: [
+        'https://testezazi.intelehealth.org:3004/api/messages/',
+        'https://testezazi.intelehealth.org:3004/api/support/',
+        'https://testezazi.intelehealth.org:3004/api/auth/validateProviderAttribute',
+        'https://testezazi.intelehealth.org/openmrs/ws/rest/v1/visit/',
+        'https://testezazi.intelehealth.org:3004/api/messages/',
+        'https://testezazi.intelehealth.org:3004/api/support/',
+        'https://testezazi.intelehealth.org:3004/api/auth/validateProviderAttribute',
+        'https://testezazi.intelehealth.org/openmrs/ws/rest/v1/visit/'
       ]
     }),
     NgxPermissionsModule.forRoot({

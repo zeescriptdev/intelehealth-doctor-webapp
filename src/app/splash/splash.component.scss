@@ -1,0 +1,31 @@
+.splash-screen {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  background: #FFE9EF; // Use your brand color
+  width: 100vw;
+}
+
+.splash-screen img {
+  width: 22vw;
+  max-width: 160px;
+  min-width: 80px;
+  height: auto;
+}
+
+@media (max-width: 600px) {
+  .splash-screen img {
+    width: 32vw;
+    max-width: 120px;
+    min-width: 60px;
+  }
+}
+
+@media (max-width: 400px) {
+  .splash-screen img {
+    width: 48vw;
+    max-width: 90px;
+    min-width: 40px;
+  }
+}

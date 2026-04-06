@@ -7,9 +7,14 @@ import { Component, OnInit } from '@angular/core';
 })
 export class AppComponent implements OnInit {
 
+  showSplash = true;
+
   constructor() { }
 
   ngOnInit() {
+    setTimeout(() => {
+      this.showSplash = false;
+    }, 1000); 
   }
 
 }
