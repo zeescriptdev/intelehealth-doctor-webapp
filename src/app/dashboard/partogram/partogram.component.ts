@@ -717,7 +717,7 @@ export class PartogramComponent implements OnInit, OnDestroy {
       
       if (enc.encounterType.display === 'LCG_SOS') {
 
-        const sosStageHourObs = enc.obs.find((o: any) => o.concept.display === 'SOS_STAGE_HOUR');
+        const sosStageHourObs = enc.obs.find((o: any) => o.concept.display.toLowerCase() === 'sos_stage_hour');
         if (sosStageHourObs) {
           const sosValue = sosStageHourObs.value;
           const match = sosValue.match(/Stage(\d+)_Hour(\d+)_SOS(\d+)/);

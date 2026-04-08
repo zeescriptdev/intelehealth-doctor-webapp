@@ -457,7 +457,7 @@ export class EpartogramComponent implements OnInit {
       let stageNo: number, stageHourNo: number, stageHourSecNo: number;
       
       if (enc.encounterType.display === 'LCG_SOS') {
-        const sosStageHourObs = enc.obs.find((o: any) => o.concept.display === 'SOS_STAGE_HOUR');
+        const sosStageHourObs = enc.obs.find((o: any) => o.concept.display.toLowerCase() === 'sos_stage_hour');
         if (sosStageHourObs) {
           const sosValue = sosStageHourObs.value;
           const match = sosValue.match(/Stage(\d+)_Hour(\d+)_SOS(\d+)/);
@@ -613,7 +613,7 @@ export class EpartogramComponent implements OnInit {
       const observations = enc.obs.sort((a: any, b: any) => new Date(a.obsDatetime).getTime() - new Date(b.obsDatetime).getTime());
       if (observations.length) {
         for (const ob of observations) {
-          if (ob.concept.display === 'SOS_STAGE_HOUR') {
+          if (ob.concept.display.toLowerCase() === 'sos_stage_hour') {
             continue;
           }
           
