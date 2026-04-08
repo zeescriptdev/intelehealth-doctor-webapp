@@ -2337,50 +2337,32 @@ export class VisitSummaryComponent implements OnInit, OnDestroy, AfterViewInit {
   * Save followup
   * @returns {Observable<any>}
   */
-  saveFollowUp(): Observable<any> {
+  saveFollowUp() {
+    let value = 'No';
     if (this.followUpForm.value.wantFollowUp === 'Yes') {
-      const value = `${moment(this.followUpForm.value.followUpDate).format('YYYY-MM-DD')}${this.isFeatureAvailable('followUpTime') ? ',Time:' + (this.followUpForm.value.followUpTime) : ''},Remark:${this.followUpForm.value.followUpReason}${this.isFeatureAvailable('followUpType') ? ',Type:' + (this.followUpForm.value.followUpType) : ''}`;
-      
-      if (this.followUpForm.value.uuid) {
-        return this.encounterService.updateObs(this.followUpForm.value.uuid, { value });
-      } else {
+      value = `${moment(this.followUpForm.value.followUpDate ?? new Date()).format('YYYY-MM-DD')},Time:${this.followUpForm.value.followUpTime ?? 'NA'},Remark:${this.followUpForm.value.followUpReason || 'NA'},Type:${this.followUpForm.value.followUpType || 'NA'}`;
+    }
+    const followUpDate = this.followUpForm.value.wantFollowUp === 'Yes'
+      ? `${this.followUpForm.value.followUpDate},Time:${this.followUpForm.value.followUpTime}`
+      : null;
+
+    if (this.followUpForm.value.uuid) {
+      this.encounterService.updateObs(this.followUpForm.value.uuid, { value }).pipe(tap((response: ObsModel) => {
+        this.followUpForm.patchValue({ present: true});
+        this.notifyHwForAvailablePrescription(`Follow-up scheduled for ${this.visit?.patient?.person?.display || 'Patient'}`, "", followUpDate);
+      })).subscribe();
+    } else {
         this.encounterService.postObs({
           concept: conceptIds.conceptFollow,
           person: this.visit.patient.uuid,
           obsDatetime: new Date(),
           value: value,
           encounter: this.visitNotePresent.uuid
-        }).subscribe ( (res) => {
-            this.followUpForm.patchValue({
-            present: true,
-            wantFollowUp: 'Yes',
-            followUpDate : this.followUpForm.value.followUpDate,
-            followUpTime : this.isFeatureAvailable('followUpTime') ? this.followUpForm.value.followUpTime : null,
-            followUpReason : this.followUpForm.value.followUpReason,
-            uuid: res.uuid,
-            followUpType : this.isFeatureAvailable('followUpType') ? this.followUpForm.value.followUpType : null
-          });
-        });
-      }
-    } else {
-      this.encounterService.postObs({
-        concept: conceptIds.conceptFollow,
-        person: this.visit.patient.uuid,
-        obsDatetime: new Date(),
-        value: this.followUpForm.value.wantFollowUp,
-        encounter: this.visitNotePresent.uuid
-      }).subscribe ( (res) => {
-         this.followUpForm.patchValue({
-            present: true,
-            wantFollowUp: 'No',
-            followUpDate : null,
-            followUpTime : null,
-            followUpReason :null,
-            uuid: res.uuid,
-            followUpType : null
-          });
-      });
-    }
+        }).pipe(tap((response: ObsModel) => {
+          this.followUpForm.patchValue({ present: true});
+          this.notifyHwForAvailablePrescription(`Follow-up scheduled for ${this.visit?.patient?.person?.display || 'Patient'}`, "", followUpDate);
+        })).subscribe();
+     }
   }
 
   /**
