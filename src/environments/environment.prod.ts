@@ -7,8 +7,8 @@ export const environment = {
   mindmapURL: `${window.location.protocol}//${window.location.hostname}:3004/api`,
   notificationURL: `${window.location.protocol}//${window.location.hostname}:3004/notification`,
   socketURL: `${window.location.protocol}//${window.location.hostname}:3004`,
-  captchaSiteKey: "6LeNZvklAAAAABQO-10y2egkCxjVOnXxswDSWL8m",
-  siteKey: "6LeNZvklAAAAABQO-10y2egkCxjVOnXxswDSWL8m",
+  captchaSiteKey: "6Let-aosAAAAAFw3Na6BUof611gjU5Prape0ebpo",
+  siteKey: "6LelRWAsAAAAAD-RkHB_lT9OT19I5ClAIHQzen7O",
   externalPrescriptionCred: 'ZXh0ZXJuYWxwcmVzdXNlcjpJSFVzZXIjMQ==', //externaluser
   vapidPublicKey: "BM4tUVW1UwkMpfAWh2mwhA-wwdIC2rCF1MFypbFpjn23qYMQXaeAaYi6ydGslRb_Vdr2Ws0MW5RSUH9InEbYNhA",
   gatewayURL: `${window.location.protocol}//${window.location.hostname}:3030/`,
