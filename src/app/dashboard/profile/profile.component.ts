@@ -398,7 +398,7 @@ export class ProfileComponent implements OnInit, AfterViewInit, OnDestroy {
             personalFormValues.visitState = this.getAttributeValue(attrType.uuid, attrType.display);
             break;
           case 'provider_ward':
-            personalFormValues.provider_ward = this.getAttributeValue(attrType.uuid, attrType.display);
+            personalFormValues.provider_ward = this.getAttributeValue(attrType.uuid, attrType.display) || 'Labor Ward';
             break;
           default:
             break;

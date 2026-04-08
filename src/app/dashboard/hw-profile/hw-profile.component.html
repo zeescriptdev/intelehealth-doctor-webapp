@@ -63,6 +63,16 @@
                 </span>
               </div>
             </li>
+            <li>
+              <div class="d-flex">
+                <span class="label">
+                  Ward
+                </span>
+                <span class="label-val">
+                  {{personalInfoForm.value.provider_ward|noValue:'NA'}}
+                </span>
+              </div>
+            </li>
           </ul>
         </div>
       </div>
@@ -212,6 +222,14 @@
                 </div>
                 <div *ngIf="f1.emailId.errors">
                   <small class="error-msg" *ngIf="f1.emailId.errors?.alreadyExists">Email already exists. Please enter another email.</small>
+                </div>
+              </div>
+              <div class="form-group col-md-6">
+                <label for="provider_ward">Ward *</label>
+                <ng-select class="profile-select" [items]="wards" bindLabel="name" bindValue="name" [clearable]="false" [searchable]="false" formControlName="provider_ward" placeholder="Select Ward">
+                </ng-select>
+                <div *ngIf="submitted && f1.provider_ward.errors">
+                  <small class="error-msg" *ngIf="f1.provider_ward.errors.required">Select ward</small>
                 </div>
               </div>
             </div>

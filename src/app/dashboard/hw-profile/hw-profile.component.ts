@@ -59,6 +59,16 @@ export class HwProfileComponent implements OnInit, OnDestroy {
   @ViewChild(MatTabGroup) tabGroup: MatTabGroup;
 
   personalInfoForm: FormGroup;
+  wards: any[] = [
+    {
+      id: 1,
+      name: 'Post Natal Ward'
+    },
+    {
+      id: 2,
+      name: 'Labor Ward'
+    }
+  ];
   phoneNumberValid: boolean = false;
   whatsAppNumberValid: boolean = false;
   phoneNumber: string = '';
@@ -99,7 +109,8 @@ export class HwProfileComponent implements OnInit, OnDestroy {
       countryCode2: new FormControl('+91'),
       phoneNumber: new FormControl('', [Validators.required]),
       whatsapp: new FormControl('', [Validators.required]),
-      emailId: new FormControl('', [Validators.required, Validators.pattern("^[a-z0-9._%+-]+@[a-z0-9.-]+\\.[a-z]{2,4}$")], [ProviderAttributeValidator.createValidator(this.authService, 'emailId', JSON.parse(localStorage.getItem('provider')).uuid)])
+      emailId: new FormControl('', [Validators.required, Validators.pattern("^[a-z0-9._%+-]+@[a-z0-9.-]+\\.[a-z]{2,4}$")], [ProviderAttributeValidator.createValidator(this.authService, 'emailId', JSON.parse(localStorage.getItem('provider')).uuid)]),
+      provider_ward: new FormControl('Labor Ward', [Validators.required])
     });
   }
 
@@ -178,6 +189,9 @@ export class HwProfileComponent implements OnInit, OnDestroy {
           case 'whatsapp':
             personalFormValues.whatsapp = this.getAttributeValue(attrType.uuid, attrType.display);
             (personalFormValues.whatsapp) ? this.whatsAppNumberValid = true : this.whatsAppNumberValid = false;
+            break;
+          case 'provider_ward':
+            personalFormValues.provider_ward = this.getAttributeValue(attrType.uuid, attrType.display) || 'Labor Ward';
             break;
           default:
             break;
@@ -383,6 +397,9 @@ export class HwProfileComponent implements OnInit, OnDestroy {
           requests.push(this.providerService.addOrUpdateProviderAttribute(this.provider.uuid, this.getAttributeUuid(attrType.uuid, attrType.display), attrType.uuid, this.getAttributeValueFromForm(attrType.display)));
           break;
         case 'whatsapp':
+          requests.push(this.providerService.addOrUpdateProviderAttribute(this.provider.uuid, this.getAttributeUuid(attrType.uuid, attrType.display), attrType.uuid, this.getAttributeValueFromForm(attrType.display)));
+          break;
+        case 'provider_ward':
           requests.push(this.providerService.addOrUpdateProviderAttribute(this.provider.uuid, this.getAttributeUuid(attrType.uuid, attrType.display), attrType.uuid, this.getAttributeValueFromForm(attrType.display)));
           break;
         default:

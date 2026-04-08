@@ -11,7 +11,7 @@ export const environment = {
   mindmapURL: "https://testezazi.intelehealth.org:3004/api",
   notificationURL: "https://testezazi.intelehealth.org:3004/notification",
   socketURL: "https://testezazi.intelehealth.org:3004",
-  captchaSiteKey: "6LelRWAsAAAAAD-RkHB_lT9OT19I5ClAIHQzen7O",
+  captchaSiteKey: "6Let-aosAAAAAFw3Na6BUof611gjU5Prape0ebpo",
   siteKey: "6LelRWAsAAAAAD-RkHB_lT9OT19I5ClAIHQzen7O",
   externalPrescriptionCred: 'ZXh0ZXJuYWxwcmVzdXNlcjpJSFVzZXIjMQ==', //externaluser
   vapidPublicKey: "BM4tUVW1UwkMpfAWh2mwhA-wwdIC2rCF1MFypbFpjn23qYMQXaeAaYi6ydGslRb_Vdr2Ws0MW5RSUH9InEbYNhA",
