@@ -367,6 +367,10 @@ export class EpartogramComponent implements OnInit {
     for (let x = 0; x < this.patient?.attributes.length; x++) {
       this.pinfo[this.patient?.attributes[x]?.attributeType.display.replace(/ /g,'')] = this.patient?.attributes[x]?.value;
     }
+    const lmpAttr = this.patient?.attributes?.find((a: any) => a.attributeType.display === 'Last Menstrual Period (LMP)');
+    if (lmpAttr) { this.pinfo['LMP'] = lmpAttr.value; }
+    const eddAttr = this.patient?.attributes?.find((a: any) => a.attributeType.display === 'Estimated Date of Delivery (EDD)');
+    if (eddAttr) { this.pinfo['EDD'] = eddAttr.value; }
     if (this.pinfo['ActiveLaborDiagnosed']) {
       this.pinfo['ActiveLaborDiagnosed'] = moment(this.pinfo['ActiveLaborDiagnosed'], 'DD/MM/YYYY hh:mm A').toISOString();
     }
