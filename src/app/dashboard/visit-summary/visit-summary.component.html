@@ -468,7 +468,7 @@
 
                       <!-- Digital Stethoscope: interactive UI -->
                       <ng-container *ngSwitchCase="pvsConstant['digital_stethoscope'].key">
-                        <app-digital-stethoscope></app-digital-stethoscope>
+                        <app-digital-stethoscope [encounters]="visit?.encounters"></app-digital-stethoscope>
                       </ng-container>
                       <!-- END Digital Stethoscope -->
 

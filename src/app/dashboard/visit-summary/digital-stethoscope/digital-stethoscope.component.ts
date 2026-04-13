@@ -1,15 +1,21 @@
 
-import { Component, OnInit } from '@angular/core';
-import { ScreeningResult, LungData, HeartData, DetectedCondition, MeasurementPoint } from 'src/app/model/model';
+import { Component, OnInit, Input, OnChanges, SimpleChanges } from '@angular/core';
+import { ScreeningResult, LungData, HeartData, DetectedCondition, MeasurementPoint, ObsModel, EncounterModel } from 'src/app/model/model';
 
 type AnyData = LungData | HeartData;
+
+/** Concept display name used to identify stethoscope OBS entries */
+const STETHOSCOPE_CONCEPT = 'sound of breathing';
 
 @Component({
   selector: 'app-digital-stethoscope',
   templateUrl: './digital-stethoscope.component.html',
   styleUrls: ['./digital-stethoscope.component.scss']
 })
-export class DigitalStethoscopeComponent implements OnInit {
+export class DigitalStethoscopeComponent implements OnInit, OnChanges {
+  //** The component scans ALL encounters for OBS with concept "Sound of breathing".
+  @Input() encounters: EncounterModel[] = [];
+
   activeTab: 'heart' | 'lungs' = 'heart';
 
   selectedPosition: number | null = null;
@@ -21,8 +27,8 @@ export class DigitalStethoscopeComponent implements OnInit {
   isPlaying: boolean = false;
   speed: number = 1.0;
 
-  deviceName = 'Ayusynk Digital Stethoscope';
-  deviceId = 'AY-2304';
+  deviceName = '';
+  deviceId = '';
 
   lungPositionNames: Record<number, string> = {
     1: 'Right Upper Lobe', 2: 'Left Upper Lobe',
@@ -39,240 +45,24 @@ export class DigitalStethoscopeComponent implements OnInit {
     1: 'Aortic', 2: 'Pulmonic', 3: 'Tricuspid', 4: 'Mitral'
   };
 
-  lungData: LungData[] = [
-    {
-      lung_bpm: "16",
-      location: "lung",
-      position: "Right Upper Lobe",
-      point: 1,
-      recorded_time: "09:42 AM",
-      device: "Ayusynk Digital Stethoscope",
-      report_url: "https://analytics-html-js-plot.s3.amazonaws.com/nivethaintelehealth.org_1_2025101420145521.448_Ant_6/nivethaintelehealth.org_1_2025101420145521.448_Ant_6.html",
-      screening_results: [
-        { confidence_score: 94, condition: "Normal Heart Sound", description: "Normal heart sound detected", condition_detected: "false" },
-        { confidence_score: 12, condition: "Systolic Murmur", description: "Systolic murmur detected", condition_detected: "false" },
-        { confidence_score: 38, condition: "S3 Gallop", description: "S3 gallop detected", condition_detected: "true" }
-      ]
-    },
-    {
-      lung_bpm: "14",
-      location: "lung",
-      position: "Left Upper Lobe",
-      point: 2,
-      recorded_time: "09:42 AM",
-      device: "Ayusynk Digital Stethoscope",
-      report_url: "https://analytics-html-js-plot.s3.amazonaws.com/nivethaintelehealth.org_1_2025101420145521.448_Ant_6/nivethaintelehealth.org_1_2025101420145521.448_Ant_6.html",
-      screening_results: [
-        { confidence_score: 94, condition: "Normal Heart Sound", description: "Normal heart sound detected", condition_detected: "false" },
-        { confidence_score: 12, condition: "Systolic Murmur", description: "Systolic murmur detected", condition_detected: "false" },
-        { confidence_score: 38, condition: "S3 Gallop", description: "S3 gallop detected", condition_detected: "true" }
-      ]
-    },
-    {
-      lung_bpm: "20",
-      location: "lung",
-      position: "Right Mid Lobe",
-      point: 3,
-      recorded_time: "09:42 AM",
-      device: "Ayusynk Digital Stethoscope",
-      report_url: "https://analytics-html-js-plot.s3.amazonaws.com/nivethaintelehealth.org_1_2025101420145521.448_Ant_6/nivethaintelehealth.org_1_2025101420145521.448_Ant_6.html",
-      screening_results: [
-        { confidence_score: 94, condition: "Normal Heart Sound", description: "Normal heart sound detected", condition_detected: "false" },
-        { confidence_score: 12, condition: "Systolic Murmur", description: "Systolic murmur detected", condition_detected: "false" },
-        { confidence_score: 38, condition: "S3 Gallop", description: "S3 gallop detected", condition_detected: "true" }
-      ]
-    },
-    {
-      lung_bpm: "17",
-      location: "lung",
-      position: "Right Lower Lobe",
-      point: 5,
-      recorded_time: "09:42 AM",
-      device: "Ayusynk Digital Stethoscope",
-      report_url: "https://analytics-html-js-plot.s3.amazonaws.com/nivethaintelehealth.org_1_2025101420145521.448_Ant_6/nivethaintelehealth.org_1_2025101420145521.448_Ant_6.html",
-      screening_results: [
-        { confidence_score: 94, condition: "Normal Heart Sound", description: "Normal heart sound detected", condition_detected: "false" },
-        { confidence_score: 12, condition: "Systolic Murmur", description: "Systolic murmur detected", condition_detected: "false" }
-      ]
-    },
-    {
-      lung_bpm: "22",
-      location: "lung",
-      position: "Left Lower Lobe",
-      point: 6,
-      recorded_time: "09:42 AM",
-      device: "Ayusynk Digital Stethoscope",
-      report_url: "https://analytics-html-js-plot.s3.amazonaws.com/nivethaintelehealth.org_1_2025101420145521.448_Ant_5/nivethaintelehealth.org_1_2025101420145521.448_Ant_5.html",
-      screening_results: [
-        { confidence_score: 94, condition: "Normal Heart Sound", description: "Normal heart sound detected", condition_detected: "false" },
-        { confidence_score: 12, condition: "Systolic Murmur", description: "Systolic murmur detected", condition_detected: "false" }
-      ]
-    },
-    {
-      lung_bpm: "19",
-      location: "lung",
-      position: "Right Lateral Upper",
-      point: 7,
-      recorded_time: "09:42 AM",
-      device: "Ayusynk Digital Stethoscope",
-      report_url: "https://analytics-html-js-plot.s3.amazonaws.com/nivethaintelehealth.org_1_2025101420145521.448_Ant_5/nivethaintelehealth.org_1_2025101420145521.448_Ant_5.html",
-      screening_results: [
-        { confidence_score: 94, condition: "Normal Heart Sound", description: "Normal heart sound detected", condition_detected: "false" },
-        { confidence_score: 12, condition: "Systolic Murmur", description: "Systolic murmur detected", condition_detected: "false" }
-      ]
-    },
-    {
-      lung_bpm: "21",
-      location: "lung",
-      position: "Right Lateral Lower",
-      point: 8,
-      recorded_time: "09:42 AM",
-      device: "Ayusynk Digital Stethoscope",
-      report_url: "https://analytics-html-js-plot.s3.amazonaws.com/nivethaintelehealth.org_1_2025101420145521.448_Ant_5/nivethaintelehealth.org_1_2025101420145521.448_Ant_5.html",
-      screening_results: [
-        { confidence_score: 94, condition: "Normal Heart Sound", description: "Normal heart sound detected", condition_detected: "false" },
-        { confidence_score: 12, condition: "Systolic Murmur", description: "Systolic murmur detected", condition_detected: "false" }
-      ]
-    },
-    {
-      lung_bpm: "23",
-      location: "lung",
-      position: "Left Lateral Upper",
-      point: 9,
-      recorded_time: "09:42 AM",
-      device: "Ayusynk Digital Stethoscope",
-      report_url: "https://analytics-html-js-plot.s3.amazonaws.com/nivethaintelehealth.org_1_2025101420145521.448_Ant_5/nivethaintelehealth.org_1_2025101420145521.448_Ant_5.html",
-      screening_results: [
-        { confidence_score: 94, condition: "Normal Heart Sound", description: "Normal heart sound detected", condition_detected: "false" },
-        { confidence_score: 12, condition: "Systolic Murmur", description: "Systolic murmur detected", condition_detected: "false" }
-      ]
-    },
-    {
-      lung_bpm: "15",
-      location: "lung",
-      position: "Left Lateral Lower",
-      point: 10,
-      recorded_time: "09:42 AM",
-      device: "Ayusynk Digital Stethoscope",
-      report_url: "https://analytics-html-js-plot.s3.amazonaws.com/nivethaintelehealth.org_1_2025101420145521.448_Ant_5/nivethaintelehealth.org_1_2025101420145521.448_Ant_5.html",
-      screening_results: [
-        { confidence_score: 94, condition: "Normal Heart Sound", description: "Normal heart sound detected", condition_detected: "false" },
-        { confidence_score: 12, condition: "Systolic Murmur", description: "Systolic murmur detected", condition_detected: "false" }
-      ]
-    },
-    {
-      lung_bpm: "24",
-      location: "lung",
-      position: "Right Upper Back",
-      point: 11,
-      recorded_time: "09:42 AM",
-      device: "Ayusynk Digital Stethoscope",
-      report_url: "https://analytics-html-js-plot.s3.amazonaws.com/nivethaintelehealth.org_1_2025101420145521.448_Ant_6/nivethaintelehealth.org_1_2025101420145521.448_Ant_6.html",
-      screening_results: [
-        { confidence_score: 94, condition: "Normal Heart Sound", description: "Normal heart sound detected", condition_detected: "false" },
-        { confidence_score: 12, condition: "Systolic Murmur", description: "Systolic murmur detected", condition_detected: "false" }
-      ]
-    },
-    {
-      lung_bpm: "13",
-      location: "lung",
-      position: "Left Upper Back",
-      point: 12,
-      recorded_time: "09:42 AM",
-      device: "Ayusynk Digital Stethoscope",
-      report_url: "https://analytics-html-js-plot.s3.amazonaws.com/nivethaintelehealth.org_1_2025101420145521.448_Ant_6/nivethaintelehealth.org_1_2025101420145521.448_Ant_6.html",
-      screening_results: [
-        { confidence_score: 94, condition: "Normal Heart Sound", description: "Normal heart sound detected", condition_detected: "false" },
-        { confidence_score: 12, condition: "Systolic Murmur", description: "Systolic murmur detected", condition_detected: "false" }
-      ]
-    },
-    {
-      lung_bpm: "25",
-      location: "lung",
-      position: "Right Mid Back",
-      point: 13,
-      recorded_time: "09:42 AM",
-      device: "Ayusynk Digital Stethoscope",
-      report_url: "https://analytics-html-js-plot.s3.amazonaws.com/nivethaintelehealth.org_1_2025101420145521.448_Ant_6/nivethaintelehealth.org_1_2025101420145521.448_Ant_6.html",
-      screening_results: [
-        { confidence_score: 94, condition: "Normal Heart Sound", description: "Normal heart sound detected", condition_detected: "false" },
-        { confidence_score: 12, condition: "Systolic Murmur", description: "Systolic murmur detected", condition_detected: "false" },
-        { confidence_score: 38, condition: "S3 Gallop", description: "S3 gallop detected", condition_detected: "true" }
-      ]
-    },
-    {
-      lung_bpm: "11",
-      location: "lung",
-      position: "Left Mid Back",
-      point: 14,
-      recorded_time: "09:42 AM",
-      device: "Ayusynk Digital Stethoscope",
-      report_url: "https://analytics-html-js-plot.s3.amazonaws.com/nivethaintelehealth.org_1_2025101420145521.448_Ant_6/nivethaintelehealth.org_1_2025101420145521.448_Ant_6.html",
-      screening_results: [
-        { confidence_score: 94, condition: "Normal Heart Sound", description: "Normal heart sound detected", condition_detected: "false" },
-        { confidence_score: 12, condition: "Systolic Murmur", description: "Systolic murmur detected", condition_detected: "false" }
-      ]
-    }
-  ];
+  private heartPositionToPoint: Record<string, number> = {
+    'aortic': 1, 'pulmonic': 2, 'tricuspid': 3, 'mitral': 4
+  };
 
-  heartData: HeartData[] = [
-    {
-      heart_bpm: 78,
-      breathing_rate: 16,
-      location: "heart",
-      position: "Aortic",
-      point: 1,
-      recorded_time: "09:42 AM",
-      device: "Ayusynk Digital Stethoscope",
-      report_url: "https://analytics-html-js-plot.s3.amazonaws.com/Ali.ayudevices40gmail.com_1_2020092620115128.084_A/Ali.ayudevices40gmail.com_1_2020092620115128.084_A.html",
-      screening_results: [
-        { confidence_score: 94, condition: "Normal Heart Sound", description: "Normal heart sound detected", condition_detected: "false" },
-        { confidence_score: 12, condition: "Systolic Murmur", description: "Systolic murmur detected", condition_detected: "false" }
-      ]
-    },
-    {
-      heart_bpm: 78,
-      breathing_rate: 16,
-      location: "heart",
-      position: "Pulmonic",
-      point: 2,
-      recorded_time: "09:42 AM",
-      device: "Ayusynk Digital Stethoscope",
-      report_url: "https://analytics-html-js-plot.s3.amazonaws.com/Ali.ayudevices40gmail.com_1_2020092620115128.084_A/Ali.ayudevices40gmail.com_1_2020092620115128.084_A.html",
-      screening_results: [
-        { confidence_score: 94, condition: "Normal Heart Sound", description: "Normal heart sound detected", condition_detected: "false" },
-        { confidence_score: 12, condition: "Systolic Murmur", description: "Systolic murmur detected", condition_detected: "false" }
-      ]
-    },
-    {
-      heart_bpm: 78,
-      breathing_rate: 16,
-      location: "heart",
-      position: "Tricuspid",
-      point: 3,
-      recorded_time: "09:42 AM",
-      device: "Ayusynk Digital Stethoscope",
-      report_url: "https://analytics-html-js-plot.s3.amazonaws.com/Ali.ayudevices40gmail.com_1_2020092620115128.084_A/Ali.ayudevices40gmail.com_1_2020092620115128.084_A.html",
-      screening_results: [
-        { confidence_score: 94, condition: "Normal Heart Sound", description: "Normal heart sound detected", condition_detected: "false" },
-        { confidence_score: 12, condition: "Systolic Murmur", description: "Systolic murmur detected", condition_detected: "false" }
-      ]
-    },
-    {
-      heart_bpm: 78,
-      breathing_rate: 16,
-      location: "heart",
-      position: "Mitral",
-      point: 4,
-      recorded_time: "09:42 AM",
-      device: "Ayusynk Digital Stethoscope",
-      report_url: "https://analytics-html-js-plot.s3.amazonaws.com/Ali.ayudevices40gmail.com_1_2020092620115128.084_A/Ali.ayudevices40gmail.com_1_2020092620115128.084_A.html",
-      screening_results: [
-        { confidence_score: 94, condition: "Normal Heart Sound", description: "Normal heart sound detected", condition_detected: "false" },
-        { confidence_score: 12, condition: "Systolic Murmur", description: "Systolic murmur detected", condition_detected: "false" }
-      ]
-    }
-  ];
+  private lungPositionToPoint: Record<string, number> = {
+    'right upper lobe': 1, 'left upper lobe': 2,
+    'right mid lobe': 3, 'left mid lobe': 4,
+    'right lower lobe': 5, 'left lower lobe': 6,
+    'right lateral upper': 7, 'right lateral lower': 8,
+    'left lateral upper': 9, 'left lateral lower': 10,
+    'right upper back': 11, 'left upper back': 12,
+    'right mid back': 13, 'left mid back': 14,
+    'right lower back': 15, 'left lower back': 16
+  };
+
+  // Data arrays — populated from OBS encounter data (no static placeholders)
+  lungData: LungData[] = [];
+  heartData: HeartData[] = [];
 
   anteriorPoints: MeasurementPoint[] = [
     { id: 1, top: '48%', left: '42%' },
@@ -323,7 +113,129 @@ export class DigitalStethoscopeComponent implements OnInit {
   }
 
   ngOnInit(): void {
-    // Auto-select first point on heart tab
+    this.parseStethoscopeData();
+  }
+
+  ngOnChanges(changes: SimpleChanges): void {
+    if (changes['encounters']) {
+      this.parseStethoscopeData();
+    }
+  }
+
+  private parseStethoscopeData(): void {
+    this.lungData = [];
+    this.heartData = [];
+    this.deviceName = '';
+    this.deviceId = '';
+
+    if (!this.encounters?.length) return;
+
+    // Collect ALL "Sound of breathing" OBS from every encounter
+    const stethObs: ObsModel[] = [];
+    for (const enc of this.encounters) {
+      if (!enc.obs?.length) continue;
+      for (const obs of enc.obs) {
+        if (obs.concept?.display?.toLowerCase().includes(STETHOSCOPE_CONCEPT)) {
+          stethObs.push(obs);
+        }
+      }
+    }
+
+    if (!stethObs.length) return;
+
+    // Parse each OBS entry into lung/heart recordings
+    for (const obs of stethObs) {
+      const parsed = this.parseObsValue(obs.value);
+      if (!parsed || typeof parsed !== 'object') continue;
+
+      const sound: string = parsed.sound ?? '';           // "heart" or "lung"
+      const obsPosition: string = parsed.position ?? '';  // e.g. "aortic"
+      const recordings: any[] = parsed.outputfromayusynk; // Ayusynk device output
+
+      if (!Array.isArray(recordings) || !recordings.length) continue;
+
+      for (const rec of recordings) {
+        this.mapRecordingToData(rec, sound, obsPosition);
+      }
+    }
+
+    // Default device name from Ayusynk if not populated from recordings
+    if (!this.deviceName) {
+      this.deviceName = 'Ayusynk Digital Stethoscope';
+    }
+  }
+
+  /**
+   * Parse an OBS value — handles JSON strings, coded objects, and plain values.
+   */
+  private parseObsValue(value: any): any {
+    if (!value) return null;
+
+    if (typeof value === 'string') {
+      const trimmed = value.trim();
+      if (trimmed.startsWith('{') || trimmed.startsWith('[')) {
+        try { return JSON.parse(trimmed); } catch { return null; }
+      }
+      return null;
+    }
+
+    // Already an object (OpenMRS sometimes pre-parses)
+    if (typeof value === 'object') {
+      return value;
+    }
+
+    return null;
+  }
+
+  /**
+   * Map a single Ayusynk recording to the appropriate data array.
+   * Resolves the position name to a point number using reverse lookup maps.
+   */
+  private mapRecordingToData(rec: any, sound: string, obsPosition: string): void {
+    const position = rec.position || obsPosition || '';
+    const posLower = position.toLowerCase().trim();
+
+    if (sound === 'heart' || rec.location === 'heart') {
+      const point = this.heartPositionToPoint[posLower] ?? 0;
+      this.heartData.push({
+        heart_bpm: rec.heart_bpm ?? 'N/A',
+        breathing_rate: rec.breathing_rate ?? 'N/A',
+        location: 'heart',
+        position: this.heartPositionNames[point] || position,
+        point,
+        report_url: rec.report_url ?? '',
+        recorded_time: rec.recorded_time ?? '',
+        device: rec.device ?? 'Ayusynk Digital Stethoscope',
+        screening_results: this.toScreeningResults(rec.screening_results)
+      });
+    } else if (sound === 'lung' || rec.location === 'lung') {
+      const point = this.lungPositionToPoint[posLower] ?? 0;
+      this.lungData.push({
+        lung_bpm: rec.lung_bpm?.toString() ?? 'N/A',
+        location: 'lung',
+        position: this.lungPositionNames[point] || position,
+        point,
+        report_url: rec.report_url ?? '',
+        recorded_time: rec.recorded_time ?? '',
+        device: rec.device ?? 'Ayusynk Digital Stethoscope',
+        screening_results: this.toScreeningResults(rec.screening_results)
+      });
+    }
+
+    // Extract device info from the first recording that has it
+    if (rec.device && !this.deviceName) this.deviceName = rec.device;
+    if (rec.deviceId && !this.deviceId) this.deviceId = rec.deviceId;
+  }
+
+  //** Safely normalize screening_results with fallback to empty array.
+  private toScreeningResults(results: any): ScreeningResult[] {
+    if (!Array.isArray(results)) return [];
+    return results.map((r: any) => ({
+      confidence_score: r.confidence_score ?? 0,
+      condition: r.condition ?? '',
+      description: r.description ?? '',
+      condition_detected: String(r.condition_detected ?? false)
+    }));
   }
 
   switchTab(tab: 'heart' | 'lungs'): void {
@@ -421,18 +333,18 @@ export class DigitalStethoscopeComponent implements OnInit {
 
   getHeartRate(data: AnyData): string | number {
     if ('heart_bpm' in data) return data.heart_bpm;
-    return 78; // Default heart rate
+    return 'N/A';
   }
 
   getBreathingRate(data: AnyData): string | number {
     if ('heart_bpm' in data) {
-      return (data as HeartData).breathing_rate || 16;
+      return (data as HeartData).breathing_rate || 'N/A';
     }
     return (data as LungData).lung_bpm;
   }
 
   getRecordedTime(data: AnyData): string {
-    return data.recorded_time || '09:42 AM';
+    return data.recorded_time || 'N/A';
   }
 
   hasConditionForSelected(): boolean {

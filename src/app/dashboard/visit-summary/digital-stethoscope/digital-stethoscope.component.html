@@ -3,7 +3,7 @@
   <header class="da-header">
     <div class="da-header-left">
       <h2 class="da-title">Digital Auscultation</h2>
-      <p class="da-subtitle">{{ deviceName }} &middot; Device ID: {{ deviceId }}</p>
+      <p class="da-subtitle" *ngIf="deviceName || deviceId">{{ deviceName || 'N/A' }} &middot; Device ID: {{ deviceId || 'N/A' }}</p>
     </div>
     <div class="da-header-badges">
       <span class="badge badge-heart">
@@ -29,8 +29,18 @@
     </button>
   </div>
 
+  <!-- No Data State: shown when no OBS recordings are available -->
+  <div class="no-selection-panel" *ngIf="heartRecordingCount === 0 && lungRecordingCount === 0" style="text-align: center; padding: 2rem;">
+    <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#9ca3af" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+      <circle cx="12" cy="12" r="10"></circle>
+      <line x1="12" y1="16" x2="12" y2="12"></line>
+      <line x1="12" y1="8" x2="12.01" y2="8"></line>
+    </svg>
+    <p>No digital auscultation data available for this visit.</p>
+  </div>
+
   <!-- Main Content -->
-  <div class="da-content">
+  <div class="da-content" *ngIf="heartRecordingCount > 0 || lungRecordingCount > 0">
     <!-- Left Column: Body Diagrams -->
     <div class="da-diagrams">
       <!-- Heart View -->
@@ -163,7 +173,7 @@
 
         <!-- Position Name -->
         <h3 class="position-name">{{ getSelectedPositionName() }}</h3>
-        <p class="recorded-info">Recorded {{ getRecordedTime(selectedData) }} &middot; {{ deviceName }}</p>
+        <p class="recorded-info">Recorded {{ getRecordedTime(selectedData) }} &middot; {{ deviceName || 'N/A' }}</p>
 
         <!-- Recording Details -->
         <div class="recording-details">
@@ -187,7 +197,7 @@
             </div>
             <div class="detail-field detail-full-width">
               <span class="detail-label">Device</span>
-              <span class="detail-value">{{ deviceName }}</span>
+              <span class="detail-value">{{ deviceName || 'N/A' }}</span>
             </div>
           </div>
         </div>
