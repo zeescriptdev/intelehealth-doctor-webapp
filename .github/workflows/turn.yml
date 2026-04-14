@@ -67,4 +67,4 @@ jobs:
               --env-file /home/ubuntu/deploy/webapp/.env \
               intelehealth-webapp:latest
             
-            rm webapp_image.tar
+            rm /home/ubuntu/deploy/webapp/webapp_image.tar.gz
