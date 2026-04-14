@@ -1,9 +1,10 @@
 name: Turn Webapp
 on:
+  workflow_dispatch:  # Allows manual trigger
   push:
     branches:
       - nas-ida5-development-master
-  workflow_dispatch:  # Allows manual trigger
+  
   
 jobs:
   build-and-deploy:
