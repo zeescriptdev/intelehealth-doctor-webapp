@@ -3,7 +3,7 @@ on:
   workflow_dispatch:  # Allows manual trigger
   push:
     branches:
-      - nas-ida5-development-master
+      - development-master
   
   
 jobs:
