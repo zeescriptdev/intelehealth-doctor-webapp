@@ -1,4 +1,4 @@
-import { Component, Inject, OnInit, OnDestroy, ViewChild } from '@angular/core';
+import { Component, Inject, OnInit, OnDestroy, ViewChild, NgZone } from '@angular/core';
 import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
 import { ToastrService } from 'ngx-toastr';
 import { ChatService } from 'src/app/services/chat.service';
@@ -7,7 +7,7 @@ import { environment } from 'src/environments/environment';
 import * as moment from 'moment';
 import { CoreService } from 'src/app/services/core/core.service';
 import { getCacheData, isFeaturePresent } from 'src/app/utils/utility-functions';
-import { Participant, RemoteParticipant, RemoteTrack, RemoteTrackPublication, Track } from 'livekit-client';
+import { Participant, RemoteParticipant, RemoteTrack, RemoteTrackPublication, Track, ConnectionQuality } from 'livekit-client';
 import { WebrtcService } from 'src/app/services/webrtc.service';
 import { doctorDetails, visitTypes } from 'src/config/constant';
 import { ApiResponseModel, EncounterProviderModel, MessageModel, RecordingResponse } from 'src/app/model/model';
@@ -58,13 +58,31 @@ export class VideoCallComponent implements OnInit, OnDestroy {
   recodingStarted = false;
   tableId: number;
   location: string;
+
+  callType: string;
   videoBitrateTooLow: boolean = false;
   videoBitrateCheckInterval: any;
   lastVideoBytesSent = 0;
   lastTimestamp = 0;
-  // isVideoRecordingEnabled: boolean;
-  callType: string;
+  lastAudioBytesSent = 0;
+  lastAudioTimestamp = 0;
+
   isVideoRecordingEnabled: boolean;
+
+  cameraIssue: boolean = false;
+  microphoneIssue: boolean = false;
+
+  private hasShownPoorToast: boolean = false;
+  private hasShownReconnectToast: boolean = false;
+
+  private callDurationStr: string = '00:00';
+  
+  // Reconnection state management
+  public isReconnecting: boolean = false;
+  private reconnectionSubscriptions: any[] = [];
+
+  // Connection quality state
+  public localConnectionQuality: ConnectionQuality | null = null;
 
   constructor(
     @Inject(MAT_DIALOG_DATA) public data,
@@ -75,7 +93,8 @@ export class VideoCallComponent implements OnInit, OnDestroy {
     private toastr: ToastrService,
     private webrtcSvc: WebrtcService,
     private appConfigService: AppConfigService,
-     private analytics: AnalyticsService
+    private analytics: AnalyticsService,
+    private ngZone: NgZone
   ) { }
 
   async ngOnInit() {
@@ -95,11 +114,13 @@ export class VideoCallComponent implements OnInit, OnDestroy {
     if (this.data.patientId && this.data.visitId) {
       this.getMessages();
     }
-    /**
-     * Update call duration every second
-     */
+    // Update duration every second to avoid computed getter changing during check
     this.changeDetForDuration = setInterval(() => {
-      this.updateCallDuration();
+      if (this.callStartedAt) {
+        const duration = moment.duration(moment().diff(this.callStartedAt));
+        const [h, m, s] = [duration.hours(), duration.minutes(), duration.seconds()].map(n => String(n).padStart(2, '0'));
+        this.callDurationStr = h !== '00' ? `${h}:${m}:${s}` : `${m}:${s}`;
+      }
     }, 1000);
     if (this.initiator === 'hw') {
       this.connecting = true;
@@ -117,6 +138,11 @@ export class VideoCallComponent implements OnInit, OnDestroy {
 
     this.isVideoRecordingEnabled = this.appConfigService.ai_llm_recording_section
 
+    // Subscribe to connection quality updates
+    const localQualitySub = this.webrtcSvc.localConnectionQuality$.subscribe((q) => {
+      this.localConnectionQuality = q;
+    });
+    this.reconnectionSubscriptions.push(localQualitySub, localQualitySub);
   }
 
   /**
@@ -170,6 +196,9 @@ export class VideoCallComponent implements OnInit, OnDestroy {
     }
     console.log("this.webrtcSvc.token",this.webrtcSvc.token);
     if (!this.webrtcSvc.token) return;
+    // Attach reconnection handlers BEFORE creating the room to catch early events
+    this.attachRoomReconnectionHandlers();
+    
     this.webrtcSvc.createRoomAndConnectCall({
       localElement: this.localVideoRef,
       remoteElement: this.remoteVideoRef,
@@ -180,7 +209,63 @@ export class VideoCallComponent implements OnInit, OnDestroy {
       handleTrackUnmuted: this.handleTrackUnmuted.bind(this),
       handleParticipantDisconnected: this.handleParticipantDisconnected.bind(this),
       handleParticipantConnect: this.handleParticipantConnect.bind(this),
+      handleMediaError: this.handleMediaDeviceError.bind(this),
     });
+  }
+
+  /**
+  * Show meaningful error when camera/mic isn't available or permission denied
+  */
+  private handleMediaDeviceError(err: any) {
+    const source = err?.source || 'device';
+    const rawError = err?.error || err;
+    const errorName = rawError?.name || rawError?.code;
+    const errorMessage = rawError?.message || rawError?.toString?.();
+
+    const deviceLabel = source === 'camera' ? 'Camera' : source === 'microphone' ? 'Microphone' : 'Media device';
+
+    // Map common getUserMedia errors to actionable, device-specific toasts
+    let title = `${deviceLabel} error`;
+    let userMsg = `Unable to access ${deviceLabel.toLowerCase()}.`;
+
+    if (errorName === 'NotAllowedError' || errorName === 'SecurityError') {
+      title = `${deviceLabel} access blocked`;
+      userMsg = `Permission denied for ${deviceLabel.toLowerCase()}. Allow access in your browser site settings and retry.`;
+    } else if (errorName === 'NotFoundError' || errorName === 'DevicesNotFoundError' || errorMessage?.includes('Requested device not found')) {
+      title = `${deviceLabel} not found`;
+      userMsg = `No ${deviceLabel.toLowerCase()} detected. Connect a ${deviceLabel.toLowerCase()} and try again.`;
+    } else if (errorName === 'NotReadableError' || errorName === 'TrackStartError') {
+      title = `${deviceLabel} in use`;
+      userMsg = `Your ${deviceLabel.toLowerCase()} is being used by another application. Close it and try again.`;
+    } else if (errorName === 'OverconstrainedError') {
+      title = `${deviceLabel} constraints not satisfied`;
+      userMsg = `The selected ${deviceLabel.toLowerCase()} doesn't meet the required settings. Choose a different device or reset to defaults.`;
+    }
+
+    this.analytics.logEvent('media-device-error', 'engagement', 'call_button', 1, {
+      doctorUserId: this.data?.connectToDrId,
+      doctorName: this.doctorName,
+      patientOpenMrsId: this.data?.patientOpenMrsId,
+      hwName: getCacheData(true, visitTypes.PATIENT_VISIT_PROVIDER)?.display?.split(":")?.[0],
+      hwId: getCacheData(true, visitTypes.PATIENT_VISIT_PROVIDER)?.provider?.uuid,
+      visitId: this.data?.visitId,
+      location: this.location,
+      callType: this.callType,
+      source,
+      errorName,
+      errorMessage
+    });
+
+    this.toastr.error(userMsg, title, { timeOut: 5000 });
+
+    // Set indicator flags for UI badges
+    if (source === 'camera') {
+      this.cameraIssue = true;
+      this._localVideoOff = true;
+    } else if (source === 'microphone') {
+      this.microphoneIssue = true;
+      this._localAudioMute = true;
+    }
   }
 
   /**
@@ -197,7 +282,7 @@ export class VideoCallComponent implements OnInit, OnDestroy {
   * @return {void}
   */
   onHWIncomingCallConnect() {
-setTimeout(() => this.connecting = false);
+    setTimeout(() => this.connecting = false);
     this.callStartedAt = moment();
     this.socketSvc.emitEvent('call-connected', this.incomingData);
   }
@@ -258,13 +343,15 @@ setTimeout(() => this.connecting = false);
   async handleParticipantConnect(): Promise<void> {
     this.callConnected = true;
     this.callStartedAt = moment();
-
-    if(this.callType === 'audio') {
-      this._localVideoOff = true;
-    }
-     this.videoBitrateCheckInterval = setInterval(() => {
+    if (this.callType === 'audio') {
+      // this._localVideoOff = true;
+      this._localVideoOff = this.webrtcSvc.toggleVideo();
+      const event = this._localVideoOff ? 'videoOff' : 'videoOn';
+      this.socketSvc.emitEvent(event, { fromWebapp: true });
+        this.videoBitrateCheckInterval = setInterval(() => {
         this.checkLocalVideoBitrate();
       }, 3000);
+    }
 
     this.socketSvc.emitEvent('call-connected', this.incomingData);
     this.analytics.logEvent('call-connected', 'engagement', 'call_button', 1,  this.buildAnalyticsEventPayload());
@@ -347,6 +434,29 @@ setTimeout(() => this.connecting = false);
   }
 
   /**
+   * Map LiveKit ConnectionQuality to a 0-4 level for UI bars
+   */
+  networkQualityClass(q: ConnectionQuality) {
+    switch (q) {
+      case ConnectionQuality.Excellent: return 'quality--excellent';
+      case ConnectionQuality.Good: return 'quality--good';
+      case ConnectionQuality.Poor: return 'quality--poor';
+      case ConnectionQuality.Lost: return 'quality--poor';
+      default: return '';
+    }
+  }
+
+  qualityLevel(q: ConnectionQuality): number {
+    switch (q) {
+      case ConnectionQuality.Excellent: return 4;
+      case ConnectionQuality.Good: return 3;
+      case ConnectionQuality.Poor: return 1;
+      case ConnectionQuality.Lost: return 0;
+      default: return 0;
+    }
+  }
+
+  /**
   * Handle track unsubscribed callback
   * @param {RemoteTrack} track - Track
   * @param {RemoteTrackPublication} publication - Publication
@@ -400,7 +510,10 @@ setTimeout(() => this.connecting = false);
   * @return {void}
   */
   handleParticipantDisconnected() {
-    this.toastr.info("Call ended from Health Worker's end.", null, { timeOut: 2000 });
+    // Suppress transient disconnect toast during reconnect attempts
+    if (!this.webrtcSvc.isCurrentlyReconnecting) {
+      this.toastr.info("Call ended from Health Worker's end.", null, { timeOut: 2000 });
+    }
     this.callConnected = false;
     this.socketSvc.incomingCallData = null;
     this.endCallInRoom();
@@ -538,42 +651,79 @@ setTimeout(() => this.connecting = false);
 
 
   async checkLocalVideoBitrate(): Promise<void> {
-  const pc: RTCPeerConnection | undefined = (this.webrtcSvc.room as any)?.engine?.pcManager?.publisher?._pc;
+    const pc: RTCPeerConnection | undefined = (this.webrtcSvc.room as any)?.engine?.pcManager?.publisher?._pc;
+    if (!pc) return;
 
-  const stats = await pc.getStats();
+    const stats = await pc.getStats();
 
-  stats.forEach((report) => {
-    if (this.lastTimestamp === 0) {
-    this.lastTimestamp = report.timestamp;
-    this.lastVideoBytesSent = report.bytesSent;
-    return;
-    }
-    if (
-      report.type === 'outbound-rtp' &&
-      report.kind === 'video' &&
-      typeof report.bytesSent === 'number' &&
-      typeof report.timestamp === 'number'
-    ) {
-      if (this.lastTimestamp && this.lastVideoBytesSent) {
-        const timeDiffSec = (report.timestamp - this.lastTimestamp) / 1000;
-        const bytesDiff = report.bytesSent - this.lastVideoBytesSent;
-        if (timeDiffSec > 0) {
-        const bitrate = (bytesDiff * 8) / timeDiffSec; // bits per second
-        this.videoBitrateTooLow = bitrate < 600_000; // e.g. < 600 kbps
-        }
+    stats.forEach((report) => {
+      if (this.lastTimestamp === 0) {
+        this.lastTimestamp = report.timestamp;
+        this.lastVideoBytesSent = report.bytesSent;
+        return;
       }
-      this.lastTimestamp = report.timestamp;
-      this.lastVideoBytesSent = report.bytesSent;
-    }
-  });
+      
+      if (report.type === 'outbound-rtp' && report.kind === 'video' && typeof report.bytesSent === 'number' && typeof report.timestamp === 'number') {
+        if (this.lastTimestamp && this.lastVideoBytesSent) {
+          const timeDiffSec = (report.timestamp - this.lastTimestamp) / 1000;
+          const bytesDiff = report.bytesSent - this.lastVideoBytesSent;
+          if (timeDiffSec > 0) {
+          const bitrate = (bytesDiff * 8) / timeDiffSec; // bits per second
+          console.log('Video bitrate (bps):', bitrate);
 
- if (this.videoBitrateTooLow && !this._localVideoOff) {
-      this.toastr.warning('Low bandwidth detected. switching to audio call');
-      this._localVideoOff = true;
-    } else {
-      this._localVideoOff = false;
+          this.videoBitrateTooLow = bitrate < 600_000; // e.g. < 200 kbps
+          }
+        }
+        this.lastTimestamp = report.timestamp;
+        this.lastVideoBytesSent = report.bytesSent;
+      }
+
+    });
+    if (this.videoBitrateTooLow) {
+      if (!this.hasShownPoorToast) {
+        this.toastr.warning('Low bandwidth detected. Continuing with the audio call');
+        this.hasShownPoorToast = true;
+      }
+    }
   }
-}
+
+  /**
+  * Attach LiveKit room reconnection handlers to update UI and logic
+  * @return {void}
+  */
+  private attachRoomReconnectionHandlers(): void {    
+    const signalReconnectingSub = this.webrtcSvc.signalReconnecting$.subscribe(() => {
+      // Update UI immediately for signal reconnection
+      this.ngZone.run(() => {
+        this.isReconnecting = true;
+      });
+    });
+
+    const isReconnectingSub = this.webrtcSvc.isReconnecting$.subscribe((isReconnecting) => {
+      console.log('Reconnection state changed:', isReconnecting);
+      this.ngZone.run(() => {
+        this.isReconnecting = isReconnecting;        
+        if (isReconnecting) {
+          if (!this.hasShownReconnectToast) {
+            this.toastr.warning('Network issue detected. Reconnecting...', 'Connection Lost', { 
+              timeOut: 3000
+            });
+            this.hasShownReconnectToast = true;
+          }
+        } 
+        // else {
+        //   // Reset toast flag and show success message
+        //   // this.hasShownReconnectToast = false;
+        //   // this.toastr.success('Connection restored successfully!', 'Reconnected', { 
+        //   //   timeOut: 2000
+        //   // });
+        // }
+      });
+    });
+
+    // Store subscriptions for cleanup
+    this.reconnectionSubscriptions.push(signalReconnectingSub, isReconnectingSub);
+  }
 
   setFlag() {
     this.endCall = true;
@@ -644,6 +794,8 @@ setTimeout(() => this.connecting = false);
     clearInterval(this.videoBitrateCheckInterval);
     this.lastVideoBytesSent = 0;
     this.lastTimestamp = 0;
+    this.lastAudioBytesSent = 0;
+    this.lastAudioTimestamp = 0;
     this.close();
   }
 
@@ -676,6 +828,11 @@ setTimeout(() => this.connecting = false);
 
     this.analytics.logEvent('toggle_audio', 'engagement', 'audio_button', 1,  this.buildAnalyticsEventPayload());
 
+    // Clear mic issue indicator when enabling mic succeeds
+    if (this.microphoneIssue) {
+      this._localAudioMute = true;
+      this.handleMediaDeviceError({ source: 'microphone', error: { name: 'NotAllowedError' } });
+    }
   }
 
   /**
@@ -689,6 +846,11 @@ setTimeout(() => this.connecting = false);
 
     this.analytics.logEvent('toggle_video', 'engagement', 'video_button', 1,  this.buildAnalyticsEventPayload());
 
+    // Clear camera issue indicator when enabling camera succeeds
+    if (this.cameraIssue) {
+      this._localVideoOff = true;
+      this.handleMediaDeviceError({ source: 'camera', error: { name: 'NotAllowedError' } });
+    }
   }
 
   /**
@@ -716,22 +878,9 @@ setTimeout(() => this.connecting = false);
   * @return {string} - Call duration
   */
   get callDuration() {
-    return this.callDurationDisplay;
+    return this.callDurationStr;
   }
 
-    /**
- * Update call duration display
- * @return {void}
- */
-  updateCallDuration() {
-    if (!this.callStartedAt) {
-      this.callDurationDisplay = '00:00';
-      return;
-    }
-    const duration = moment.duration(moment().diff(this.callStartedAt));
-    const [h, m, s] = [duration.hours(), duration.minutes(), duration.seconds()].map(n => String(n).padStart(2, '0'));
-    this.callDurationDisplay = h !== '00' ? `${h}:${m}:${s}` : `${m}:${s}`;
-  }
   /**
   * Check if attachement is pdf
   * @return {boolean} - True if pdf else false
@@ -768,6 +917,11 @@ setTimeout(() => this.connecting = false);
   ngOnDestroy(): void {
     this.socketSvc.incoming = false;
     clearInterval(this.changeDetForDuration);
+    
+    // Clean up reconnection subscriptions
+    this.reconnectionSubscriptions.forEach(sub => sub.unsubscribe());
+    this.reconnectionSubscriptions = [];
+    
     this.webrtcSvc.disconnect();
     this.webrtcSvc.token = '';
   }
@@ -782,21 +936,19 @@ setTimeout(() => this.connecting = false);
   }
 
   buildAnalyticsEventPayload() {
+    const providerData = getCacheData(true, visitTypes.PATIENT_VISIT_PROVIDER);
 
-  const providerData = getCacheData(true, visitTypes.PATIENT_VISIT_PROVIDER);
-
-  return {
-    doctorUserId: this.data?.connectToDrId,
-    doctorName: this.doctorName,
-    patientOpenMrsId: this.data?.patientOpenMrsId,
-    hwName: providerData?.display?.split(":")?.[0] || null,
-    hwId: providerData?.provider?.uuid || null,
-    visitId: this.data?.visitId,
-    location: this.location,
-    callType: this.callType,
-    recordingId: this.tableId,
-    callDuration: this.callDuration
-  };
-}
-
+    return {
+      doctorUserId: this.data?.connectToDrId,
+      doctorName: this.doctorName,
+      patientOpenMrsId: this.data?.patientOpenMrsId,
+      hwName: providerData?.display?.split(":")?.[0] || null,
+      hwId: providerData?.provider?.uuid || null,
+      visitId: this.data?.visitId,
+      location: this.location,
+      callType: this.callType,
+      recordingId: this.tableId,
+      callDuration: this.callDuration
+    };
+  }
 }

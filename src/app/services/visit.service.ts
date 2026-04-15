@@ -9,7 +9,6 @@ import { visitTypes } from "src/config/constant";
 })
 export class VisitService {
 
-
   private baseURL = environment.baseURL;
   private baseURLMindmap = environment.mindmapURL;
   private baseURLAbha = environment.abhaURL;
@@ -303,6 +302,20 @@ export class VisitService {
       frequency: splitMed?.[5] ?? '-'
     };
     if (uuid) med.uuid = uuid;
+
+    // Restore AI metadata from 7th field (JSON object, may contain colons)
+    const aiMetaStr = splitMed?.slice(6).join(':');
+    if (aiMetaStr) {
+      try {
+        const aiMeta = JSON.parse(aiMetaStr);
+        med.aiGenerated = true;
+        if (aiMeta.r) med.rationale = aiMeta.r;
+        if (aiMeta.l) med.likelihood = aiMeta.l;
+      } catch {
+        if (aiMetaStr === 'Y') med.aiGenerated = true;
+      }
+    }
+
     return med;
   }
 }

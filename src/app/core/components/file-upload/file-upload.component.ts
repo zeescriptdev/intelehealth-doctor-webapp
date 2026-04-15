@@ -149,7 +149,6 @@ export class FileUploadComponent implements OnChanges {
     } else {
       this.onFileRemove.emit({ success : true , filePath : this.filePath});
       this.deleteSubject.next(this.options.formData.key);
-
     }
     
   }
