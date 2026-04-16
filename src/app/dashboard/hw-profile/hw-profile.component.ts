@@ -382,38 +382,38 @@ export class HwProfileComponent implements OnInit, OnDestroy {
   }
 
   updateProviderAttributes() {
-    let requests = [];
-    this.providerAttributeTypes.forEach((attrType: any) => {
-      switch (attrType.display) {
-        case 'address':
-          break;
-        case 'countryCode':
-          requests.push(this.providerService.addOrUpdateProviderAttribute(this.provider.uuid, this.getAttributeUuid(attrType.uuid, attrType.display), attrType.uuid, this.getAttributeValueFromForm('countryCode1')));
-          break;
-        case 'emailId':
-          requests.push(this.providerService.addOrUpdateProviderAttribute(this.provider.uuid, this.getAttributeUuid(attrType.uuid, attrType.display), attrType.uuid, this.getAttributeValueFromForm(attrType.display)));
-          break;
-        case 'phoneNumber':
-          requests.push(this.providerService.addOrUpdateProviderAttribute(this.provider.uuid, this.getAttributeUuid(attrType.uuid, attrType.display), attrType.uuid, this.getAttributeValueFromForm(attrType.display)));
-          break;
-        case 'whatsapp':
-          requests.push(this.providerService.addOrUpdateProviderAttribute(this.provider.uuid, this.getAttributeUuid(attrType.uuid, attrType.display), attrType.uuid, this.getAttributeValueFromForm(attrType.display)));
-          break;
-        case 'provider_ward':
-          requests.push(this.providerService.addOrUpdateProviderAttribute(this.provider.uuid, this.getAttributeUuid(attrType.uuid, attrType.display), attrType.uuid, this.getAttributeValueFromForm(attrType.display)));
-          break;
-        default:
-          break;
+    // Re-fetch provider to get latest attributes and avoid creating duplicates
+    this.authService.getProvider(JSON.parse(localStorage.user).uuid).subscribe((freshProvider: any) => {
+      if (freshProvider.results.length) {
+        this.provider = freshProvider.results[0];
+        localStorage.setItem('provider', JSON.stringify(this.provider));
       }
-    });
-    this.providerService.requestDataFromMultipleSources(requests).subscribe((responseList: any) => {
-      // console.log(responseList);
-      // if (this.personalInfoForm.get('phoneNumber').dirty && this.oldPhoneNumber != this.getAttributeValueFromForm('phoneNumber')) {
-      //   this.toastr.success("Profile has been updated successfully", "Profile Updated");
-      //   this.toastr.warning("Kindly re-login to see updated details", "Re-login");
-      //   this.cookieService.delete('app.sid', '/');
-      //   this.authService.logOut();
-      // } else {
+
+      let requests: any[] = [];
+      this.providerAttributeTypes.forEach((attrType: any) => {
+        switch (attrType.display) {
+          case 'address':
+            break;
+          case 'countryCode':
+            requests.push(this.providerService.addOrUpdateProviderAttribute(this.provider.uuid, this.getAttributeUuid(attrType.uuid, attrType.display), attrType.uuid, this.getAttributeValueFromForm('countryCode1')));
+            break;
+          case 'emailId':
+            requests.push(this.providerService.addOrUpdateProviderAttribute(this.provider.uuid, this.getAttributeUuid(attrType.uuid, attrType.display), attrType.uuid, this.getAttributeValueFromForm(attrType.display)));
+            break;
+          case 'phoneNumber':
+            requests.push(this.providerService.addOrUpdateProviderAttribute(this.provider.uuid, this.getAttributeUuid(attrType.uuid, attrType.display), attrType.uuid, this.getAttributeValueFromForm(attrType.display)));
+            break;
+          case 'whatsapp':
+            requests.push(this.providerService.addOrUpdateProviderAttribute(this.provider.uuid, this.getAttributeUuid(attrType.uuid, attrType.display), attrType.uuid, this.getAttributeValueFromForm(attrType.display)));
+            break;
+          case 'provider_ward':
+            requests.push(this.providerService.addOrUpdateProviderAttribute(this.provider.uuid, this.getAttributeUuid(attrType.uuid, attrType.display), attrType.uuid, this.getAttributeValueFromForm(attrType.display)));
+            break;
+          default:
+            break;
+        }
+      });
+      this.providerService.requestDataFromMultipleSources(requests).subscribe((responseList: any) => {
         this.authService.getProvider(JSON.parse(localStorage.user).uuid).subscribe((provider: any) => {
           if (provider.results.length) {
             localStorage.setItem('provider', JSON.stringify(provider.results[0]));
@@ -425,15 +425,9 @@ export class HwProfileComponent implements OnInit, OnDestroy {
             this.toastr.success("Profile has been updated successfully", "Profile Updated");
             this.editMode = false;
             this.personalInfoForm.markAsPristine();
-            // let role = this.rolesService.getRole('ORGANIZATIONAL: SYSTEM ADMINISTRATOR');
-            // if (role) {
-            //   this.router.navigate(['/admin']);
-            // } else {
-            //   this.router.navigate(['/dashboard']);
-            // }
           }
         });
-      // }
+      });
     });
   }
 
